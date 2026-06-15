@@ -710,6 +710,27 @@
     font-weight: 500;
     white-space: nowrap;
   }
+  .audit-article-head.is-static {
+    cursor: default;
+  }
+  .audit-article-head.is-static:hover { background: var(--surface); }
+  .audit-article-head-assess-btn {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--gov-green);
+    background: none;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .audit-article-head-assess-btn:hover {
+    color: var(--gov-green-dk);
+    background: none;
+    text-decoration: underline;
+  }
   .audit-article-body {
     border-top: 1px solid var(--line-2);
     padding: 14px;
@@ -896,6 +917,7 @@
     .audit-compare-grid { grid-template-columns: 1fr; }
     .audit-article-head { grid-template-columns: auto 1fr; }
     .audit-article-toggle { grid-column: 1 / -1; }
+    .audit-article-head-assess-btn { grid-column: 1 / -1; justify-self: start; }
   }
   .audit-compare-col {
     border: 1px solid var(--line);
@@ -11915,9 +11937,7 @@
     }).join('');
     const assessed = isArticleAssessed(section.key);
     if (!assessed) {
-      const openBtn = locked ? '' :
-        '<button type="button" class="btn primary audit-article-assess-btn" onclick="openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">Assess this article</button>';
-      return '<div class="audit-finding-empty">Not yet assessed — opens full-screen workspace.</div>' + openBtn;
+      return '<div class="audit-finding-empty">Not yet assessed.</div>';
     }
     const editBtn = locked ? '' :
       '<button type="button" class="btn' + (captureStage ? '' : ' primary') + ' audit-article-assess-btn" onclick="openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">' +
@@ -11947,17 +11967,27 @@
         ? '<span class="pill ' + (articleMax >= 4 ? 'red' : (articleMax >= 2 ? 'amber' : 'green')) + '">Max RAG ' + articleMax + '</span>'
         : '<span class="pill grey">Not assessed</span>';
       const abbrev = renderAuditArticleAbbreviatedBody(section, findings, locked);
+      const headAction = assessed
+        ? '<span class="audit-article-toggle">' + (expanded ? '− Hide summary' : '+ Show summary') + '</span>'
+        : (locked ? '' : '<button type="button" class="audit-article-head-assess-btn" onclick="event.stopPropagation(); openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">Assess this article</button>');
+      const headClass = 'audit-article-head' + (assessed ? '' : ' is-static');
+      const headClick = assessed
+        ? ' onclick="toggleAuditArticleSection(\'' + escHtml(section.key) + '\')"'
+        : '';
+      const bodyHtml = assessed
+        ? '<div class="audit-article-body"' + (expanded ? '' : ' hidden') + '>' + abbrev + '</div>'
+        : '';
 
       return '<section class="audit-article-section' + (expanded ? ' is-expanded' : '') + '" data-article-key="' + escHtml(section.key) + '">' +
-        '<div class="audit-article-head" onclick="toggleAuditArticleSection(\'' + escHtml(section.key) + '\')">' +
+        '<div class="' + headClass + '"' + headClick + '>' +
         '<div class="audit-article-letter">' + escHtml(section.key) + '</div>' +
         '<div><div class="audit-article-title">' + escHtml(section.label) + '</div>' +
         '<div class="audit-article-meta">' + failureCount + ' failure example' +
         (failureCount === 1 ? '' : 's') + ' recorded</div></div>' +
         maxPill +
-        '<span class="audit-article-toggle">' + (expanded ? '− Hide summary' : '+ Show summary') + '</span>' +
+        headAction +
         '</div>' +
-        '<div class="audit-article-body"' + (expanded ? '' : ' hidden') + '>' + abbrev + '</div></section>';
+        bodyHtml + '</section>';
     }).join('');
   }
 
