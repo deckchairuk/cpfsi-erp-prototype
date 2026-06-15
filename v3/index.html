@@ -1083,6 +1083,15 @@
     border-top: 1px solid var(--line-2);
     max-width: 920px;
   }
+  .audit-fs-related-section {
+    display: contents;
+  }
+  .audit-fs-related-section .audit-field-group-label {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line-2);
+  }
   .audit-fs-example-count {
     font-size: 12px;
     color: var(--ink-3);
@@ -6391,7 +6400,7 @@
           </div>
 
           <div class="audit-articles-toolbar">
-            <span class="hint">Click <strong>Assess</strong> on an article to open the full-screen workspace. GFP is always required when scoring a failure; M&amp;M is optional.</span>
+            <span class="hint">Click <strong>Assess</strong> on an article to open the full-screen workspace. Choose failure type, describe what you saw, then set RAG. Optionally link a related failure from another category.</span>
           </div>
 
           <div id="audit-article-sections"></div>
@@ -9573,7 +9582,17 @@
     'Other M&M failure'
   ];
 
+  const AUDIT_FAILURE_TYPES = [
+    { key: 'gfp', label: 'General Fire Precaution' },
+    { key: 'fsm', label: 'Fire Safety Management' },
+    { key: 'maintenance', label: 'Maintenance' }
+  ];
+
+  const AUDIT_MAINTENANCE_SPECIFIC_FAILURES = AUDIT_MM_CATEGORIES.slice();
+
   const AUDIT_MAINTENANCE_DH_KEYS = ['equans', 'serco', 'mitie', 'capita', 'g4s'];
+
+  let auditFsFormDraft = null;
 
   const AUDIT_IN_PROGRESS_FINDINGS = [
     {
@@ -11587,6 +11606,124 @@
     return html;
   }
 
+  function getAuditFailureTypeLabel(key) {
+    const match = AUDIT_FAILURE_TYPES.find(function (t) { return t.key === key; });
+    return match ? match.label : key || '';
+  }
+
+  function getAuditSpecificFailuresForType(type) {
+    if (type === 'gfp') return AUDIT_GFP_FAILURES;
+    if (type === 'fsm') return AUDIT_MM_SPECIFIC_FAILURES;
+    if (type === 'maintenance') return AUDIT_MAINTENANCE_SPECIFIC_FAILURES;
+    return [];
+  }
+
+  function getAuditRelatedTypeOptions(primaryType) {
+    return AUDIT_FAILURE_TYPES.filter(function (t) { return t.key !== primaryType; });
+  }
+
+  function inferMmFailureType(f) {
+    if (f.mmSpecificFailure && AUDIT_MM_SPECIFIC_FAILURES.indexOf(f.mmSpecificFailure) >= 0) return 'fsm';
+    if (f.mmCategory || f.mmSpecificFailure) return 'maintenance';
+    return '';
+  }
+
+  function getAuditFindingFlowFields(f) {
+    if (!f || f.isNoFailure) return null;
+    if (f.primaryFailureType) {
+      return {
+        primaryFailureType: f.primaryFailureType,
+        primarySpecificFailure: f.primarySpecificFailure || '',
+        primaryExample: f.primaryExample || '',
+        relatedFailureType: f.relatedFailureType || '',
+        relatedSpecificFailure: f.relatedSpecificFailure || ''
+      };
+    }
+    const flow = {
+      primaryFailureType: 'gfp',
+      primarySpecificFailure: '',
+      primaryExample: '',
+      relatedFailureType: '',
+      relatedSpecificFailure: ''
+    };
+    const hasGfp = !!(f.gfpSpecificFailure || f.gfpExample);
+    const mmType = inferMmFailureType(f);
+    const hasMm = !!mmType;
+    if (hasGfp) {
+      flow.primaryFailureType = 'gfp';
+      flow.primarySpecificFailure = f.gfpSpecificFailure || '';
+      flow.primaryExample = f.gfpExample || '';
+      if (hasMm) {
+        flow.relatedFailureType = mmType;
+        flow.relatedSpecificFailure = mmType === 'fsm'
+          ? (f.mmSpecificFailure || '')
+          : (f.mmCategory || f.mmSpecificFailure || '');
+      }
+    } else if (hasMm) {
+      flow.primaryFailureType = mmType;
+      flow.primarySpecificFailure = mmType === 'fsm'
+        ? (f.mmSpecificFailure || '')
+        : (f.mmCategory || f.mmSpecificFailure || '');
+      flow.primaryExample = f.mmExample || f.gfpExample || '';
+    }
+    return flow;
+  }
+
+  function applyAuditFindingFlowToLegacy(payload) {
+    payload.gfpSpecificFailure = '';
+    payload.gfpExample = '';
+    payload.mmCategory = '';
+    payload.mmSpecificFailure = '';
+    payload.mmExample = '';
+    function applyPart(type, specific, exampleText) {
+      if (!type || !specific) return;
+      if (type === 'gfp') {
+        payload.gfpSpecificFailure = specific;
+        payload.gfpExample = exampleText;
+      } else if (type === 'fsm') {
+        payload.mmSpecificFailure = specific;
+        payload.mmCategory = payload.mmCategory || 'FRA';
+        if (exampleText && !payload.mmExample) payload.mmExample = exampleText;
+      } else if (type === 'maintenance') {
+        payload.mmCategory = specific;
+        if (exampleText && !payload.mmExample) payload.mmExample = exampleText;
+      }
+    }
+    applyPart(payload.primaryFailureType, payload.primarySpecificFailure, payload.primaryExample);
+    if (payload.relatedFailureType) {
+      applyPart(payload.relatedFailureType, payload.relatedSpecificFailure, payload.primaryExample);
+    }
+    return payload;
+  }
+
+  function captureAuditFsFormDraft() {
+    return {
+      dutyHolder: document.getElementById('audit-fs-dh')?.value || '',
+      primaryFailureType: document.getElementById('audit-fs-primary-type')?.value || 'gfp',
+      primarySpecificFailure: document.getElementById('audit-fs-primary-failure')?.value || '',
+      primaryExample: document.getElementById('audit-fs-primary-example')?.value || '',
+      relatedFailureType: document.getElementById('audit-fs-related-type')?.value || '',
+      relatedSpecificFailure: document.getElementById('audit-fs-related-failure')?.value || '',
+      ragScore: getAuditFsEditorScore()
+    };
+  }
+
+  function onAuditFsPrimaryTypeChange() {
+    auditFsFormDraft = captureAuditFsFormDraft();
+    auditFsFormDraft.primarySpecificFailure = '';
+    auditFsFormDraft.relatedFailureType = '';
+    auditFsFormDraft.relatedSpecificFailure = '';
+    renderAuditAssessmentMain();
+    renderAuditAssessmentSidebar();
+  }
+
+  function onAuditFsRelatedTypeChange() {
+    auditFsFormDraft = captureAuditFsFormDraft();
+    auditFsFormDraft.relatedSpecificFailure = '';
+    renderAuditAssessmentMain();
+    renderAuditAssessmentSidebar();
+  }
+
   function groupAuditFindingsByDh(findings) {
     const order = [];
     findings.forEach(function (f) {
@@ -11611,11 +11748,12 @@
 
   function auditFindingPreviewText(f) {
     if (!f || (f.ragScore || 0) === 0) return 'No failure (score 0)';
-    const parts = [];
-    if (f.gfpSpecificFailure) parts.push(f.gfpSpecificFailure);
-    if (f.mmSpecificFailure) parts.push('M&M: ' + f.mmSpecificFailure);
-    const example = f.gfpExample || f.mmExample || '';
-    if (example) parts.push(example.slice(0, 80) + (example.length > 80 ? '…' : ''));
+    const flow = getAuditFindingFlowFields(f);
+    if (!flow) return 'Failure recorded';
+    const parts = [getAuditFailureTypeLabel(flow.primaryFailureType)];
+    if (flow.primarySpecificFailure) parts.push(flow.primarySpecificFailure);
+    if (flow.relatedFailureType) parts.push('+ ' + getAuditFailureTypeLabel(flow.relatedFailureType));
+    if (flow.primaryExample) parts.push(flow.primaryExample.slice(0, 80) + (flow.primaryExample.length > 80 ? '…' : ''));
     return parts.join(' · ') || 'Failure recorded';
   }
 
@@ -11894,10 +12032,10 @@
           groups.map(function (g) {
             return '<div style="margin-bottom:10px;"><div class="audit-dh-group-label">' + escHtml(g.dh) + '</div>' +
               g.findings.map(function (f) {
+                const flow = getAuditFindingFlowFields(f);
                 return '<div class="audit-scoring-readonly-finding">' +
                   '<strong>RAG ' + (f.ragScore || 0) + '</strong> · ' + escHtml(auditFindingPreviewText(f)) +
-                  (f.gfpExample ? '<div style="margin-top:6px;color:var(--ink-2);">' + escHtml(f.gfpExample) + '</div>' : '') +
-                  (f.mmExample ? '<div style="margin-top:4px;color:var(--ink-2);">' + escHtml(f.mmExample) + '</div>' : '') +
+                  (flow && flow.primaryExample ? '<div style="margin-top:6px;color:var(--ink-2);">' + escHtml(flow.primaryExample) + '</div>' : '') +
                   '</div>';
               }).join('') +
               '</div>';
@@ -11969,6 +12107,7 @@
     const f = auditFindings.find(function (x) { return x.id === id; });
     if (!f) return;
     auditFindingEditId = id;
+    auditFsFormDraft = null;
     auditActiveArticleKey = f.articleKey;
     auditNewFindingPresetDh = null;
     auditAssessmentDhFocus = f.dutyHolder;
@@ -11982,6 +12121,7 @@
     clearNoFailureMarker(articleKey, dutyHolder);
     auditActiveArticleKey = articleKey;
     auditFindingEditId = 'new';
+    auditFsFormDraft = null;
     auditNewFindingPresetDh = dutyHolder || null;
     auditAssessmentDhFocus = dutyHolder || null;
     auditExpandedArticles[articleKey] = true;
@@ -12001,6 +12141,7 @@
     if (modal) modal.classList.remove('open');
     auditFindingEditId = null;
     auditNewFindingPresetDh = null;
+    auditFsFormDraft = null;
     if (!document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('sc-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
@@ -12055,21 +12196,19 @@
 
   function renderAuditFsExampleCardHtml(f, index) {
     const active = auditFindingEditId === f.id;
-    const mmFirst = isAuditMaintenanceDutyHolder(f.dutyHolder);
-    const gfpFields =
-      '<div><div class="lbl">GFP specific failure</div><div class="val">' + escHtml(f.gfpSpecificFailure || '—') + '</div></div>' +
-      '<div class="span-2"><div class="lbl">Example GFP failure(s) seen</div><div class="val">' + escHtml(f.gfpExample || '—') + '</div></div>';
-    const mmFields = (f.mmCategory || f.mmSpecificFailure || f.mmExample)
-      ? '<div><div class="lbl">M&amp;M category</div><div class="val">' + escHtml(f.mmCategory || '—') + '</div></div>' +
-        '<div><div class="lbl">M&amp;M specific failure</div><div class="val">' + escHtml(f.mmSpecificFailure || '—') + '</div></div>' +
-        (f.mmExample ? '<div class="span-2"><div class="lbl">Example M&amp;M failure(s) seen</div><div class="val">' + escHtml(f.mmExample) + '</div></div>' : '')
+    const flow = getAuditFindingFlowFields(f) || {};
+    const primaryFields =
+      '<div><div class="lbl">Type of failure</div><div class="val">' + escHtml(getAuditFailureTypeLabel(flow.primaryFailureType)) + '</div></div>' +
+      '<div><div class="lbl">Specific failure</div><div class="val">' + escHtml(flow.primarySpecificFailure || '—') + '</div></div>' +
+      '<div class="span-2"><div class="lbl">Example observed</div><div class="val">' + escHtml(flow.primaryExample || '—') + '</div></div>';
+    const relatedFields = flow.relatedFailureType
+      ? '<div><div class="lbl">Related failure type</div><div class="val">' + escHtml(getAuditFailureTypeLabel(flow.relatedFailureType)) + '</div></div>' +
+        '<div><div class="lbl">Related specific failure</div><div class="val">' + escHtml(flow.relatedSpecificFailure || '—') + '</div></div>'
       : '';
     const ragField =
       '<div><div class="lbl">RAG score</div><div class="val"><span class="pill ' +
       (f.ragScore >= 4 ? 'red' : (f.ragScore >= 2 ? 'amber' : 'green')) + '">' + (f.ragScore || 0) + '</span></div></div>';
-    const fieldGrid = mmFirst
-      ? mmFields + gfpFields + ragField
-      : gfpFields + mmFields + ragField;
+    const fieldGrid = primaryFields + relatedFields + ragField;
 
     return '<div class="audit-fs-example-card' + (active ? ' is-active' : '') + '">' +
       '<div class="audit-fs-example-card-header">' +
@@ -12219,55 +12358,79 @@
     const dhOptions = holders.map(function (name) {
       return '<option value="' + escHtml(name) + '"' + (defaultDh === name ? ' selected' : '') + '>' + escHtml(name) + '</option>';
     }).join('');
-    const gfpFailure = f ? f.gfpSpecificFailure : '';
-    const gfpExample = f ? f.gfpExample : '';
-    const mmCategory = f ? f.mmCategory : '';
-    const mmFailure = f ? f.mmSpecificFailure : '';
-    const mmExample = f ? f.mmExample : '';
-    const score = f ? (f.ragScore || 0) : -1;
-    const mmFirst = isAuditMaintenanceDutyHolder(defaultDh);
+
+    const draft = auditFsFormDraft || {};
+    const flow = f ? getAuditFindingFlowFields(f) : null;
+    const primaryType = draft.primaryFailureType || (flow ? flow.primaryFailureType : 'gfp');
+    const primarySpecific = draft.primarySpecificFailure !== undefined
+      ? draft.primarySpecificFailure
+      : (flow ? flow.primarySpecificFailure : '');
+    const primaryExample = draft.primaryExample !== undefined
+      ? draft.primaryExample
+      : (flow ? flow.primaryExample : '');
+    const relatedType = draft.relatedFailureType !== undefined
+      ? draft.relatedFailureType
+      : (flow ? flow.relatedFailureType : '');
+    const relatedSpecific = draft.relatedSpecificFailure !== undefined
+      ? draft.relatedSpecificFailure
+      : (flow ? flow.relatedSpecificFailure : '');
+    const score = draft.ragScore >= 0 ? draft.ragScore : (f ? (f.ragScore || 0) : -1);
+
+    const primaryTypeOptions = AUDIT_FAILURE_TYPES.map(function (t) {
+      return '<option value="' + escHtml(t.key) + '"' + (primaryType === t.key ? ' selected' : '') + '>' + escHtml(t.label) + '</option>';
+    }).join('');
+
+    const relatedTypeOptions = '<option value="">None</option>' +
+      getAuditRelatedTypeOptions(primaryType).map(function (t) {
+        return '<option value="' + escHtml(t.key) + '"' + (relatedType === t.key ? ' selected' : '') + '>' + escHtml(t.label) + '</option>';
+      }).join('');
+
     const ragBtns = [0, 1, 2, 3, 4, 5, 6].map(function (n) {
       const selected = score >= 0 && n === score;
       return '<button type="button" class="audit-rag-btn' + (selected ? ' selected ' + auditRagClass(n) : '') + '" data-score="' + n + '" onclick="setAuditFsFindingScore(' + n + ')">' + n + '</button>';
     }).join('');
 
-    const gfpBlock =
-      '<div class="audit-field-group-label">General Fire Precautions</div>' +
-      '<div class="field"><label for="audit-fs-gfp-failure">General Fire Precautions — specific failure</label>' +
-      '<select id="audit-fs-gfp-failure">' + auditSelectOptions(AUDIT_GFP_FAILURES, gfpFailure, true) + '</select></div>' +
-      '<div class="field span-2"><label for="audit-fs-gfp-example">Example GFP failure(s) seen</label>' +
-      '<textarea id="audit-fs-gfp-example" placeholder="What you observed on site…">' + escHtml(gfpExample) + '</textarea></div>';
+    const primaryBlock =
+      '<div class="audit-field-group-label">Primary failure</div>' +
+      '<div class="field span-2"><label for="audit-fs-primary-type">What is the type of failure?</label>' +
+      '<select id="audit-fs-primary-type" onchange="onAuditFsPrimaryTypeChange()">' + primaryTypeOptions + '</select></div>' +
+      '<div class="field span-2"><label for="audit-fs-primary-failure">Choose the specific failure</label>' +
+      '<select id="audit-fs-primary-failure">' + auditSelectOptions(getAuditSpecificFailuresForType(primaryType), primarySpecific, true) + '</select></div>' +
+      '<div class="field span-2"><label for="audit-fs-primary-example">Enter the example you observed</label>' +
+      '<textarea id="audit-fs-primary-example" placeholder="What you observed on site…">' + escHtml(primaryExample) + '</textarea></div>';
 
-    const mmBlock =
-      '<div class="field"><label for="audit-fs-mm-cat">Maintenance &amp; Management category</label>' +
-      '<select id="audit-fs-mm-cat">' + auditSelectOptions(AUDIT_MM_CATEGORIES, mmCategory, true) + '</select></div>' +
-      '<div class="field"><label for="audit-fs-mm-failure">Maintenance &amp; Management — specific failure</label>' +
-      '<select id="audit-fs-mm-failure">' + auditSelectOptions(AUDIT_MM_SPECIFIC_FAILURES, mmFailure, true) + '</select></div>' +
-      '<div class="field span-2"><label for="audit-fs-mm-example">Example of Maintenance/Management failure(s) seen</label>' +
-      '<textarea id="audit-fs-mm-example" placeholder="Optional — link a management or maintenance issue if relevant…">' + escHtml(mmExample) + '</textarea></div>';
+    const relatedBlock =
+      '<div class="audit-fs-related-section">' +
+      '<div class="audit-field-group-label">Related failure <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></div>' +
+      '<div class="field span-2"><label for="audit-fs-related-type">Add a related failure</label>' +
+      '<select id="audit-fs-related-type" onchange="onAuditFsRelatedTypeChange()">' + relatedTypeOptions + '</select></div>' +
+      (relatedType
+        ? '<div class="field span-2"><label for="audit-fs-related-failure">Choose the specific failure</label>' +
+          '<select id="audit-fs-related-failure">' + auditSelectOptions(getAuditSpecificFailuresForType(relatedType), relatedSpecific, true) + '</select></div>'
+        : '') +
+      '</div>';
 
     const ragBlock =
       '<div class="field span-2"><label>RAG score <span style="font-weight:400;color:var(--ink-3);">(0 = no issue · 1–3 amber · 4–6 red)</span></label>' +
       '<div class="audit-rag-row" id="audit-fs-rag-row">' + ragBtns + '</div></div>';
 
-    const fieldOrder = mmFirst ? mmBlock + gfpBlock : gfpBlock + mmBlock;
-
     return '<div class="audit-fs-finding-form">' +
       '<h3>' + (isNew ? 'Add example' : 'Edit example') + '</h3>' +
-      '<div class="editor-sub">Field order adjusts for maintenance Duty Holders (M&amp;M first). GFP required when scoring a failure; M&amp;M fields are optional.</div>' +
+      '<div class="editor-sub">A GFP failure is usually recorded first, but you may start with Management or Maintenance and link a related GFP failure. Management and Maintenance are unlikely to relate to each other.</div>' +
       '<div id="audit-fs-zero-note" class="audit-fs-zero-note" hidden>Score 0 — no failure for this Duty Holder. Use Record no failure, or raise RAG to enter details.</div>' +
       '<div class="audit-fs-fields" id="audit-fs-detail-fields">' +
       '<div class="field span-2"><label for="audit-fs-dh">Duty Holder</label>' +
       '<select id="audit-fs-dh" onchange="onAuditFsDhChange()">' + dhOptions + '</select></div>' +
-      fieldOrder +
+      primaryBlock +
+      relatedBlock +
       '</div>' +
       '<div class="audit-fs-rag-section"><div class="audit-fs-fields">' + ragBlock + '</div></div>' +
       '</div>';
   }
 
   function onAuditFsDhChange() {
-    const dh = document.getElementById('audit-fs-dh')?.value || '';
-    auditAssessmentDhFocus = dh;
+    auditFsFormDraft = captureAuditFsFormDraft();
+    auditAssessmentDhFocus = auditFsFormDraft.dutyHolder || '';
     renderAuditAssessmentMain();
     renderAuditAssessmentSidebar();
   }
@@ -12298,6 +12461,7 @@
 
   function cancelAuditFindingEdit() {
     auditFindingEditId = null;
+    auditFsFormDraft = null;
     renderAuditAssessmentModal();
   }
 
@@ -12364,11 +12528,11 @@
     if (auditFindingsLocked()) return;
     lockAuditSiteVisitType();
     const dutyHolder = document.getElementById('audit-fs-dh')?.value || auditNewFindingPresetDh || auditAssessmentDhFocus || '';
-    const gfpSpecificFailure = document.getElementById('audit-fs-gfp-failure')?.value || '';
-    const gfpExample = document.getElementById('audit-fs-gfp-example')?.value.trim() || '';
-    const mmCategory = document.getElementById('audit-fs-mm-cat')?.value || '';
-    const mmSpecificFailure = document.getElementById('audit-fs-mm-failure')?.value || '';
-    const mmExample = document.getElementById('audit-fs-mm-example')?.value.trim() || '';
+    const primaryFailureType = document.getElementById('audit-fs-primary-type')?.value || 'gfp';
+    const primarySpecificFailure = document.getElementById('audit-fs-primary-failure')?.value || '';
+    const primaryExample = document.getElementById('audit-fs-primary-example')?.value.trim() || '';
+    const relatedFailureType = document.getElementById('audit-fs-related-type')?.value || '';
+    const relatedSpecificFailure = document.getElementById('audit-fs-related-failure')?.value || '';
     const ragScore = getAuditFsEditorScore();
 
     if (!dutyHolder) {
@@ -12379,27 +12543,35 @@
       window.alert('Select a RAG score above 0 to record a failure, or use Record no failure.');
       return;
     }
-    if (!gfpSpecificFailure) {
-      window.alert('Select a General Fire Precautions specific failure.');
+    if (!primarySpecificFailure) {
+      window.alert('Choose the specific failure for the primary failure type.');
       return;
     }
-    if (!gfpExample) {
-      window.alert('Enter an example GFP failure seen on site.');
+    if (!primaryExample) {
+      window.alert('Enter the example you observed on site.');
+      return;
+    }
+    if (relatedFailureType && !relatedSpecificFailure) {
+      window.alert('Choose the specific failure for the related failure, or clear the related failure type.');
+      return;
+    }
+    if (primaryFailureType !== 'gfp' && relatedFailureType !== 'gfp') {
+      window.alert('Every example must include a General Fire Precaution failure — set it as the primary failure or add it as a related failure.');
       return;
     }
 
     clearNoFailureMarker(auditActiveArticleKey, dutyHolder);
 
-    const payload = {
+    const payload = applyAuditFindingFlowToLegacy({
       articleKey: auditActiveArticleKey,
       dutyHolder: dutyHolder,
-      gfpSpecificFailure: gfpSpecificFailure,
-      gfpExample: gfpExample,
-      ragScore: ragScore,
-      mmCategory: mmCategory,
-      mmSpecificFailure: mmSpecificFailure,
-      mmExample: mmExample
-    };
+      primaryFailureType: primaryFailureType,
+      primarySpecificFailure: primarySpecificFailure,
+      primaryExample: primaryExample,
+      relatedFailureType: relatedFailureType,
+      relatedSpecificFailure: relatedSpecificFailure,
+      ragScore: ragScore
+    });
 
     if (auditFindingEditId && auditFindingEditId !== 'new') {
       const f = auditFindings.find(function (x) { return x.id === auditFindingEditId; });
@@ -12408,6 +12580,7 @@
       auditFindings.push(Object.assign({ id: 'f' + Date.now() }, payload));
     }
 
+    auditFsFormDraft = null;
     auditAssessmentDhFocus = dutyHolder;
     if (addAnother) {
       auditFindingEditId = 'new';
