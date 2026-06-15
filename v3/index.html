@@ -969,6 +969,12 @@
   }
   .audit-assessment-sidebar .modal-group { margin-bottom: 18px; }
   .audit-assessment-sidebar .modal-group:last-child { margin-bottom: 0; }
+  .audit-assessment-sidebar-title {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
   .audit-assessment-article-pill {
     display: inline-flex;
     align-items: center;
@@ -12008,7 +12014,7 @@
     const subEl = document.getElementById('audit-assessment-sub');
     if (titleEl) {
       titleEl.textContent = section
-        ? ('Article ' + section.key + ' — ' + section.label)
+        ? (section.key + ' — ' + section.label)
         : 'Site visit assessment';
     }
     if (subEl) {
@@ -12080,22 +12086,22 @@
   function renderAuditAssessmentSidebar() {
     const el = document.getElementById('audit-assessment-sidebar');
     if (!el || !auditActiveArticleKey) return;
-    const section = AUDIT_ARTICLE_SECTIONS.find(function (s) { return s.key === auditActiveArticleKey; });
     const holders = getAuditFindingDutyHolders();
     const dhScores = getArticleDhHighestScores(auditActiveArticleKey);
     const focusDh = auditAssessmentDhFocus || auditNewFindingPresetDh || holders[0] || '';
     const dhNav = holders.map(function (h) {
       const active = h === focusDh;
       const sc = dhScores[h] || 0;
+      const exampleCount = getDhFailureExamples(auditActiveArticleKey, h).length;
+      const dhLabel = escHtml(h) + ' (' + exampleCount + ')';
       return '<button type="button" class="audit-assessment-dh-btn' + (active ? ' is-active' : '') + '" data-dh="' + escHtml(h) + '" onclick="setAuditAssessmentDhFocus(this.dataset.dh)">' +
-        '<span>' + escHtml(h) + '</span>' +
+        '<span>' + dhLabel + '</span>' +
         '<span class="score-pill ' + auditRagClass(sc) + '">RAG ' + sc + '</span></button>';
     }).join('');
     const noFailure = hasNoFailureRecorded(auditActiveArticleKey, focusDh);
 
     el.innerHTML =
-      '<div class="audit-assessment-article-pill">Article ' + escHtml(auditActiveArticleKey) + '</div>' +
-      '<div style="font-size:12px;color:var(--ink-2);line-height:1.45;margin-bottom:14px;">' + escHtml(section ? section.label : '') + '</div>' +
+      '<h3 class="audit-assessment-sidebar-title">Assessment</h3>' +
       '<div class="modal-group"><div class="modal-group-label">Duty Holders (' + holders.length + ')</div>' +
       '<div class="audit-assessment-dh-nav">' + dhNav + '</div>' +
       '<button type="button" class="btn' + (noFailure ? ' hidden' : '') + '" style="margin-top:12px;width:100%;" data-article="' + escHtml(auditActiveArticleKey) + '" data-dh="' + escHtml(focusDh) + '" onclick="startNewAuditFinding(this.dataset.article, this.dataset.dh)">+ Add another example</button>' +
