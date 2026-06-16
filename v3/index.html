@@ -5912,48 +5912,24 @@
       </div>
 
       <!-- BOTTOM RIGHT: Open processes -->
-      <div class="card">
-        <h3>My open processes  ·  12</h3>
+      <div class="card" id="dash-processes-card">
+        <h3 id="dash-processes-title">My open processes</h3>
         <div class="process-filters-bar" style="margin-bottom:12px;">
           <div class="filter-group">
             <div class="filter-group-label">Type</div>
-            <div class="filter-chips filter-chips--scroll" role="group" aria-label="Process type">
-              <button class="chip on">All</button>
-              <button class="chip">Audits</button>
-              <button class="chip">Follow-ups</button>
-              <button class="chip">Consultations</button>
-              <button class="chip">Concerns</button>
+            <div class="filter-chips filter-chips--scroll dash-process-filters-type" role="group" aria-label="Process type">
+              <button class="chip on" data-dash-process-type="all" type="button">All</button>
+              <button class="chip" data-dash-process-type="audit" type="button">Audits</button>
+              <button class="chip" data-dash-process-type="follow-up" type="button">Follow-ups</button>
+              <button class="chip" data-dash-process-type="consultation" type="button">Consultations</button>
+              <button class="chip" data-dash-process-type="concern" type="button">Concerns</button>
             </div>
           </div>
         </div>
         <table class="data">
-          <tbody>
-            <tr onclick="show('audit')">
-              <td><span class="pill blue">Audit</span></td>
-              <td><strong>Temple Quay House</strong></td>
-              <td>Site visit (Stage 2 of 6)</td>
-              <td style="color:var(--ink-3);">Started 14 Jun</td>
-            </tr>
-            <tr>
-              <td><span class="pill purple">Follow-up</span></td>
-              <td>HMP Lewes</td>
-              <td>Awaiting action plan</td>
-              <td style="color:var(--ink-3);">Due in 12 days</td>
-            </tr>
-            <tr>
-              <td><span class="pill grey">Consultation</span></td>
-              <td>Charing Cross House refurb</td>
-              <td>Reviewing</td>
-              <td style="color:var(--amber);"><strong>SLA: 5 days left</strong></td>
-            </tr>
-            <tr>
-              <td><span class="pill grey">Concern</span></td>
-              <td>Maidstone Magistrates Court</td>
-              <td>Awaiting contact</td>
-              <td style="color:var(--ink-3);">Logged 18 Jun</td>
-            </tr>
-          </tbody>
+          <tbody id="dash-processes-list"></tbody>
         </table>
+        <a id="dash-processes-more" onclick="show('processes')" style="margin-top:8px;display:inline-block;">View more →</a>
       </div>
     </div>
 
@@ -10607,6 +10583,8 @@
   }
 
   let dashboardCpinView = 'mine';
+  let dashboardProcessesTypeFilter = 'all';
+  const DASHBOARD_PROCESS_PREVIEW_LIMIT = 3;
   let processesDateFilter = { type: 'all' };
   let premisesDateFilter = { type: 'all' };
   let cpinsDateFilter = { type: 'all' };
@@ -10848,6 +10826,105 @@
 
   function initDashboardPage() {
     renderDashboardCpinPanel();
+    bindDashboardProcessFiltersOnce();
+    renderDashboardProcessesPanel();
+  }
+
+  function bindDashboardProcessFiltersOnce() {
+    const card = document.getElementById('dash-processes-card');
+    if (!card || card.dataset.filtersBound) return;
+    card.dataset.filtersBound = '1';
+    card.querySelectorAll('.dash-process-filters-type .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        setDashboardProcessTypeFilter(chip.dataset.dashProcessType);
+      });
+    });
+  }
+
+  function setDashboardProcessTypeFilter(type) {
+    dashboardProcessesTypeFilter = type || 'all';
+    document.querySelectorAll('.dash-process-filters-type .chip').forEach(function (chip) {
+      chip.classList.toggle('on', chip.dataset.dashProcessType === dashboardProcessesTypeFilter);
+    });
+    renderDashboardProcessesPanel();
+  }
+
+  function getDashboardOpenProcesses() {
+    const dashboardTypes = ['audit', 'follow-up', 'consultation', 'concern'];
+    return PROCESSES_LIST.filter(function (p) {
+      if (!p.mine || p.status === 'closed') return false;
+      if (dashboardTypes.indexOf(p.type) < 0) return false;
+      if (dashboardProcessesTypeFilter !== 'all' && p.type !== dashboardProcessesTypeFilter) return false;
+      return true;
+    });
+  }
+
+  function getDashboardProcessPreview(items) {
+    if (dashboardProcessesTypeFilter !== 'all') {
+      return items.slice(0, DASHBOARD_PROCESS_PREVIEW_LIMIT);
+    }
+    const audits = items.filter(function (p) { return p.type === 'audit'; });
+    const others = items.filter(function (p) { return p.type !== 'audit'; });
+    others.sort(function (a, b) {
+      return (b.score == null ? -1 : b.score) - (a.score == null ? -1 : a.score);
+    });
+    return audits.concat(others).slice(0, DASHBOARD_PROCESS_PREVIEW_LIMIT);
+  }
+
+  function getDashboardProcessRoute(p) {
+    if (p.route) return p.route;
+    if (p.type === 'audit') return 'audit';
+    if (p.type === 'concern') return 'concerns';
+    return 'processes';
+  }
+
+  function formatDashboardProcessStatus(p) {
+    const plain = p.statusText.replace(/<[^>]+>/g, '').trim();
+    const auditMatch = plain.match(/Stage (\d+) of (\d+)\s*·\s*(.+)/);
+    if (auditMatch) return auditMatch[3].trim() + ' (Stage ' + auditMatch[1] + ' of ' + auditMatch[2] + ')';
+    if (p.hasSla) return plain.split('·')[0].trim();
+    return plain;
+  }
+
+  function formatDashboardProcessWhen(p) {
+    if (p.hasSla) {
+      const sla = p.statusText.match(/SLA:\s*([^<]+)/);
+      if (sla) return '<strong style="color:var(--amber);">SLA: ' + escHtml(sla[1].trim()) + ' left</strong>';
+    }
+    if (p.status === 'awaiting-action-plan') return '<span style="color:var(--ink-3);">Due in ' + escHtml(p.age) + '</span>';
+    if (p.type === 'audit' && p.status === 'in-progress') return '<span style="color:var(--ink-3);">Started ' + escHtml(p.age) + '</span>';
+    if (p.type === 'concern' && p.status === 'open') return '<span style="color:var(--ink-3);">Logged ' + escHtml(p.age) + '</span>';
+    return '<span style="color:var(--ink-3);">' + escHtml(p.age) + '</span>';
+  }
+
+  function renderDashboardProcessRow(p) {
+    const meta = PROCESS_TYPE_PILLS[p.type] || { label: p.type, pill: 'grey' };
+    const route = getDashboardProcessRoute(p);
+    const label = p.type === 'consultation' ? 'Consultation' : meta.label;
+    const premises = p.type === 'audit'
+      ? '<strong>' + escHtml(p.premises) + '</strong>'
+      : escHtml(p.premises);
+    return '<tr onclick="show(\'' + escHtml(route) + '\')">' +
+      '<td><span class="pill ' + meta.pill + '">' + escHtml(label) + '</span></td>' +
+      '<td>' + premises + '</td>' +
+      '<td>' + escHtml(formatDashboardProcessStatus(p)) + '</td>' +
+      '<td>' + formatDashboardProcessWhen(p) + '</td>' +
+      '</tr>';
+  }
+
+  function renderDashboardProcessesPanel() {
+    const title = document.getElementById('dash-processes-title');
+    const list = document.getElementById('dash-processes-list');
+    const more = document.getElementById('dash-processes-more');
+    if (!list) return;
+    const items = getDashboardOpenProcesses();
+    const preview = getDashboardProcessPreview(items);
+    const totalOpen = countProcessesForView('Open and mine');
+    if (title) title.textContent = 'My open processes  ·  ' + totalOpen;
+    list.innerHTML = preview.length
+      ? preview.map(renderDashboardProcessRow).join('')
+      : '<tr><td colspan="4" style="color:var(--ink-3);font-size:13px;padding:16px 8px;">No processes match this filter.</td></tr>';
+    if (more) more.hidden = totalOpen <= DASHBOARD_PROCESS_PREVIEW_LIMIT;
   }
 
   function setDashboardCpinView(view) {
