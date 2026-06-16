@@ -3098,13 +3098,15 @@
     flex-shrink: 0;
   }
   /* Safety concern intake (fullscreen log form) */
-  #sc-intake-modal.modal-backdrop {
+  #sc-intake-modal.modal-backdrop,
+  #cpin-intake-modal.modal-backdrop {
     padding: 0;
     align-items: stretch;
     overflow: hidden;
     z-index: 110;
   }
-  #sc-intake-modal .sc-intake-modal {
+  #sc-intake-modal .sc-intake-modal,
+  #cpin-intake-modal .sc-intake-modal {
     max-width: none;
     width: 100%;
     height: 100vh;
@@ -3173,7 +3175,8 @@
     margin-top: 4px;
   }
   /* Override global .field label/input rules that break card layout */
-  #sc-intake-modal .field label.sc-intake-rag-option {
+  #sc-intake-modal .field label.sc-intake-rag-option,
+  #cpin-intake-modal .field label.sc-intake-rag-option {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -3184,7 +3187,8 @@
     color: inherit;
     margin-bottom: 0;
   }
-  #sc-intake-modal .field .sc-intake-rag-option input[type="radio"] {
+  #sc-intake-modal .field .sc-intake-rag-option input[type="radio"],
+  #cpin-intake-modal .field .sc-intake-rag-option input[type="radio"] {
     width: auto;
     margin: 3px 0 0;
     padding: 0;
@@ -5874,41 +5878,16 @@
       </div>
 
       <!-- BOTTOM LEFT: Suggested patch -->
-      <div class="card">
+      <div class="card" id="dash-patch-premises-card">
         <h3>Suggested for your patch</h3>
         <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Premises in Kent, Surrey or Sussex, ranked by RBIP score.</div>
         <table class="data">
           <thead>
             <tr><th>Premises</th><th>Type</th><th>Score</th><th>Last audit</th></tr>
           </thead>
-          <tbody>
-            <tr onclick="show('premisesdetail')">
-              <td><strong>Temple Quay House</strong></td>
-              <td>Government office</td>
-              <td class="score-cell high">47 <span class="delta up">▲ 3</span></td>
-              <td>Jan 2025</td>
-            </tr>
-            <tr>
-              <td>HMP Lewes</td>
-              <td>Prison · Cat B</td>
-              <td class="score-cell high">42 <span class="delta down">▼ 5</span></td>
-              <td>Oct 2024</td>
-            </tr>
-            <tr>
-              <td>Maidstone Magistrates Court</td>
-              <td>Court</td>
-              <td class="score-cell mid">34 <span class="delta down">▼ 2</span></td>
-              <td>Mar 2024</td>
-            </tr>
-            <tr>
-              <td>Crawley Job Centre Plus</td>
-              <td>DWP office</td>
-              <td class="score-cell mid">31</td>
-              <td>Jul 2024</td>
-            </tr>
-          </tbody>
+          <tbody id="dash-patch-premises-list"></tbody>
         </table>
-        <a style="margin-top:8px;display:inline-block;">See full RBIP for your patch →</a>
+        <a id="dash-patch-premises-more" onclick="show('premises')" style="margin-top:8px;display:inline-block;">See full RBIP for your patch →</a>
       </div>
 
       <!-- BOTTOM RIGHT: Open processes -->
@@ -6601,10 +6580,10 @@
       <div class="screen-head-text">
         <div class="screen-head-title-row">
           <h1>CPINs</h1>
-          <button type="button" class="screen-head-new" onclick="alert('Add new CPIN — manual entry form coming soon. Use this when a CPIN arrives by phone or email.')">+ Add new CPIN</button>
+          <button type="button" class="screen-head-new" onclick="openCpinIntakeForm()">+ Add new CPIN</button>
         </div>
         <div class="meta">Reports of fire incidents from Fire &amp; Rescue Services</div>
-        <div class="cpin-queue-hint">FRS use the <a href="cpin-report.html" target="_blank" rel="noopener">external CPIN form</a>. New submissions appear under <strong>Unassigned</strong> until an inspector picks them up.</div>
+        <div class="cpin-queue-hint">Log phone or email reports with <strong>+ Add new CPIN</strong>. FRS can also use the <a href="cpin-report.html" target="_blank" rel="noopener">external CPIN form</a>. New submissions appear under <strong>Unassigned</strong> until an inspector picks them up.</div>
       </div>
     </div>
 
@@ -8522,6 +8501,102 @@
     <div class="sc-intake-footer">
       <button class="btn" type="button" onclick="closeScIntakeForm()">Cancel</button>
       <button class="btn primary" type="button" onclick="submitScIntakeForm()">Log safety concern</button>
+    </div>
+  </div>
+</div>
+
+<!-- CPIN intake — fullscreen log form (phone / email manual entry) -->
+<div id="cpin-intake-modal" class="modal-backdrop" onclick="if(event.target===this) closeCpinIntakeForm()">
+  <div class="modal sc-intake-modal" onclick="event.stopPropagation()">
+    <div class="sc-intake-header">
+      <div>
+        <h2 id="cpin-intake-title">Log CPIN</h2>
+        <div class="sub" id="cpin-intake-sub">Record a Crown Premises' Incident Notification received by phone or email when FRS did not use the external form. Not for safety hazards (use Safety Concerns) or audit follow-up.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeCpinIntakeForm()" title="Close (Esc)">×</button>
+    </div>
+
+    <div class="sc-intake-body">
+      <div class="sc-intake-inner">
+        <form id="cpin-log-form" novalidate>
+          <p class="sc-intake-required" id="cpin-log-required-note">* denotes a required field</p>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="cpin-log-incident-number">Incident number *</label>
+              <input type="text" id="cpin-log-incident-number" name="incidentNumber" required placeholder="FRS reference number" />
+            </div>
+            <div class="field">
+              <label for="cpin-log-incident-date">Date of incident *</label>
+              <input type="date" id="cpin-log-incident-date" name="incidentDate" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="cpin-log-incident-time">Time of incident</label>
+              <input type="time" id="cpin-log-incident-time" name="incidentTime" />
+            </div>
+            <div class="field">
+              <label for="cpin-log-frs">Fire and Rescue Service</label>
+              <select id="cpin-log-frs" name="frs">
+                <option>Not Given</option>
+                <option>London Fire Brigade</option>
+                <option>Kent FRS</option>
+                <option>East Sussex FRS</option>
+                <option>West Sussex FRS</option>
+                <option>Surrey FRS</option>
+                <option>Avon FRS</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="cpin-log-premises">Address of premises</label>
+            <select id="cpin-log-premises" name="premises">
+              <option value="">Please select</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="cpin-log-premises-free">Premises not in system or not found</label>
+            <div class="help" style="margin:-2px 0 6px;">If unable to find premises in the list above, enter the address here.</div>
+            <input type="text" id="cpin-log-premises-free" name="premisesFree" />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="cpin-log-contact">Point of contact *</label>
+              <input type="text" id="cpin-log-contact" name="contact" required />
+            </div>
+            <div class="field">
+              <label for="cpin-log-email">Fire service contact email *</label>
+              <input type="email" id="cpin-log-email" name="email" required />
+            </div>
+          </div>
+
+          <section class="sc-intake-section" aria-labelledby="cpin-log-stop-heading">
+            <h3 id="cpin-log-stop-heading">Stop message</h3>
+
+            <div class="field">
+              <label>Incident status *</label>
+              <div class="sc-intake-rag-group" id="cpin-log-status-group"></div>
+              <p class="sc-intake-urgent">Please immediately call 0300 1233911 if you select &lsquo;Serious or Fatal Injuries Suspected as Result of Fire&rsquo; (24hr phone line).</p>
+            </div>
+
+            <div class="field" style="margin-top:16px;">
+              <label for="cpin-log-description">Description of incident *</label>
+              <div class="help" style="margin:-2px 0 6px;">Use plain language — replace any codes with plain language.</div>
+              <textarea id="cpin-log-description" name="description" rows="5" required placeholder="What happened, where on site, injuries or firefighting actions…"></textarea>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+
+    <div class="sc-intake-footer">
+      <button class="btn" type="button" onclick="closeCpinIntakeForm()">Cancel</button>
+      <button class="btn primary" type="button" onclick="submitCpinIntakeForm()">Report incident</button>
     </div>
   </div>
 </div>
@@ -10457,10 +10532,10 @@
   }
 
   const PREMISES_LIST = [
-    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' } },
-    { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' } },
+    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' } },
+    { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreTrend: 'down', scoreDelta: 5, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' } },
     { name: 'HMP Maidstone', ref: 'PRM-0002118', address: 'County Road, Maidstone ME14 1UZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 38, scoreClass: 'score-high', lastAudit: 'Aug 2024', lastAuditSort: 202408, patch: true, work: { pill: 'blue', label: 'Audit in progress' } },
-    { name: 'Maidstone Magistrates Court', ref: 'PRM-0001922', address: 'Barker Road, Maidstone ME16 8EQ', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 34, scoreClass: 'score-mid', lastAudit: 'Mar 2024', lastAuditSort: 202403, patch: true, work: { pill: 'grey', label: 'Concern open' } },
+    { name: 'Maidstone Magistrates Court', ref: 'PRM-0001922', address: 'Barker Road, Maidstone ME16 8EQ', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 34, scoreTrend: 'down', scoreDelta: 2, scoreClass: 'score-mid', lastAudit: 'Mar 2024', lastAuditSort: 202403, patch: true, work: { pill: 'grey', label: 'Concern open' } },
     { name: 'Charing Cross House refurb', ref: 'PRM-0001756', address: 'Charing Cross, London WC2N 5HS', category: 'government-office', typeLabel: 'Government office', dept: 'MoJ', score: 36, scoreClass: 'score-mid', lastAudit: 'May 2024', lastAuditSort: 202405, patch: true, work: { pill: 'grey', label: 'Consultation open' } },
     { name: 'Crawley Job Centre Plus', ref: 'PRM-0002201', address: 'County Oak Way, Crawley RH11 7EL', category: 'government-office', typeLabel: 'DWP office', dept: 'DWP', score: 31, scoreClass: 'score-mid', lastAudit: 'Jul 2024', lastAuditSort: 202407, patch: false, work: null },
     { name: 'DWP Crawley', ref: 'PRM-0002204', address: 'Fleming Way, Crawley RH10 9DF', category: 'government-office', typeLabel: 'DWP office', dept: 'DWP', score: 31, scoreClass: 'score-mid', lastAudit: 'Jun 2024', lastAuditSort: 202406, patch: false, work: { pill: 'blue', label: 'Action plan review' } },
@@ -10585,6 +10660,7 @@
   let dashboardCpinView = 'mine';
   let dashboardProcessesTypeFilter = 'all';
   const DASHBOARD_PROCESS_PREVIEW_LIMIT = 3;
+  const DASHBOARD_PATCH_PREMISES_LIMIT = 4;
   let processesDateFilter = { type: 'all' };
   let premisesDateFilter = { type: 'all' };
   let cpinsDateFilter = { type: 'all' };
@@ -10828,6 +10904,51 @@
     renderDashboardCpinPanel();
     bindDashboardProcessFiltersOnce();
     renderDashboardProcessesPanel();
+    renderDashboardPatchPremisesPanel();
+  }
+
+  function getDashboardPatchPremises() {
+    return sortPremises(PREMISES_LIST.filter(function (p) { return p.patch; }), 'worst')
+      .slice(0, DASHBOARD_PATCH_PREMISES_LIMIT);
+  }
+
+  function getPremisesScoreCellLevel(p) {
+    if (p.scoreClass === 'score-high') return 'high';
+    if (p.scoreClass === 'score-mid') return 'mid';
+    return 'low';
+  }
+
+  function renderDashboardPatchPremisesScore(p) {
+    const level = getPremisesScoreCellLevel(p);
+    let html = '<td class="score-cell ' + level + '">' + p.score;
+    if (p.scoreTrend && p.scoreDelta) {
+      html += ' <span class="delta ' + (p.scoreTrend === 'up' ? 'up' : 'down') + '">' +
+        (p.scoreTrend === 'up' ? '▲' : '▼') + ' ' + p.scoreDelta + '</span>';
+    }
+    html += '</td>';
+    return html;
+  }
+
+  function renderDashboardPatchPremisesRow(p, index) {
+    const route = p.route || 'premises';
+    const nameCell = index === 0
+      ? '<strong>' + escHtml(p.name) + '</strong>'
+      : escHtml(p.name);
+    return '<tr onclick="show(\'' + escHtml(route) + '\')">' +
+      '<td>' + nameCell + '</td>' +
+      '<td>' + escHtml(p.typeLabel) + '</td>' +
+      renderDashboardPatchPremisesScore(p) +
+      '<td>' + escHtml(p.lastAudit) + '</td>' +
+      '</tr>';
+  }
+
+  function renderDashboardPatchPremisesPanel() {
+    const list = document.getElementById('dash-patch-premises-list');
+    if (!list) return;
+    const items = getDashboardPatchPremises();
+    list.innerHTML = items.length
+      ? items.map(renderDashboardPatchPremisesRow).join('')
+      : '<tr><td colspan="4" style="color:var(--ink-3);font-size:13px;padding:16px 8px;">No premises in your patch.</td></tr>';
   }
 
   function bindDashboardProcessFiltersOnce() {
@@ -15266,7 +15387,8 @@
     if (!document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
-        !document.getElementById('new-modal')?.classList.contains('open')) {
+        !document.getElementById('new-modal')?.classList.contains('open') &&
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     resetScIntakeForm();
@@ -15286,6 +15408,154 @@
   }
 
   // ---------------------------------------------------------
+  // CPIN intake (fullscreen log form — phone / email)
+  // ---------------------------------------------------------
+  function buildCpinIntakeStatusRadios() {
+    const group = document.getElementById('cpin-log-status-group');
+    if (!group || group.dataset.built) return;
+    group.dataset.built = '1';
+    group.innerHTML = CPIN_INCIDENT_STATUS_OPTIONS.map(function (status, i) {
+      return '<label class="sc-intake-rag-option">' +
+        '<input type="radio" name="incidentStatus" value="' + escHtml(status) + '"' + (i === 0 ? ' required' : '') + ' />' +
+        '<div class="sc-intake-rag-copy"><strong>' + escHtml(status) + '</strong></div>' +
+        '</label>';
+    }).join('');
+  }
+
+  function populateCpinIntakePremisesSelect() {
+    const sel = document.getElementById('cpin-log-premises');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Please select</option>';
+    getCpinPremisesCatalog().forEach(function (p) {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  }
+
+  function resetCpinIntakeForm() {
+    const form = document.getElementById('cpin-log-form');
+    if (form) {
+      form.reset();
+      const dateEl = document.getElementById('cpin-log-incident-date');
+      if (dateEl) dateEl.valueAsDate = new Date();
+      const frsEl = document.getElementById('cpin-log-frs');
+      if (frsEl) frsEl.value = 'Not Given';
+    }
+  }
+
+  function openCpinIntakeForm(premisesName) {
+    buildCpinIntakeStatusRadios();
+    populateCpinIntakePremisesSelect();
+    resetCpinIntakeForm();
+    if (premisesName) {
+      const sel = document.getElementById('cpin-log-premises');
+      if (sel) sel.value = premisesName;
+    }
+    document.getElementById('cpin-intake-modal')?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () {
+      document.getElementById('cpin-log-incident-number')?.focus();
+    });
+  }
+
+  function closeCpinIntakeForm() {
+    document.getElementById('cpin-intake-modal')?.classList.remove('open');
+    if (!document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
+        !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
+        !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
+        !document.getElementById('new-modal')?.classList.contains('open') &&
+        !document.getElementById('sc-intake-modal')?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+    resetCpinIntakeForm();
+  }
+
+  function formatCpinUkDate(iso) {
+    if (!iso) return '';
+    const p = String(iso).split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function formatCpinTime(t) {
+    if (!t) return '';
+    const parts = String(t).split(':');
+    return parts[0] + ':' + (parts[1] || '00');
+  }
+
+  function cpinSeverityFromIncidentStatus(status) {
+    if (!status) return 'green';
+    if (status.indexOf('Serious or Fatal') >= 0 || status.indexOf('Injuries') >= 0) return 'red';
+    if (status.indexOf('Fought Fire') >= 0) return 'amber';
+    return 'green';
+  }
+
+  function nextCpinIntakeRef() {
+    let max = 4500;
+    getAllCpinRecords().forEach(function (c) {
+      const m = (c.ref || '').match(/CPIN-2026-(\d+)/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return 'CPIN-2026-' + String(max + 1);
+  }
+
+  function saveCpinIntakeFromForm(formData) {
+    const status = formData.get('incidentStatus');
+    if (!status) return null;
+
+    const premises = (formData.get('premises') || '').trim();
+    const premisesFree = (formData.get('premisesFree') || '').trim();
+    const description = (formData.get('description') || '').trim();
+    const prem = premises ? PREMISES_LIST.find(function (p) { return p.name === premises; }) : null;
+    const list = loadCpinIntake();
+    const record = {
+      id: 'cpin-in-' + Date.now(),
+      ref: nextCpinIntakeRef(),
+      severity: cpinSeverityFromIncidentStatus(status),
+      when: 'Just now',
+      premises: premises || null,
+      summary: description.length > 72 ? description.slice(0, 72) + '…' : description,
+      patch: prem ? !!prem.patch : false,
+      workflow: premises ? 'incoming' : (premisesFree ? 'awaiting_premises' : 'incoming'),
+      assignee: null,
+      intake: {
+        incidentNumber: formData.get('incidentNumber'),
+        incidentDate: formatCpinUkDate(formData.get('incidentDate')),
+        incidentTime: formatCpinTime(formData.get('incidentTime')),
+        frs: formData.get('frs'),
+        contact: formData.get('contact'),
+        email: formData.get('email'),
+        incidentStatus: status,
+        description: description,
+        premisesFree: premisesFree
+      }
+    };
+
+    list.unshift(record);
+    localStorage.setItem(CPIN_INTAKE_KEY, JSON.stringify(list));
+    return record;
+  }
+
+  function submitCpinIntakeForm() {
+    const form = document.getElementById('cpin-log-form');
+    if (!form) return;
+    if (!form.reportValidity()) return;
+
+    const record = saveCpinIntakeFromForm(new FormData(form));
+    if (!record) return;
+
+    closeCpinIntakeForm();
+    show('cpins');
+    if (typeof switchCpinsTab === 'function') switchCpinsTab('unassigned');
+    if (typeof renderCpinsLists === 'function') renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+  }
+
+  // ---------------------------------------------------------
   // + New modal
   // ---------------------------------------------------------
   function openNewModal() {
@@ -15297,7 +15567,8 @@
     if (!document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
-        !document.getElementById('sc-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
   }
@@ -15325,6 +15596,8 @@
         closeAuditAssessmentModal();
       } else if (document.getElementById('letter-composer-modal')?.classList.contains('open')) {
         closeLetterComposer();
+      } else if (document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
+        closeCpinIntakeForm();
       } else if (document.getElementById('sc-intake-modal')?.classList.contains('open')) {
         closeScIntakeForm();
       } else if (document.getElementById('list-date-range-modal')?.classList.contains('open')) {
