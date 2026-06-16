@@ -483,6 +483,41 @@
   .delta.down { color: var(--green); }
   .delta.up { color: var(--red); }
 
+  #dash-processes-card table.data {
+    table-layout: fixed;
+  }
+  #dash-processes-card table.data td {
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    line-height: 1.35;
+  }
+  #dash-processes-card table.data td:first-child {
+    width: 92px;
+    padding-left: 0;
+    padding-right: 4px;
+  }
+  #dash-processes-card table.data td:nth-child(2) {
+    width: 36%;
+  }
+  #dash-processes-card table.data .pill {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+  #dash-patch-premises-card table.data th:first-child,
+  #dash-patch-premises-card table.data td:first-child {
+    padding-left: 0;
+  }
+  #dash-patch-premises-card table.data th:last-child,
+  #dash-patch-premises-card table.data td:last-child {
+    padding-right: 0;
+  }
+
   /* Time bar */
   .time-bar {
     height: 8px;
@@ -10659,7 +10694,7 @@
 
   let dashboardCpinView = 'mine';
   let dashboardProcessesTypeFilter = 'all';
-  const DASHBOARD_PROCESS_PREVIEW_LIMIT = 3;
+  const DASHBOARD_PROCESS_PREVIEW_LIMIT = 4;
   const DASHBOARD_PATCH_PREMISES_LIMIT = 4;
   let processesDateFilter = { type: 'all' };
   let premisesDateFilter = { type: 'all' };
@@ -11002,20 +11037,9 @@
   function formatDashboardProcessStatus(p) {
     const plain = p.statusText.replace(/<[^>]+>/g, '').trim();
     const auditMatch = plain.match(/Stage (\d+) of (\d+)\s*·\s*(.+)/);
-    if (auditMatch) return auditMatch[3].trim() + ' (Stage ' + auditMatch[1] + ' of ' + auditMatch[2] + ')';
+    if (auditMatch) return 'Stage ' + auditMatch[1] + ' of ' + auditMatch[2] + ' · ' + auditMatch[3].trim();
     if (p.hasSla) return plain.split('·')[0].trim();
     return plain;
-  }
-
-  function formatDashboardProcessWhen(p) {
-    if (p.hasSla) {
-      const sla = p.statusText.match(/SLA:\s*([^<]+)/);
-      if (sla) return '<strong style="color:var(--amber);">SLA: ' + escHtml(sla[1].trim()) + ' left</strong>';
-    }
-    if (p.status === 'awaiting-action-plan') return '<span style="color:var(--ink-3);">Due in ' + escHtml(p.age) + '</span>';
-    if (p.type === 'audit' && p.status === 'in-progress') return '<span style="color:var(--ink-3);">Started ' + escHtml(p.age) + '</span>';
-    if (p.type === 'concern' && p.status === 'open') return '<span style="color:var(--ink-3);">Logged ' + escHtml(p.age) + '</span>';
-    return '<span style="color:var(--ink-3);">' + escHtml(p.age) + '</span>';
   }
 
   function renderDashboardProcessRow(p) {
@@ -11029,7 +11053,6 @@
       '<td><span class="pill ' + meta.pill + '">' + escHtml(label) + '</span></td>' +
       '<td>' + premises + '</td>' +
       '<td>' + escHtml(formatDashboardProcessStatus(p)) + '</td>' +
-      '<td>' + formatDashboardProcessWhen(p) + '</td>' +
       '</tr>';
   }
 
@@ -11044,7 +11067,7 @@
     if (title) title.textContent = 'My open processes  ·  ' + totalOpen;
     list.innerHTML = preview.length
       ? preview.map(renderDashboardProcessRow).join('')
-      : '<tr><td colspan="4" style="color:var(--ink-3);font-size:13px;padding:16px 8px;">No processes match this filter.</td></tr>';
+      : '<tr><td colspan="3" style="color:var(--ink-3);font-size:13px;padding:16px 8px 16px 0;">No processes match this filter.</td></tr>';
     if (more) more.hidden = totalOpen <= DASHBOARD_PROCESS_PREVIEW_LIMIT;
   }
 
