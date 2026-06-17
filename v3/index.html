@@ -1459,6 +1459,7 @@
     flex-wrap: wrap;
     margin-top: 4px;
   }
+  .letter-attachment-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -1743,6 +1744,47 @@
   }
   .plan-thread .steps span.done { color: var(--green); }
   .plan-thread .steps span.current { color: var(--accent); font-weight: 600; }
+  .plan-thread.is-thread-settled {
+    border-color: var(--green);
+    background: var(--green-soft);
+  }
+  .plan-thread.is-thread-awaiting {
+    border-style: dashed;
+  }
+  .plan-thread.is-thread-reviewing {
+    border-color: var(--amber);
+    background: var(--amber-soft);
+  }
+  .plan-thread.is-thread-closed {
+    opacity: 0.75;
+    background: var(--bg);
+  }
+  .audit-s5-threads-progress {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fcfcfa;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .audit-s5-threads-progress .count {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .audit-s5-threads-progress .bar {
+    height: 6px;
+    background: var(--line-2);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .audit-s5-threads-progress .bar > div {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.2s ease;
+  }
   .info-banner {
     padding: 10px 12px;
     background: var(--amber-soft);
@@ -6675,53 +6717,10 @@
         <div class="audit-panel" id="audit-panel-5" hidden>
           <h2 style="margin:0;">Action plans</h2>
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            Runs once per Duty Holder with a 28-DAP or EN outcome, in parallel. Each thread: receive plan → review → adequate? → satisfactory letter or feedback loop. GSS/NoD Duty Holders are already settled at Stage 4.
+            Each Duty Holder with a 28-DAP or EN outcome runs a parallel thread: receive plan → review adequacy → satisfactory letter or feedback loop. GSS Duty Holders are already settled at Stage 4.
           </div>
-
-          <div class="plan-thread" id="plan-thread-hmcts">
-            <div class="head">
-              <span class="name">HMCTS</span>
-              <span class="pill amber" id="plan-status-hmcts">28-DAP  ·  Under review</span>
-            </div>
-            <div style="font-size:12px;color:var(--ink-2);">Action plan received 18 July 2026. Saved against this process and premises.</div>
-            <div class="steps" id="plan-steps-hmcts">
-              <span class="done">✓ Received</span> →
-              <span class="current">Reviewing adequacy</span> →
-              <span>Satisfactory letter or feedback</span>
-            </div>
-            <div id="plan-actions-hmcts" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn primary" onclick="markPlanAdequate('hmcts')">Mark adequate</button>
-              <button class="btn">Send unsatisfactory feedback</button>
-            </div>
-            <div class="success-banner" id="plan-success-hmcts" hidden>
-              <strong>Plan marked adequate.</strong> Satisfactory action plan letter drafted and ready to send to HMCTS.
-            </div>
-          </div>
-
-          <div class="plan-thread">
-            <div class="head">
-              <span class="name">Equans</span>
-              <span class="pill grey">28-DAP  ·  Awaiting plan</span>
-            </div>
-            <div style="font-size:12px;color:var(--ink-2);">28 days from letter sent: due 19 August 2026.</div>
-            <div class="steps">
-              <span class="current">Awaiting plan</span> →
-              <span>Review</span> →
-              <span>Satisfactory letter or feedback</span>
-            </div>
-          </div>
-
-          <div class="plan-thread" style="opacity:0.7;">
-            <div class="head">
-              <span class="name">The Property Directorate</span>
-              <span class="pill green">GSS  ·  Settled</span>
-            </div>
-            <div style="font-size:12px;color:var(--ink-3);">No follow-up required. Closed at Stage 4.</div>
-          </div>
-
-          <div class="stage-actions">
-            <button class="btn primary" onclick="setAuditStage(6)">Mark settled threads complete →</button>
-          </div>
+          <div id="audit-stage5-content"></div>
+          <div class="stage-actions" id="audit-stage5-actions"></div>
         </div>
 
         <!-- Stage 6: Close -->
@@ -9813,6 +9812,7 @@
   let hmctsPlanSettled = false;
   let auditLettersSent = false;
   let auditStage4State = null;
+  let auditStage5State = null;
   let auditEditPermission = false;
   let auditEditPermissionRequested = false;
   let auditFindingEditId = null;
@@ -11667,6 +11667,9 @@
     if (n === 4) {
       initAuditStage4();
     }
+    if (n === 5) {
+      initAuditStage5();
+    }
     window.scrollTo(0, 0);
   }
 
@@ -12549,6 +12552,250 @@
     touchAuditActivity();
     updateAuditEditWarning();
     setAuditStage(5);
+  }
+
+  // ── Stage 5: Action plans ────────────────────────────────────────────────
+
+  function auditDhSlug(dh) {
+    return (dh || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  }
+
+  function dhNeedsActionPlan(selected) {
+    return (selected || []).some(function (k) { return k === '28dap' || k === 'en'; });
+  }
+
+  function getAuditStage5OutcomeLabel(selected) {
+    const labels = { en: 'EN', '28dap': '28-DAP', gss: 'GSS' };
+    return (selected || []).map(function (k) { return labels[k] || k; }).join(' + ');
+  }
+
+  function getAuditStage5ThreadStatusLabel(thread) {
+    if (!thread.needsPlan) return 'Settled at Stage 4';
+    if (thread.status === 'settled') return 'Settled';
+    if (thread.status === 'reviewing') return 'Under review';
+    if (thread.status === 'awaiting') return 'Awaiting plan';
+    return thread.status;
+  }
+
+  function getAuditStage5ThreadStatusPill(thread) {
+    if (!thread.needsPlan || thread.status === 'settled') return 'green';
+    if (thread.status === 'reviewing') return 'amber';
+    return 'grey';
+  }
+
+  function seedAuditStage5Thread(dh, selected) {
+    const needsPlan = dhNeedsActionPlan(selected);
+    const thread = {
+      dh: dh,
+      outcomes: selected.slice(),
+      needsPlan: needsPlan,
+      status: needsPlan ? 'awaiting' : 'settled-at-4',
+      settled: !needsPlan,
+      planReceivedAt: null,
+      dueDate: null,
+      satisfactoryLetterReady: false
+    };
+    if (needsPlan && dh === 'HMCTS') {
+      thread.status = hmctsPlanSettled ? 'settled' : 'reviewing';
+      thread.settled = hmctsPlanSettled;
+      thread.planReceivedAt = '18 July 2026';
+      thread.satisfactoryLetterReady = hmctsPlanSettled;
+    }
+    if (needsPlan && dh === 'Equans') {
+      thread.dueDate = '19 August 2026';
+    }
+    return thread;
+  }
+
+  function initAuditStage5() {
+    initAuditStage4();
+    if (!auditStage5State) {
+      auditStage5State = { threads: {} };
+    }
+    const holders = Object.keys(auditStage4State.outcomes);
+    holders.forEach(function (dh) {
+      const selected = auditStage4State.outcomes[dh].selected || [];
+      if (!auditStage5State.threads[dh]) {
+        auditStage5State.threads[dh] = seedAuditStage5Thread(dh, selected);
+      } else {
+        const t = auditStage5State.threads[dh];
+        t.outcomes = selected.slice();
+        t.needsPlan = dhNeedsActionPlan(selected);
+        if (!t.needsPlan) {
+          t.status = 'settled-at-4';
+          t.settled = true;
+        }
+      }
+    });
+    syncHmctsPlanSettledFromStage5();
+    renderAuditStage5();
+  }
+
+  function syncHmctsPlanSettledFromStage5() {
+    const hmcts = auditStage5State && auditStage5State.threads['HMCTS'];
+    hmctsPlanSettled = !!(hmcts && hmcts.settled);
+  }
+
+  function allAuditStage5ThreadsSettled() {
+    if (!auditStage5State) return false;
+    const threads = Object.values(auditStage5State.threads);
+    return threads.length > 0 && threads.every(function (t) { return t.settled; });
+  }
+
+  function renderAuditStage5ThreadSteps(thread) {
+    if (!thread.needsPlan) {
+      return '<span class="done">✓ No action plan required</span>';
+    }
+    if (thread.status === 'awaiting') {
+      return '<span class="current">Awaiting plan</span> → <span>Review</span> → <span>Satisfactory letter or feedback</span>';
+    }
+    if (thread.status === 'reviewing') {
+      return '<span class="done">✓ Received</span> → <span class="current">Reviewing adequacy</span> → <span>Satisfactory letter or feedback</span>';
+    }
+    if (thread.status === 'settled') {
+      return '<span class="done">✓ Received</span> → <span class="done">✓ Marked adequate</span> → <span class="done">✓ Satisfactory letter sent</span>';
+    }
+    return '';
+  }
+
+  function renderAuditStage5ThreadCard(dh, thread) {
+    const slug = auditDhSlug(dh);
+    const dhSafe = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const outcomeLabel = getAuditStage5OutcomeLabel(thread.outcomes);
+    const statusLabel = getAuditStage5ThreadStatusLabel(thread);
+    const statusPill = getAuditStage5ThreadStatusPill(thread);
+    let rowClass = 'plan-thread';
+    if (!thread.needsPlan || (thread.settled && thread.status === 'settled-at-4')) rowClass += ' is-thread-closed';
+    else if (thread.settled) rowClass += ' is-thread-settled';
+    else if (thread.status === 'reviewing') rowClass += ' is-thread-reviewing';
+    else if (thread.status === 'awaiting') rowClass += ' is-thread-awaiting';
+
+    let h = '<div class="' + rowClass + '" id="plan-thread-' + escHtml(slug) + '">';
+    h += '<div class="head">';
+    h += '<span class="name">' + escHtml(dh) + '</span>';
+    h += '<span class="pill ' + statusPill + '">' + escHtml(outcomeLabel) + '  ·  ' + escHtml(statusLabel) + '</span>';
+    h += '</div>';
+
+    if (!thread.needsPlan) {
+      h += '<div style="font-size:12px;color:var(--ink-3);">No follow-up required. Closed at Stage 4.</div>';
+    } else if (thread.status === 'awaiting') {
+      h += '<div style="font-size:12px;color:var(--ink-2);">28 days from letter sent' +
+        (thread.dueDate ? ': due ' + escHtml(thread.dueDate) : '') + '.</div>';
+    } else if (thread.status === 'reviewing') {
+      h += '<div style="font-size:12px;color:var(--ink-2);">Action plan received' +
+        (thread.planReceivedAt ? ' ' + escHtml(thread.planReceivedAt) : '') +
+        '. Saved against this process and premises.</div>';
+    } else if (thread.status === 'settled') {
+      h += '<div style="font-size:12px;color:var(--ink-2);">Action plan marked adequate. Satisfactory letter sent.</div>';
+    }
+
+    h += '<div class="steps">' + renderAuditStage5ThreadSteps(thread) + '</div>';
+
+    if (thread.needsPlan && thread.status === 'awaiting') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record plan received</button>';
+      h += '</div>';
+    }
+    if (thread.needsPlan && thread.status === 'reviewing') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="markPlanAdequate(\'' + escHtml(slug) + '\')">Mark adequate</button>';
+      h += '<button class="btn" type="button" onclick="sendAuditPlanFeedback(\'' + dhSafe + '\')">Send unsatisfactory feedback</button>';
+      h += '</div>';
+    }
+    if (thread.needsPlan && thread.status === 'settled' && thread.satisfactoryLetterReady) {
+      h += '<div class="success-banner"><strong>Plan marked adequate.</strong> Satisfactory action plan letter drafted and ready to send to ' + escHtml(dh) + '.</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function renderAuditStage5() {
+    const el  = document.getElementById('audit-stage5-content');
+    const act = document.getElementById('audit-stage5-actions');
+    if (!el || !auditStage5State) return;
+
+    let html = '';
+
+    if (!auditLettersSent) {
+      html += '<div class="audit-finding-empty">Outcome letters must be sent before action plan threads begin.';
+      html += '<div style="margin-top:12px;"><button type="button" class="btn primary" onclick="setAuditStage(4)">Go to outcomes and letters</button></div></div>';
+      el.innerHTML = html;
+      if (act) {
+        act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
+      }
+      return;
+    }
+
+    const threads = Object.keys(auditStage5State.threads).map(function (dh) {
+      return { dh: dh, thread: auditStage5State.threads[dh] };
+    });
+    const settledCount = threads.filter(function (t) { return t.thread.settled; }).length;
+    const pct = threads.length ? Math.round((settledCount / threads.length) * 100) : 0;
+    const openCount = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).length;
+
+    html += '<div class="setup-section">';
+    html += '<h3>Threads from outcomes</h3>';
+    html += '<div class="help">Derived from Stage 4 outcomes. Each 28-DAP or EN outcome opens a parallel thread until the plan is received, reviewed and settled.</div>';
+    html += '<table class="audit-scoring-dh-table outcome-table" style="margin-top:12px;"><thead><tr>';
+    html += '<th>Duty Holder</th><th>Outcome</th><th>Thread status</th>';
+    html += '</tr></thead><tbody>';
+    threads.forEach(function (t) {
+      const pill = getAuditStage5ThreadStatusPill(t.thread);
+      html += '<tr>';
+      html += '<td style="font-weight:600;vertical-align:top;">' + escHtml(t.dh) + '</td>';
+      html += '<td style="vertical-align:top;">' + escHtml(getAuditStage5OutcomeLabel(t.thread.outcomes)) + '</td>';
+      html += '<td style="vertical-align:top;"><span class="pill ' + pill + '" style="font-size:11px;">' + escHtml(getAuditStage5ThreadStatusLabel(t.thread)) + '</span></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    html += '<div class="setup-section">';
+    html += '<h3>Action plan threads</h3>';
+    html += '<div class="help">Work each open thread in parallel. Mark plans adequate or send feedback until every Duty Holder is settled.</div>';
+
+    html += '<div class="audit-s5-threads-progress">';
+    if (settledCount === threads.length) {
+      html += '<div class="count" style="color:var(--green);">✓ All ' + threads.length + ' Duty Holder threads settled — ready to close</div>';
+    } else if (openCount) {
+      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' settled  ·  ' + openCount + ' open</div>';
+      html += '<div style="font-size:12px;color:var(--ink-2);">Receive and review action plans for each open thread, then send a satisfactory letter or feedback.</div>';
+    } else {
+      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' settled</div>';
+    }
+    html += '<div class="bar"><div style="width:' + pct + '%;"></div></div>';
+    html += '</div>';
+
+    threads.forEach(function (t) {
+      html += renderAuditStage5ThreadCard(t.dh, t.thread);
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    if (act) {
+      let actions = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
+      if (allAuditStage5ThreadsSettled()) {
+        actions += '<button class="btn primary" onclick="setAuditStage(6)">Continue to close →</button>';
+      } else {
+        actions += '<button class="btn primary" disabled title="Settle all threads before closing">Continue to close →</button>';
+      }
+      act.innerHTML = actions;
+    }
+
+    updateDutyHolderProgress();
+  }
+
+  function recordAuditPlanReceived(dh) {
+    if (!auditStage5State || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.needsPlan || t.status !== 'awaiting') return;
+    t.status = 'reviewing';
+    t.planReceivedAt = '17 Jun 2026';
+    renderAuditStage5();
+  }
+
+  function sendAuditPlanFeedback(dh) {
+    window.alert('Unsatisfactory feedback letter would be drafted for ' + dh + '. The thread stays open until a revised plan is received.');
   }
 
   function normalizeAuditFinding(f) {
@@ -13620,43 +13867,65 @@
   }
 
   function markPlanAdequate(holder) {
-    if (holder !== 'hmcts' || hmctsPlanSettled) return;
-    hmctsPlanSettled = true;
-
-    const status = document.getElementById('plan-status-hmcts');
-    const steps = document.getElementById('plan-steps-hmcts');
-    const actions = document.getElementById('plan-actions-hmcts');
-    const success = document.getElementById('plan-success-hmcts');
-
-    if (status) {
-      status.className = 'pill green';
-      status.textContent = '28-DAP  ·  Settled';
-    }
-    if (steps) {
-      steps.innerHTML =
-        '<span class="done">✓ Received</span> → ' +
-        '<span class="done">✓ Marked adequate</span> → ' +
-        '<span class="done">✓ Satisfactory letter sent</span>';
-    }
-    if (actions) actions.hidden = true;
-    if (success) success.hidden = false;
-
-    updateDutyHolderProgress();
+    if (!auditStage5State) return;
+    const dh = Object.keys(auditStage5State.threads).find(function (d) {
+      return auditDhSlug(d) === holder || d.toLowerCase() === holder;
+    });
+    if (!dh) return;
+    const t = auditStage5State.threads[dh];
+    if (!t || !t.needsPlan || t.settled || t.status !== 'reviewing') return;
+    t.status = 'settled';
+    t.settled = true;
+    t.satisfactoryLetterReady = true;
+    syncHmctsPlanSettledFromStage5();
+    renderAuditStage5();
   }
 
   function updateDutyHolderProgress() {
+    if (!auditStage5State) return;
+    const threads = auditStage5State.threads;
+
+    function statusForDh(dh) {
+      const t = threads[dh];
+      if (!t) return null;
+      if (t.settled) return { pill: 'green', label: 'Settled' };
+      if (t.status === 'reviewing') return { pill: 'amber', label: 'Action plan under review' };
+      if (t.needsPlan) return { pill: 'grey', label: 'Awaiting action plan' };
+      return { pill: 'green', label: 'Settled' };
+    }
+
+    const hmctsStatus = statusForDh('HMCTS');
     const hmctsClose = document.getElementById('audit-close-hmcts');
-    if (hmctsClose) {
-      hmctsClose.innerHTML = '<span>HMCTS</span><span class="pill green">Settled</span>';
+    if (hmctsClose && hmctsStatus) {
+      hmctsClose.innerHTML = '<span>HMCTS</span><span class="pill ' + hmctsStatus.pill + '">' + escHtml(hmctsStatus.label) + '</span>';
     }
     const hmctsContext = document.getElementById('audit-context-hmcts');
-    if (hmctsContext) {
-      hmctsContext.innerHTML = '<span>HMCTS</span><span class="pill green">Settled</span>';
+    if (hmctsContext && hmctsStatus) {
+      const ctxLabel = hmctsStatus.label === 'Settled' ? 'Settled' : (threads['HMCTS'] && threads['HMCTS'].needsPlan ? '28-DAP' : 'Settled');
+      hmctsContext.innerHTML = '<span>HMCTS</span><span class="pill ' + hmctsStatus.pill + '">' + escHtml(ctxLabel) + '</span>';
     }
+
+    const settledCount = Object.values(threads).filter(function (t) { return t.settled; }).length;
+    const total = Object.keys(threads).length;
+    const openDh = Object.keys(threads).filter(function (dh) {
+      const t = threads[dh];
+      return t.needsPlan && !t.settled;
+    });
+
+    const closeLabel = document.getElementById('audit-close-progress-label');
+    const closeBar = document.getElementById('audit-close-progress-bar');
+    if (closeLabel) closeLabel.textContent = settledCount + ' of ' + total + ' Duty Holders settled';
+    if (closeBar) closeBar.style.width = (total ? Math.round((settledCount / total) * 100) : 0) + '%';
 
     const closeMsg = document.getElementById('audit-close-message');
     if (closeMsg) {
-      closeMsg.innerHTML = '<strong>Not ready to close yet.</strong> Equans still has an open 28-DAP thread. Once their action plan is received and settled, you can close this audit.';
+      if (openDh.length === 0) {
+        closeMsg.innerHTML = '<strong>Ready to close.</strong> All Duty Holder threads are settled. You can close this audit and move it to the historical record.';
+      } else {
+        closeMsg.innerHTML = '<strong>Not ready to close yet.</strong> ' +
+          escHtml(openDh.join(' and ')) + ' still ' + (openDh.length === 1 ? 'has' : 'have') +
+          ' an open thread. Once all are settled (or a follow-up audit is scheduled), you can close this audit.';
+      }
     }
   }
 
