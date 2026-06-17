@@ -6681,7 +6681,7 @@
         <div class="audit-panel" id="audit-panel-3" hidden>
           <h2 style="margin:0;">Scoring and enforcement decision</h2>
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            Review assessment scoring rolled up from the site visit. Attribute failings to Duty Holders, record EMM dialogue, and confirm one outcome per Duty Holder — the audit has no single outcome.
+            Review assessment scoring rolled up from the site visit. Attribute failings to Duty Holders and confirm one outcome per Duty Holder — the audit has no single outcome.
           </div>
 
           <div id="audit-scoring-empty" class="audit-finding-empty" hidden>
@@ -6690,11 +6690,6 @@
           </div>
 
           <div id="audit-scoring-summary" class="audit-scoring-summary" hidden></div>
-
-          <div class="field" style="margin-top:16px;">
-            <label>EMM (Enforcement management dialogue)</label>
-            <textarea rows="2" placeholder="Log the enforcement management discussion…">Discussed with line manager. 28-DAP appropriate for HMCTS and Equans given severity. Property Directorate — no failings attributed.</textarea>
-          </div>
 
           <div class="stage-actions">
             <button type="button" class="btn" onclick="setAuditStage(2)">Edit findings</button>
@@ -8593,6 +8588,8 @@
               <span id="letter-composer-edit-label">Edit</span>
             </button>
             <div class="letter-composer-footer-actions">
+              <button class="btn" type="button" id="letter-composer-edit-letter-btn" onclick="editAuditStage4LetterFromComposer()" hidden>Edit letter</button>
+              <button class="btn primary" type="button" id="letter-composer-confirm-btn" onclick="confirmAuditStage4LetterFromComposer()" hidden>Confirm letter</button>
               <button class="btn" type="button" id="letter-composer-cancel-btn" onclick="closeLetterComposer()">Cancel</button>
               <button class="btn primary" type="button" id="letter-composer-save-btn" onclick="saveLetterComposer()">Save letters</button>
             </div>
@@ -11990,13 +11987,25 @@
 
   let auditOutcomeDhFocus = null;
 
+  function getDefaultAuditOutcomeEmm(dh) {
+    if (dh === 'HMCTS') return 'Discussed with line manager. EN and 28-DAP appropriate given Article A RAG 5.';
+    if (dh === 'Equans') return 'Discussed with line manager. 28-DAP appropriate given severity.';
+    if (dh === 'The Property Directorate') return 'No failings attributed — GSS appropriate.';
+    return '';
+  }
+
   function initAuditStage4() {
     if (!auditStage4State) {
       auditStage4State = { outcomes: {}, outcomesLocked: auditLettersSent, lettersDrafted: {}, lettersConfirmed: {}, letters: [] };
     }
     const holders = getAuditFindingDutyHolders();
     holders.forEach(function (dh) {
-      if (auditStage4State.outcomes[dh]) return;
+      if (auditStage4State.outcomes[dh]) {
+        if (auditStage4State.outcomes[dh].emmNotes === undefined) {
+          auditStage4State.outcomes[dh].emmNotes = getDefaultAuditOutcomeEmm(dh);
+        }
+        return;
+      }
       const failingKeys = [];
       let hasEN = false, hasDap = false;
       getAuditArticleSectionsForType().forEach(function (s) {
@@ -12009,19 +12018,21 @@
       if (hasEN)  selected.push('en');
       if (hasDap) selected.push('28dap');
       if (selected.length === 0) selected.push('gss');
-      auditStage4State.outcomes[dh] = { selected: selected, confirmed: auditLettersSent, failingKeys: failingKeys };
+      auditStage4State.outcomes[dh] = {
+        selected: selected,
+        confirmed: auditLettersSent,
+        failingKeys: failingKeys,
+        emmNotes: getDefaultAuditOutcomeEmm(dh)
+      };
     });
     if (auditLettersSent) auditStage4State.outcomesLocked = true;
     if (!auditStage4State.lettersDrafted) auditStage4State.lettersDrafted = {};
     if (!auditStage4State.lettersConfirmed) auditStage4State.lettersConfirmed = {};
     if (!auditStage4State.letters) auditStage4State.letters = [];
     renderAuditStage4();
-    const needsReview = holders.some(function (dh) {
-      return auditStage4State.outcomes[dh] && !auditStage4State.outcomes[dh].confirmed;
-    });
-    if (!auditStage4State.outcomesLocked && !auditLettersSent && needsReview && holders.length) {
-      openAuditOutcomeModal();
-    }
+    const modal = document.getElementById('audit-outcome-modal');
+    if (modal) modal.classList.remove('open');
+    document.body.classList.remove('audit-outcome-modal-open');
   }
 
   function renderAuditStage4() {
@@ -12136,89 +12147,223 @@
     renderAuditStage4();
   }
 
-  function renderAuditStage4LettersSection(locked) {
-    const state = auditStage4State;
+  function confirmAllAuditStage4Letters() {
+    if (!auditStage4State) return;
+    getAuditStage4LetterIds().forEach(function (id) {
+      if (getAuditStage4SavedLetter(id)) confirmAuditStage4Letter(id);
+    });
+  }
+
+  function getAuditStage4RequiredLetters() {
+    if (!auditStage4State) return [];
     const letters = [];
-    Object.keys(state.outcomes).forEach(function (dh) {
-      (state.outcomes[dh].selected || []).forEach(function (k) {
+    Object.keys(auditStage4State.outcomes).forEach(function (dh) {
+      (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
         const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
         if (def) {
           const id = (dh + '-' + k).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-          const saved = getAuditStage4SavedLetter(id);
           letters.push({
-            id: id, dh: dh, key: k, def: def, saved: saved,
+            id: id, dh: dh, key: k, def: def,
+            saved: getAuditStage4SavedLetter(id),
             confirmed: isAuditStage4LetterConfirmed(id)
           });
         }
       });
     });
+    return letters;
+  }
+
+  function getAuditStage4LetterStatusText(letters) {
+    const savedCount = letters.filter(function (l) { return l.saved; }).length;
+    const confirmedCount = letters.filter(function (l) { return l.confirmed; }).length;
+    const missingCount = letters.length - savedCount;
+    if (!savedCount && missingCount) return missingCount + ' letter' + (missingCount === 1 ? '' : 's') + ' to write';
+    if (!savedCount) return '';
+    let text = '✓ ' + savedCount + (savedCount === 1 ? ' letter saved' : ' letters saved');
+    const unconfirmed = savedCount - confirmedCount;
+    if (unconfirmed > 0) text += ' · ' + unconfirmed + ' need' + (unconfirmed === 1 ? 's' : '') + ' confirmation';
+    else if (confirmedCount === letters.length) text += ' · all confirmed';
+    if (missingCount > 0) text += ' · ' + missingCount + ' still to write';
+    return text;
+  }
+
+  function getDhNameForRecipient(rp) {
+    if (!rp) return '';
+    const dh = (auditSetup.dutyHolders || []).find(function (d) { return d.key === rp.linkedDh; });
+    if (dh) return dh.name;
+    const byKey = Object.keys(SETUP_DH_KEY_BY_NAME).find(function (name) {
+      return SETUP_DH_KEY_BY_NAME[name] === rp.linkedDh;
+    });
+    return byKey || getDutyHolderLabelForKey(rp.linkedDh) || '';
+  }
+
+  function getAuditStage4LetterRecipients() {
+    if (!auditStage4State) initAuditStage4();
+    const dhNames = Object.keys(auditStage4State.outcomes);
+    return getSetupLetterRecipients().filter(function (rp) {
+      return dhNames.indexOf(getDhNameForRecipient(rp)) >= 0;
+    });
+  }
+
+  function getOutcomeKeyFromTemplateId(templateId) {
+    const map = { 'audit-outcome-en': 'en', 'audit-outcome-28dap': '28dap', 'audit-outcome-gss': 'gss' };
+    return map[templateId] || null;
+  }
+
+  function getAuditStage4LetterId(dh, outcomeKey) {
+    return (dh + '-' + outcomeKey).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  }
+
+  function loadAuditStage4LetterSlot(letterId, recipientId) {
+    const entry = findAuditStage4LetterEntry(letterId);
+    if (!entry || !letterComposerState) return false;
+    const saved = getAuditStage4SavedLetter(letterId);
+    const draft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[letterId];
+    const dhRecipients = getRecipientsForDutyHolder(entry.dh);
+    letterComposerState.outcomeLetterId = letterId;
+    letterComposerState.stage4Dh = entry.dh;
+    letterComposerState.stage4OutcomeKey = entry.key;
+    letterComposerState.templateId = (draft && draft.templateId) || (saved && saved.templateId) || getAuditOutcomeTemplateId(entry.key);
+    letterComposerState.customBody = (draft && draft.customBody) || (saved && saved.body) || null;
+    const rid = recipientId || letterComposerState.previewRecipientId;
+    const rpOnDh = dhRecipients.find(function (r) { return r.id === rid; }) || dhRecipients[0];
+    letterComposerState.previewRecipientId = rpOnDh ? rpOnDh.id : rid;
+    if (draft && draft.recipientIds) {
+      letterComposerState.recipientIds = draft.recipientIds.slice();
+    }
+    letterComposerState.editing = false;
+    return true;
+  }
+
+  function syncAuditStage4FromRecipient(recipientId) {
+    if (!letterComposerState || !auditStage4State) return;
+    const rp = getAuditStage4LetterRecipients().find(function (r) { return r.id === recipientId; });
+    if (!rp) return;
+    const dhName = getDhNameForRecipient(rp);
+    if (!dhName || !auditStage4State.outcomes[dhName]) return;
+    if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
+    let outcomeKey = getOutcomeKeyFromTemplateId(letterComposerState.templateId);
+    const selected = auditStage4State.outcomes[dhName].selected || [];
+    if (!outcomeKey || selected.indexOf(outcomeKey) < 0) {
+      outcomeKey = selected[0];
+      if (outcomeKey) letterComposerState.templateId = getAuditOutcomeTemplateId(outcomeKey);
+    }
+    loadAuditStage4LetterSlot(getAuditStage4LetterId(dhName, outcomeKey), recipientId);
+  }
+
+  function syncAuditStage4FromTemplate(templateId) {
+    if (!letterComposerState || !letterComposerState.stage4Dh || !auditStage4State) return;
+    const outcomeKey = getOutcomeKeyFromTemplateId(templateId);
+    if (!outcomeKey) return;
+    const selected = auditStage4State.outcomes[letterComposerState.stage4Dh].selected || [];
+    if (selected.indexOf(outcomeKey) < 0) return;
+    if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
+    loadAuditStage4LetterSlot(getAuditStage4LetterId(letterComposerState.stage4Dh, outcomeKey), letterComposerState.previewRecipientId);
+  }
+
+  function openAuditStage4LetterComposerAll() {
+    if (!auditStage4State || auditLettersSent) return;
+    const draft = localStorage.getItem(setupDraftKey(activeAuditId));
+    if (draft) {
+      try { auditSetup = Object.assign(defaultAuditSetup(), JSON.parse(draft)); } catch (e) { /* keep current */ }
+    }
+    const recipients = getAuditStage4LetterRecipients();
+    if (!recipients.length) {
+      window.alert('Approve at least one Responsible Person linked to your Duty Holders before writing letters.');
+      return;
+    }
+    const letters = getAuditStage4RequiredLetters();
+    const firstSlot = letters[0];
+    if (!firstSlot) return;
+    openLetterComposer({
+      context: 'audit-stage4',
+      saveTo: 'audit-stage4-letters',
+      outcomeLetterId: firstSlot.id,
+      stage4Dh: firstSlot.dh,
+      stage4OutcomeKey: firstSlot.key,
+      templateId: getAuditOutcomeTemplateId(firstSlot.key),
+      recipientIds: recipients.map(function (r) { return r.id; }),
+      previewRecipientId: recipients[0].id
+    });
+  }
+
+  function openAuditStage4LetterComposerNext() {
+    openAuditStage4LetterComposerAll();
+  }
+
+  function confirmAuditStage4LetterFromComposer() {
+    if (!letterComposerState || !letterComposerState.outcomeLetterId) return;
+    confirmAuditStage4Letter(letterComposerState.outcomeLetterId);
+    closeLetterComposer();
+  }
+
+  function editAuditStage4LetterFromComposer() {
+    if (!letterComposerState || !letterComposerState.outcomeLetterId || auditLettersSent) return;
+    const letterId = letterComposerState.outcomeLetterId;
+    closeLetterComposer();
+    openAuditStage4LetterComposer(letterId);
+  }
+
+  function stashAuditStage4LetterComposerDraft() {
+    if (!letterComposerState || !letterComposerState.outcomeLetterId) return;
+    if (!letterComposerState.slotDrafts) letterComposerState.slotDrafts = {};
+    const bodyEl = document.getElementById('letter-composer-body');
+    if (letterComposerState.editing && bodyEl) {
+      letterComposerState.customBody = bodyEl.innerHTML;
+      letterComposerState.editing = false;
+    }
+    letterComposerState.slotDrafts[letterComposerState.outcomeLetterId] = {
+      templateId: letterComposerState.templateId,
+      recipientIds: (letterComposerState.recipientIds || []).slice(),
+      previewRecipientId: letterComposerState.previewRecipientId,
+      customBody: letterComposerState.customBody || null
+    };
+  }
+
+  function renderAuditStage4LettersSection(locked) {
+    const letters = getAuditStage4RequiredLetters();
     if (!letters.length) return '';
 
     const canEdit = !auditLettersSent;
-    const draftedCount = letters.filter(function (l) { return l.saved; }).length;
-    const confirmedCount = letters.filter(function (l) { return l.confirmed; }).length;
-    const pct = Math.round((confirmedCount / letters.length) * 100);
+    const savedEntries = letters.filter(function (l) { return l.saved; });
+    const unconfirmedCount = savedEntries.filter(function (l) { return !l.confirmed; }).length;
 
     let h = '<div class="setup-section">';
     h += '<h3>Letters</h3>';
-    h += '<div class="help">One letter per outcome. Write each letter, review the draft, then confirm it. All letters must be confirmed before you can finalise and send.</div>';
+    h += '<div class="help">Write templated letters for each outcome. Tick all recipients in the composer and save once — each outcome letter is generated and confirmed automatically.</div>';
+    h += '<div class="letter-attachment-list" id="audit-stage4-letters-list">';
 
-    h += '<div class="audit-s4-letters-progress">';
-    if (confirmedCount === letters.length) {
-      h += '<div class="count" style="color:var(--green);">✓ All ' + letters.length + ' letters confirmed — ready to finalise and send</div>';
-    } else if (draftedCount > 0) {
-      h += '<div class="count">' + confirmedCount + ' of ' + letters.length + ' confirmed  ·  ' + draftedCount + ' drafted</div>';
-      h += '<div style="font-size:12px;color:var(--ink-2);">Open each drafted letter, check the wording, then confirm. Unconfirmed drafts cannot be sent.</div>';
+    if (!savedEntries.length) {
+      h += '<div class="letter-attachment-empty">No letters saved yet. Use Write letters to create templated letters for each outcome.</div>';
     } else {
-      h += '<div class="count">0 of ' + letters.length + ' letters written</div>';
-      h += '<div style="font-size:12px;color:var(--ink-2);">Write a letter for each outcome below.</div>';
+      savedEntries.forEach(function (l) {
+        const ltr = l.saved;
+        const meta = (ltr.templateLabel || l.def.label) + ' · ' + (ltr.recipientName || l.dh) + (ltr.at ? ' · ' + ltr.at : '');
+        h += '<div class="letter-attachment-item">';
+        h += '<div class="letter-attachment-icon">PDF</div>';
+        h += '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>';
+        h += '<span>' + escHtml(meta) + '</span></div>';
+        h += '<button class="btn" type="button" onclick="viewAuditStage4Letter(\'' + escHtml(l.id) + '\')">View</button>';
+        h += '</div>';
+      });
     }
-    h += '<div class="bar"><div style="width:' + pct + '%;"></div></div>';
     h += '</div>';
 
-    h += '<div class="letter-attachment-list">';
-    letters.forEach(function (l) {
-      const saved = l.saved;
-      const confirmed = l.confirmed;
-      let rowClass = 'letter-attachment-item';
-      if (confirmed) rowClass += ' is-letter-confirmed';
-      else if (saved) rowClass += ' is-letter-draft';
-      else rowClass += ' is-letter-pending';
-
-      const fileName = saved ? (saved.fileName || 'Letter.pdf') : (l.def.label + ' — ' + l.dh);
-      const meta = l.def.label + ' · ' + l.dh + (saved && saved.at ? ' · ' + saved.at : '');
-
-      let statusPill = '';
-      if (confirmed) {
-        statusPill = '<span class="pill green" style="font-size:11px;">Confirmed</span>';
-      } else if (saved) {
-        statusPill = '<span class="pill amber" style="font-size:11px;">Draft — needs review</span>';
-      } else {
-        statusPill = '<span class="pill grey" style="font-size:11px;">Not written</span>';
+    if (canEdit) {
+      h += '<div class="letter-composer-actions">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage4LetterComposerAll()">Write letters</button>';
+      if (unconfirmedCount > 0) {
+        h += '<button class="btn" type="button" onclick="confirmAllAuditStage4Letters()">Confirm all letters</button>';
       }
-
-      h += '<div class="' + rowClass + '">';
-      h += '<div class="letter-attachment-icon">PDF</div>';
-      h += '<div class="letter-attachment-info">';
-      h += '<strong>' + escHtml(fileName) + '</strong>';
-      h += '<span>' + escHtml(meta) + '</span>';
-      h += '<div class="audit-s4-letter-status">' + statusPill + '</div>';
+      h += '<span id="audit-stage4-letter-status" style="font-size:12px;color:var(--ink-3);">' + escHtml(getAuditStage4LetterStatusText(letters)) + '</span>';
       h += '</div>';
-      h += '<div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">';
-      if (saved) {
-        h += '<button class="btn" type="button" onclick="viewAuditStage4Letter(\'' + escHtml(l.id) + '\')">View</button>';
-        if (canEdit) {
-          h += '<button class="btn" type="button" onclick="openAuditStage4LetterComposer(\'' + escHtml(l.id) + '\')">Edit</button>';
-          if (!confirmed) {
-            h += '<button class="btn primary" type="button" onclick="confirmAuditStage4Letter(\'' + escHtml(l.id) + '\')">Confirm letter</button>';
-          }
-        }
-      } else if (canEdit) {
-        h += '<button class="btn primary" type="button" onclick="openAuditStage4LetterComposer(\'' + escHtml(l.id) + '\')">Write letter</button>';
-      }
-      h += '</div></div>';
-    });
-    h += '</div></div>';
+    } else if (savedEntries.length) {
+      h += '<div class="letter-composer-actions">';
+      h += '<span style="font-size:12px;color:var(--green);font-weight:600;">✓ ' + savedEntries.length + (savedEntries.length === 1 ? ' letter sent' : ' letters sent') + '</span>';
+      h += '</div>';
+    }
+
+    h += '</div>';
     return h;
   }
 
@@ -12236,6 +12381,7 @@
       return;
     }
     const saved = getAuditStage4SavedLetter(letterId);
+    const allRecipients = getAuditStage4LetterRecipients();
     const templateId = saved ? saved.templateId : getAuditOutcomeTemplateId(entry.key);
     const opts = {
       context: 'audit-stage4',
@@ -12244,7 +12390,7 @@
       stage4Dh: entry.dh,
       stage4OutcomeKey: entry.key,
       templateId: templateId,
-      recipientIds: saved ? [saved.recipientId] : [recipients[0].id],
+      recipientIds: allRecipients.map(function (r) { return r.id; }),
       previewRecipientId: saved ? saved.recipientId : recipients[0].id
     };
     if (saved && saved.body) opts.customBody = saved.body;
@@ -12385,10 +12531,25 @@
     html += '</div>';
     if (canEdit) {
       html += '<div class="outcome-picker-hint">Select one or more outcomes. EN and 28-DAP can apply together; GSS replaces other outcomes.</div>';
-    } else if (o.confirmed) {
-      html += '<div class="audit-s4-confirmed-row">✓ Outcome confirmed for this Duty Holder</div>';
     }
     return html;
+  }
+
+  function setAuditOutcomeEmmNotes(dh, value) {
+    if (!auditStage4State || !auditStage4State.outcomes[dh] || auditStage4State.outcomesLocked || auditLettersSent) return;
+    auditStage4State.outcomes[dh].emmNotes = value;
+  }
+
+  function renderAuditOutcomeEmmField(dh, o, locked) {
+    const dhSafe = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const canEdit = !locked && !o.confirmed;
+    const fieldId = 'audit-outcome-emm-' + auditDhSlug(dh);
+    return '<div class="field audit-outcome-emm-field" style="margin-top:16px;">' +
+      '<label for="' + fieldId + '">EMM (Enforcement management dialogue)</label>' +
+      '<textarea id="' + fieldId + '" rows="2" ' +
+      'placeholder="Log the enforcement management discussion for this Duty Holder…"' +
+      (canEdit ? ' oninput="setAuditOutcomeEmmNotes(\'' + dhSafe + '\', this.value)"' : ' disabled') +
+      '>' + escHtml(o.emmNotes || '') + '</textarea></div>';
   }
 
   function renderAuditOutcomeMain() {
@@ -12416,6 +12577,10 @@
     html += '<div class="modal-group-label">Choose outcome(s) for this Duty Holder</div>';
     html += '<div class="section-lead">Each selected outcome will generate a letter. Review your choices, then save to confirm.</div>';
     html += renderAuditOutcomePicker(dh, o, locked);
+    html += renderAuditOutcomeEmmField(dh, o, locked);
+    if (o.confirmed) {
+      html += '<div class="audit-s4-confirmed-row">✓ Outcome confirmed for this Duty Holder</div>';
+    }
     html += '</div>';
 
     html += renderAuditOutcomeScoreSummary(dh);
@@ -12431,7 +12596,6 @@
     const holders = Object.keys(auditStage4State.outcomes);
     const dhIdx   = holders.indexOf(dh);
     const nextDh  = dhIdx < holders.length - 1 ? holders[dhIdx + 1] : null;
-    const allConf = holders.every(function (h) { return auditStage4State.outcomes[h].confirmed; });
     const locked  = auditStage4State.outcomesLocked || auditLettersSent;
     const dhSafe  = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
@@ -12450,9 +12614,6 @@
       } else if (nextDh) {
         const nextSafe = nextDh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += '<button type="button" class="btn" onclick="setAuditOutcomeDhFocus(\'' + nextSafe + '\')">Next Duty Holder →</button>';
-      }
-      if (allConf) {
-        html += '<button type="button" class="btn primary" onclick="lockAndCloseOutcomeModal()">Lock outcomes →</button>';
       }
     }
     html += '</div></div>';
@@ -12480,6 +12641,14 @@
   function confirmAuditDhOutcomeAndNext(dh, nextDh) {
     if (!auditStage4State || !auditStage4State.outcomes[dh]) return;
     auditStage4State.outcomes[dh].confirmed = true;
+    const holders = Object.keys(auditStage4State.outcomes);
+    const allConfirmed = holders.length > 0 && holders.every(function (h) {
+      return auditStage4State.outcomes[h].confirmed;
+    });
+    if (allConfirmed) {
+      closeAuditOutcomeModal();
+      return;
+    }
     if (nextDh && auditStage4State.outcomes[nextDh]) auditOutcomeDhFocus = nextDh;
     renderAuditOutcomeModal();
   }
@@ -12488,15 +12657,6 @@
     if (!auditStage4State || !auditStage4State.outcomes[dh] || auditStage4State.outcomesLocked) return;
     auditStage4State.outcomes[dh].confirmed = false;
     renderAuditOutcomeModal();
-  }
-
-  function lockAndCloseOutcomeModal() {
-    if (!auditStage4State) return;
-    Object.keys(auditStage4State.outcomes).forEach(function (dh) {
-      auditStage4State.outcomes[dh].confirmed = true;
-    });
-    auditStage4State.outcomesLocked = true;
-    closeAuditOutcomeModal();
   }
 
   function finalizeAuditLetters() {
@@ -13287,42 +13447,39 @@
           renderAuditRagMiniScale(dhScores[h] || 0) +
           '<span class="audit-abbr-dh-meta">highest ' + (dhScores[h] || 0) + '</span></div>';
       }).join('');
-      const scoringSection =
-        '<div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line-2);">' +
-        '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-3);font-weight:600;margin-bottom:8px;">Score per Duty Holder</div>' +
-        dhMini +
-        '</div>';
       let detailHtml = '';
       if (expanded) {
         const scoredFindings = findings.filter(function (f) { return (f.ragScore || 0) > 0; });
-        let findingsContent = '';
         if (scoredFindings.length) {
           const groups = groupAuditFindingsByDh(scoredFindings);
-          findingsContent = groups.map(function (g) {
-            return '<div style="margin-bottom:10px;"><div class="audit-dh-group-label">' + escHtml(g.dh) + '</div>' +
-              g.findings.map(function (f) {
-                const flow = getAuditFindingFlowFields(f);
-                return '<div class="audit-scoring-readonly-finding">' +
-                  '<strong>RAG ' + (f.ragScore || 0) + '</strong> · ' + escHtml(auditFindingPreviewText(f)) +
-                  (flow && flow.primaryExample ? '<div style="margin-top:6px;color:var(--ink-2);">' + escHtml(flow.primaryExample) + '</div>' : '') +
-                  '</div>';
-              }).join('') + '</div>';
-          }).join('');
+          detailHtml = '<div class="audit-scoring-article-body">' +
+            groups.map(function (g) {
+              return '<div style="margin-bottom:10px;"><div class="audit-dh-group-label">' + escHtml(g.dh) + '</div>' +
+                g.findings.map(function (f) {
+                  const flow = getAuditFindingFlowFields(f);
+                  return '<div class="audit-scoring-readonly-finding">' +
+                    '<strong>RAG ' + (f.ragScore || 0) + '</strong> · ' + escHtml(auditFindingPreviewText(f)) +
+                    (flow && flow.primaryExample ? '<div style="margin-top:6px;color:var(--ink-2);">' + escHtml(flow.primaryExample) + '</div>' : '') +
+                    '</div>';
+                }).join('') +
+                '</div>';
+            }).join('') +
+            '</div>';
         } else {
-          findingsContent = '<div class="audit-finding-empty" style="margin-bottom:0;">No failures — all Duty Holders scored 0.</div>';
+          detailHtml = '<div class="audit-scoring-article-body"><div class="audit-finding-empty" style="margin-bottom:0;">No failures — all Duty Holders scored 0.</div></div>';
         }
-        detailHtml = '<div class="audit-scoring-article-body">' + scoringSection + findingsContent + '</div>';
       }
-      const toggleLabel = '<span class="audit-article-toggle" style="font-size:12px;">' + (expanded ? '− Hide details' : '+ Show details') + '</span>';
+      const toggleLabel = allZero ? '' :
+        '<span class="audit-article-toggle" style="font-size:12px;">' + (expanded ? '− Hide details' : '+ Show details') + '</span>';
       const letterStyle = allZero ? ' style="background:var(--green);"' : '';
       return '<div class="audit-scoring-article-row">' +
         '<div class="audit-scoring-article-head" onclick="toggleAuditScoringDetail(\'' + escHtml(section.key) + '\')">' +
         '<div class="audit-article-letter"' + letterStyle + '>' + escHtml(section.key) + '</div>' +
         '<div><div class="audit-article-title">' + escHtml(section.label) + '</div>' +
         '<div class="audit-article-meta">' + (allZero ? 'All clear — score 0' : 'Highest RAG ' + articleMax) + '</div></div>' +
-        (allZero ? '<span class="pill green">0</span>' : '<span class="pill ' + (articleMax >= 4 ? 'red' : (articleMax >= 2 ? 'amber' : 'green')) + '">' + articleMax + '</span>') +
         toggleLabel +
         '</div>' + detailHtml +
+        '<div style="padding:0 14px 12px;background:#fcfcfa;">' + dhMini + '</div>' +
         '</div>';
     }).join('');
 
@@ -17088,9 +17245,7 @@
 
   function getLetterComposerRecipients() {
     if (letterComposerUsesAuditStage4()) {
-      const dh = letterComposerState.stage4Dh;
-      const recipients = dh ? getRecipientsForDutyHolder(dh) : getSetupLetterRecipients();
-      return recipients.length ? recipients : getSetupLetterRecipients();
+      return getAuditStage4LetterRecipients();
     }
     if (letterComposerUsesAuditSetup()) return getSetupLetterRecipients();
     if (letterComposerUsesBizSupport() && typeof getBizSupportById === 'function' && typeof getBsLetterRecipients === 'function') {
@@ -17316,12 +17471,26 @@
       letterComposerState.editing = false;
     }
     letterComposerState.previewRecipientId = id;
+    if (letterComposerUsesAuditStage4()) {
+      syncAuditStage4FromRecipient(id);
+    }
     renderLetterComposer();
   }
 
   function selectLetterView(id) {
     if (!letterComposerState || letterComposerState.mode !== 'view') return;
     letterComposerState.viewLetterId = id;
+    if (letterComposerUsesAuditStage4()) {
+      const saved = getAuditStage4SavedLetters().find(function (l) { return l.id === id; });
+      if (saved && saved.outcomeLetterId) {
+        letterComposerState.outcomeLetterId = saved.outcomeLetterId;
+        const entry = findAuditStage4LetterEntry(saved.outcomeLetterId);
+        if (entry) {
+          letterComposerState.stage4Dh = entry.dh;
+          letterComposerState.stage4OutcomeKey = entry.key;
+        }
+      }
+    }
     renderLetterComposer();
   }
 
@@ -17341,7 +17510,8 @@
       customBody: opts.customBody || null,
       templateSearch: opts.templateSearch || '',
       previewRecipientId: opts.previewRecipientId || null,
-      editing: false
+      editing: false,
+      slotDrafts: opts.slotDrafts || {}
     };
     const modal = document.getElementById('letter-composer-modal');
     if (modal) {
@@ -17385,16 +17555,20 @@
     const recGroup = document.getElementById('letter-composer-recipient-group');
     const editBtn = document.getElementById('letter-composer-edit-btn');
     const saveBtn = document.getElementById('letter-composer-save-btn');
+    const confirmBtn = document.getElementById('letter-composer-confirm-btn');
+    const editLetterBtn = document.getElementById('letter-composer-edit-letter-btn');
     const searchEl = document.getElementById('letter-composer-template-search');
 
-    if (titleEl) titleEl.textContent = isView ? 'View letter' : 'Write letter';
+    if (titleEl) titleEl.textContent = isView ? 'View letter' : (isStage4 ? 'Write letters' : 'Write letter');
     if (subEl) {
       if (isView) {
         subEl.textContent = 'Use View on each saved letter to read it in the preview panel.';
       } else if (letterComposerState.saveTo === 'activity-files' || letterComposerState.saveTo === 'audit-activity-files') {
         subEl.textContent = 'Choose a template and recipients — use View to preview each letter. Saved copies appear in All and Files on this CPIN.';
       } else if (letterComposerState.context === 'audit-stage4') {
-        subEl.textContent = 'Review and edit the outcome letter. Use Edit in the preview to change the body. Saved copies appear in Files on this audit.';
+        subEl.textContent = isView
+          ? 'Review each saved outcome letter. Confirm when the wording is correct, or edit to make changes.'
+          : 'Tick all recipients, preview each letter with View, then save letters in one step.';
       } else if (letterComposerState.context === 'audit-setup') {
         subEl.textContent = 'Choose a template and recipients — letters are saved here and sent when you start the audit.';
       } else if (letterComposerState.context === 'bizsupport') {
@@ -17421,8 +17595,17 @@
       if (!isView) {
         const toFiles = letterComposerState.saveTo === 'activity-files' || letterComposerState.saveTo === 'audit-activity-files';
         const toStage4 = letterComposerState.saveTo === 'audit-stage4-letters';
-        saveBtn.textContent = toStage4 ? 'Save letter' : (toFiles ? 'Save to files' : 'Save letters');
+        saveBtn.textContent = toStage4 ? 'Save letters' : (toFiles ? 'Save to files' : 'Save letters');
       }
+    }
+    if (confirmBtn) {
+      const outcomeId = letterComposerState.outcomeLetterId;
+      const showConfirm = isView && isStage4 && outcomeId && getAuditStage4SavedLetter(outcomeId) &&
+        !isAuditStage4LetterConfirmed(outcomeId) && !auditLettersSent;
+      confirmBtn.hidden = !showConfirm;
+    }
+    if (editLetterBtn) {
+      editLetterBtn.hidden = !(isView && isStage4 && !auditLettersSent);
     }
     const cancelBtn = document.getElementById('letter-composer-cancel-btn');
     if (cancelBtn) cancelBtn.textContent = isView ? 'Close' : 'Cancel';
@@ -17444,6 +17627,9 @@
       letterComposerState.recipientIds = (letterComposerState.recipientIds || []).filter(function (id) {
         return recipients.some(function (rp) { return rp.id === id; });
       });
+      if (isStage4 && !(letterComposerState.recipientIds || []).length && recipients.length) {
+        letterComposerState.recipientIds = [recipients[0].id];
+      }
       const tplEl = document.getElementById('letter-composer-templates');
       if (tplEl) {
         if (!templates.length) {
@@ -17545,6 +17731,9 @@
     letterComposerState.templateId = id;
     letterComposerState.customBody = null;
     letterComposerState.editing = false;
+    if (letterComposerUsesAuditStage4()) {
+      syncAuditStage4FromTemplate(id);
+    }
     renderLetterComposer();
   }
 
@@ -17639,6 +17828,82 @@
     }
   }
 
+  function saveAuditStage4LettersBulk() {
+    if (!letterComposerState || !auditStage4State) return;
+    const recipients = getAuditStage4LetterRecipients();
+    const recipientIds = letterComposerState.recipientIds || [];
+    const selected = recipients.filter(function (rp) { return recipientIds.indexOf(rp.id) >= 0; });
+    if (!selected.length) {
+      window.alert('Select at least one Responsible Person to send letters to.');
+      return;
+    }
+    const bodyEl = document.getElementById('letter-composer-body');
+    if (letterComposerState.editing && bodyEl) {
+      letterComposerState.customBody = bodyEl.innerHTML;
+      letterComposerState.editing = false;
+    }
+    if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
+
+    const slots = getAuditStage4RequiredLetters();
+    const stamp = cpinLogTimestamp();
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const newLetters = [];
+
+    slots.forEach(function (slot, idx) {
+      const rp = selected.find(function (r) { return getDhNameForRecipient(r) === slot.dh; });
+      if (!rp) return;
+      const slotDraft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[slot.id];
+      const templateId = (slotDraft && slotDraft.templateId) || getAuditOutcomeTemplateId(slot.key);
+      const tmpl = LETTER_TEMPLATES.find(function (t) { return t.id === templateId; });
+      if (!tmpl) return;
+      const o = auditStage4State.outcomes[slot.dh];
+      const ctx = buildAuditStage4LetterContext(slot.dh, slot.key, o ? o.failingKeys : []);
+      ctx.addressee = rp;
+      let bodyHtml;
+      if (letterComposerState.outcomeLetterId === slot.id && letterComposerState.customBody) {
+        bodyHtml = letterComposerState.customBody;
+      } else if (letterComposerState.slotDrafts && letterComposerState.slotDrafts[slot.id] && letterComposerState.slotDrafts[slot.id].customBody) {
+        bodyHtml = letterComposerState.slotDrafts[slot.id].customBody;
+      } else {
+        bodyHtml = tmpl.buildBody(ctx);
+      }
+      newLetters.push({
+        id: 'ltr-s4-' + slot.id + '-' + (stamp.ts + idx),
+        outcomeLetterId: slot.id,
+        dutyHolder: slot.dh,
+        outcomeKey: slot.key,
+        templateId: templateId,
+        templateLabel: tmpl.label,
+        recipientId: rp.id,
+        recipientName: rp.name,
+        recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || slot.dh,
+        fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.pdf',
+        body: bodyHtml,
+        at: stamp.at,
+        ts: stamp.ts + idx
+      });
+    });
+
+    if (!newLetters.length) {
+      window.alert('No outcome letters to save for the selected recipients. Ensure each ticked recipient is linked to a Duty Holder with a confirmed outcome.');
+      return;
+    }
+
+    const savedIds = newLetters.map(function (l) { return l.outcomeLetterId; });
+    auditStage4State.letters = getAuditStage4SavedLetters().filter(function (l) {
+      return savedIds.indexOf(l.outcomeLetterId) < 0;
+    }).concat(newLetters);
+    newLetters.forEach(function (l) {
+      auditStage4State.lettersDrafted[l.outcomeLetterId] = true;
+      if (!auditStage4State.lettersConfirmed) auditStage4State.lettersConfirmed = {};
+      auditStage4State.lettersConfirmed[l.outcomeLetterId] = true;
+    });
+    letterComposerState.slotDrafts = {};
+    appendAuditLettersToActivity(newLetters, stamp);
+    closeLetterComposer();
+    renderAuditStage4();
+  }
+
   function saveLetterComposer() {
     if (!letterComposerState || letterComposerState.mode === 'view') return;
     const isStage4 = letterComposerUsesAuditStage4();
@@ -17654,20 +17919,25 @@
       window.alert('Select at least one Responsible Person to send letters to.');
       return;
     }
-    const templates = getLetterTemplatesForContext(letterComposerState.context);
-    const template = templates.find(function (t) { return t.id === letterComposerState.templateId; });
-    if (!template) return;
-
     const bodyEl = document.getElementById('letter-composer-body');
     if (letterComposerState.editing && bodyEl) {
       letterComposerState.customBody = bodyEl.innerHTML;
       letterComposerState.editing = false;
     }
+    const saveTo = letterComposerState.saveTo || 'onsite';
+    if (saveTo === 'audit-stage4-letters') {
+      saveAuditStage4LettersBulk();
+      return;
+    }
+
     const useSharedBody = !!letterComposerState.customBody;
     const sharedBody = letterComposerState.customBody || (bodyEl ? bodyEl.innerHTML : '');
     const ctxBase = buildLetterComposerContext(letterComposerState.context, cpin);
     const stamp = cpinLogTimestamp();
-    const saveTo = letterComposerState.saveTo || 'onsite';
+    const templates = getLetterTemplatesForContext(letterComposerState.context);
+    const template = templates.find(function (t) { return t.id === letterComposerState.templateId; });
+    if (!template) return;
+
     const newLetters = selected.map(function (rp) {
       let bodyHtml;
       if (useSharedBody) {
@@ -17700,28 +17970,6 @@
       appendAuditLettersToActivity(newLetters, stamp);
       renderSetupAppointmentLetters();
       closeLetterComposer();
-      return;
-    }
-
-    if (saveTo === 'audit-stage4-letters') {
-      const outcomeLetterId = letterComposerState.outcomeLetterId;
-      const entry = outcomeLetterId ? findAuditStage4LetterEntry(outcomeLetterId) : null;
-      const letter = newLetters[0];
-      if (letter && outcomeLetterId) {
-        letter.outcomeLetterId = outcomeLetterId;
-        letter.dutyHolder = entry ? entry.dh : '';
-        letter.outcomeKey = entry ? entry.key : '';
-        auditStage4State.letters = getAuditStage4SavedLetters().filter(function (l) {
-          return l.outcomeLetterId !== outcomeLetterId;
-        }).concat([letter]);
-        auditStage4State.lettersDrafted[outcomeLetterId] = true;
-        if (auditStage4State.lettersConfirmed) {
-          auditStage4State.lettersConfirmed[outcomeLetterId] = false;
-        }
-      }
-      appendAuditLettersToActivity(newLetters, stamp);
-      closeLetterComposer();
-      renderAuditStage4();
       return;
     }
 
