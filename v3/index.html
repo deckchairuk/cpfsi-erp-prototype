@@ -1636,6 +1636,10 @@
     color: var(--ink-2);
     line-height: 1.4;
   }
+  .outcome-picker-article-lead {
+    font-weight: 600;
+    color: var(--ink-2);
+  }
   .outcome-picker-check {
     width: 28px;
     height: 28px;
@@ -12242,22 +12246,7 @@
       if (!allOutcomesConfirmed) {
         html += '<button class="btn primary" onclick="openAuditOutcomeModal()">Review and confirm outcomes →</button>';
       } else {
-        html += '<div style="font-size:13px;color:var(--green);font-weight:600;">✓ All outcomes confirmed' + (locked ? ' and locked' : '') + '</div>';
-        html += '<div class="audit-s4-outcome-summary" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">';
-        holders.forEach(function (dh) {
-          const o = state.outcomes[dh];
-          html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-          html += '<span style="font-weight:600;font-size:13px;min-width:140px;">' + escHtml(dh) + '</span>';
-          html += '<div style="display:flex;gap:5px;flex-wrap:wrap;">';
-          o.selected.forEach(function (k) {
-            const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
-            if (def) html += '<span class="pill ' + def.pill + '" style="font-size:11px;">' + escHtml(def.label) + '</span>';
-          });
-          html += '</div>';
-          html += '<span class="pill green" style="font-size:10px;">Confirmed</span>';
-          html += '</div>';
-        });
-        html += '</div>';
+        html += '<div style="font-size:13px;color:var(--green);font-weight:600;">✓ All outcomes confirmed</div>';
         if (!auditLettersSent) {
           html += '<button class="btn" style="margin-top:10px;" onclick="openAuditOutcomeModal()">Review outcomes</button>';
         }
@@ -12864,6 +12853,24 @@
     return '<div class="audit-outcome-score-summary"><span class="lbl">From site visit (reference)</span>' + parts + '</div>';
   }
 
+  function getAuditOutcomeRelatedArticles(dh, outcomeKey) {
+    const articles = [];
+    getAuditArticleSectionsForType().forEach(function (s) {
+      const sc = getArticleDhHighestScores(s.key)[dh] || 0;
+      if (sc <= 0) return;
+      if (outcomeKey === 'en' && sc >= 4) articles.push({ key: s.key, score: sc });
+      else if (outcomeKey === '28dap' && sc >= 1 && sc < 4) articles.push({ key: s.key, score: sc });
+    });
+    return articles;
+  }
+
+  function formatAuditOutcomeDescription(dh, outcomeKey, desc) {
+    const articles = getAuditOutcomeRelatedArticles(dh, outcomeKey);
+    if (!articles.length) return escHtml(desc);
+    const text = articles.map(function (a) { return 'Article ' + a.key; }).join(', ');
+    return '<span class="outcome-picker-article-lead">' + escHtml(text) + ' – </span>' + escHtml(desc);
+  }
+
   function renderAuditOutcomePicker(dh, o, locked) {
     const dhSafe = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     const canEdit = !locked && !o.confirmed;
@@ -12875,7 +12882,10 @@
       html += '<div class="outcome-picker-badge pill ' + def.pill + '">' + escHtml(def.abbr || def.key) + '</div>';
       html += '<div class="outcome-picker-body">';
       html += '<strong>' + escHtml(def.label) + '</strong>';
-      html += '<span>' + escHtml(def.desc) + '</span>';
+      const descHtml = (def.key === 'en' || def.key === '28dap')
+        ? formatAuditOutcomeDescription(dh, def.key, def.desc)
+        : escHtml(def.desc);
+      html += '<span>' + descHtml + '</span>';
       html += '</div>';
       html += '<div class="outcome-picker-check" aria-hidden="true">' + (active ? '✓' : '') + '</div>';
       html += '</button>';
