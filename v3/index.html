@@ -1803,6 +1803,71 @@
     color: var(--green);
     margin-top: 10px;
   }
+  .plan-thread .letter-attachment-list {
+    margin-top: 10px;
+  }
+  .plan-thread .letter-attachment-item {
+    margin-bottom: 6px;
+  }
+  .plan-thread-prompt {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.45;
+  }
+  .plan-thread-prompt.is-adequate {
+    background: var(--green-soft);
+    border: 1px solid var(--green-soft);
+    color: var(--green);
+  }
+  .plan-thread-prompt.is-inadequate {
+    background: var(--amber-soft);
+    border: 1px solid var(--amber-soft);
+    color: var(--amber);
+  }
+  .plan-thread-prompt.is-awaiting-revision {
+    background: #f4f4f2;
+    border: 1px dashed var(--line);
+    color: var(--ink-2);
+  }
+  .plan-thread-outcome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .plan-thread-outcome.is-complete {
+    background: var(--green-soft);
+    border: 1px solid var(--green-soft);
+    color: var(--green);
+  }
+  .plan-thread-outcome.is-inadequate {
+    background: var(--amber-soft);
+    border: 1px solid var(--amber-soft);
+    color: var(--amber);
+  }
+  .plan-thread-outcome .outcome-copy {
+    flex: 1;
+    min-width: 140px;
+    color: var(--ink-2);
+  }
+  .plan-thread-outcome.is-complete .outcome-copy { color: var(--green); }
+  .plan-thread-outcome.is-inadequate .outcome-copy { color: var(--amber); }
+  .plan-thread-letters-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 12px;
+    margin-bottom: 6px;
+  }
   .add-finding-btn {
     text-align: center;
     padding: 12px;
@@ -3302,6 +3367,116 @@
     color: #fff;
     border-color: var(--ink);
   }
+
+  /* Recipient package list — groups letters per person (audit outcomes, etc.) */
+  .letter-composer-layout.is-package-mode {
+    grid-template-columns: 420px 1fr;
+  }
+  .letter-package-summary {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .letter-package-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .letter-package-card.is-included {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-soft);
+  }
+  .letter-package-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 12px 8px;
+    background: #fcfcfa;
+    border-bottom: 1px solid var(--line);
+  }
+  .letter-package-check {
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .letter-package-check input { width: auto; margin: 0; }
+  .letter-package-meta { flex: 1; min-width: 0; }
+  .letter-package-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+  .letter-package-role { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+  .letter-package-dh { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+  .letter-package-why {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    background: #fafaf8;
+  }
+  .letter-package-why-label { display: block; margin-bottom: 6px; }
+  .letter-package-outcomes { display: flex; flex-wrap: wrap; gap: 5px; }
+  .letter-package-letters-label {
+    padding: 8px 12px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .letter-package-letters {
+    padding: 6px 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .letter-package-letter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .letter-package-letter:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .letter-package-letter.is-active {
+    border-color: var(--gov-focus);
+    background: #fff;
+    box-shadow: 0 0 0 2px var(--gov-focus);
+  }
+  .letter-package-letter-label { flex: 1; font-weight: 600; font-size: 12px; }
+  .letter-package-letter-status {
+    font-size: 10px;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .letter-package-letter-action {
+    font-size: 11px;
+    color: var(--ink-3);
+    flex-shrink: 0;
+  }
+  .letter-package-letter.is-active .letter-package-letter-action {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .letter-composer-preview-context {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background: #f4f4f2;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+  }
+  .letter-composer-preview-context strong { color: var(--ink); font-weight: 600; }
   .letter-composer-main {
     overflow: hidden;
     padding: 16px 28px 20px;
@@ -6508,7 +6683,7 @@
         <div class="audit-stage-meta" id="audit-stage-meta">
           <div class="audit-meta-row audit-meta-row--status">
             <span class="pill blue">Open</span>
-            <span>Stage 2 of 6  ·  Site visit and assessment</span>
+            <span>Stage 2 of 5  ·  Site visit and assessment</span>
           </div>
           <div class="audit-meta-row">
             <span>Reactive</span>
@@ -6540,7 +6715,6 @@
         <div class="stage" data-audit-stage="3" onclick="setAuditStage(3)">Scoring and enforcement</div>
         <div class="stage" data-audit-stage="4" onclick="setAuditStage(4)">Outcomes and letters</div>
         <div class="stage" data-audit-stage="5" onclick="setAuditStage(5)">Action plans</div>
-        <div class="stage" data-audit-stage="6" onclick="setAuditStage(6)">Close</div>
 
         <div style="margin-top:16px;padding:10px 12px;font-size:11px;color:var(--ink-3);">
           Log calls, emails and time at any point via Activity below. Not a stage — available throughout.
@@ -6712,34 +6886,10 @@
         <div class="audit-panel" id="audit-panel-5" hidden>
           <h2 style="margin:0;">Action plans</h2>
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            Each Duty Holder with a 28-DAP or EN outcome runs a parallel thread: receive plan → review adequacy → satisfactory letter or feedback loop. GSS Duty Holders are already settled at Stage 4.
+            Each Duty Holder with a 28-DAP or EN outcome runs a parallel thread: receive plan → review adequacy → letter → settled. When all threads are complete, close this audit and start a follow-up audit from this stage.
           </div>
           <div id="audit-stage5-content"></div>
           <div class="stage-actions" id="audit-stage5-actions"></div>
-        </div>
-
-        <!-- Stage 6: Close -->
-        <div class="audit-panel" id="audit-panel-6" hidden>
-          <h2 style="margin:0;">Close</h2>
-          <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            The process closes when every Duty Holder thread is settled. The slowest Duty Holder sets the close date. Time is finalised, scoring attributed, and the process moves to the historical record.
-          </div>
-
-          <div class="dh-progress" id="audit-close-progress">
-            <strong id="audit-close-progress-label">2 of 3 Duty Holders settled</strong>
-            <div class="bar"><div id="audit-close-progress-bar"></div></div>
-            <div class="dh-status-row"><span>The Property Directorate</span><span class="pill green">Settled</span></div>
-            <div class="dh-status-row" id="audit-close-hmcts"><span>HMCTS</span><span class="pill amber">Action plan under review</span></div>
-            <div class="dh-status-row"><span>Equans</span><span class="pill grey">Awaiting action plan</span></div>
-          </div>
-
-          <div class="inset" style="margin:16px 0;" id="audit-close-message">
-            <strong>Not ready to close yet.</strong> HMCTS and Equans still have open 28-DAP threads. Once both are settled (or a follow-up audit is scheduled), you can close this audit. A linked follow-up audit process can be created for Duty Holders who need in-person verification.
-          </div>
-
-          <div class="stage-actions">
-            <button class="btn" disabled style="opacity:0.45;cursor:not-allowed;" title="Waiting on Duty Holder threads">Close audit</button>
-          </div>
         </div>
 
       </div>
@@ -8301,7 +8451,7 @@
       <div>
         <h1 id="audit-setup-title">Audit  ·  A-2026-0314</h1>
         <div class="meta" id="audit-setup-meta">
-          Stage 1 of 6  ·  Setup pre-audit  ·
+          Stage 1 of 5  ·  Setup pre-audit  ·
           <span class="pill blue" style="margin-left:6px;">Reactive</span>
           <span style="color:var(--ink-3);margin-left:4px;">Triggered from <a onclick="show('cpins')">CPIN-2026-0418</a></span>
         </div>
@@ -8324,8 +8474,7 @@
         <div class="stage future">Scoring and enforcement</div>
         <div class="stage future">Outcomes and letters</div>
         <div class="stage future">Action plans</div>
-        <div class="stage future">Close</div>
-        <div style="margin-top:16px;padding:10px 12px;font-size:11px;color:var(--ink-3);">Stages 2–6 open after you start the audit.</div>
+        <div style="margin-top:16px;padding:10px 12px;font-size:11px;color:var(--ink-3);">Stages 2–5 open after you start the audit.</div>
       </div>
       <div>
         <!-- Premises -->
@@ -8573,6 +8722,7 @@
         <main class="letter-composer-main">
           <div class="letter-composer-preview-section">
             <div class="modal-group-label">Letter preview</div>
+            <div class="letter-composer-preview-context" id="letter-composer-preview-context" hidden></div>
             <div class="letter-composer-preview-wrap">
               <div class="letter-preview" id="letter-composer-preview" style="padding:18px;font-size:12px;">
                 <div class="head">CPFSI · Crown Premises Fire Safety Inspectorate</div>
@@ -9532,7 +9682,9 @@
     const raw = (window.location.hash || '#login').slice(1);
     const auditMatch = raw.match(/^audit-stage-([1-6])$/);
     if (auditMatch) {
-      return { screen: 'audit', stage: parseInt(auditMatch[1], 10), cpinId: null, concernId: null, bizsupportId: null };
+      let stage = parseInt(auditMatch[1], 10);
+      if (stage > AUDIT_STAGE_COUNT) stage = AUDIT_STAGE_COUNT;
+      return { screen: 'audit', stage: stage, cpinId: null, concernId: null, bizsupportId: null };
     }
     const cpinMatch = raw.match(/^cpin(?:\/([^/]+))?$/);
     if (cpinMatch) {
@@ -9706,15 +9858,15 @@
   });
 
   // ---------------------------------------------------------
-  // Audit process: stage navigation (6-stage lifecycle)
+  // Audit process: stage navigation (5-stage lifecycle)
   // ---------------------------------------------------------
+  const AUDIT_STAGE_COUNT = 5;
   const AUDIT_STAGE_NAMES = {
     1: 'Setup pre-audit',
     2: 'Site visit and assessment',
     3: 'Scoring and enforcement',
     4: 'Outcomes and letters',
-    5: 'Action plans',
-    6: 'Close'
+    5: 'Action plans'
   };
 
   const AUDIT_STAGE_SHORT = {
@@ -9722,8 +9874,7 @@
     2: 'Site visit',
     3: 'Scoring',
     4: 'Outcomes',
-    5: 'Action plans',
-    6: 'Close'
+    5: 'Action plans'
   };
 
   const AUDIT_STAGE_ACTIVITY_OPTIONS = {
@@ -9731,8 +9882,7 @@
     2: ['Site visit', 'Travel', 'Phone call', 'Desk-based investigation'],
     3: ['Desk-based investigation', 'Meeting', 'Phone call', 'Scoring review'],
     4: ['Letter drafting', 'Desk-based investigation', 'Phone call', 'Meeting'],
-    5: ['Desk-based investigation', 'Phone call', 'Meeting', 'Letter drafting'],
-    6: ['Desk-based investigation', 'General admin', 'Phone call']
+    5: ['Desk-based investigation', 'Phone call', 'Meeting', 'Letter drafting', 'General admin']
   };
 
   const AUDIT_ACTIVITY_KEY = 'audit-activity-log-v1';
@@ -9808,6 +9958,9 @@
   let auditStage = 2;
   let hmctsPlanSettled = false;
   let auditLettersSent = false;
+  let auditClosed = false;
+  let auditClosedAt = null;
+  let auditFollowUpId = null;
   let auditStage4State = null;
   let auditStage5State = null;
   let auditEditPermission = false;
@@ -10082,6 +10235,9 @@
     ctx.setup = auditSetup;
     ctx.lettersSent = auditLettersSent;
     ctx.hmctsPlanSettled = hmctsPlanSettled;
+    ctx.closed = auditClosed;
+    ctx.closedAt = auditClosedAt;
+    ctx.followUpAuditId = auditFollowUpId;
     ctx.activityLog = auditActivityLog;
     ctx.premises = auditSetup.premises || ctx.premises;
   }
@@ -10100,6 +10256,9 @@
     auditSetup = ctx.setup || defaultAuditSetup();
     auditLettersSent = !!ctx.lettersSent;
     hmctsPlanSettled = !!ctx.hmctsPlanSettled;
+    auditClosed = !!ctx.closed;
+    auditClosedAt = ctx.closedAt || null;
+    auditFollowUpId = ctx.followUpAuditId || null;
     auditActivityLog = ctx.activityLog || createEmptyActivityLog();
     auditFindingEditId = null;
     auditActiveArticleKey = null;
@@ -10126,7 +10285,7 @@
       const trigger = auditSetup.trigger || 'Started from premises';
       const reactive = auditSetup.fromCpinClose || (trigger.indexOf('CPIN') >= 0);
       setupMetaEl.innerHTML =
-        'Stage 1 of 6  ·  Setup pre-audit  · ' +
+        'Stage 1 of ' + AUDIT_STAGE_COUNT + '  ·  Setup pre-audit  · ' +
         '<span class="pill blue" style="margin-left:6px;">' + (reactive ? 'Reactive' : 'Proactive') + '</span>' +
         '<span style="color:var(--ink-3);margin-left:4px;">' + escHtml(trigger) + '</span>';
     }
@@ -10217,6 +10376,7 @@
   }
 
   function setAuditStage(n) {
+    n = Math.min(Math.max(1, parseInt(n, 10) || 1), AUDIT_STAGE_COUNT);
     auditStage = n;
     closeAuditStagesPanel();
     const hash = 'audit-stage-' + n;
@@ -10270,9 +10430,9 @@
   };
 
   const PROCESSES_LIST = [
-    { id: 'A-2026-0314', type: 'audit', premises: 'Temple Quay House', score: 47, scoreTrend: 'up', scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 2 of 6  ·  Site visit', owner: 'Phil Gower', ownerInitials: 'PG', age: '8 days', mine: true, patch: true, route: 'audit' },
+    { id: 'A-2026-0314', type: 'audit', premises: 'Temple Quay House', score: 47, scoreTrend: 'up', scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 2 of 5  ·  Site visit', owner: 'Phil Gower', ownerInitials: 'PG', age: '8 days', mine: true, patch: true, route: 'audit' },
     { id: 'F-2026-0142', type: 'follow-up', premises: 'HMP Lewes', score: 42, scoreTrend: 'down', scoreClass: 'score-high', status: 'awaiting-action-plan', statusText: 'Awaiting action plan', owner: 'Phil Gower', ownerInitials: 'PG', age: '12 days', mine: true, patch: true, prison: true },
-    { id: 'A-2026-0301', type: 'audit', premises: 'HMP Maidstone', score: 38, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 4 of 6  ·  Outcomes', owner: 'Steve France', ownerInitials: 'SF', age: '23 days', mine: false, patch: true, prison: true },
+    { id: 'A-2026-0301', type: 'audit', premises: 'HMP Maidstone', score: 38, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 4 of 5  ·  Outcomes', owner: 'Steve France', ownerInitials: 'SF', age: '23 days', mine: false, patch: true, prison: true },
     { id: 'C-2026-0089', type: 'consultation', premises: 'Charing Cross House refurb', score: 36, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Reviewing  ·  <strong style="color:var(--amber);">SLA: 5 days</strong>', owner: 'Phil Gower', ownerInitials: 'PG', age: '10 days', mine: true, patch: true, hasSla: true },
     { id: 'SC-2026-0073', type: 'concern', premises: 'Maidstone Magistrates Court', score: 34, scoreClass: 'score-mid', status: 'open', statusText: 'Awaiting contact', owner: 'Phil Gower', ownerInitials: 'PG', age: '4 days', mine: true, patch: true },
     { id: 'A-2026-0298', type: 'audit', premises: 'DWP Crawley', score: 31, scoreTrend: 'down', scoreClass: 'score-mid', status: 'awaiting-action-plan', statusText: 'Stage 5  ·  Action plan', owner: 'Hannah Munro', ownerInitials: 'HM', age: '2 months', mine: false, patch: false },
@@ -10284,7 +10444,7 @@
     { id: 'CPIN-2026-0401', type: 'cpin', premises: 'Reading Job Centre Plus', score: 28, scoreClass: 'score-mid', status: 'awaiting-action-plan', statusText: 'Duty holder response due', owner: 'Hannah Munro', ownerInitials: 'HM', age: '14 days', mine: false, patch: false },
     { id: 'AP-2026-0007', type: 'appeal', premises: 'HMP Wandsworth', score: 35, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Panel review  ·  Evidence pack', owner: 'Steve France', ownerInitials: 'SF', age: '18 days', mine: false, patch: false, prison: true },
     { id: 'AP-2026-0011', type: 'appeal', premises: 'Folkestone Tribunal Hearing Centre', score: 22, scoreClass: 'score-low', status: 'open', statusText: 'Lodged  ·  Awaiting schedule', owner: 'Hannah Munro', ownerInitials: 'HM', age: '6 days', mine: false, patch: false },
-    { id: 'A-2026-0320', type: 'audit', premises: 'HMP Bristol', score: 44, scoreTrend: 'up', scoreClass: 'score-high', status: 'open', statusText: 'Stage 1 of 6  ·  Planning', owner: 'Phil Gower', ownerInitials: 'PG', age: '1 day', mine: true, patch: true, prison: true },
+    { id: 'A-2026-0320', type: 'audit', premises: 'HMP Bristol', score: 44, scoreTrend: 'up', scoreClass: 'score-high', status: 'open', statusText: 'Stage 1 of 5  ·  Planning', owner: 'Phil Gower', ownerInitials: 'PG', age: '1 day', mine: true, patch: true, prison: true },
     { id: 'F-2026-0155', type: 'follow-up', premises: 'HMP Isis', score: 33, scoreClass: 'score-mid', status: 'open', statusText: 'Opened  ·  Awaiting first visit', owner: 'Steve France', ownerInitials: 'SF', age: '2 days', mine: false, patch: true, prison: true },
     { id: 'SC-2026-0061', type: 'concern', premises: 'Lewes Crown Court', score: 30, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Investigating  ·  Site photos received', owner: 'Phil Gower', ownerInitials: 'PG', age: '7 days', mine: true, patch: true },
     { id: 'C-2026-0075', type: 'consultation', premises: 'Bristol Crown Court', score: 27, scoreClass: 'score-mid', status: 'open', statusText: 'New submission  ·  <strong style="color:var(--amber);">SLA: 3 days</strong>', owner: 'Hannah Munro', ownerInitials: 'HM', age: '1 day', mine: false, patch: false, hasSla: true },
@@ -11634,7 +11794,7 @@
         else el.classList.add('future');
       });
     }
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= AUDIT_STAGE_COUNT; i++) {
       const panel = document.getElementById('audit-panel-' + i);
       if (panel) panel.hidden = (i !== n);
     }
@@ -11642,8 +11802,8 @@
     if (meta) {
       meta.innerHTML =
         '<div class="audit-meta-row audit-meta-row--status">' +
-          '<span class="pill blue">Open</span>' +
-          '<span>Stage ' + n + ' of 6  ·  ' + escHtml(AUDIT_STAGE_NAMES[n]) + '</span>' +
+          '<span class="pill ' + (auditClosed ? 'grey' : 'blue') + '">' + (auditClosed ? 'Closed' : 'Open') + '</span>' +
+          '<span>Stage ' + n + ' of ' + AUDIT_STAGE_COUNT + '  ·  ' + escHtml(AUDIT_STAGE_NAMES[n]) + '</span>' +
         '</div>' +
         '<div class="audit-meta-row">' +
           '<span>Reactive</span>' +
@@ -12042,7 +12202,8 @@
     const state   = auditStage4State;
     const locked  = state.outcomesLocked || auditLettersSent;
     const holders = Object.keys(state.outcomes);
-    const allConfirmed = locked || (holders.length > 0 && holders.every(function (dh) { return state.outcomes[dh].confirmed; }));
+    const allOutcomesConfirmed = holders.length > 0 && holders.every(function (dh) { return state.outcomes[dh].confirmed; });
+    const allConfirmed = locked || allOutcomesConfirmed;
 
     let html = '';
 
@@ -12076,14 +12237,29 @@
     // Confirm outcomes
     html += '<div class="setup-section">';
     html += '<h3>Confirm outcomes per Duty Holder</h3>';
-    html += '<div class="help">Open the full-screen review to confirm or adjust each Duty Holder\'s outcome. One letter will be generated per outcome.</div>';
+    html += '<div class="help">Open the full-screen review to confirm or adjust each Duty Holder\'s outcome. One letter per outcome is sent to each linked Responsible Person.</div>';
     if (holders.length) {
-      if (!locked) {
+      if (!allOutcomesConfirmed) {
         html += '<button class="btn primary" onclick="openAuditOutcomeModal()">Review and confirm outcomes →</button>';
       } else {
-        html += '<div style="font-size:13px;color:var(--green);font-weight:600;">✓ All outcomes confirmed</div>';
+        html += '<div style="font-size:13px;color:var(--green);font-weight:600;">✓ All outcomes confirmed' + (locked ? ' and locked' : '') + '</div>';
+        html += '<div class="audit-s4-outcome-summary" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">';
+        holders.forEach(function (dh) {
+          const o = state.outcomes[dh];
+          html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
+          html += '<span style="font-weight:600;font-size:13px;min-width:140px;">' + escHtml(dh) + '</span>';
+          html += '<div style="display:flex;gap:5px;flex-wrap:wrap;">';
+          o.selected.forEach(function (k) {
+            const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
+            if (def) html += '<span class="pill ' + def.pill + '" style="font-size:11px;">' + escHtml(def.label) + '</span>';
+          });
+          html += '</div>';
+          html += '<span class="pill green" style="font-size:10px;">Confirmed</span>';
+          html += '</div>';
+        });
+        html += '</div>';
         if (!auditLettersSent) {
-          html += '<button class="btn" style="margin-top:8px;" onclick="openAuditOutcomeModal()">Review outcomes</button>';
+          html += '<button class="btn" style="margin-top:10px;" onclick="openAuditOutcomeModal()">Review outcomes</button>';
         }
       }
     }
@@ -12101,16 +12277,15 @@
       if (auditLettersSent) {
         actions += '<button class="btn primary" onclick="setAuditStage(5)">Continue to action plans →</button>';
       } else if (allConfirmed) {
-        const lettersReady = allAuditStage4LettersConfirmed();
+        const lettersReady = allAuditStage4LettersSaved();
         if (lettersReady) {
           actions += '<button class="btn primary" onclick="finalizeAuditLetters()">Finalise and send all letters →</button>';
         } else {
-          const nConfirmed = getAuditStage4LetterIds().filter(function (id) {
-            return getAuditStage4SavedLetter(id) && isAuditStage4LetterConfirmed(id);
-          }).length;
-          const nTotal = getAuditStage4LetterIds().length;
-          actions += '<span style="font-size:12px;color:var(--ink-2);margin-right:8px;">' + nConfirmed + ' of ' + nTotal + ' letters confirmed</span>';
-          actions += '<button class="btn primary" disabled title="Confirm all letters before sending">Finalise and send all letters →</button>';
+          const required = getAuditStage4RequiredLetters();
+          const nSaved = required.filter(function (l) { return l.saved; }).length;
+          const nTotal = required.length;
+          actions += '<span style="font-size:12px;color:var(--ink-2);margin-right:8px;">' + nSaved + ' of ' + nTotal + ' letters saved</span>';
+          actions += '<button class="btn primary" disabled title="Write all outcome letters before sending">Finalise and send all letters →</button>';
         }
       }
       act.innerHTML = actions;
@@ -12118,14 +12293,17 @@
   }
 
   function getAuditStage4LetterIds() {
-    if (!auditStage4State) return [];
-    const ids = [];
-    Object.keys(auditStage4State.outcomes).forEach(function (dh) {
-      (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
-        ids.push((dh + '-' + k).replace(/[^a-z0-9]/gi, '-').toLowerCase());
-      });
-    });
-    return ids;
+    return getAuditStage4RequiredLetters().map(function (l) { return l.id; });
+  }
+
+  function getAuditStage4LetterTaskId(dh, outcomeKey, recipientId) {
+    return (dh + '-' + outcomeKey + '-' + recipientId).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  }
+
+  function allAuditStage4LettersSaved() {
+    const letters = getAuditStage4RequiredLetters();
+    if (!letters.length) return false;
+    return letters.every(function (l) { return !!l.saved; });
   }
 
   function isAuditStage4LetterConfirmed(letterId) {
@@ -12157,17 +12335,27 @@
   function getAuditStage4RequiredLetters() {
     if (!auditStage4State) return [];
     const letters = [];
+    const savedLetters = getAuditStage4SavedLetters();
     Object.keys(auditStage4State.outcomes).forEach(function (dh) {
+      const dhRecipients = getRecipientsForDutyHolder(dh);
       (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
         const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
-        if (def) {
-          const id = (dh + '-' + k).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        if (!def) return;
+        const slotId = getAuditStage4LetterId(dh, k);
+        dhRecipients.forEach(function (rp) {
+          const taskId = getAuditStage4LetterTaskId(dh, k, rp.id);
           letters.push({
-            id: id, dh: dh, key: k, def: def,
-            saved: getAuditStage4SavedLetter(id),
-            confirmed: isAuditStage4LetterConfirmed(id)
+            id: taskId,
+            slotId: slotId,
+            dh: dh,
+            key: k,
+            def: def,
+            recipientId: rp.id,
+            recipientName: rp.name,
+            saved: matchAuditStage4SavedLetter(savedLetters, taskId, slotId, rp.id),
+            confirmed: isAuditStage4LetterConfirmed(taskId)
           });
-        }
+        });
       });
     });
     return letters;
@@ -12175,14 +12363,11 @@
 
   function getAuditStage4LetterStatusText(letters) {
     const savedCount = letters.filter(function (l) { return l.saved; }).length;
-    const confirmedCount = letters.filter(function (l) { return l.confirmed; }).length;
     const missingCount = letters.length - savedCount;
-    if (!savedCount && missingCount) return missingCount + ' letter' + (missingCount === 1 ? '' : 's') + ' to write';
-    if (!savedCount) return '';
+    if (!letters.length) return 'No letters required';
+    if (!savedCount) return missingCount + ' letter' + (missingCount === 1 ? '' : 's') + ' to write';
+    if (savedCount === letters.length) return '✓ ' + savedCount + ' letters saved — ready to finalise';
     let text = '✓ ' + savedCount + (savedCount === 1 ? ' letter saved' : ' letters saved');
-    const unconfirmed = savedCount - confirmedCount;
-    if (unconfirmed > 0) text += ' · ' + unconfirmed + ' need' + (unconfirmed === 1 ? 's' : '') + ' confirmation';
-    else if (confirmedCount === letters.length) text += ' · all confirmed';
     if (missingCount > 0) text += ' · ' + missingCount + ' still to write';
     return text;
   }
@@ -12215,19 +12400,26 @@
   }
 
   function loadAuditStage4LetterSlot(letterId, recipientId) {
-    const entry = findAuditStage4LetterEntry(letterId);
-    if (!entry || !letterComposerState) return false;
-    const saved = getAuditStage4SavedLetter(letterId);
-    const draft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[letterId];
-    const dhRecipients = getRecipientsForDutyHolder(entry.dh);
-    letterComposerState.outcomeLetterId = letterId;
-    letterComposerState.stage4Dh = entry.dh;
-    letterComposerState.stage4OutcomeKey = entry.key;
-    letterComposerState.templateId = (draft && draft.templateId) || (saved && saved.templateId) || getAuditOutcomeTemplateId(entry.key);
+    const required = getAuditStage4RequiredLetters();
+    let task = required.find(function (t) { return t.id === letterId; });
+    if (!task) {
+      const entry = findAuditStage4LetterSlotEntry(letterId);
+      if (entry) {
+        const rid = recipientId || letterComposerState.previewRecipientId;
+        const rp = getRecipientsForDutyHolder(entry.dh).find(function (r) { return r.id === rid; }) ||
+          getRecipientsForDutyHolder(entry.dh)[0];
+        if (rp) task = required.find(function (t) { return t.slotId === entry.id && t.recipientId === rp.id; });
+      }
+    }
+    if (!task || !letterComposerState) return false;
+    const saved = getAuditStage4SavedLetter(task.id);
+    const draft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[task.id];
+    letterComposerState.outcomeLetterId = task.id;
+    letterComposerState.stage4Dh = task.dh;
+    letterComposerState.stage4OutcomeKey = task.key;
+    letterComposerState.templateId = (draft && draft.templateId) || (saved && saved.templateId) || getAuditOutcomeTemplateId(task.key);
     letterComposerState.customBody = (draft && draft.customBody) || (saved && saved.body) || null;
-    const rid = recipientId || letterComposerState.previewRecipientId;
-    const rpOnDh = dhRecipients.find(function (r) { return r.id === rid; }) || dhRecipients[0];
-    letterComposerState.previewRecipientId = rpOnDh ? rpOnDh.id : rid;
+    letterComposerState.previewRecipientId = recipientId || task.recipientId;
     if (draft && draft.recipientIds) {
       letterComposerState.recipientIds = draft.recipientIds.slice();
     }
@@ -12248,7 +12440,7 @@
       outcomeKey = selected[0];
       if (outcomeKey) letterComposerState.templateId = getAuditOutcomeTemplateId(outcomeKey);
     }
-    loadAuditStage4LetterSlot(getAuditStage4LetterId(dhName, outcomeKey), recipientId);
+    loadAuditStage4LetterSlot(getAuditStage4LetterTaskId(dhName, outcomeKey, recipientId), recipientId);
   }
 
   function syncAuditStage4FromTemplate(templateId) {
@@ -12258,7 +12450,160 @@
     const selected = auditStage4State.outcomes[letterComposerState.stage4Dh].selected || [];
     if (selected.indexOf(outcomeKey) < 0) return;
     if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
-    loadAuditStage4LetterSlot(getAuditStage4LetterId(letterComposerState.stage4Dh, outcomeKey), letterComposerState.previewRecipientId);
+    loadAuditStage4LetterSlot(
+      getAuditStage4LetterTaskId(letterComposerState.stage4Dh, outcomeKey, letterComposerState.previewRecipientId),
+      letterComposerState.previewRecipientId
+    );
+  }
+
+  function getAuditStage4RecipientPackages() {
+    const tasks = getAuditStage4RequiredLetters();
+    const recipientMap = {};
+    const allRecipients = getAuditStage4LetterRecipients();
+    tasks.forEach(function (task) {
+      if (!recipientMap[task.recipientId]) {
+        const rp = allRecipients.find(function (r) { return r.id === task.recipientId; });
+        recipientMap[task.recipientId] = {
+          recipientId: task.recipientId,
+          recipientName: task.recipientName,
+          role: rp && rp.role,
+          dh: task.dh,
+          outcomes: [],
+          letters: []
+        };
+      }
+      const pkg = recipientMap[task.recipientId];
+      if (pkg.outcomes.indexOf(task.key) < 0) pkg.outcomes.push(task.key);
+      pkg.letters.push(task);
+    });
+    return Object.values(recipientMap);
+  }
+
+  function getAuditStage4SavedPackages() {
+    const map = {};
+    getAuditStage4SavedLetters().forEach(function (ltr) {
+      const rid = ltr.recipientId || 'unknown';
+      if (!map[rid]) {
+        map[rid] = {
+          recipientId: rid,
+          recipientName: ltr.recipientName || 'Recipient',
+          dh: ltr.dutyHolder || '',
+          letters: []
+        };
+      }
+      map[rid].letters.push(ltr);
+    });
+    return Object.values(map);
+  }
+
+  function selectAuditStage4LetterTask(taskId) {
+    if (!letterComposerState || letterComposerState.mode === 'view') return;
+    if (letterComposerState.editing) {
+      const bodyEl = document.getElementById('letter-composer-body');
+      if (bodyEl) letterComposerState.customBody = bodyEl.innerHTML;
+      letterComposerState.editing = false;
+    }
+    if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
+    loadAuditStage4LetterSlot(taskId);
+    renderLetterComposer();
+  }
+
+  function selectAuditStage4SavedLetter(letterId) {
+    if (!letterComposerState || letterComposerState.mode !== 'view') return;
+    letterComposerState.viewLetterId = letterId;
+    const saved = getAuditStage4SavedLetters().find(function (l) { return l.id === letterId; });
+    if (saved) {
+      letterComposerState.outcomeLetterId = saved.letterTaskId || saved.outcomeLetterId;
+      const entry = findAuditStage4LetterTask(letterComposerState.outcomeLetterId);
+      if (entry) {
+        letterComposerState.stage4Dh = entry.dh;
+        letterComposerState.stage4OutcomeKey = entry.key;
+      }
+    }
+    renderLetterComposer();
+  }
+
+  function getAuditStage4PreviewContextLabel(isView) {
+    if (!letterComposerState) return '';
+    if (isView) {
+      const saved = getAuditStage4SavedLetters().find(function (l) { return l.id === letterComposerState.viewLetterId; });
+      if (!saved) return '';
+      return (saved.recipientName || 'Recipient') + ' · ' + (saved.dutyHolder || '') + ' · ' + (saved.templateLabel || 'Letter');
+    }
+    const task = getAuditStage4RequiredLetters().find(function (t) { return t.id === letterComposerState.outcomeLetterId; });
+    if (!task) return '';
+    return task.recipientName + ' · ' + task.dh + ' · ' + task.def.label;
+  }
+
+  function renderLetterComposerStage4Packages(recEl, isView) {
+    if (isView) {
+      const packages = getAuditStage4SavedPackages();
+      if (!packages.length) {
+        recEl.innerHTML = '<div class="letter-attachment-empty">No saved letters yet.</div>';
+        return;
+      }
+      recEl.innerHTML = packages.map(function (pkg) {
+        let h = '<div class="letter-package-card">';
+        h += '<div class="letter-package-header" style="border-bottom:none;">';
+        h += '<div class="letter-package-meta" style="padding-left:0;">';
+        h += '<div class="letter-package-name">' + escHtml(pkg.recipientName) + '</div>';
+        if (pkg.dh) h += '<div class="letter-package-dh">Contact for ' + escHtml(pkg.dh) + '</div>';
+        h += '</div></div>';
+        h += '<div class="letter-package-letters-label">' + pkg.letters.length + ' saved letter' + (pkg.letters.length === 1 ? '' : 's') + '</div>';
+        h += '<div class="letter-package-letters">';
+        pkg.letters.forEach(function (ltr) {
+          const active = ltr.id === letterComposerState.viewLetterId;
+          h += '<button type="button" class="letter-package-letter' + (active ? ' is-active' : '') + '" onclick="selectAuditStage4SavedLetter(\'' + escHtml(ltr.id) + '\')">';
+          h += '<span class="letter-package-letter-label">' + escHtml(ltr.templateLabel || 'Letter') + '</span>';
+          h += '<span class="letter-package-letter-action">View</span>';
+          h += '</button>';
+        });
+        h += '</div></div>';
+        return h;
+      }).join('');
+      return;
+    }
+
+    const packages = getAuditStage4RecipientPackages();
+    const totalLetters = packages.reduce(function (n, p) { return n + p.letters.length; }, 0);
+    let html = '<div class="letter-package-summary">' + packages.length + ' recipient' + (packages.length === 1 ? '' : 's') +
+      ' · ' + totalLetters + ' letter' + (totalLetters === 1 ? '' : 's') + ' to send</div>';
+
+    html += packages.map(function (pkg) {
+      const included = (letterComposerState.recipientIds || []).indexOf(pkg.recipientId) >= 0;
+      const rpSafe = pkg.recipientId.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      let h = '<div class="letter-package-card' + (included ? ' is-included' : '') + '">';
+      h += '<div class="letter-package-header">';
+      h += '<label class="letter-package-check"><input type="checkbox"' + (included ? ' checked' : '') +
+        ' onchange="toggleLetterRecipient(\'' + rpSafe + '\', this.checked)" />' +
+        '<span class="visually-hidden">Include ' + escHtml(pkg.recipientName) + '</span></label>';
+      h += '<div class="letter-package-meta">';
+      h += '<div class="letter-package-name">' + escHtml(pkg.recipientName) + '</div>';
+      if (pkg.role) h += '<div class="letter-package-role">' + escHtml(pkg.role) + '</div>';
+      h += '<div class="letter-package-dh">Contact for ' + escHtml(pkg.dh) + '</div>';
+      h += '</div></div>';
+      h += '<div class="letter-package-why"><span class="letter-package-why-label">Because of outcomes for ' + escHtml(pkg.dh) + ':</span>';
+      h += '<div class="letter-package-outcomes">';
+      pkg.outcomes.forEach(function (k) {
+        const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
+        if (def) h += '<span class="pill ' + def.pill + '" style="font-size:10px;">' + escHtml(def.label) + '</span>';
+      });
+      h += '</div></div>';
+      h += '<div class="letter-package-letters-label">' + pkg.letters.length + ' letter' + (pkg.letters.length === 1 ? '' : 's') + ' to send</div>';
+      h += '<div class="letter-package-letters">';
+      pkg.letters.forEach(function (task) {
+        const active = letterComposerState.outcomeLetterId === task.id;
+        h += '<button type="button" class="letter-package-letter' + (active ? ' is-active' : '') + '" onclick="selectAuditStage4LetterTask(\'' + escHtml(task.id) + '\')">';
+        h += '<span class="letter-package-letter-label">' + escHtml(task.def.label) + '</span>';
+        if (task.saved) h += '<span class="letter-package-letter-status">Saved</span>';
+        h += '<span class="letter-package-letter-action">Preview</span>';
+        h += '</button>';
+      });
+      h += '</div></div>';
+      return h;
+    }).join('');
+
+    recEl.innerHTML = html;
   }
 
   function openAuditStage4LetterComposerAll() {
@@ -12326,11 +12671,10 @@
 
     const canEdit = !auditLettersSent;
     const savedEntries = letters.filter(function (l) { return l.saved; });
-    const unconfirmedCount = savedEntries.filter(function (l) { return !l.confirmed; }).length;
 
     let h = '<div class="setup-section">';
     h += '<h3>Letters</h3>';
-    h += '<div class="help">Write templated letters for each outcome. Tick all recipients in the composer and save once — each outcome letter is generated and confirmed automatically.</div>';
+    h += '<div class="help">Open the letter writer to see each recipient\'s package of letters — one per confirmed outcome for their Duty Holder.</div>';
     h += '<div class="letter-attachment-list" id="audit-stage4-letters-list">';
 
     if (!savedEntries.length) {
@@ -12338,7 +12682,7 @@
     } else {
       savedEntries.forEach(function (l) {
         const ltr = l.saved;
-        const meta = (ltr.templateLabel || l.def.label) + ' · ' + (ltr.recipientName || l.dh) + (ltr.at ? ' · ' + ltr.at : '');
+        const meta = (ltr.templateLabel || l.def.label) + ' · ' + (ltr.recipientName || l.recipientName) + ' · ' + l.dh + (ltr.at ? ' · ' + ltr.at : '');
         h += '<div class="letter-attachment-item">';
         h += '<div class="letter-attachment-icon">PDF</div>';
         h += '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>';
@@ -12352,9 +12696,6 @@
     if (canEdit) {
       h += '<div class="letter-composer-actions">';
       h += '<button class="btn primary" type="button" onclick="openAuditStage4LetterComposerAll()">Write letters</button>';
-      if (unconfirmedCount > 0) {
-        h += '<button class="btn" type="button" onclick="confirmAllAuditStage4Letters()">Confirm all letters</button>';
-      }
       h += '<span id="audit-stage4-letter-status" style="font-size:12px;color:var(--ink-3);">' + escHtml(getAuditStage4LetterStatusText(letters)) + '</span>';
       h += '</div>';
     } else if (savedEntries.length) {
@@ -12373,7 +12714,7 @@
     if (draft) {
       try { auditSetup = Object.assign(defaultAuditSetup(), JSON.parse(draft)); } catch (e) { /* keep current */ }
     }
-    const entry = findAuditStage4LetterEntry(letterId);
+    const entry = findAuditStage4LetterTask(letterId);
     if (!entry) return;
     const recipients = getRecipientsForDutyHolder(entry.dh);
     if (!recipients.length) {
@@ -12391,7 +12732,7 @@
       stage4OutcomeKey: entry.key,
       templateId: templateId,
       recipientIds: allRecipients.map(function (r) { return r.id; }),
-      previewRecipientId: saved ? saved.recipientId : recipients[0].id
+      previewRecipientId: saved ? saved.recipientId : (entry.recipientId || recipients[0].id)
     };
     if (saved && saved.body) opts.customBody = saved.body;
     openLetterComposer(opts);
@@ -12400,7 +12741,7 @@
   function viewAuditStage4Letter(letterId) {
     const saved = getAuditStage4SavedLetter(letterId);
     if (!saved) return;
-    const entry = findAuditStage4LetterEntry(letterId);
+    const entry = findAuditStage4LetterTask(letterId);
     openLetterComposer({
       context: 'audit-stage4',
       saveTo: 'audit-stage4-letters',
@@ -12408,20 +12749,31 @@
       viewLetterId: saved.id,
       outcomeLetterId: letterId,
       stage4Dh: entry ? entry.dh : null,
-      stage4OutcomeKey: entry ? entry.key : null
+      stage4OutcomeKey: entry ? entry.key : null,
+      previewRecipientId: saved.recipientId
     });
   }
 
-  function findAuditStage4LetterEntry(letterId) {
+  function findAuditStage4LetterSlotEntry(slotId) {
     if (!auditStage4State) return null;
     let found = null;
     Object.keys(auditStage4State.outcomes).forEach(function (dh) {
       (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
-        const id = (dh + '-' + k).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-        if (id === letterId) found = { id: id, dh: dh, key: k };
+        const id = getAuditStage4LetterId(dh, k);
+        if (id === slotId) found = { id: id, dh: dh, key: k };
       });
     });
     return found;
+  }
+
+  function findAuditStage4LetterTask(letterId) {
+    const task = getAuditStage4RequiredLetters().find(function (l) { return l.id === letterId; });
+    if (task) return { id: task.id, slotId: task.slotId, dh: task.dh, key: task.key, recipientId: task.recipientId };
+    return findAuditStage4LetterSlotEntry(letterId);
+  }
+
+  function findAuditStage4LetterEntry(letterId) {
+    return findAuditStage4LetterTask(letterId);
   }
 
   // ── Outcome review full-screen modal ──────────────────────────────────────
@@ -12646,6 +12998,7 @@
       return auditStage4State.outcomes[h].confirmed;
     });
     if (allConfirmed) {
+      auditStage4State.outcomesLocked = true;
       closeAuditOutcomeModal();
       return;
     }
@@ -12661,8 +13014,8 @@
 
   function finalizeAuditLetters() {
     if (auditLettersSent) { setAuditStage(5); return; }
-    if (!allAuditStage4LettersConfirmed()) {
-      window.alert('Confirm all outcome letters before finalising and sending.');
+    if (!allAuditStage4LettersSaved()) {
+      window.alert('Write all outcome letters before finalising and sending.');
       return;
     }
 
@@ -12731,16 +13084,31 @@
 
   function getAuditStage5ThreadStatusLabel(thread) {
     if (!thread.needsPlan) return 'Settled at Stage 4';
-    if (thread.status === 'settled') return 'Settled';
+    if (thread.status === 'settled') return 'Complete';
     if (thread.status === 'reviewing') return 'Under review';
+    if (thread.status === 'adequate-pending-letter') return 'Marked adequate';
+    if (thread.status === 'inadequate-pending-letter') return 'Marked inadequate';
+    if (thread.status === 'awaiting-revision') return 'Inadequate';
     if (thread.status === 'awaiting') return 'Awaiting plan';
     return thread.status;
   }
 
   function getAuditStage5ThreadStatusPill(thread) {
     if (!thread.needsPlan || thread.status === 'settled') return 'green';
-    if (thread.status === 'reviewing') return 'amber';
+    if (thread.status === 'awaiting-revision') return 'amber';
+    if (thread.status === 'reviewing' || thread.status === 'adequate-pending-letter' || thread.status === 'inadequate-pending-letter') return 'amber';
     return 'grey';
+  }
+
+  function getAuditStage5LatestLetter(thread, letterType) {
+    if (!thread.letters || !thread.letters.length) return null;
+    if (letterType) {
+      for (let i = thread.letters.length - 1; i >= 0; i--) {
+        if (thread.letters[i].letterType === letterType) return { letter: thread.letters[i], index: i };
+      }
+      return null;
+    }
+    return { letter: thread.letters[thread.letters.length - 1], index: thread.letters.length - 1 };
   }
 
   function seedAuditStage5Thread(dh, selected) {
@@ -12753,13 +13121,31 @@
       settled: !needsPlan,
       planReceivedAt: null,
       dueDate: null,
-      satisfactoryLetterReady: false
+      revisionDueDate: null,
+      adequacyDecision: null,
+      letters: []
     };
     if (needsPlan && dh === 'HMCTS') {
-      thread.status = hmctsPlanSettled ? 'settled' : 'reviewing';
-      thread.settled = hmctsPlanSettled;
-      thread.planReceivedAt = '18 July 2026';
-      thread.satisfactoryLetterReady = hmctsPlanSettled;
+      if (hmctsPlanSettled) {
+        thread.status = 'settled';
+        thread.settled = true;
+        thread.planReceivedAt = '18 July 2026';
+        thread.adequacyDecision = 'adequate';
+        thread.letters = [{
+          id: 'ltr-s5-hmcts-sat',
+          letterType: 'satisfactory',
+          templateId: 'audit-plan-satisfactory',
+          templateLabel: 'Satisfactory action plan letter',
+          recipientName: 'Mark Stevens',
+          fileName: 'Letter-Mark-Stevens-Satisfactory-Action-Plan-2026-07-18.pdf',
+          body: '',
+          at: '18 July 2026',
+          ts: Date.now()
+        }];
+      } else {
+        thread.status = 'reviewing';
+        thread.planReceivedAt = '18 July 2026';
+      }
     }
     if (needsPlan && dh === 'Equans') {
       thread.dueDate = '19 August 2026';
@@ -12781,6 +13167,7 @@
         const t = auditStage5State.threads[dh];
         t.outcomes = selected.slice();
         t.needsPlan = dhNeedsActionPlan(selected);
+        if (!t.letters) t.letters = [];
         if (!t.needsPlan) {
           t.status = 'settled-at-4';
           t.settled = true;
@@ -12807,13 +13194,61 @@
       return '<span class="done">✓ No action plan required</span>';
     }
     if (thread.status === 'awaiting') {
-      return '<span class="current">Awaiting plan</span> → <span>Review</span> → <span>Satisfactory letter or feedback</span>';
+      return '<span class="current">Awaiting plan</span> → <span>Review</span> → <span>Letter</span>';
+    }
+    if (thread.status === 'awaiting-revision') {
+      return '<span class="done">✓ Feedback sent</span> → <span class="current">Awaiting revised plan</span> → <span>Review</span> → <span>Letter</span>';
     }
     if (thread.status === 'reviewing') {
-      return '<span class="done">✓ Received</span> → <span class="current">Reviewing adequacy</span> → <span>Satisfactory letter or feedback</span>';
+      return '<span class="done">✓ Received</span> → <span class="current">Review adequacy</span> → <span>Write letter</span>';
+    }
+    if (thread.status === 'adequate-pending-letter') {
+      return '<span class="done">✓ Received</span> → <span class="done">✓ Marked adequate</span> → <span class="current">Write satisfactory letter</span>';
+    }
+    if (thread.status === 'inadequate-pending-letter') {
+      return '<span class="done">✓ Received</span> → <span class="done">✓ Marked inadequate</span> → <span class="current">Write feedback letter</span>';
     }
     if (thread.status === 'settled') {
-      return '<span class="done">✓ Received</span> → <span class="done">✓ Marked adequate</span> → <span class="done">✓ Satisfactory letter sent</span>';
+      return '<span class="done">✓ Received</span> → <span class="done">✓ Marked adequate</span> → <span class="done">✓ Complete</span>';
+    }
+    return '';
+  }
+
+  function renderAuditStage5ThreadLetters(thread, slug, letterType) {
+    if (!thread.letters || !thread.letters.length) return '';
+    const items = letterType
+      ? thread.letters.map(function (ltr, idx) { return { ltr: ltr, idx: idx }; }).filter(function (x) { return x.ltr.letterType === letterType; })
+      : thread.letters.map(function (ltr, idx) { return { ltr: ltr, idx: idx }; });
+    if (!items.length) return '';
+    let h = '<div class="plan-thread-letters-label">Attached letter' + (items.length === 1 ? '' : 's') + '</div>';
+    h += '<div class="letter-attachment-list">';
+    items.forEach(function (item) {
+      const ltr = item.ltr;
+      const meta = (ltr.templateLabel || 'Letter') + (ltr.at ? ' · ' + ltr.at : '');
+      h += '<div class="letter-attachment-item">';
+      h += '<div class="letter-attachment-icon">PDF</div>';
+      h += '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>';
+      h += '<span>' + escHtml(meta) + '</span></div>';
+      h += '<button class="btn" type="button" onclick="viewAuditStage5Letter(\'' + slug + '\', ' + item.idx + ')">View</button>';
+      h += '</div>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  function renderAuditStage5ThreadOutcome(thread, dh) {
+    if (thread.status === 'settled') {
+      return '<div class="plan-thread-outcome is-complete">' +
+        '<span class="pill green">Complete</span>' +
+        '<span class="outcome-copy"><strong>This is complete.</strong> Satisfactory letter sent to ' + escHtml(dh) + ' — no further action on this thread.</span>' +
+        '</div>';
+    }
+    if (thread.status === 'awaiting-revision') {
+      return '<div class="plan-thread-outcome is-inadequate">' +
+        '<span class="pill amber">Inadequate</span>' +
+        '<span class="outcome-copy"><strong>Plan marked inadequate.</strong> Feedback letter sent — awaiting a revised action plan from ' + escHtml(dh) +
+        (thread.revisionDueDate ? ' (due ' + escHtml(thread.revisionDueDate) + ')' : '') + '.</span>' +
+        '</div>';
     }
     return '';
   }
@@ -12829,6 +13264,7 @@
     else if (thread.settled) rowClass += ' is-thread-settled';
     else if (thread.status === 'reviewing') rowClass += ' is-thread-reviewing';
     else if (thread.status === 'awaiting') rowClass += ' is-thread-awaiting';
+    else if (thread.status === 'awaiting-revision') rowClass += ' is-thread-reviewing';
 
     let h = '<div class="' + rowClass + '" id="plan-thread-' + escHtml(slug) + '">';
     h += '<div class="head">';
@@ -12840,30 +13276,53 @@
       h += '<div style="font-size:12px;color:var(--ink-3);">No follow-up required. Closed at Stage 4.</div>';
     } else if (thread.status === 'awaiting') {
       h += '<div style="font-size:12px;color:var(--ink-2);">28 days from letter sent' +
-        (thread.dueDate ? ': due ' + escHtml(thread.dueDate) : '') + '.</div>';
+        (thread.dueDate ? ': due ' + escHtml(thread.dueDate) : '') + '. Record when the action plan is received.</div>';
     } else if (thread.status === 'reviewing') {
       h += '<div style="font-size:12px;color:var(--ink-2);">Action plan received' +
         (thread.planReceivedAt ? ' ' + escHtml(thread.planReceivedAt) : '') +
-        '. Saved against this process and premises.</div>';
-    } else if (thread.status === 'settled') {
-      h += '<div style="font-size:12px;color:var(--ink-2);">Action plan marked adequate. Satisfactory letter sent.</div>';
+        '. Review the plan and mark it adequate or inadequate.</div>';
+    } else if (thread.status === 'adequate-pending-letter') {
+      h += '<div class="plan-thread-prompt is-adequate"><strong>Plan marked adequate.</strong> Write a satisfactory letter to confirm this with ' + escHtml(dh) + ' and close the thread.</div>';
+    } else if (thread.status === 'inadequate-pending-letter') {
+      h += '<div class="plan-thread-prompt is-inadequate"><strong>Plan marked inadequate.</strong> Write a feedback letter explaining what must be improved before a revised plan is submitted.</div>';
     }
 
     h += '<div class="steps">' + renderAuditStage5ThreadSteps(thread) + '</div>';
+    h += renderAuditStage5ThreadOutcome(thread, dh);
+
+    if (thread.status === 'settled') {
+      h += renderAuditStage5ThreadLetters(thread, slug, 'satisfactory');
+    } else if (thread.status === 'awaiting-revision') {
+      h += renderAuditStage5ThreadLetters(thread, slug, 'feedback');
+    } else if (thread.letters && thread.letters.length) {
+      h += renderAuditStage5ThreadLetters(thread, slug);
+    }
 
     if (thread.needsPlan && thread.status === 'awaiting') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
       h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record plan received</button>';
       h += '</div>';
     }
-    if (thread.needsPlan && thread.status === 'reviewing') {
+    if (thread.needsPlan && thread.status === 'awaiting-revision') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="markPlanAdequate(\'' + escHtml(slug) + '\')">Mark adequate</button>';
-      h += '<button class="btn" type="button" onclick="sendAuditPlanFeedback(\'' + dhSafe + '\')">Send unsatisfactory feedback</button>';
+      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record plan received</button>';
       h += '</div>';
     }
-    if (thread.needsPlan && thread.status === 'settled' && thread.satisfactoryLetterReady) {
-      h += '<div class="success-banner"><strong>Plan marked adequate.</strong> Satisfactory action plan letter drafted and ready to send to ' + escHtml(dh) + '.</div>';
+    if (thread.needsPlan && thread.status === 'reviewing') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="markAuditPlanAdequate(\'' + dhSafe + '\')">Mark adequate</button>';
+      h += '<button class="btn" type="button" onclick="markAuditPlanInadequate(\'' + dhSafe + '\')">Mark inadequate</button>';
+      h += '</div>';
+    }
+    if (thread.needsPlan && thread.status === 'adequate-pending-letter') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'satisfactory\')">Write satisfactory letter</button>';
+      h += '</div>';
+    }
+    if (thread.needsPlan && thread.status === 'inadequate-pending-letter') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'feedback\')">Write feedback letter</button>';
+      h += '</div>';
     }
     h += '</div>';
     return h;
@@ -12911,7 +13370,7 @@
 
     html += '<div class="setup-section">';
     html += '<h3>Action plan threads</h3>';
-    html += '<div class="help">Work each open thread in parallel. Mark plans adequate or send feedback until every Duty Holder is settled.</div>';
+    html += '<div class="help">Work each open thread in parallel. Mark plans adequate or inadequate, write the required letter, then move on when every thread is settled.</div>';
 
     html += '<div class="audit-s5-threads-progress">';
     if (settledCount === threads.length) {
@@ -12928,34 +13387,257 @@
     threads.forEach(function (t) {
       html += renderAuditStage5ThreadCard(t.dh, t.thread);
     });
+    html += renderAuditStage5CloseSection(threads);
     html += '</div>';
 
     el.innerHTML = html;
 
     if (act) {
-      let actions = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
-      if (allAuditStage5ThreadsSettled()) {
-        actions += '<button class="btn primary" onclick="setAuditStage(6)">Continue to close →</button>';
-      } else {
-        actions += '<button class="btn primary" disabled title="Settle all threads before closing">Continue to close →</button>';
-      }
-      act.innerHTML = actions;
+      act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
     }
 
     updateDutyHolderProgress();
   }
 
+  function renderAuditStage5CloseSection(threads) {
+    const allSettled = allAuditStage5ThreadsSettled();
+    let h = '<div class="setup-section" style="margin-top:8px;">';
+    h += '<h3>Close audit</h3>';
+
+    if (auditClosed) {
+      h += '<div class="plan-thread-outcome is-complete">';
+      h += '<span class="pill green">Closed</span>';
+      h += '<span class="outcome-copy"><strong>This audit is closed</strong>';
+      if (auditClosedAt) h += ' (' + escHtml(auditClosedAt) + ')';
+      if (auditFollowUpId) h += '. Follow-up audit <strong>' + escHtml(auditFollowUpId) + '</strong> has been started.';
+      else h += '.';
+      h += ' Time has been finalised and this process is in the historical record.</span>';
+      h += '</div>';
+      if (auditFollowUpId) {
+        h += '<div style="margin-top:12px;">';
+        h += '<button class="btn primary" type="button" onclick="continueAudit(\'' + escHtml(auditFollowUpId) + '\')">Open follow-up audit →</button>';
+        h += '</div>';
+      }
+    } else if (allSettled) {
+      h += '<div class="help">All Duty Holder threads are settled. Close this audit and start a follow-up audit to verify remedial action on site.</div>';
+      h += '<div class="plan-thread-outcome is-complete" style="margin-top:10px;">';
+      h += '<span class="pill green">Ready to close</span>';
+      h += '<span class="outcome-copy"><strong>All recipients complete.</strong> Closing finalises time and scoring. A linked follow-up audit can be created for Duty Holders who need in-person verification.</span>';
+      h += '</div>';
+      h += '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="closeAuditAndStartFollowUp()">Close audit and start follow-up →</button>';
+      h += '</div>';
+    } else {
+      const openDh = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).map(function (t) { return t.dh; });
+      h += '<div class="help">Close is available once every Duty Holder thread is settled.</div>';
+      if (openDh.length) {
+        h += '<div class="plan-thread-prompt is-awaiting-revision" style="margin-top:10px;">';
+        h += '<strong>Not ready to close yet.</strong> ' + escHtml(openDh.join(' and ')) + ' still ' +
+          (openDh.length === 1 ? 'has' : 'have') + ' an open thread.</div>';
+      }
+    }
+
+    h += '</div>';
+    return h;
+  }
+
+  function closeAuditAndStartFollowUp() {
+    if (!allAuditStage5ThreadsSettled() || auditClosed) return;
+    snapshotActiveAuditContext();
+
+    const premises = auditSetup.premises || 'Temple Quay House';
+    const parentAuditId = activeAuditId;
+    const stamp = cpinLogTimestamp();
+    const closedAt = stamp.at;
+
+    auditClosed = true;
+    auditClosedAt = closedAt;
+    const followUpId = 'A-2026-' + String(9300 + Math.floor(Math.random() * 999));
+    auditFollowUpId = followUpId;
+
+    auditActivityLog.notes.unshift({
+      id: 'n-audit-closed-' + stamp.ts,
+      text: 'Audit closed. All Duty Holder threads settled. Follow-up audit ' + followUpId + ' started.',
+      stage: 5,
+      at: stamp.at,
+      ts: stamp.ts
+    });
+    touchAuditActivity();
+
+    const setup = seedAuditSetupFromPremises(premises, followUpId);
+    setup.trigger = 'Follow-up audit from ' + parentAuditId;
+    setup.fromFollowUpAudit = parentAuditId;
+
+    auditContexts[parentAuditId].closed = true;
+    auditContexts[parentAuditId].closedAt = closedAt;
+    auditContexts[parentAuditId].followUpAuditId = followUpId;
+    auditContexts[parentAuditId].stage = 5;
+
+    auditContexts[followUpId] = {
+      auditId: followUpId,
+      premises: premises,
+      stage: 1,
+      findings: [],
+      siteVisitTypeLocked: false,
+      themedArticles: [],
+      expandedArticles: {},
+      scoringDetailExpanded: {},
+      setup: setup,
+      lettersSent: false,
+      hmctsPlanSettled: false,
+      closed: false,
+      closedAt: null,
+      followUpAuditId: null,
+      activityLog: createEmptyActivityLog()
+    };
+
+    applyAuditContext(followUpId);
+    auditStage = 1;
+    localStorage.removeItem(setupDraftKey(followUpId));
+    show('auditsetup');
+  }
+
   function recordAuditPlanReceived(dh) {
     if (!auditStage5State || !auditStage5State.threads[dh]) return;
     const t = auditStage5State.threads[dh];
-    if (!t.needsPlan || t.status !== 'awaiting') return;
+    if (!t.needsPlan || (t.status !== 'awaiting' && t.status !== 'awaiting-revision')) return;
     t.status = 'reviewing';
     t.planReceivedAt = '17 Jun 2026';
+    t.adequacyDecision = null;
     renderAuditStage5();
   }
 
-  function sendAuditPlanFeedback(dh) {
-    window.alert('Unsatisfactory feedback letter would be drafted for ' + dh + '. The thread stays open until a revised plan is received.');
+  function findAuditStage5Dh(dhOrSlug) {
+    if (!auditStage5State) return null;
+    return Object.keys(auditStage5State.threads).find(function (d) {
+      return d === dhOrSlug || auditDhSlug(d) === dhOrSlug;
+    }) || null;
+  }
+
+  function markAuditPlanAdequate(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.needsPlan || t.status !== 'reviewing') return;
+    t.status = 'adequate-pending-letter';
+    t.adequacyDecision = 'adequate';
+    renderAuditStage5();
+  }
+
+  function markAuditPlanInadequate(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.needsPlan || t.status !== 'reviewing') return;
+    t.status = 'inadequate-pending-letter';
+    t.adequacyDecision = 'inadequate';
+    renderAuditStage5();
+  }
+
+  function markPlanAdequate(holder) {
+    markAuditPlanAdequate(holder);
+  }
+
+  function openAuditStage5LetterComposer(dhOrSlug, letterType) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State || !auditStage5State.threads[dh]) return;
+    const thread = auditStage5State.threads[dh];
+    const recipients = getRecipientsForDutyHolder(dh);
+    if (!recipients.length) {
+      window.alert('Approve at least one Responsible Person linked to ' + dh + ' before writing letters.');
+      return;
+    }
+    const templateId = letterType === 'feedback' ? 'audit-plan-feedback' : 'audit-plan-satisfactory';
+    openLetterComposer({
+      context: 'audit-stage5',
+      saveTo: 'audit-stage5-letter',
+      stage5Dh: dh,
+      stage5LetterType: letterType,
+      templateId: templateId,
+      recipientIds: [recipients[0].id],
+      previewRecipientId: recipients[0].id
+    });
+  }
+
+  function viewAuditStage5Letter(dhOrSlug, letterIndex) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State || !auditStage5State.threads[dh]) return;
+    const letters = auditStage5State.threads[dh].letters || [];
+    const saved = letters[letterIndex];
+    if (!saved) return;
+    openLetterComposer({
+      context: 'audit-stage5',
+      saveTo: 'audit-stage5-letter',
+      mode: 'view',
+      viewLetterId: saved.id,
+      stage5Dh: dh,
+      stage5LetterType: saved.letterType || 'satisfactory',
+      templateId: saved.templateId
+    });
+  }
+
+  function saveAuditStage5Letter() {
+    if (!letterComposerState || !auditStage5State) return;
+    const dh = letterComposerState.stage5Dh;
+    const letterType = letterComposerState.stage5LetterType;
+    const t = dh && auditStage5State.threads[dh];
+    if (!t) return;
+
+    const recipients = getRecipientsForDutyHolder(dh);
+    const recipientIds = letterComposerState.recipientIds || [];
+    const selected = recipients.filter(function (rp) { return recipientIds.indexOf(rp.id) >= 0; });
+    if (!selected.length) {
+      window.alert('Select at least one Responsible Person to send the letter to.');
+      return;
+    }
+
+    const bodyEl = document.getElementById('letter-composer-body');
+    if (letterComposerState.editing && bodyEl) {
+      letterComposerState.customBody = bodyEl.innerHTML;
+      letterComposerState.editing = false;
+    }
+
+    const templates = getLetterTemplatesForContext('audit-stage5');
+    const template = templates.find(function (tpl) { return tpl.id === letterComposerState.templateId; });
+    if (!template) return;
+
+    const ctxBase = buildLetterComposerContext('audit-stage5', null);
+    const stamp = cpinLogTimestamp();
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const useSharedBody = !!letterComposerState.customBody;
+    const sharedBody = letterComposerState.customBody || (bodyEl ? bodyEl.innerHTML : '');
+    const rp = selected[0];
+    const bodyHtml = useSharedBody ? sharedBody : template.buildBody(Object.assign({}, ctxBase, { addressee: rp }));
+    const letter = {
+      id: 'ltr-s5-' + auditDhSlug(dh) + '-' + letterType + '-' + stamp.ts,
+      letterType: letterType,
+      templateId: template.id,
+      templateLabel: template.label,
+      recipientId: rp.id,
+      recipientName: rp.name,
+      recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || dh,
+      fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(template.label) + '-' + dateStr + '.pdf',
+      body: bodyHtml,
+      at: stamp.at,
+      ts: stamp.ts
+    };
+
+    if (!t.letters) t.letters = [];
+    t.letters.push(letter);
+
+    if (letterType === 'satisfactory' && t.status === 'adequate-pending-letter') {
+      t.status = 'settled';
+      t.settled = true;
+    } else if (letterType === 'feedback' && t.status === 'inadequate-pending-letter') {
+      t.status = 'awaiting-revision';
+      t.revisionDueDate = t.revisionDueDate || t.dueDate || '19 August 2026';
+      t.adequacyDecision = null;
+    }
+
+    appendAuditLettersToActivity([letter], stamp);
+    syncHmctsPlanSettledFromStage5();
+    closeLetterComposer();
+    renderAuditStage5();
   }
 
   function normalizeAuditFinding(f) {
@@ -14023,21 +14705,6 @@
     saveAuditAssessmentFinding(false);
   }
 
-  function markPlanAdequate(holder) {
-    if (!auditStage5State) return;
-    const dh = Object.keys(auditStage5State.threads).find(function (d) {
-      return auditDhSlug(d) === holder || d.toLowerCase() === holder;
-    });
-    if (!dh) return;
-    const t = auditStage5State.threads[dh];
-    if (!t || !t.needsPlan || t.settled || t.status !== 'reviewing') return;
-    t.status = 'settled';
-    t.settled = true;
-    t.satisfactoryLetterReady = true;
-    syncHmctsPlanSettledFromStage5();
-    renderAuditStage5();
-  }
-
   function updateDutyHolderProgress() {
     if (!auditStage5State) return;
     const threads = auditStage5State.threads;
@@ -14046,16 +14713,15 @@
       const t = threads[dh];
       if (!t) return null;
       if (t.settled) return { pill: 'green', label: 'Settled' };
-      if (t.status === 'reviewing') return { pill: 'amber', label: 'Action plan under review' };
+      if (t.status === 'reviewing' || t.status === 'adequate-pending-letter' || t.status === 'inadequate-pending-letter') {
+        return { pill: 'amber', label: 'Action plan under review' };
+      }
+      if (t.status === 'awaiting-revision') return { pill: 'amber', label: 'Inadequate — awaiting plan' };
       if (t.needsPlan) return { pill: 'grey', label: 'Awaiting action plan' };
       return { pill: 'green', label: 'Settled' };
     }
 
     const hmctsStatus = statusForDh('HMCTS');
-    const hmctsClose = document.getElementById('audit-close-hmcts');
-    if (hmctsClose && hmctsStatus) {
-      hmctsClose.innerHTML = '<span>HMCTS</span><span class="pill ' + hmctsStatus.pill + '">' + escHtml(hmctsStatus.label) + '</span>';
-    }
     const hmctsContext = document.getElementById('audit-context-hmcts');
     if (hmctsContext && hmctsStatus) {
       const ctxLabel = hmctsStatus.label === 'Settled' ? 'Settled' : (threads['HMCTS'] && threads['HMCTS'].needsPlan ? '28-DAP' : 'Settled');
@@ -14064,26 +14730,11 @@
 
     const settledCount = Object.values(threads).filter(function (t) { return t.settled; }).length;
     const total = Object.keys(threads).length;
-    const openDh = Object.keys(threads).filter(function (dh) {
-      const t = threads[dh];
-      return t.needsPlan && !t.settled;
-    });
 
-    const closeLabel = document.getElementById('audit-close-progress-label');
-    const closeBar = document.getElementById('audit-close-progress-bar');
-    if (closeLabel) closeLabel.textContent = settledCount + ' of ' + total + ' Duty Holders settled';
-    if (closeBar) closeBar.style.width = (total ? Math.round((settledCount / total) * 100) : 0) + '%';
-
-    const closeMsg = document.getElementById('audit-close-message');
-    if (closeMsg) {
-      if (openDh.length === 0) {
-        closeMsg.innerHTML = '<strong>Ready to close.</strong> All Duty Holder threads are settled. You can close this audit and move it to the historical record.';
-      } else {
-        closeMsg.innerHTML = '<strong>Not ready to close yet.</strong> ' +
-          escHtml(openDh.join(' and ')) + ' still ' + (openDh.length === 1 ? 'has' : 'have') +
-          ' an open thread. Once all are settled (or a follow-up audit is scheduled), you can close this audit.';
-      }
-    }
+    const contextLabel = document.getElementById('audit-context-progress-label');
+    const contextBar = document.getElementById('audit-context-progress-bar');
+    if (contextLabel) contextLabel.textContent = settledCount + ' of ' + total + ' settled';
+    if (contextBar) contextBar.style.width = (total ? Math.round((settledCount / total) * 100) : 0) + '%';
   }
 
   function escHtml(s) {
@@ -16920,6 +17571,35 @@
       }
     },
     {
+      id: 'audit-plan-satisfactory',
+      label: 'Satisfactory action plan letter',
+      hint: 'Confirm the submitted action plan is adequate',
+      contexts: ['audit-stage5'],
+      buildBody: function (ctx) {
+        return '<p>Thank you for submitting your action plan following the fire safety audit at <span class="conditional">' +
+          escHtml(ctx.premises) + '</span> on ' + escHtml(ctx.auditDate || '22 June 2026') + '.</p>' +
+          '<p>I am writing to confirm that the action plan received from ' + escHtml(ctx.dutyHolder || 'you') +
+          (ctx.planReceivedAt ? ' on <span class="conditional">' + escHtml(ctx.planReceivedAt) + '</span>' : '') +
+          ' has been reviewed and is considered <strong>adequate</strong>. No further action is required on this plan.</p>' +
+          '<p>Please proceed with the remedial actions and timescales set out in your plan. CPFSI may request evidence of completion in due course.</p>';
+      }
+    },
+    {
+      id: 'audit-plan-feedback',
+      label: 'Unsatisfactory action plan feedback',
+      hint: 'Explain why the plan is inadequate and request a revision',
+      contexts: ['audit-stage5'],
+      buildBody: function (ctx) {
+        return '<p>Thank you for submitting your action plan following the fire safety audit at <span class="conditional">' +
+          escHtml(ctx.premises) + '</span> on ' + escHtml(ctx.auditDate || '22 June 2026') + '.</p>' +
+          '<p>I am writing to inform ' + escHtml(ctx.dutyHolder || 'you') + ' that, having reviewed the action plan received' +
+          (ctx.planReceivedAt ? ' on <span class="conditional">' + escHtml(ctx.planReceivedAt) + '</span>' : '') +
+          ', it is considered <strong>inadequate</strong> in its current form.</p>' +
+          '<p>Please submit a revised written action plan within twenty-eight (28) days, addressing the gaps identified in our review. ' +
+          'The revised plan must set out clear remedial steps, responsible persons and realistic timescales.</p>';
+      }
+    },
+    {
       id: 'cpin-onsite-appointment',
       label: 'On-site evaluation appointment',
       hint: 'Standard appointment following incident notification',
@@ -17170,6 +17850,11 @@
     return letterComposerState.context === 'audit-stage4';
   }
 
+  function letterComposerUsesAuditStage5() {
+    if (!letterComposerState) return false;
+    return letterComposerState.context === 'audit-stage5';
+  }
+
   function letterComposerUsesAuditSetup() {
     if (!letterComposerState) return false;
     return letterComposerState.context === 'audit-setup' || letterComposerState.context === 'audit-activity';
@@ -17201,8 +17886,21 @@
     return auditStage4State.letters.slice();
   }
 
-  function getAuditStage4SavedLetter(outcomeLetterId) {
-    return getAuditStage4SavedLetters().find(function (l) { return l.outcomeLetterId === outcomeLetterId; }) || null;
+  function matchAuditStage4SavedLetter(letters, taskId, slotId, recipientId) {
+    return letters.find(function (l) {
+      if (l.letterTaskId === taskId || l.outcomeLetterId === taskId) return true;
+      if (l.recipientId === recipientId && (l.outcomeSlotId === slotId || l.outcomeLetterId === slotId)) return true;
+      return false;
+    }) || null;
+  }
+
+  function getAuditStage4SavedLetter(letterTaskId) {
+    const letters = getAuditStage4SavedLetters();
+    const direct = letters.find(function (l) {
+      return (l.letterTaskId || l.outcomeLetterId) === letterTaskId;
+    });
+    if (direct) return direct;
+    return letters.find(function (l) { return l.outcomeLetterId === letterTaskId; }) || null;
   }
 
   function getDutyHolderKeyByName(dhName) {
@@ -17247,6 +17945,9 @@
     if (letterComposerUsesAuditStage4()) {
       return getAuditStage4LetterRecipients();
     }
+    if (letterComposerUsesAuditStage5() && letterComposerState.stage5Dh) {
+      return getRecipientsForDutyHolder(letterComposerState.stage5Dh);
+    }
     if (letterComposerUsesAuditSetup()) return getSetupLetterRecipients();
     if (letterComposerUsesBizSupport() && typeof getBizSupportById === 'function' && typeof getBsLetterRecipients === 'function') {
       const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
@@ -17262,6 +17963,10 @@
 
   function getLetterComposerSavedLetters() {
     if (letterComposerUsesAuditStage4()) return getAuditStage4SavedLetters();
+    if (letterComposerUsesAuditStage5() && letterComposerState.stage5Dh && auditStage5State) {
+      const t = auditStage5State.threads[letterComposerState.stage5Dh];
+      return t && t.letters ? t.letters.slice() : [];
+    }
     if (letterComposerUsesAuditSetup()) return getAuditSetupSavedLetters();
     if (letterComposerUsesBizSupport() && typeof getBizSupportById === 'function' && typeof getBsSavedLetters === 'function') {
       const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
@@ -17276,7 +17981,7 @@
   }
 
   function getLetterComposerPremises() {
-    if (letterComposerUsesAuditStage4() || letterComposerUsesAuditSetup()) {
+    if (letterComposerUsesAuditStage4() || letterComposerUsesAuditStage5() || letterComposerUsesAuditSetup()) {
       return auditSetup.premises || 'Temple Quay House, Bristol BS1';
     }
     if (letterComposerUsesBizSupport() && typeof getBizSupportById === 'function') {
@@ -17316,6 +18021,9 @@
     if (context === 'audit-stage4' && letterComposerState) {
       return getAuditOutcomeTemplateId(letterComposerState.stage4OutcomeKey);
     }
+    if (context === 'audit-stage5' && letterComposerState) {
+      return letterComposerState.templateId || 'audit-plan-satisfactory';
+    }
     if (context === 'audit-setup' || context === 'audit-activity') return 'cpin-onsite-appointment';
     return 'cpin-onsite-appointment';
   }
@@ -17324,6 +18032,7 @@
     let resolvedContext = context;
     if (context === 'audit-setup' || context === 'audit-activity') resolvedContext = 'cpin-onsite';
     if (context === 'audit-stage4') resolvedContext = 'audit-outcome';
+    if (context === 'audit-stage5') resolvedContext = 'audit-stage5';
     const q = (searchQuery || '').trim().toLowerCase();
     return LETTER_TEMPLATES.filter(function (t) {
       if (t.contexts.indexOf(resolvedContext) < 0) return false;
@@ -17415,6 +18124,16 @@
         o ? o.failingKeys : []
       );
     }
+    if (context === 'audit-stage5' && letterComposerState) {
+      const dh = letterComposerState.stage5Dh;
+      const thread = auditStage5State && dh && auditStage5State.threads[dh];
+      return {
+        premises: (auditSetup && auditSetup.premises) ? auditSetup.premises + ', Bristol BS1' : 'Temple Quay House, Bristol BS1',
+        auditDate: '22 June 2026',
+        dutyHolder: dh || '',
+        planReceivedAt: thread && thread.planReceivedAt ? thread.planReceivedAt : 'recently'
+      };
+    }
     if (context === 'audit-setup' || context === 'audit-activity') {
       const appt = formatSetupAppointment();
       return {
@@ -17505,6 +18224,8 @@
       outcomeLetterId: opts.outcomeLetterId || null,
       stage4Dh: opts.stage4Dh || null,
       stage4OutcomeKey: opts.stage4OutcomeKey || null,
+      stage5Dh: opts.stage5Dh || null,
+      stage5LetterType: opts.stage5LetterType || null,
       templateId: opts.templateId || getDefaultLetterTemplateId(context),
       recipientIds: opts.recipientIds ? opts.recipientIds.slice() : null,
       customBody: opts.customBody || null,
@@ -17531,6 +18252,7 @@
       document.body.style.overflow = '';
     }
     if (auditStage === 4 && typeof renderAuditStage4 === 'function') renderAuditStage4();
+    if (auditStage === 5 && typeof renderAuditStage5 === 'function') renderAuditStage5();
   }
 
   function renderLetterComposer() {
@@ -17538,10 +18260,11 @@
     const cpin = getCpinById(activeCpinId);
     const isAudit = letterComposerUsesAuditSetup();
     const isStage4 = letterComposerUsesAuditStage4();
+    const isStage5 = letterComposerUsesAuditStage5();
     const isBs = letterComposerUsesBizSupport();
     const isConcern = letterComposerUsesConcern();
     const isView = letterComposerState.mode === 'view';
-    const canPreview = isAudit || isStage4 || isBs || isConcern || !!getCpinById(activeCpinId);
+    const canPreview = isAudit || isStage4 || isStage5 || isBs || isConcern || !!getCpinById(activeCpinId);
     const allTemplates = getLetterTemplatesForContext(letterComposerState.context);
     const templates = getLetterTemplatesForContext(letterComposerState.context, letterComposerState.templateSearch);
     const recipients = getLetterComposerRecipients();
@@ -17559,16 +18282,28 @@
     const editLetterBtn = document.getElementById('letter-composer-edit-letter-btn');
     const searchEl = document.getElementById('letter-composer-template-search');
 
-    if (titleEl) titleEl.textContent = isView ? 'View letter' : (isStage4 ? 'Write letters' : 'Write letter');
+    if (titleEl) {
+      if (isView) titleEl.textContent = 'View letter';
+      else if (isStage4) titleEl.textContent = 'Write letters';
+      else if (isStage5) titleEl.textContent = letterComposerState.stage5LetterType === 'feedback' ? 'Write feedback letter' : 'Write satisfactory letter';
+      else titleEl.textContent = 'Write letter';
+    }
     if (subEl) {
       if (isView) {
-        subEl.textContent = 'Use View on each saved letter to read it in the preview panel.';
+        subEl.textContent = isStage4
+          ? 'Each recipient\'s saved letters are grouped below. Select a letter to read it in the preview.'
+          : (isStage5 ? 'Read the saved action plan letter in the preview panel.' : 'Use View on each saved letter to read it in the preview panel.');
       } else if (letterComposerState.saveTo === 'activity-files' || letterComposerState.saveTo === 'audit-activity-files') {
         subEl.textContent = 'Choose a template and recipients — use View to preview each letter. Saved copies appear in All and Files on this CPIN.';
+      } else if (letterComposerState.context === 'audit-stage5') {
+        const dh = letterComposerState.stage5Dh || 'this Duty Holder';
+        subEl.textContent = letterComposerState.stage5LetterType === 'feedback'
+          ? 'Send feedback to ' + dh + ' explaining why the action plan is inadequate and what a revised plan must address.'
+          : 'Confirm to ' + dh + ' that their action plan is adequate. Saving will attach the letter and close this thread.';
       } else if (letterComposerState.context === 'audit-stage4') {
         subEl.textContent = isView
-          ? 'Review each saved outcome letter. Confirm when the wording is correct, or edit to make changes.'
-          : 'Tick all recipients, preview each letter with View, then save letters in one step.';
+          ? 'Review each recipient\'s outcome letters grouped by Duty Holder.'
+          : 'Each recipient receives one letter per confirmed outcome. Preview any letter, then save all.';
       } else if (letterComposerState.context === 'audit-setup') {
         subEl.textContent = 'Choose a template and recipients — letters are saved here and sent when you start the audit.';
       } else if (letterComposerState.context === 'bizsupport') {
@@ -17579,15 +18314,30 @@
         subEl.textContent = 'Choose a template and recipients on the left — use View to preview each person\'s letter.';
       }
     }
-    if (layout) layout.classList.remove('is-view-only');
-    if (tplGroup) tplGroup.hidden = isView;
+    if (layout) {
+      layout.classList.remove('is-view-only');
+      layout.classList.toggle('is-package-mode', isStage4);
+    }
+    if (tplGroup) tplGroup.hidden = isView || isStage4 || isStage5;
     const recHelp = document.getElementById('letter-composer-recipient-help');
     const recLabel = recGroup && recGroup.querySelector('.modal-group-label');
-    if (recLabel) recLabel.textContent = isView ? 'Saved letters' : 'Recipients';
+    if (recLabel) {
+      recLabel.textContent = isStage5 ? 'Recipient' : (isStage4 ? 'Recipients & letters' : (isView ? 'Saved letters' : 'Recipients'));
+    }
     if (recHelp) {
-      recHelp.textContent = isView
-        ? 'Use View to read each saved letter in the preview panel.'
-        : 'Tick recipients to include when saving. Use View to read each person\'s letter in the preview.';
+      if (isStage5) {
+        recHelp.textContent = isView
+          ? 'Letter attached to the action plan thread for ' + (letterComposerState.stage5Dh || 'this Duty Holder') + '.'
+          : 'This letter will be sent to the Responsible Person linked to ' + (letterComposerState.stage5Dh || 'this Duty Holder') + '.';
+      } else if (isStage4) {
+        recHelp.textContent = isView
+          ? 'Letters are grouped by recipient. Each letter matches one outcome template.'
+          : 'Tick recipients to include. Expand each person to see which outcome letters they will receive.';
+      } else {
+        recHelp.textContent = isView
+          ? 'Use View to read each saved letter in the preview panel.'
+          : 'Tick recipients to include when saving. Use View to read each person\'s letter in the preview.';
+      }
     }
     if (editBtn) editBtn.hidden = isView;
     if (saveBtn) {
@@ -17595,14 +18345,21 @@
       if (!isView) {
         const toFiles = letterComposerState.saveTo === 'activity-files' || letterComposerState.saveTo === 'audit-activity-files';
         const toStage4 = letterComposerState.saveTo === 'audit-stage4-letters';
-        saveBtn.textContent = toStage4 ? 'Save letters' : (toFiles ? 'Save to files' : 'Save letters');
+        if (toStage4) {
+          const pkgs = getAuditStage4RecipientPackages().filter(function (p) {
+            return (letterComposerState.recipientIds || []).indexOf(p.recipientId) >= 0;
+          });
+          const n = pkgs.reduce(function (c, p) { return c + p.letters.length; }, 0);
+          saveBtn.textContent = 'Save ' + n + ' letter' + (n === 1 ? '' : 's');
+        } else if (isStage5) {
+          saveBtn.textContent = 'Save letter';
+        } else {
+          saveBtn.textContent = toFiles ? 'Save to files' : 'Save letters';
+        }
       }
     }
     if (confirmBtn) {
-      const outcomeId = letterComposerState.outcomeLetterId;
-      const showConfirm = isView && isStage4 && outcomeId && getAuditStage4SavedLetter(outcomeId) &&
-        !isAuditStage4LetterConfirmed(outcomeId) && !auditLettersSent;
-      confirmBtn.hidden = !showConfirm;
+      confirmBtn.hidden = true;
     }
     if (editLetterBtn) {
       editLetterBtn.hidden = !(isView && isStage4 && !auditLettersSent);
@@ -17646,7 +18403,29 @@
 
     const recEl = document.getElementById('letter-composer-recipients');
     if (recEl) {
-      if (isView) {
+      if (isStage4) {
+        if (!isView) {
+          const activeTask = getAuditStage4RequiredLetters().find(function (t) {
+            return t.id === letterComposerState.outcomeLetterId;
+          });
+          if (activeTask && (letterComposerState.recipientIds || []).indexOf(activeTask.recipientId) < 0) {
+            const firstIncluded = getAuditStage4RecipientPackages().find(function (p) {
+              return (letterComposerState.recipientIds || []).indexOf(p.recipientId) >= 0;
+            });
+            if (firstIncluded && firstIncluded.letters[0]) {
+              loadAuditStage4LetterSlot(firstIncluded.letters[0].id);
+            }
+          } else if (!letterComposerState.outcomeLetterId) {
+            const firstPkg = getAuditStage4RecipientPackages()[0];
+            if (firstPkg && firstPkg.letters[0]) {
+              loadAuditStage4LetterSlot(firstPkg.letters[0].id);
+            }
+          }
+        } else if (!letterComposerState.viewLetterId && saved.length) {
+          letterComposerState.viewLetterId = saved[0].id;
+        }
+        renderLetterComposerStage4Packages(recEl, isView);
+      } else if (isView) {
         if (!saved.length) {
           recEl.innerHTML = '<div class="letter-attachment-empty">No saved letters' + (isStage4 ? ' for this outcome' : (isAudit ? ' for this audit setup' : (isBs ? ' on this business support' : (isConcern ? ' on this safety concern' : ' on this CPIN')))) + '.</div>';
         } else {
@@ -17687,9 +18466,25 @@
     const addresseeEl = document.getElementById('letter-composer-addressee');
     const bodyEl = document.getElementById('letter-composer-body');
     const preview = document.getElementById('letter-composer-preview');
+    const contextEl = document.getElementById('letter-composer-preview-context');
+
+    if (isStage4 && contextEl) {
+      const label = getAuditStage4PreviewContextLabel(isView);
+      if (label) {
+        const parts = label.split(' · ');
+        contextEl.hidden = false;
+        contextEl.innerHTML = '<strong>' + escHtml(parts[0] || '') + '</strong>' +
+          (parts[1] ? ' · ' + escHtml(parts[1]) : '') +
+          (parts[2] ? ' · <em>' + escHtml(parts[2]) + '</em>' : '');
+      } else {
+        contextEl.hidden = true;
+      }
+    } else if (contextEl) {
+      contextEl.hidden = true;
+    }
 
     if (isView) {
-      if (!letterComposerState.viewLetterId && saved.length) {
+      if (!isStage4 && !letterComposerState.viewLetterId && saved.length) {
         letterComposerState.viewLetterId = saved[0].id;
       }
       const activeViewLetter = saved.find(function (l) { return l.id === letterComposerState.viewLetterId; }) || saved[0];
@@ -17848,39 +18643,46 @@
     const stamp = cpinLogTimestamp();
     const dateStr = new Date().toISOString().slice(0, 10);
     const newLetters = [];
+    let idx = 0;
 
-    slots.forEach(function (slot, idx) {
-      const rp = selected.find(function (r) { return getDhNameForRecipient(r) === slot.dh; });
-      if (!rp) return;
-      const slotDraft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[slot.id];
-      const templateId = (slotDraft && slotDraft.templateId) || getAuditOutcomeTemplateId(slot.key);
-      const tmpl = LETTER_TEMPLATES.find(function (t) { return t.id === templateId; });
-      if (!tmpl) return;
-      const o = auditStage4State.outcomes[slot.dh];
-      const ctx = buildAuditStage4LetterContext(slot.dh, slot.key, o ? o.failingKeys : []);
-      ctx.addressee = rp;
-      let bodyHtml;
-      if (letterComposerState.outcomeLetterId === slot.id && letterComposerState.customBody) {
-        bodyHtml = letterComposerState.customBody;
-      } else if (letterComposerState.slotDrafts && letterComposerState.slotDrafts[slot.id] && letterComposerState.slotDrafts[slot.id].customBody) {
-        bodyHtml = letterComposerState.slotDrafts[slot.id].customBody;
-      } else {
-        bodyHtml = tmpl.buildBody(ctx);
-      }
-      newLetters.push({
-        id: 'ltr-s4-' + slot.id + '-' + (stamp.ts + idx),
-        outcomeLetterId: slot.id,
-        dutyHolder: slot.dh,
-        outcomeKey: slot.key,
-        templateId: templateId,
-        templateLabel: tmpl.label,
-        recipientId: rp.id,
-        recipientName: rp.name,
-        recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || slot.dh,
-        fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.pdf',
-        body: bodyHtml,
-        at: stamp.at,
-        ts: stamp.ts + idx
+    selected.forEach(function (rp) {
+      const dhName = getDhNameForRecipient(rp);
+      const o = auditStage4State.outcomes[dhName];
+      if (!o) return;
+      (o.selected || []).forEach(function (key) {
+        const taskId = getAuditStage4LetterTaskId(dhName, key, rp.id);
+        const slotDraft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[taskId];
+        const templateId = (slotDraft && slotDraft.templateId) || getAuditOutcomeTemplateId(key);
+        const tmpl = LETTER_TEMPLATES.find(function (t) { return t.id === templateId; });
+        if (!tmpl) return;
+        const ctx = buildAuditStage4LetterContext(dhName, key, o.failingKeys || []);
+        ctx.addressee = rp;
+        let bodyHtml;
+        if (letterComposerState.outcomeLetterId === taskId && letterComposerState.customBody) {
+          bodyHtml = letterComposerState.customBody;
+        } else if (slotDraft && slotDraft.customBody) {
+          bodyHtml = slotDraft.customBody;
+        } else {
+          bodyHtml = tmpl.buildBody(ctx);
+        }
+        newLetters.push({
+          id: 'ltr-s4-' + taskId + '-' + (stamp.ts + idx),
+          letterTaskId: taskId,
+          outcomeLetterId: taskId,
+          outcomeSlotId: getAuditStage4LetterId(dhName, key),
+          dutyHolder: dhName,
+          outcomeKey: key,
+          templateId: templateId,
+          templateLabel: tmpl.label,
+          recipientId: rp.id,
+          recipientName: rp.name,
+          recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || dhName,
+          fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.pdf',
+          body: bodyHtml,
+          at: stamp.at,
+          ts: stamp.ts + idx
+        });
+        idx++;
       });
     });
 
@@ -17889,14 +18691,12 @@
       return;
     }
 
-    const savedIds = newLetters.map(function (l) { return l.outcomeLetterId; });
+    const savedIds = newLetters.map(function (l) { return l.letterTaskId; });
     auditStage4State.letters = getAuditStage4SavedLetters().filter(function (l) {
-      return savedIds.indexOf(l.outcomeLetterId) < 0;
+      return savedIds.indexOf(l.letterTaskId || l.outcomeLetterId) < 0;
     }).concat(newLetters);
     newLetters.forEach(function (l) {
-      auditStage4State.lettersDrafted[l.outcomeLetterId] = true;
-      if (!auditStage4State.lettersConfirmed) auditStage4State.lettersConfirmed = {};
-      auditStage4State.lettersConfirmed[l.outcomeLetterId] = true;
+      auditStage4State.lettersDrafted[l.letterTaskId] = true;
     });
     letterComposerState.slotDrafts = {};
     appendAuditLettersToActivity(newLetters, stamp);
@@ -17907,11 +18707,12 @@
   function saveLetterComposer() {
     if (!letterComposerState || letterComposerState.mode === 'view') return;
     const isStage4 = letterComposerUsesAuditStage4();
+    const isStage5 = letterComposerUsesAuditStage5();
     const isAudit = letterComposerUsesAuditSetup();
     const isBs = letterComposerUsesBizSupport();
     const isConcern = letterComposerUsesConcern();
     const cpin = getCpinById(activeCpinId);
-    if (!isAudit && !isBs && !isConcern && !isStage4 && !cpin) return;
+    if (!isAudit && !isBs && !isConcern && !isStage4 && !isStage5 && !cpin) return;
     const recipients = getLetterComposerRecipients();
     const recipientIds = letterComposerState.recipientIds || [];
     const selected = recipients.filter(function (rp) { return recipientIds.indexOf(rp.id) >= 0; });
@@ -17927,6 +18728,10 @@
     const saveTo = letterComposerState.saveTo || 'onsite';
     if (saveTo === 'audit-stage4-letters') {
       saveAuditStage4LettersBulk();
+      return;
+    }
+    if (saveTo === 'audit-stage5-letter') {
+      saveAuditStage5Letter();
       return;
     }
 
