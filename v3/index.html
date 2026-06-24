@@ -1706,6 +1706,33 @@
     margin: 4px 0 14px;
     line-height: 1.45;
   }
+  .audit-followup-carry-banner {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #c9b8e8;
+    border-radius: 8px;
+    background: #f6f2fc;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .audit-followup-carry-banner strong { color: var(--ink); }
+  .audit-followup-carry-banner a {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .audit-stage5-followup-intro {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #c9b8e8;
+    border-radius: 8px;
+    background: #f6f2fc;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .audit-stage5-followup-intro strong { color: var(--ink); }
   .audit-s4-confirmed-row {
     display: flex;
     align-items: center;
@@ -6484,6 +6511,22 @@
       <button class="btn primary" onclick="continueAudit('A-2026-0314')">Continue audit →</button>
     </div>
 
+    <div class="premises-audit-banner" style="margin-top:10px;border-color:#c9b8e8;background:#f6f2fc;">
+      <div>
+        <strong>Demo: audit ready to close</strong>
+        <div style="font-size:13px;color:var(--ink-2);margin-top:4px;">A-2026-0399  ·  Temple Quay House  ·  Stage 5 — outcomes sent, all threads settled</div>
+      </div>
+      <button class="btn primary" onclick="continueAudit('A-2026-0399')">Open demo →</button>
+    </div>
+
+    <div class="premises-audit-banner" style="margin-top:10px;border-color:#c9b8e8;background:#faf8ff;">
+      <div>
+        <strong>Demo: follow-up at Stage 5</strong>
+        <div style="font-size:13px;color:var(--ink-2);margin-top:4px;">F-2026-0398  ·  From A-2026-0399  ·  Check previous action plans</div>
+      </div>
+      <button class="btn" onclick="continueAudit('F-2026-0398')">Open demo →</button>
+    </div>
+
     <div class="tabs" id="premises-detail-tabs">
       <button type="button" class="active" data-premises-tab="overview" onclick="setPremisesDetailTab('overview')">Overview</button>
       <button type="button" data-premises-tab="processes" onclick="setPremisesDetailTab('processes')">Processes  ·  6</button>
@@ -6827,6 +6870,8 @@
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
             Choose audit type, then assess each article in a full-screen workspace. Saved findings appear below as a brief summary — scoring and outcomes are on the next step.
           </div>
+
+          <div class="audit-followup-carry-banner" id="audit-followup-carry-banner" hidden></div>
 
           <div id="audit-themed-add-wrap" class="audit-themed-add" hidden>
             <span style="font-size:13px;color:var(--ink-2);">Themed audit — add articles to assess:</span>
@@ -8471,6 +8516,10 @@
       <strong>Pre-filled from the source.</strong> Because this audit was started from a CPIN, the premises, the Duty Holders and the trigger are already filled in. Review them, confirm the appointment, then start. Audit type is chosen at Stage 2 (site visit).
     </div>
 
+    <div class="inset" id="setup-followup-notice" hidden style="border-color:#c9b8e8;background:#f6f2fc;">
+      <strong>Follow-up audit.</strong> <span id="setup-followup-notice-body">Linked to the previous audit. Notify Duty Holders, confirm the follow-up visit, then start. Unresolved failings are carried forward to the site visit.</span>
+    </div>
+
     <div class="process-grid" style="margin-top:16px;">
       <div class="stage-rail" id="setup-stage-rail">
         <div class="stage current">Setup pre-audit</div>
@@ -8516,7 +8565,7 @@
         <!-- Duty Holders -->
         <div class="setup-section">
           <h3>3. Duty Holders and Responsible Persons</h3>
-          <div class="help">Duty Holders are pre-suggested on load. Approve, reject or add organisations first — Responsible Persons are then suggested for each approved Duty Holder.</div>
+          <div class="help" id="setup-dh-rp-help">Duty Holders are pre-suggested on load. Approve, reject or add organisations first — Responsible Persons are then suggested for each approved Duty Holder.</div>
 
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3);font-weight:600;margin:8px 0 6px;">Duty Holders (organisations)</div>
           <div id="setup-dh-list"></div>
@@ -8530,8 +8579,8 @@
         </div>
 
         <!-- Appointment -->
-        <div class="setup-section">
-          <h3>4. Appointment</h3>
+        <div class="setup-section" id="setup-appt-section">
+          <h3 id="setup-appt-section-title">4. Appointment</h3>
           <div class="help">Pick a date and time. We will check the lead inspector's calendar and the premises' working hours.</div>
           <div class="field-row">
             <div class="field">
@@ -8560,8 +8609,8 @@
 
         <!-- Appointment letters -->
         <div class="setup-section">
-          <h3>5. Appointment letters</h3>
-          <div class="help">Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as PDF attachments and are sent when you start the audit.</div>
+          <h3 id="setup-appointment-letters-heading">5. Appointment letters</h3>
+          <div class="help" id="setup-appointment-letters-help">Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as PDF attachments and are sent when you start the audit.</div>
           <div class="letter-attachment-list" id="setup-appointment-letters-list"></div>
           <div class="letter-composer-actions" style="margin-top:10px;">
             <button class="btn primary" type="button" onclick="openAuditSetupLetterComposer()">Write letter</button>
@@ -8573,7 +8622,7 @@
         <!-- Final actions -->
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
           <button class="btn" type="button" onclick="saveAuditSetupDraft()">Save as draft</button>
-          <button class="btn primary" type="button" onclick="startAudit()">Start audit and send appointment letter →</button>
+          <button class="btn primary" type="button" id="setup-start-audit-btn" onclick="startAudit()">Start audit and send appointment letter →</button>
         </div>
       </div>
 
@@ -9262,7 +9311,7 @@
             </div>
           </button>
 
-          <button class="new-option" onclick="closeNewModal();">
+          <button class="new-option" onclick="closeNewModal();startFollowUpFromAudit(PROTOTYPE_AUDIT_ID);">
             <div class="icon">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="2.5" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7.5L8 10L12.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
@@ -9670,8 +9719,12 @@
     if (id !== 'cpin') cpinDetailLastId = null;
 
     let hash = id;
-    if (id === 'audit') hash = 'audit-stage-' + auditStage;
-    else if (id === 'cpin' && activeCpinId) hash = 'cpin/' + activeCpinId;
+    const auditStageRoute = id.match(/^audit-stage-([1-6])$/);
+    if (auditStageRoute) {
+      hash = id;
+    } else if (id === 'audit') {
+      hash = 'audit-stage-' + auditStage;
+    } else if (id === 'cpin' && activeCpinId) hash = 'cpin/' + activeCpinId;
     else if (id === 'concern' && typeof activeConcernId === 'function' && activeConcernId()) hash = 'concern/' + activeConcernId();
     else if (id === 'bizsupport' && typeof activeBizSupportId === 'function' && activeBizSupportId()) hash = 'bizsupport/' + activeBizSupportId();
 
@@ -9728,8 +9781,9 @@
 
     if (screen === 'audit' && stage) {
       ensureAuditContextsInit();
-      if (!auditContexts[activeAuditId]) applyAuditContext(PROTOTYPE_AUDIT_ID);
+      applyAuditContext(activeAuditId);
       auditStage = stage;
+      if (auditContexts[activeAuditId]) auditContexts[activeAuditId].stage = stage;
       render(screen);
       layoutAuditStageRail();
       applyAuditStageUI(stage);
@@ -9891,6 +9945,8 @@
 
   const AUDIT_ACTIVITY_KEY = 'audit-activity-log-v1';
   const PROTOTYPE_AUDIT_ID = 'A-2026-0314';
+  const DEMO_AUDIT_READY_ID = 'A-2026-0399';
+  const DEMO_FOLLOWUP_STAGE5_ID = 'F-2026-0398';
   const SETUP_DRAFT_KEY = 'audit-setup-draft-v1';
 
   const DEFAULT_AUDIT_ACTIVITY_LOG = {
@@ -10191,6 +10247,467 @@
     return setup;
   }
 
+  function isFollowUpAudit(setup) {
+    setup = setup || auditSetup;
+    return !!(setup && (setup.isFollowUp || setup.parentAuditId || setup.fromFollowUpAudit));
+  }
+
+  function getFollowUpParentAuditId(setup) {
+    setup = setup || auditSetup;
+    if (!setup) return null;
+    return setup.parentAuditId || setup.fromFollowUpAudit || null;
+  }
+
+  function collectUnresolvedFindingsFromParent(parentCtx) {
+    if (!parentCtx) return [];
+    const parentId = parentCtx.auditId;
+    const findings = parentCtx.findings || [];
+    return findings
+      .filter(function (f) { return !f.isNoFailure && (f.ragScore || 0) > 0; })
+      .map(function (f, i) {
+        const clone = JSON.parse(JSON.stringify(f));
+        clone.id = 'fu-' + String(parentId).replace(/[^a-z0-9]/gi, '') + '-' + (f.id || i) + '-' + Date.now();
+        clone.carriedFromParent = true;
+        clone.parentFindingId = f.id;
+        clone.parentAuditId = parentId;
+        return clone;
+      });
+  }
+
+  function copyParentSetupResponsiblePersons(parentSetup) {
+    const parentRps = (parentSetup && parentSetup.responsiblePersons) || [];
+    return parentRps
+      .filter(function (rp) { return rp.status === 'accepted'; })
+      .map(function (rp) {
+        return Object.assign({}, rp, { status: 'accepted' });
+      });
+  }
+
+  function seedFollowUpAuditFromParent(parentAuditId) {
+    ensureAuditContextsInit();
+    snapshotActiveAuditContext();
+    const parentCtx = auditContexts[parentAuditId];
+    if (!parentCtx) return null;
+
+    const followUpId = 'F-2026-' + String(9300 + Math.floor(Math.random() * 999));
+    const parentSetup = parentCtx.setup || defaultAuditSetup();
+    const carriedFindings = collectUnresolvedFindingsFromParent(parentCtx);
+    const expandedArticles = {};
+    carriedFindings.forEach(function (f) {
+      if (f.articleKey) expandedArticles[f.articleKey] = true;
+    });
+    const parentOutcomes = extractParentOutcomesFromCtx(parentCtx);
+
+    const setup = defaultAuditSetup();
+    setup.premises = parentCtx.premises || parentSetup.premises || 'Temple Quay House';
+    setup.premisesRef = parentSetup.premisesRef || 'PRM-0001847';
+    setup.trigger = 'Follow-up from ' + parentAuditId;
+    setup.spawnedAuditId = followUpId;
+    setup.isFollowUp = true;
+    setup.parentAuditId = parentAuditId;
+    setup.fromPremises = false;
+    setup.fromCpinClose = false;
+    setup.auditType = parentSetup.auditType || 'full';
+    setup.dutyHolders = (parentSetup.dutyHolders || defaultSetupDutyHolders()).map(function (dh) {
+      return Object.assign({}, dh, { status: dh.status === 'rejected' ? 'rejected' : 'accepted' });
+    });
+    setup.responsiblePersons = copyParentSetupResponsiblePersons(parentSetup);
+    setup.inspectors = (parentSetup.inspectors || []).slice();
+    setup.appointmentDate = '';
+    setup.appointmentTime = '';
+    setup.appointmentDuration = 'half';
+    setup.letterSent = false;
+    setup.letterSkipped = false;
+    setup.letters = [];
+
+    auditContexts[followUpId] = {
+      auditId: followUpId,
+      premises: setup.premises,
+      stage: 1,
+      findings: carriedFindings,
+      siteVisitTypeLocked: carriedFindings.length > 0,
+      themedArticles: (parentCtx.themedArticles || []).slice(),
+      expandedArticles: expandedArticles,
+      scoringDetailExpanded: {},
+      setup: setup,
+      lettersSent: false,
+      hmctsPlanSettled: false,
+      closed: false,
+      closedAt: null,
+      followUpAuditId: null,
+      parentAuditId: parentAuditId,
+      parentOutcomes: parentOutcomes,
+      activityLog: createEmptyActivityLog()
+    };
+
+    return followUpId;
+  }
+
+  function startFollowUpFromAudit(parentAuditId) {
+    const followUpId = seedFollowUpAuditFromParent(parentAuditId);
+    if (!followUpId) {
+      window.alert('Could not start follow-up — parent audit not found.');
+      return;
+    }
+    const carried = auditContexts[followUpId].findings.length;
+    auditContexts[followUpId].activityLog.notes.unshift({
+      id: 'n-followup-started-' + Date.now(),
+      text: 'Follow-up audit created from ' + parentAuditId + '. ' + carried + ' unresolved issue' + (carried === 1 ? '' : 's') + ' carried forward.',
+      stage: 1,
+      at: 'Today',
+      ts: Date.now()
+    });
+    applyAuditContext(followUpId);
+    auditStage = 1;
+    localStorage.removeItem(setupDraftKey(followUpId));
+    show('auditsetup');
+  }
+
+  function extractParentOutcomesFromCtx(ctx) {
+    const out = {};
+    if (!ctx) return out;
+    if (ctx.stage4State && ctx.stage4State.outcomes) {
+      Object.keys(ctx.stage4State.outcomes).forEach(function (dh) {
+        out[dh] = (ctx.stage4State.outcomes[dh].selected || []).slice();
+      });
+      return out;
+    }
+    return out;
+  }
+
+  function createSettledStage5Thread(dh, selected) {
+    const needsPlan = dhNeedsActionPlan(selected);
+    const thread = {
+      dh: dh,
+      outcomes: selected.slice(),
+      needsPlan: needsPlan,
+      status: needsPlan ? 'settled' : 'settled-at-4',
+      settled: true,
+      planReceivedAt: needsPlan ? '18 July 2026' : null,
+      dueDate: null,
+      revisionDueDate: null,
+      adequacyDecision: needsPlan ? 'adequate' : null,
+      letters: []
+    };
+    if (needsPlan) {
+      thread.letters = [{
+        id: 'ltr-s5-' + auditDhSlug(dh) + '-sat',
+        letterType: 'satisfactory',
+        templateId: 'audit-plan-satisfactory',
+        templateLabel: 'Satisfactory action plan letter',
+        recipientName: dh === 'HMCTS' ? 'Mark Stevens' : (dh === 'Equans' ? 'Sarah Patel' : 'Recipient'),
+        fileName: 'Letter-' + auditDhSlug(dh) + '-Satisfactory-Action-Plan-2026-07-18.pdf',
+        body: '',
+        at: '18 July 2026',
+        ts: Date.now()
+      }];
+    }
+    return thread;
+  }
+
+  function demoAuditStage4LetterTaskId(dh, outcomeKey, recipientId) {
+    return (dh + '-' + outcomeKey + '-' + recipientId).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  }
+
+  function demoAuditStage4LetterSlotId(dh, outcomeKey) {
+    return (dh + '-' + outcomeKey).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  }
+
+  function createDemoStage4Letters() {
+    const specs = [
+      { dh: 'HMCTS', key: 'en', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-en', label: 'Enforcement Notice', file: 'Letter-Mark-Stevens-Enforcement-Notice-2026-07-15.pdf' },
+      { dh: 'HMCTS', key: '28dap', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Mark-Stevens-28-day-Action-Plan-2026-07-15.pdf' },
+      { dh: 'Equans', key: '28dap', rid: 'rp2', rname: 'Sarah Patel', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Sarah-Patel-28-day-Action-Plan-2026-07-15.pdf' },
+      { dh: 'The Property Directorate', key: 'gss', rid: 'rp3', rname: 'Richard Byrne', tmpl: 'audit-outcome-gss', label: 'Generally Suitable & Sufficient', file: 'Letter-Richard-Byrne-Generally-Suitable-Sufficient-2026-07-15.pdf' }
+    ];
+    const letters = [];
+    const lettersConfirmed = {};
+    const lettersDrafted = {};
+    const baseTs = 1721039400000;
+    specs.forEach(function (s, i) {
+      const taskId = demoAuditStage4LetterTaskId(s.dh, s.key, s.rid);
+      const slotId = demoAuditStage4LetterSlotId(s.dh, s.key);
+      letters.push({
+        id: 'ltr-s4-demo-' + taskId,
+        letterTaskId: taskId,
+        outcomeLetterId: taskId,
+        outcomeSlotId: slotId,
+        dutyHolder: s.dh,
+        outcomeKey: s.key,
+        templateId: s.tmpl,
+        templateLabel: s.label,
+        recipientId: s.rid,
+        recipientName: s.rname,
+        recipientDh: s.dh,
+        fileName: s.file,
+        body: '',
+        at: '15 Jul 2026',
+        ts: baseTs + i
+      });
+      lettersConfirmed[taskId] = true;
+      lettersDrafted[taskId] = true;
+    });
+    return { letters: letters, lettersConfirmed: lettersConfirmed, lettersDrafted: lettersDrafted };
+  }
+
+  function createDemoStage4State() {
+    const letterData = createDemoStage4Letters();
+    return {
+      outcomes: {
+        'HMCTS': { selected: ['en', '28dap'], confirmed: true, failingKeys: ['A', 'D'], emmNotes: 'Discussed with line manager. EN and 28-DAP appropriate given Article A RAG 5.' },
+        'Equans': { selected: ['28dap'], confirmed: true, failingKeys: ['A', 'D'], emmNotes: 'Discussed with line manager. 28-DAP appropriate given severity.' },
+        'The Property Directorate': { selected: ['gss'], confirmed: true, failingKeys: [], emmNotes: 'No failings attributed — GSS appropriate.' }
+      },
+      outcomesLocked: true,
+      lettersDrafted: letterData.lettersDrafted,
+      lettersConfirmed: letterData.lettersConfirmed,
+      letters: letterData.letters
+    };
+  }
+
+  function createDemoAuditSetup() {
+    const setup = defaultAuditSetup();
+    setup.premises = 'Temple Quay House';
+    setup.premisesRef = 'PRM-0001847';
+    setup.trigger = 'Reactive (CPIN-2026-0418)';
+    setup.spawnedAuditId = DEMO_AUDIT_READY_ID;
+    setup.sourceCpinRef = 'CPIN-2026-0418';
+    setup.fromCpinClose = true;
+    setup.auditType = 'full';
+    setup.dutyHolders = defaultSetupDutyHolders().map(function (dh) {
+      return Object.assign({}, dh, { status: 'accepted' });
+    });
+    setup.responsiblePersons = [
+      { id: 'rp1', key: 'mstevens', ref: 'RP-0008821', name: 'Mark Stevens', role: 'Property Director', initials: 'MS', fromPremises: true, status: 'accepted', linkedDh: 'hmcts' },
+      { id: 'rp2', key: 'spatel', ref: 'RP-0009104', name: 'Sarah Patel', role: 'Maintenance Lead', initials: 'SP', fromPremises: true, status: 'accepted', linkedDh: 'equans' },
+      { id: 'rp3', key: 'rbyrne', ref: 'RP-0007742', name: 'Richard Byrne', role: 'Property Officer', initials: 'RB', fromPremises: true, status: 'accepted', linkedDh: 'propdir' }
+    ];
+    setup.inspectors = [];
+    setup.appointmentDate = '2026-07-14';
+    setup.appointmentTime = '09:00';
+    setup.appointmentDuration = 'half';
+    setup.letterSent = true;
+    setup.letterSkipped = false;
+    setup.letters = [
+      {
+        id: 'ltr-demo-setup-rp1',
+        templateId: 'cpin-onsite-appointment',
+        templateLabel: 'On-site evaluation appointment',
+        recipientId: 'rp1',
+        recipientName: 'Mark Stevens',
+        recipientDh: 'HMCTS',
+        fileName: 'Letter-Mark-Stevens-On-site-evaluation-appointment-2026-07-01.pdf',
+        body: '',
+        at: '1 Jul 2026',
+        ts: 1719840600000
+      },
+      {
+        id: 'ltr-demo-setup-rp2',
+        templateId: 'cpin-onsite-appointment',
+        templateLabel: 'On-site evaluation appointment',
+        recipientId: 'rp2',
+        recipientName: 'Sarah Patel',
+        recipientDh: 'Equans',
+        fileName: 'Letter-Sarah-Patel-On-site-evaluation-appointment-2026-07-01.pdf',
+        body: '',
+        at: '1 Jul 2026',
+        ts: 1719840601000
+      },
+      {
+        id: 'ltr-demo-setup-rp3',
+        templateId: 'cpin-onsite-appointment',
+        templateLabel: 'On-site evaluation appointment',
+        recipientId: 'rp3',
+        recipientName: 'Richard Byrne',
+        recipientDh: 'The Property Directorate',
+        fileName: 'Letter-Richard-Byrne-On-site-evaluation-appointment-2026-07-01.pdf',
+        body: '',
+        at: '1 Jul 2026',
+        ts: 1719840602000
+      }
+    ];
+    return setup;
+  }
+
+  function createDemoAuditActivityLog() {
+    return {
+      notes: [
+        { id: 'demo-setup-created', text: 'Audit record A-2026-0399 created from CPIN-2026-0418.', stage: 1, at: '1 Jul, 09:00', ts: 1719820800000 },
+        { id: 'demo-setup-letters', text: 'Appointment letters sent to Mark Stevens, Sarah Patel and Richard Byrne.', stage: 1, at: '1 Jul, 14:30', ts: 1719840600000 },
+        { id: 'demo-s2-site', text: 'Site visit completed — findings recorded for Articles A and D.', stage: 2, at: '14 Jul, 16:20', ts: 1720975200000 },
+        { id: 'demo-s3-emm', text: 'EMM discussion — EN and 28-DAP for HMCTS; 28-DAP for Equans; GSS for Property Directorate.', stage: 3, at: '14 Jul, 17:05', ts: 1720977900000 },
+        { id: 'demo-s4-outcomes', text: 'Outcomes confirmed for all Duty Holders.', stage: 4, at: '15 Jul, 10:00', ts: 1721034000000 },
+        { id: 'demo-s4-letters', text: 'Outcome letters finalised and sent — 4 letters (EN, 28-DAP, GSS).', stage: 4, at: '15 Jul, 11:30', ts: 1721039400000 },
+        { id: 'demo-s5-settled', text: 'All action plan threads settled — HMCTS and Equans satisfactory; Property Directorate GSS only.', stage: 5, at: '18 Jul, 14:00', ts: 1721305200000 }
+      ],
+      times: [
+        { id: 'demo-t1', activity: 'Pre-audit prep', minutes: 45, stage: 1, at: '1 Jul', ts: 1719837000000 },
+        { id: 'demo-t2', activity: 'Site visit', minutes: 240, stage: 2, at: '14 Jul', ts: 1720965600000 },
+        { id: 'demo-t3', activity: 'Desk-based investigation', minutes: 90, stage: 2, at: '14 Jul', ts: 1720972800000 },
+        { id: 'demo-t4', activity: 'Letter drafting', minutes: 75, stage: 4, at: '15 Jul', ts: 1721037600000 },
+        { id: 'demo-t5', activity: 'Desk-based investigation', minutes: 60, stage: 5, at: '18 Jul', ts: 1721301600000 }
+      ],
+      interim: [],
+      files: []
+    };
+  }
+
+  function createDemoStage5StateAllSettled() {
+    return {
+      threads: {
+        'HMCTS': createSettledStage5Thread('HMCTS', ['en', '28dap']),
+        'Equans': createSettledStage5Thread('Equans', ['28dap']),
+        'The Property Directorate': createSettledStage5Thread('The Property Directorate', ['gss'])
+      }
+    };
+  }
+
+  function seedFollowUpStage5Thread(dh, selected) {
+    const needsPlan = dhNeedsActionPlan(selected);
+    const thread = {
+      dh: dh,
+      outcomes: selected.slice(),
+      needsPlan: needsPlan,
+      followUp: true,
+      status: needsPlan ? 'fu-check-previous' : 'settled-at-4',
+      settled: !needsPlan,
+      planReceivedAt: null,
+      dueDate: null,
+      revisionDueDate: null,
+      adequacyDecision: null,
+      followUpSeverity: null,
+      letters: []
+    };
+    if (needsPlan && dh === 'Equans') {
+      thread.previousPlanDue = '19 August 2026';
+    }
+    return thread;
+  }
+
+  function createDemoFollowUpStage5State() {
+    const parentOutcomes = {
+      'HMCTS': ['en', '28dap'],
+      'Equans': ['28dap'],
+      'The Property Directorate': ['gss']
+    };
+    return {
+      threads: {
+        'HMCTS': seedFollowUpStage5Thread('HMCTS', parentOutcomes['HMCTS']),
+        'Equans': seedFollowUpStage5Thread('Equans', parentOutcomes['Equans']),
+        'The Property Directorate': seedFollowUpStage5Thread('The Property Directorate', parentOutcomes['The Property Directorate'])
+      }
+    };
+  }
+
+  function buildDemoAuditReadyContext() {
+    return {
+      auditId: DEMO_AUDIT_READY_ID,
+      premises: 'Temple Quay House',
+      stage: 5,
+      findings: JSON.parse(JSON.stringify(AUDIT_IN_PROGRESS_FINDINGS)),
+      siteVisitTypeLocked: true,
+      themedArticles: ['D'],
+      expandedArticles: { A: true, D: true },
+      scoringDetailExpanded: {},
+      setup: createDemoAuditSetup(),
+      lettersSent: true,
+      hmctsPlanSettled: true,
+      closed: false,
+      closedAt: null,
+      followUpAuditId: null,
+      parentAuditId: null,
+      parentOutcomes: null,
+      stage4State: createDemoStage4State(),
+      stage5State: createDemoStage5StateAllSettled(),
+      activityLog: createDemoAuditActivityLog()
+    };
+  }
+
+  function buildDemoFollowUpStage5Context() {
+    const parentCtx = buildDemoAuditReadyContext();
+    const parentSetup = parentCtx.setup;
+    const setup = defaultAuditSetup();
+    setup.premises = 'Temple Quay House';
+    setup.premisesRef = parentSetup.premisesRef || 'PRM-0001847';
+    setup.isFollowUp = true;
+    setup.parentAuditId = DEMO_AUDIT_READY_ID;
+    setup.trigger = 'Follow-up from ' + DEMO_AUDIT_READY_ID;
+    setup.spawnedAuditId = DEMO_FOLLOWUP_STAGE5_ID;
+    setup.auditType = 'full';
+    setup.dutyHolders = JSON.parse(JSON.stringify(parentSetup.dutyHolders));
+    setup.responsiblePersons = JSON.parse(JSON.stringify(parentSetup.responsiblePersons));
+    setup.inspectors = [];
+    setup.letterSent = true;
+    setup.letterSkipped = false;
+    setup.appointmentDate = '2026-08-12';
+    setup.appointmentTime = '10:00';
+    setup.appointmentDuration = 'half';
+    setup.letters = [
+      {
+        id: 'ltr-demo-fu-rp1',
+        templateId: 'audit-followup-notification',
+        templateLabel: 'Follow-up audit notification',
+        recipientId: 'rp1',
+        recipientName: 'Mark Stevens',
+        recipientDh: 'HMCTS',
+        fileName: 'Letter-Mark-Stevens-Follow-up-audit-notification-2026-08-01.pdf',
+        body: '',
+        at: '1 Aug 2026',
+        ts: 1722513600000
+      },
+      {
+        id: 'ltr-demo-fu-rp2',
+        templateId: 'audit-followup-notification',
+        templateLabel: 'Follow-up audit notification',
+        recipientId: 'rp2',
+        recipientName: 'Sarah Patel',
+        recipientDh: 'Equans',
+        fileName: 'Letter-Sarah-Patel-Follow-up-audit-notification-2026-08-01.pdf',
+        body: '',
+        at: '1 Aug 2026',
+        ts: 1722513601000
+      },
+      {
+        id: 'ltr-demo-fu-rp3',
+        templateId: 'audit-followup-notification',
+        templateLabel: 'Follow-up audit notification',
+        recipientId: 'rp3',
+        recipientName: 'Richard Byrne',
+        recipientDh: 'The Property Directorate',
+        fileName: 'Letter-Richard-Byrne-Follow-up-audit-notification-2026-08-01.pdf',
+        body: '',
+        at: '1 Aug 2026',
+        ts: 1722513602000
+      }
+    ];
+    const carried = collectUnresolvedFindingsFromParent(parentCtx);
+    return {
+      auditId: DEMO_FOLLOWUP_STAGE5_ID,
+      premises: 'Temple Quay House',
+      stage: 5,
+      findings: carried,
+      siteVisitTypeLocked: true,
+      themedArticles: ['D'],
+      expandedArticles: { A: true, D: true },
+      scoringDetailExpanded: {},
+      setup: setup,
+      lettersSent: true,
+      hmctsPlanSettled: false,
+      closed: false,
+      closedAt: null,
+      followUpAuditId: null,
+      parentAuditId: DEMO_AUDIT_READY_ID,
+      parentOutcomes: {
+        'HMCTS': ['en', '28dap'],
+        'Equans': ['28dap'],
+        'The Property Directorate': ['gss']
+      },
+      stage4State: createDemoStage4State(),
+      stage5State: createDemoFollowUpStage5State(),
+      activityLog: createEmptyActivityLog()
+    };
+  }
+
   function ensureAuditContextsInit() {
     if (!auditContexts[PROTOTYPE_AUDIT_ID]) {
       auditContexts[PROTOTYPE_AUDIT_ID] = {
@@ -10208,7 +10725,15 @@
         activityLog: JSON.parse(JSON.stringify(DEFAULT_AUDIT_ACTIVITY_LOG))
       };
     }
+    if (!auditContexts[DEMO_AUDIT_READY_ID]) {
+      auditContexts[DEMO_AUDIT_READY_ID] = buildDemoAuditReadyContext();
+    }
+    if (!auditContexts[DEMO_FOLLOWUP_STAGE5_ID]) {
+      auditContexts[DEMO_FOLLOWUP_STAGE5_ID] = buildDemoFollowUpStage5Context();
+    }
   }
+
+  let auditParentOutcomes = null;
 
   function snapshotActiveAuditContext() {
     if (!activeAuditId) return;
@@ -10242,6 +10767,10 @@
     ctx.closed = auditClosed;
     ctx.closedAt = auditClosedAt;
     ctx.followUpAuditId = auditFollowUpId;
+    ctx.parentAuditId = getFollowUpParentAuditId();
+    ctx.parentOutcomes = auditParentOutcomes;
+    ctx.stage4State = auditStage4State;
+    ctx.stage5State = auditStage5State;
     ctx.activityLog = auditActivityLog;
     ctx.premises = auditSetup.premises || ctx.premises;
   }
@@ -10263,6 +10792,9 @@
     auditClosed = !!ctx.closed;
     auditClosedAt = ctx.closedAt || null;
     auditFollowUpId = ctx.followUpAuditId || null;
+    auditParentOutcomes = ctx.parentOutcomes || null;
+    auditStage4State = ctx.stage4State || null;
+    auditStage5State = ctx.stage5State || null;
     auditActivityLog = ctx.activityLog || createEmptyActivityLog();
     auditFindingEditId = null;
     auditActiveArticleKey = null;
@@ -10276,28 +10808,107 @@
     const ctx = auditContexts[activeAuditId];
     const id = (ctx && ctx.auditId) || activeAuditId || PROTOTYPE_AUDIT_ID;
     const premises = (ctx && ctx.premises) || auditSetup.premises || 'Temple Quay House';
+    const followUp = isFollowUpAudit();
+    const parentId = getFollowUpParentAuditId();
+    const processLabel = followUp ? 'Follow-up audit' : 'Audit';
     const titleEl = document.getElementById('audit-page-title');
     const crumbsEl = document.getElementById('audit-page-crumbs');
     const setupTitleEl = document.getElementById('audit-setup-title');
     const setupMetaEl = document.getElementById('audit-setup-meta');
-    if (titleEl) titleEl.textContent = 'Audit  ·  ' + id;
+    if (titleEl) titleEl.textContent = processLabel + '  ·  ' + id;
     if (crumbsEl) {
-      crumbsEl.innerHTML = '<a onclick="show(\'premisesdetail\')">' + escHtml(premises) + '</a> /  Audit ' + escHtml(id);
+      let crumbs = '<a onclick="show(\'premisesdetail\')">' + escHtml(premises) + '</a> /  ' + escHtml(processLabel) + ' ' + escHtml(id);
+      if (followUp && parentId) {
+        crumbs += ' <span style="color:var(--ink-3);">· from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a></span>';
+      }
+      crumbsEl.innerHTML = crumbs;
     }
-    if (setupTitleEl) setupTitleEl.textContent = 'Audit  ·  ' + id;
+    if (setupTitleEl) setupTitleEl.textContent = processLabel + '  ·  ' + id;
     if (setupMetaEl) {
       const trigger = auditSetup.trigger || 'Started from premises';
-      const reactive = auditSetup.fromCpinClose || (trigger.indexOf('CPIN') >= 0);
-      setupMetaEl.innerHTML =
+      const reactive = !followUp && (auditSetup.fromCpinClose || (trigger.indexOf('CPIN') >= 0));
+      let meta =
         'Stage 1 of ' + AUDIT_STAGE_COUNT + '  ·  Setup pre-audit  · ' +
-        '<span class="pill blue" style="margin-left:6px;">' + (reactive ? 'Reactive' : 'Proactive') + '</span>' +
+        '<span class="pill ' + (followUp ? 'purple' : 'blue') + '" style="margin-left:6px;">' +
+        (followUp ? 'Follow-up' : (reactive ? 'Reactive' : 'Proactive')) + '</span>' +
         '<span style="color:var(--ink-3);margin-left:4px;">' + escHtml(trigger) + '</span>';
+      if (followUp && parentId) {
+        meta += ' <span style="color:var(--ink-3);">· Parent <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a></span>';
+      }
+      setupMetaEl.innerHTML = meta;
     }
     const def = document.getElementById('setup-default-notice');
-    if (def && auditSetup.fromPremises && !auditSetup.fromCpinClose) {
+    const fuNotice = document.getElementById('setup-followup-notice');
+    const fuBody = document.getElementById('setup-followup-notice-body');
+    if (followUp && fuNotice) {
+      if (def) def.hidden = true;
+      fuNotice.hidden = false;
+      const carried = (ctx && ctx.findings || auditFindings || []).filter(function (f) { return f.carriedFromParent; }).length;
+      if (fuBody) {
+        fuBody.innerHTML = 'Linked to audit <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>. ' +
+          (carried
+            ? '<strong>' + carried + ' unresolved issue' + (carried === 1 ? '' : 's') + '</strong> from that audit are carried forward — verify each on site and add any new issues you find.'
+            : 'No unresolved issues were carried forward. Assess the premises as normal and record any new failings.');
+      }
+    } else if (fuNotice) {
+      fuNotice.hidden = true;
+    }
+    if (def && auditSetup.fromPremises && !auditSetup.fromCpinClose && !followUp) {
       def.innerHTML = '<strong>Started from premises.</strong> Duty Holders are suggested from what ' + escHtml(premises) + ' already knows. Review details, confirm the appointment, then start. No assessment data is pre-filled — you begin with a clean site visit.';
       def.hidden = false;
     }
+    renderFollowUpCarryBanner();
+    updateAuditSetupFollowUpUi();
+  }
+
+  function updateAuditSetupFollowUpUi() {
+    const followUp = isFollowUpAudit();
+    const apptTitle = document.getElementById('setup-appt-section-title');
+    const letterHeading = document.getElementById('setup-appointment-letters-heading');
+    const letterHelp = document.getElementById('setup-appointment-letters-help');
+    const startBtn = document.getElementById('setup-start-audit-btn');
+    const parentId = getFollowUpParentAuditId();
+    if (apptTitle) apptTitle.textContent = followUp ? '4. Follow-up visit' : '4. Appointment';
+    if (letterHeading) letterHeading.textContent = followUp ? '5. Duty Holder notification' : '5. Appointment letters';
+    if (letterHelp) {
+      letterHelp.textContent = followUp
+        ? 'Notify Responsible Persons that a follow-up audit is being carried out to verify remedial action from audit ' +
+          (parentId || 'the previous audit') + '. Saved letters are sent when you start the follow-up.'
+        : 'Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as PDF attachments and are sent when you start the audit.';
+    }
+    const dhRpHelp = document.getElementById('setup-dh-rp-help');
+    if (dhRpHelp) {
+      dhRpHelp.textContent = followUp
+        ? 'Duty Holders and Responsible Persons carry over from the parent audit. You can add or remove contacts — no further suggestions from the premises catalogue.'
+        : 'Duty Holders are pre-suggested on load. Approve, reject or add organisations first — Responsible Persons are then suggested for each approved Duty Holder.';
+    }
+    if (startBtn) {
+      startBtn.textContent = followUp
+        ? 'Start follow-up audit and send notification →'
+        : 'Start audit and send appointment letter →';
+    }
+  }
+
+  function renderFollowUpCarryBanner() {
+    const el = document.getElementById('audit-followup-carry-banner');
+    if (!el) return;
+    if (!isFollowUpAudit() || auditStage !== 2) {
+      el.hidden = true;
+      return;
+    }
+    const parentId = getFollowUpParentAuditId();
+    const carried = auditFindings.filter(function (f) { return f.carriedFromParent; });
+    if (!carried.length) {
+      el.hidden = true;
+      return;
+    }
+    const articleSet = {};
+    carried.forEach(function (f) { if (f.articleKey) articleSet[f.articleKey] = true; });
+    const articles = Object.keys(articleSet).sort().join(', ');
+    el.innerHTML = '<strong>' + carried.length + ' unresolved issue' + (carried.length === 1 ? '' : 's') + ' carried from ' +
+      '<a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>.</strong> ' +
+      'Articles ' + escHtml(articles) + ' — verify each on site. Update scores if remedied, or add new findings as you explore.';
+    el.hidden = false;
   }
 
   function startNewAuditFromPremises(premisesName) {
@@ -10327,10 +10938,27 @@
     snapshotActiveAuditContext();
     ensureAuditContextsInit();
     const id = auditId || PROTOTYPE_AUDIT_ID;
+    if (!auditContexts[id]) {
+      window.alert('Audit not found.');
+      return;
+    }
     applyAuditContext(id);
-    const stage = auditContexts[id].stage || 2;
+    const ctx = auditContexts[id];
+    const stage = Math.min(Math.max(1, parseInt(ctx.stage, 10) || 2), AUDIT_STAGE_COUNT);
+    ctx.stage = stage;
+
+    if (stage === 1) {
+      show('auditsetup');
+      return;
+    }
+
     auditStage = stage;
-    window.location.hash = 'audit-stage-' + stage;
+    const hash = 'audit-stage-' + stage;
+    if (window.location.hash === '#' + hash) {
+      renderFromHash();
+    } else {
+      window.location.hash = hash;
+    }
   }
 
   function startAudit() {
@@ -10364,10 +10992,12 @@
     if (letters.length && !auditSetup.letterSkipped) {
       appendAuditLettersToActivity(letters, stamp, { skipIfExists: true });
     }
-    if (!auditActivityLog.notes.some(function (n) { return n.id === 'n-audit-started'; })) {
+    if (!auditActivityLog.notes.some(function (n) { return n.id === (isFollowUpAudit() ? 'n-followup-started' : 'n-audit-started'); })) {
       auditActivityLog.notes.unshift({
-        id: 'n-audit-started',
-        text: 'Audit started — appointment confirmed and letters sent.',
+        id: isFollowUpAudit() ? 'n-followup-started' : 'n-audit-started',
+        text: isFollowUpAudit()
+          ? 'Follow-up audit started — Duty Holders notified and visit confirmed.'
+          : 'Audit started — appointment confirmed and letters sent.',
         stage: 1,
         at: stamp.at,
         ts: stamp.ts
@@ -10435,6 +11065,8 @@
 
   const PROCESSES_LIST = [
     { id: 'A-2026-0314', type: 'audit', premises: 'Temple Quay House', score: 47, scoreTrend: 'up', scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 2 of 5  ·  Site visit', owner: 'Phil Gower', ownerInitials: 'PG', age: '8 days', mine: true, patch: true, route: 'audit' },
+    { id: 'A-2026-0399', type: 'audit', premises: 'Temple Quay House', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Outcomes sent  ·  Ready to close', owner: 'Phil Gower', ownerInitials: 'PG', age: '9 days', mine: true, patch: true, route: 'audit', demoClose: true },
+    { id: 'F-2026-0398', type: 'follow-up', premises: 'Temple Quay House', score: 44, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Action plans', owner: 'Phil Gower', ownerInitials: 'PG', age: '2 days', mine: true, patch: true, route: 'audit' },
     { id: 'F-2026-0142', type: 'follow-up', premises: 'HMP Lewes', score: 42, scoreTrend: 'down', scoreClass: 'score-high', status: 'awaiting-action-plan', statusText: 'Awaiting action plan', owner: 'Phil Gower', ownerInitials: 'PG', age: '12 days', mine: true, patch: true, prison: true },
     { id: 'A-2026-0301', type: 'audit', premises: 'HMP Maidstone', score: 38, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 4 of 5  ·  Outcomes', owner: 'Steve France', ownerInitials: 'SF', age: '23 days', mine: false, patch: true, prison: true },
     { id: 'C-2026-0089', type: 'consultation', premises: 'Charing Cross House refurb', score: 36, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Reviewing  ·  <strong style="color:var(--amber);">SLA: 5 days</strong>', owner: 'Phil Gower', ownerInitials: 'PG', age: '10 days', mine: true, patch: true, hasSla: true },
@@ -10643,7 +11275,9 @@
     const scoreHtml = p.score == null
       ? '<div class="proc-score">—</div>'
       : `<div class="proc-score ${p.scoreClass || ''}">${p.score}${trend}</div>`;
-    const click = p.route ? `onclick="show('${p.route}')"` : '';
+    const click = (p.type === 'audit' || p.type === 'follow-up')
+      ? `onclick="continueAudit('${p.id}')"`
+      : (p.route ? `onclick="show('${p.route}')"` : '');
     return `<div class="proc-row" ${click}>
       <div class="proc-line-primary">
         <div class="ptype"><span class="pill ${meta.pill}">${meta.label}</span></div>
@@ -10737,7 +11371,7 @@
   }
 
   const PREMISES_TQ_PROCESSES = [
-    { pill: 'blue', pillLabel: 'Audit', title: 'A-2026-0314', sub: 'Reactive  ·  Stage 2 — Site visit  ·  Phil Gower', when: 'Jun 2026', route: 'audit-stage-2' },
+    { pill: 'blue', pillLabel: 'Audit', title: 'A-2026-0314', sub: 'Reactive  ·  Stage 2 — Site visit  ·  Phil Gower', when: 'Jun 2026', route: 'audit:A-2026-0314' },
     { pill: 'red', pillLabel: 'CPIN', title: 'CPIN-2026-0417', sub: 'Amber  ·  Electrical fault — closed, audit spawned', when: '12 Jun 2026', route: 'cpin/cpin-0418-tq' },
     { pill: 'grey', pillLabel: 'Support', title: 'BS-2026-0088', sub: 'Fire door training discussion', when: 'May 2026', route: 'bizsupport/bs-tq-closed' },
     { pill: 'grey', pillLabel: 'Concern', title: 'SC-2026-0012', sub: 'Corridor storage — resolved', when: 'Mar 2026', route: null },
@@ -10784,7 +11418,14 @@
     const el = document.getElementById(elId);
     if (!el) return;
     el.innerHTML = items.map(function (item) {
-      const click = item.route ? ' onclick="show(\'' + item.route + '\')"' : '';
+      let click = '';
+      if (item.route) {
+        if (item.route.indexOf('audit:') === 0) {
+          click = ' onclick="continueAudit(\'' + escHtml(item.route.slice(6)) + '\')"';
+        } else {
+          click = ' onclick="show(\'' + item.route + '\')"';
+        }
+      }
       return '<div class="premises-detail-row"' + click + '>' +
         '<div class="when">' + escHtml(item.when) + '</div>' +
         '<div><div class="title"><span class="pill ' + item.pill + '" style="margin-right:8px;font-size:10px;">' + escHtml(item.pillLabel) + '</span>' + escHtml(item.title) + '</div>' +
@@ -11398,12 +12039,14 @@
 
   function renderDashboardProcessRow(p) {
     const meta = PROCESS_TYPE_PILLS[p.type] || { label: p.type, pill: 'grey' };
-    const route = getDashboardProcessRoute(p);
     const label = p.type === 'consultation' ? 'Consultation' : meta.label;
     const premises = p.type === 'audit'
       ? '<strong>' + escHtml(p.premises) + '</strong>'
       : escHtml(p.premises);
-    return '<tr onclick="show(\'' + escHtml(route) + '\')">' +
+    const openFn = (p.type === 'audit' || p.type === 'follow-up')
+      ? "continueAudit('" + escHtml(p.id) + "')"
+      : "show('" + escHtml(getDashboardProcessRoute(p)) + "')";
+    return '<tr onclick="' + openFn + '">' +
       '<td><span class="pill ' + meta.pill + '">' + escHtml(label) + '</span></td>' +
       '<td>' + premises + '</td>' +
       '<td>' + escHtml(formatDashboardProcessStatus(p)) + '</td>' +
@@ -13100,6 +13743,11 @@
     if (thread.status === 'inadequate-pending-letter') return 'Marked inadequate';
     if (thread.status === 'awaiting-revision') return 'Inadequate';
     if (thread.status === 'awaiting') return 'Awaiting plan';
+    if (thread.status === 'fu-check-previous') return 'Check previous plan';
+    if (thread.status === 'fu-progress-ok') return 'Extension granted';
+    if (thread.status === 'fu-enforcement-pending') return 'Enforcement';
+    if (thread.status === 'fu-evidence-low') return 'Evidence accepted';
+    if (thread.status === 'fu-verify-site') return 'Verify on site';
     return thread.status;
   }
 
@@ -13169,10 +13817,16 @@
       auditStage5State = { threads: {} };
     }
     const holders = Object.keys(auditStage4State.outcomes);
+    const followUp = isFollowUpAudit();
+    const parentOut = auditParentOutcomes || {};
     holders.forEach(function (dh) {
       const selected = auditStage4State.outcomes[dh].selected || [];
       if (!auditStage5State.threads[dh]) {
-        auditStage5State.threads[dh] = seedAuditStage5Thread(dh, selected);
+        if (followUp) {
+          auditStage5State.threads[dh] = seedFollowUpStage5Thread(dh, parentOut[dh] || selected);
+        } else {
+          auditStage5State.threads[dh] = seedAuditStage5Thread(dh, selected);
+        }
       } else {
         const t = auditStage5State.threads[dh];
         t.outcomes = selected.slice();
@@ -13220,6 +13874,20 @@
     }
     if (thread.status === 'settled') {
       return '<span class="done">✓ Received</span> → <span class="done">✓ Marked adequate</span> → <span class="done">✓ Complete</span>';
+    }
+    if (thread.followUp) {
+      if (thread.status === 'fu-check-previous') {
+        return '<span class="current">Check previous plan</span> → <span>Decision</span> → <span>Letter</span>';
+      }
+      if (thread.status === 'fu-progress-ok') {
+        return '<span class="done">✓ Extension granted</span> → <span class="current">Monitor progress</span>';
+      }
+      if (thread.status === 'fu-enforcement-pending') {
+        return '<span class="done">✓ Not cooperating</span> → <span class="current">Issue enforcement</span>';
+      }
+      if (thread.status === 'fu-evidence-low' || thread.status === 'fu-verify-site') {
+        return '<span class="done">✓ Plan actioned</span> → <span class="current">Close thread</span>';
+      }
     }
     return '';
   }
@@ -13284,6 +13952,20 @@
 
     if (!thread.needsPlan) {
       h += '<div style="font-size:12px;color:var(--ink-3);">No follow-up required. Closed at Stage 4.</div>';
+    } else if (thread.followUp && thread.status === 'fu-check-previous') {
+      const parentId = getFollowUpParentAuditId();
+      h += '<div style="font-size:12px;color:var(--ink-2);">Previous audit' +
+        (parentId ? ' (<a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>)' : '') +
+        ' required an action plan. Check whether it was actioned in full, only in part, or not at all.</div>';
+    } else if (thread.followUp && thread.status === 'fu-progress-ok') {
+      h += '<div style="font-size:12px;color:var(--ink-2);">Duty Holder is making progress but work is not complete' +
+        (thread.extensionUntil ? ' — extended to ' + escHtml(thread.extensionUntil) : '') + '. Log interim activity and monitor.</div>';
+    } else if (thread.followUp && thread.status === 'fu-enforcement-pending') {
+      h += '<div class="plan-thread-prompt is-inadequate"><strong>Not making progress or not cooperating.</strong> Issue an Enforcement Notice and send the letter.</div>';
+    } else if (thread.followUp && thread.status === 'fu-evidence-low') {
+      h += '<div class="plan-thread-prompt is-adequate"><strong>Plan actioned with sufficient evidence.</strong> Low severity — send a satisfactory letter and revisit scoring.</div>';
+    } else if (thread.followUp && thread.status === 'fu-verify-site') {
+      h += '<div class="plan-thread-prompt is-awaiting-revision"><strong>Plan actioned but in-person verification required.</strong> High severity — schedule a verification visit and set a reminder.</div>';
     } else if (thread.status === 'awaiting') {
       h += '<div style="font-size:12px;color:var(--ink-2);">28 days from letter sent' +
         (thread.dueDate ? ': due ' + escHtml(thread.dueDate) : '') + '. Record when the action plan is received.</div>';
@@ -13334,6 +14016,36 @@
       h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'feedback\')">Write feedback letter</button>';
       h += '</div>';
     }
+    if (thread.followUp && thread.needsPlan && thread.status === 'fu-check-previous') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="markFollowUpPlanActionedLow(\'' + dhSafe + '\')">Actioned with evidence (low severity)</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpPlanActionedHigh(\'' + dhSafe + '\')">Actioned — verify on site (high)</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpMakingProgress(\'' + dhSafe + '\')">Making progress — extend</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpNotCooperating(\'' + dhSafe + '\')">Not actioned / not cooperating</button>';
+      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">New action plan received</button>';
+      h += '</div>';
+    }
+    if (thread.followUp && thread.status === 'fu-progress-ok') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record revised plan</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpPlanActionedLow(\'' + dhSafe + '\')">Now complete — close thread</button>';
+      h += '</div>';
+    }
+    if (thread.followUp && thread.status === 'fu-enforcement-pending') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'enforcement\')">Write enforcement notice</button>';
+      h += '</div>';
+    }
+    if (thread.followUp && thread.status === 'fu-evidence-low') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'satisfactory\')">Write satisfactory letter</button>';
+      h += '</div>';
+    }
+    if (thread.followUp && thread.status === 'fu-verify-site') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="markFollowUpVerificationScheduled(\'' + dhSafe + '\')">Verification visit scheduled</button>';
+      h += '</div>';
+    }
     h += '</div>';
     return h;
   }
@@ -13362,6 +14074,18 @@
     const pct = threads.length ? Math.round((settledCount / threads.length) * 100) : 0;
     const openCount = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).length;
 
+    if (isFollowUpAudit()) {
+      const parentId = getFollowUpParentAuditId();
+      html += '<div class="audit-stage5-followup-intro">';
+      html += '<strong>Follow-up audit — action plan and enforcement.</strong> ';
+      html += 'This stage differs from a first audit: you are checking whether previous action plans were actioned, ';
+      html += 'whether a new plan is adequate, and whether enforcement is needed if progress has stalled. ';
+      if (parentId) {
+        html += 'Carried forward from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>.';
+      }
+      html += '</div>';
+    }
+
     html += '<div class="setup-section">';
     html += '<h3>Threads from outcomes</h3>';
     html += '<div class="help">Derived from Stage 4 outcomes. Each 28-DAP or EN outcome opens a parallel thread until the plan is received, reviewed and settled.</div>';
@@ -13380,7 +14104,9 @@
 
     html += '<div class="setup-section">';
     html += '<h3>Action plan threads</h3>';
-    html += '<div class="help">Work each open thread in parallel. Mark plans adequate or inadequate, write the required letter, then move on when every thread is settled.</div>';
+    html += '<div class="help">' + (isFollowUpAudit()
+      ? 'Check whether previous action plans were actioned. Work each thread — evidence review, extension, enforcement, or new plan as needed.'
+      : 'Work each open thread in parallel. Mark plans adequate or inadequate, write the required letter, then move on when every thread is settled.') + '</div>';
 
     html += '<div class="audit-s5-threads-progress">';
     if (settledCount === threads.length) {
@@ -13429,14 +14155,25 @@
         h += '</div>';
       }
     } else if (allSettled) {
-      h += '<div class="help">All Duty Holder threads are settled. Close this audit and start a follow-up audit to verify remedial action on site.</div>';
-      h += '<div class="plan-thread-outcome is-complete" style="margin-top:10px;">';
-      h += '<span class="pill green">Ready to close</span>';
-      h += '<span class="outcome-copy"><strong>All recipients complete.</strong> Closing finalises time and scoring. A linked follow-up audit can be created for Duty Holders who need in-person verification.</span>';
-      h += '</div>';
-      h += '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="closeAuditAndStartFollowUp()">Close audit and start follow-up →</button>';
-      h += '</div>';
+      if (isFollowUpAudit()) {
+        h += '<div class="help">All follow-up threads are settled. Close this follow-up audit to finalise time and scoring.</div>';
+        h += '<div class="plan-thread-outcome is-complete" style="margin-top:10px;">';
+        h += '<span class="pill green">Ready to close</span>';
+        h += '<span class="outcome-copy"><strong>All Duty Holder threads complete.</strong> Closing finalises this follow-up audit.</span>';
+        h += '</div>';
+        h += '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">';
+        h += '<button class="btn primary" type="button" onclick="closeFollowUpAudit()">Close follow-up audit →</button>';
+        h += '</div>';
+      } else {
+        h += '<div class="help">All Duty Holder threads are settled. Close this audit and start a follow-up audit to verify remedial action on site.</div>';
+        h += '<div class="plan-thread-outcome is-complete" style="margin-top:10px;">';
+        h += '<span class="pill green">Ready to close</span>';
+        h += '<span class="outcome-copy"><strong>All recipients complete.</strong> Closing finalises time and scoring. A linked follow-up audit can be created for Duty Holders who need in-person verification.</span>';
+        h += '</div>';
+        h += '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">';
+        h += '<button class="btn primary" type="button" onclick="closeAuditAndStartFollowUp()">Close audit and start follow-up →</button>';
+        h += '</div>';
+      }
     } else {
       const openDh = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).map(function (t) { return t.dh; });
       h += '<div class="help">Close is available once every Duty Holder thread is settled.</div>';
@@ -13455,14 +14192,15 @@
     if (!allAuditStage5ThreadsSettled() || auditClosed) return;
     snapshotActiveAuditContext();
 
-    const premises = auditSetup.premises || 'Temple Quay House';
     const parentAuditId = activeAuditId;
     const stamp = cpinLogTimestamp();
     const closedAt = stamp.at;
 
     auditClosed = true;
     auditClosedAt = closedAt;
-    const followUpId = 'A-2026-' + String(9300 + Math.floor(Math.random() * 999));
+
+    const followUpId = seedFollowUpAuditFromParent(parentAuditId);
+    if (!followUpId) return;
     auditFollowUpId = followUpId;
 
     auditActivityLog.notes.unshift({
@@ -13474,32 +14212,10 @@
     });
     touchAuditActivity();
 
-    const setup = seedAuditSetupFromPremises(premises, followUpId);
-    setup.trigger = 'Follow-up audit from ' + parentAuditId;
-    setup.fromFollowUpAudit = parentAuditId;
-
     auditContexts[parentAuditId].closed = true;
     auditContexts[parentAuditId].closedAt = closedAt;
     auditContexts[parentAuditId].followUpAuditId = followUpId;
     auditContexts[parentAuditId].stage = 5;
-
-    auditContexts[followUpId] = {
-      auditId: followUpId,
-      premises: premises,
-      stage: 1,
-      findings: [],
-      siteVisitTypeLocked: false,
-      themedArticles: [],
-      expandedArticles: {},
-      scoringDetailExpanded: {},
-      setup: setup,
-      lettersSent: false,
-      hmctsPlanSettled: false,
-      closed: false,
-      closedAt: null,
-      followUpAuditId: null,
-      activityLog: createEmptyActivityLog()
-    };
 
     applyAuditContext(followUpId);
     auditStage = 1;
@@ -13507,13 +14223,83 @@
     show('auditsetup');
   }
 
+  function closeFollowUpAudit() {
+    if (!isFollowUpAudit() || !allAuditStage5ThreadsSettled() || auditClosed) return;
+    snapshotActiveAuditContext();
+    const stamp = cpinLogTimestamp();
+    auditClosed = true;
+    auditClosedAt = stamp.at;
+    auditActivityLog.notes.unshift({
+      id: 'n-followup-closed-' + stamp.ts,
+      text: 'Follow-up audit closed. All Duty Holder threads settled.',
+      stage: 5,
+      at: stamp.at,
+      ts: stamp.ts
+    });
+    touchAuditActivity();
+    snapshotActiveAuditContext();
+    renderAuditStage5();
+  }
+
   function recordAuditPlanReceived(dh) {
     if (!auditStage5State || !auditStage5State.threads[dh]) return;
     const t = auditStage5State.threads[dh];
-    if (!t.needsPlan || (t.status !== 'awaiting' && t.status !== 'awaiting-revision')) return;
+    if (!t.needsPlan || (t.status !== 'awaiting' && t.status !== 'awaiting-revision' && t.status !== 'fu-check-previous' && t.status !== 'fu-progress-ok')) return;
     t.status = 'reviewing';
     t.planReceivedAt = '17 Jun 2026';
     t.adequacyDecision = null;
+    renderAuditStage5();
+  }
+
+  function markFollowUpPlanActionedLow(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.followUp) return;
+    if (t.status === 'fu-check-previous' || t.status === 'fu-progress-ok') {
+      t.status = 'fu-evidence-low';
+      t.followUpSeverity = 'low';
+      renderAuditStage5();
+    }
+  }
+
+  function markFollowUpPlanActionedHigh(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.followUp || t.status !== 'fu-check-previous') return;
+    t.status = 'fu-verify-site';
+    t.followUpSeverity = 'high';
+    renderAuditStage5();
+  }
+
+  function markFollowUpMakingProgress(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.followUp || t.status !== 'fu-check-previous') return;
+    t.status = 'fu-progress-ok';
+    t.extensionUntil = '30 September 2026';
+    renderAuditStage5();
+  }
+
+  function markFollowUpNotCooperating(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.followUp || t.status !== 'fu-check-previous') return;
+    t.status = 'fu-enforcement-pending';
+    renderAuditStage5();
+  }
+
+  function markFollowUpVerificationScheduled(dhOrSlug) {
+    const dh = findAuditStage5Dh(dhOrSlug);
+    if (!dh || !auditStage5State.threads[dh]) return;
+    const t = auditStage5State.threads[dh];
+    if (!t.followUp || t.status !== 'fu-verify-site') return;
+    t.status = 'settled';
+    t.settled = true;
+    t.verificationScheduled = '12 August 2026';
     renderAuditStage5();
   }
 
@@ -13557,7 +14343,8 @@
       window.alert('Approve at least one Responsible Person linked to ' + dh + ' before writing letters.');
       return;
     }
-    const templateId = letterType === 'feedback' ? 'audit-plan-feedback' : 'audit-plan-satisfactory';
+    const templateId = letterType === 'enforcement' ? 'audit-outcome-en'
+      : letterType === 'feedback' ? 'audit-plan-feedback' : 'audit-plan-satisfactory';
     openLetterComposer({
       context: 'audit-stage5',
       saveTo: 'audit-stage5-letter',
@@ -13635,13 +14422,16 @@
     if (!t.letters) t.letters = [];
     t.letters.push(letter);
 
-    if (letterType === 'satisfactory' && t.status === 'adequate-pending-letter') {
+    if (letterType === 'satisfactory' && (t.status === 'adequate-pending-letter' || t.status === 'fu-evidence-low')) {
       t.status = 'settled';
       t.settled = true;
     } else if (letterType === 'feedback' && t.status === 'inadequate-pending-letter') {
       t.status = 'awaiting-revision';
       t.revisionDueDate = t.revisionDueDate || t.dueDate || '19 August 2026';
       t.adequacyDecision = null;
+    } else if (letterType === 'enforcement' && t.status === 'fu-enforcement-pending') {
+      t.status = 'settled';
+      t.settled = true;
     }
 
     appendAuditLettersToActivity([letter], stamp);
@@ -13939,6 +14729,7 @@
   }
 
   function renderAuditFindings() {
+    renderFollowUpCarryBanner();
     renderAuditArticleSections();
     renderAuditThemedAddWrap();
     if (auditStage === 3) renderAuditScoringSummary();
@@ -15763,7 +16554,7 @@
       return {
         title: p.id,
         subtitle: meta.label + ' · ' + p.premises + ' · ' + plainStatus,
-        route: p.route || 'processes',
+        route: (p.type === 'audit' || p.type === 'follow-up') ? ('audit:' + p.id) : (p.route || 'processes'),
         pill: meta.pill,
         pillLabel: meta.label,
         keywords: (p.id + ' ' + p.premises + ' ' + p.type + ' ' + plainStatus + ' ' + p.owner).toLowerCase()
@@ -15861,6 +16652,10 @@
     closeGlobalSearch();
     const input = document.getElementById('global-search-input');
     if (input) input.value = '';
+    if (route && route.indexOf('audit:') === 0) {
+      continueAudit(route.slice(6));
+      return;
+    }
     show(route);
   }
 
@@ -17542,10 +18337,29 @@
       }
     },
     {
+      id: 'audit-followup-notification',
+      label: 'Follow-up audit notification',
+      hint: 'Notify Duty Holders a follow-up audit is scheduled',
+      contexts: ['audit-followup-setup'],
+      buildBody: function (ctx) {
+        const appt = ctx.appointment;
+        return (
+          '<p>Following the fire safety audit at <span class="conditional">' + escHtml(ctx.premises) + '</span>' +
+          (ctx.parentAuditId ? ' (reference <span class="conditional">' + escHtml(ctx.parentAuditId) + '</span>)' : '') +
+          ', CPFSI is scheduling a <strong>follow-up audit</strong> to verify that remedial action has been taken in respect of deficiencies identified previously.</p>' +
+          '<p>We intend to visit on <span class="conditional">' + escHtml(appt.long) + '</span>. We anticipate the visit will take ' +
+          escHtml(appt.duration) + '.</p>' +
+          '<p>Please confirm that a representative will be available to meet our inspector' +
+          (ctx.assignee ? ' (<span class="conditional">' + escHtml(ctx.assignee) + '</span>)' : '') +
+          ', and that access can be provided to all relevant areas and evidence of remedial work completed.</p>'
+        );
+      }
+    },
+    {
       id: 'audit-outcome-en',
       label: 'Enforcement Notice',
       hint: 'Serious deficiencies — formal enforcement',
-      contexts: ['audit-outcome'],
+      contexts: ['audit-outcome', 'audit-stage5'],
       buildBody: function (ctx) {
         const fText = ctx.failingArticles ? escHtml(ctx.failingArticles) : '';
         return '<p>Following the fire safety audit conducted at <span class="conditional">' + escHtml(ctx.premises) + '</span> on ' +
@@ -18034,13 +18848,18 @@
     if (context === 'audit-stage5' && letterComposerState) {
       return letterComposerState.templateId || 'audit-plan-satisfactory';
     }
+    if ((context === 'audit-setup' || context === 'audit-activity') && isFollowUpAudit()) {
+      return 'audit-followup-notification';
+    }
     if (context === 'audit-setup' || context === 'audit-activity') return 'cpin-onsite-appointment';
     return 'cpin-onsite-appointment';
   }
 
   function getLetterTemplatesForContext(context, searchQuery) {
     let resolvedContext = context;
-    if (context === 'audit-setup' || context === 'audit-activity') resolvedContext = 'cpin-onsite';
+    if (context === 'audit-setup' || context === 'audit-activity') {
+      resolvedContext = isFollowUpAudit() ? 'audit-followup-setup' : 'cpin-onsite';
+    }
     if (context === 'audit-stage4') resolvedContext = 'audit-outcome';
     if (context === 'audit-stage5') resolvedContext = 'audit-stage5';
     const q = (searchQuery || '').trim().toLowerCase();
@@ -18150,6 +18969,7 @@
         premises: auditSetup.premises || 'Temple Quay House, Bristol BS1',
         appointment: appt,
         incidentRef: auditSetup.sourceCpinRef || 'CPIN-2026-0418',
+        parentAuditId: getFollowUpParentAuditId(),
         assignee: 'Phil Gower'
       };
     }
@@ -19295,6 +20115,12 @@
     if (auditSetup.fromCpinClose) {
       notice.hidden = true;
       def.hidden = false;
+    } else if (isFollowUpAudit()) {
+      notice.hidden = true;
+      if (def) def.hidden = true;
+      const fuNotice = document.getElementById('setup-followup-notice');
+      if (fuNotice) fuNotice.hidden = false;
+      updateAuditContextLabels();
     } else if (auditSetup.fromPremises) {
       notice.hidden = true;
       def.hidden = false;
@@ -19390,7 +20216,9 @@
     const dh = auditSetup.dutyHolders.find(function (d) { return d.id === id; });
     if (!dh || dh.status !== 'suggested') return;
     dh.status = 'accepted';
-    suggestSetupRpsForDh(dh.key || SETUP_DH_KEY_BY_NAME[dh.name]);
+    if (!isFollowUpAudit()) {
+      suggestSetupRpsForDh(dh.key || SETUP_DH_KEY_BY_NAME[dh.name]);
+    }
     renderSetupDutyHolders();
     renderSetupResponsiblePersons();
   }
@@ -19440,10 +20268,15 @@
     if (hint) {
       const pending = auditSetup.dutyHolders.some(function (d) { return d.status === 'suggested'; });
       const accepted = setupHasAcceptedDutyHolders();
+      const followUp = isFollowUpAudit();
       if (accepted && !pending) {
-        hint.textContent = 'Duty Holders approved — review suggested Responsible Persons below.';
+        hint.textContent = followUp
+          ? 'Duty Holders approved — contacts from the parent audit are listed below. Use + Add for more.'
+          : 'Duty Holders approved — review suggested Responsible Persons below.';
       } else if (pending) {
-        hint.textContent = 'Approve at least one Duty Holder — suggested Responsible Persons will appear for each organisation.';
+        hint.textContent = followUp
+          ? 'Approve at least one Duty Holder — contacts from the parent audit will appear below.'
+          : 'Approve at least one Duty Holder — suggested Responsible Persons will appear for each organisation.';
       } else {
         hint.textContent = '';
       }
@@ -19455,17 +20288,26 @@
     const list = document.getElementById('setup-rp-list');
     const hint = document.getElementById('setup-rp-hint');
     if (!list) return;
-    if (setupHasAcceptedDutyHolders()) ensureSetupResponsiblePersonSuggestions();
+    const followUp = isFollowUpAudit();
+    if (setupHasAcceptedDutyHolders() && !followUp) ensureSetupResponsiblePersonSuggestions();
     pruneSetupResponsiblePersons();
     const rps = getSetupResponsiblePersonsForDutyHolders();
     if (!setupHasAcceptedDutyHolders()) {
-      list.innerHTML = '<p style="color:var(--ink-3);font-size:13px;margin:0;">Approve or add Duty Holders above first — contacts are suggested for each approved organisation.</p>';
+      list.innerHTML = '<p style="color:var(--ink-3);font-size:13px;margin:0;">' +
+        (followUp
+          ? 'Approve or add Duty Holders above first — then add Responsible Persons if needed.'
+          : 'Approve or add Duty Holders above first — contacts are suggested for each approved organisation.') +
+        '</p>';
       if (hint) hint.textContent = '';
       refreshSetupSummary();
       return;
     }
     if (!rps.length) {
-      list.innerHTML = '<p style="color:var(--ink-3);font-size:13px;margin:0;">No suggested contacts yet for the approved Duty Holders. Use + Add to search the directory.</p>';
+      list.innerHTML = '<p style="color:var(--ink-3);font-size:13px;margin:0;">' +
+        (followUp
+          ? 'No Responsible Persons carried from the parent audit. Use + Add to search the directory.'
+          : 'No suggested contacts yet for the approved Duty Holders. Use + Add to search the directory.') +
+        '</p>';
       if (hint) hint.textContent = '';
       refreshSetupSummary();
       return;
