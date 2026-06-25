@@ -6174,6 +6174,12 @@
     height: 100%;
     background: var(--line-2);
   }
+  #premises-map-container .maplibregl-map,
+  #premises-map-container .leaflet-container {
+    width: 100%;
+    height: 100%;
+    font-family: var(--sans);
+  }
   .premises-map-link {
     background: none;
     border: none;
@@ -6218,11 +6224,14 @@
 
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
 <script>
   // Default key for static deploys (e.g. GitHub Pages). Override via os-maps-config.js if present.
   window.OS_MAPS_CONFIG = { apiKey: 'tjPc23pZAsmksMRQoIFf4yJgLbbAlH2z' };
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
 <script src="../feedback-config.js"></script>
 </head>
 <body>
@@ -11577,9 +11586,15 @@
 
   loadOsMapsConfigFile();
 
+  const OS_VTS_MAX_ZOOM = 15;
+  const OS_VTS_STYLE_BASE = 'https://api.os.uk/maps/vector/v1/vts/resources/styles';
+
+  function getOsVtsStyleUrl(apiKey) {
+    return OS_VTS_STYLE_BASE + '?srs=3857&key=' + apiKey;
+  }
+
   function verifyOsMapsApiKey(apiKey) {
-    const testUrl = 'https://api.os.uk/maps/raster/v1/zxy/Road_3857/10/511/340.png?key=' + apiKey;
-    return fetch(testUrl).then(function (r) {
+    return fetch(getOsVtsStyleUrl(apiKey)).then(function (r) {
       return { ok: r.ok, status: r.status };
     }).catch(function () {
       return { ok: false, status: 0 };
@@ -11621,9 +11636,14 @@
 
   let premisesMapInstance = null;
   let premisesMapMarker = null;
+  let premisesMapVectorLayer = null;
   let premisesMapActiveName = null;
 
   function destroyPremisesMap() {
+    if (premisesMapVectorLayer && premisesMapInstance) {
+      premisesMapInstance.removeLayer(premisesMapVectorLayer);
+      premisesMapVectorLayer = null;
+    }
     if (premisesMapInstance) {
       premisesMapInstance.remove();
       premisesMapInstance = null;
@@ -11662,8 +11682,8 @@
       );
       return;
     }
-    if (!window.L) {
-      showPremisesMapSetupMessage('Map library did not load. Check your network connection and try again.');
+    if (!window.L || !window.L.maplibreGL) {
+      showPremisesMapSetupMessage('Map libraries did not load. Check your network connection and try again.');
       return;
     }
     if (prem.lat == null || prem.lng == null) {
@@ -11678,7 +11698,7 @@
       if (!result.ok) {
         const hint = result.status === 401
           ? 'The OS API rejected this key (401). Check the key in os-maps-config.js — letter I vs l is easy to mistype.'
-          : 'Could not reach OS Maps API (HTTP ' + (result.status || 'network error') + ').';
+          : 'Could not reach OS Vector Tile API (HTTP ' + (result.status || 'network error') + '). Enable OS Vector Tile API on your project.';
         showPremisesMapSetupMessage(hint);
         return;
       }
@@ -11696,19 +11716,16 @@
 
     premisesMapInstance = L.map(container, {
       center: [prem.lat, prem.lng],
-      zoom: 17,
+      zoom: OS_VTS_MAX_ZOOM,
       minZoom: 6,
-      maxZoom: 20,
+      maxZoom: OS_VTS_MAX_ZOOM,
       zoomControl: true
     });
 
-    L.tileLayer(
-      'https://api.os.uk/maps/raster/v1/zxy/Road_3857/{z}/{x}/{y}.png?key=' + apiKey,
-      {
-        maxZoom: 20,
-        attribution: '© Crown copyright and database rights OS'
-      }
-    ).addTo(premisesMapInstance);
+    premisesMapVectorLayer = L.maplibreGL({
+      style: getOsVtsStyleUrl(apiKey),
+      attribution: '© Crown copyright and database rights OS'
+    }).addTo(premisesMapInstance);
 
     premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
     premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
@@ -11717,7 +11734,11 @@
 
     setTimeout(function () {
       if (premisesMapInstance) premisesMapInstance.invalidateSize();
-    }, 50);
+      const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
+        ? premisesMapVectorLayer.getMaplibreMap()
+        : null;
+      if (glMap) glMap.resize();
+    }, 80);
   }
 
   function openPremisesMapModal(premisesName) {
