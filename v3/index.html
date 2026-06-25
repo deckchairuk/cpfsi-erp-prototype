@@ -11586,7 +11586,9 @@
 
   loadOsMapsConfigFile();
 
-  const OS_VTS_MAX_ZOOM = 15;
+  // OS Vector Tile API (EPSG:3857): native tiles to ~zoom 17; API allows 18 with overzoom.
+  const OS_VTS_MAX_ZOOM = 17;
+  const OS_VTS_DEFAULT_ZOOM = 16;
   const OS_VTS_STYLE_BASE = 'https://api.os.uk/maps/vector/v1/vts/resources/styles';
 
   function getOsVtsStyleUrl(apiKey) {
@@ -11716,7 +11718,7 @@
 
     premisesMapInstance = L.map(container, {
       center: [prem.lat, prem.lng],
-      zoom: OS_VTS_MAX_ZOOM,
+      zoom: OS_VTS_DEFAULT_ZOOM,
       minZoom: 6,
       maxZoom: OS_VTS_MAX_ZOOM,
       zoomControl: true
