@@ -6221,7 +6221,7 @@
 <script>window.OS_MAPS_CONFIG = window.OS_MAPS_CONFIG || { apiKey: '' };</script>
 <script src="os-maps-config.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="/feedback-config.js"></script>
+<script src="../feedback-config.js"></script>
 </head>
 <body>
 
@@ -11570,6 +11570,14 @@
 
   loadOptionalOsMapsLocalConfig();
 
+  document.addEventListener('click', function (e) {
+    const mapBtn = e.target.closest('.premises-map-link');
+    if (!mapBtn) return;
+    e.preventDefault();
+    const name = mapBtn.getAttribute('data-premises-map');
+    if (name) openPremisesMapModal(name);
+  });
+
   function renderPremisesDetailMeta(prem, metaElId) {
     const el = document.getElementById(metaElId);
     if (!el || !prem) return;
@@ -11577,8 +11585,7 @@
     const type = prem.typeLabel ? escHtml(prem.typeLabel) : '';
     const address = prem.address ? escHtml(prem.address) : '';
     const mapLink = (prem.lat != null && prem.lng != null)
-      ? '  ·  <button type="button" class="premises-map-link" onclick="openPremisesMapModal(' +
-        JSON.stringify(prem.name) + ')">View on map</button>'
+      ? '  ·  <button type="button" class="premises-map-link" data-premises-map="' + escHtml(prem.name) + '">View on map</button>'
       : '';
     el.innerHTML = address + mapLink + (dept ? '  ·  ' + dept : '') + (type ? '  ·  ' + type : '');
   }
@@ -11652,7 +11659,11 @@
         maxZoom: 20,
         attribution: '© Crown copyright and database rights OS'
       }
-    ).addTo(premisesMapInstance);
+    ).addTo(premisesMapInstance).on('tileerror', function () {
+      showPremisesMapSetupMessage(
+        'OS map tiles could not be loaded. Check that OS Maps API is enabled on your project and that this API key is valid.'
+      );
+    });
 
     premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
     premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
@@ -11679,8 +11690,16 @@
 
     modal.classList.add('open');
     document.body.classList.add('premises-map-modal-open');
-    initPremisesOsMap(prem);
+    try {
+      initPremisesOsMap(prem);
+    } catch (err) {
+      console.error('Premises map failed to open:', err);
+      showPremisesMapSetupMessage('Could not open the map. Check the browser console for details.');
+    }
   }
+
+  window.openPremisesMapModal = openPremisesMapModal;
+  window.closePremisesMapModal = closePremisesMapModal;
 
   function initPremisesDetailPage() {
     const prem = getPremisesByName('Temple Quay House');
