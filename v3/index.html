@@ -6141,7 +6141,85 @@
     }
   }
 
+  /* Premises map — fullscreen OS Maps modal */
+  #premises-map-modal.modal-backdrop {
+    padding: 0;
+    align-items: stretch;
+    overflow: hidden;
+    z-index: 120;
+  }
+  #premises-map-modal .premises-map-modal {
+    max-width: none;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    box-shadow: none;
+    background: var(--surface);
+  }
+  #premises-map-modal .modal-header {
+    flex-shrink: 0;
+    padding: 14px 20px;
+  }
+  #premises-map-modal .modal-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    position: relative;
+  }
+  #premises-map-container {
+    width: 100%;
+    height: 100%;
+    background: var(--line-2);
+  }
+  .premises-map-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    font-size: inherit;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .premises-map-link:hover { color: var(--accent-dark); }
+  .premises-map-link:focus-visible {
+    outline: 3px solid var(--gov-focus);
+    outline-offset: 2px;
+  }
+  .premises-map-attribution {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 500;
+    font-size: 11px;
+    color: var(--ink-3);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--line-2);
+    pointer-events: none;
+  }
+  .premises-map-setup-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="os-maps-config.local.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="/feedback-config.js"></script>
 </head>
 <body>
@@ -6489,7 +6567,7 @@
       <div>
         <div class="prem-ref" id="premises-detail-ref">PRM-0001847</div>
         <h1>Temple Quay House</h1>
-        <div class="meta">Temple Back East, Bristol BS1  ·  <strong>HMCTS</strong>  ·  Government office</div>
+        <div class="meta" id="premises-detail-meta">Temple Back East, Bristol BS1  ·  <strong>HMCTS</strong>  ·  Government office</div>
         <div style="margin-top:12px;display:flex;gap:8px;">
           <span class="pill grey">Sprinkler system</span>
           <span class="pill grey">Smoke ventilation</span>
@@ -6619,7 +6697,7 @@
       <div>
         <div class="prem-ref">PRM-0002140</div>
         <h1>HMP Bristol</h1>
-        <div class="meta">Cambridge Grove, Bristol BS7  ·  <strong>HMPPS</strong>  ·  Prison · Cat B</div>
+        <div class="meta" id="premises-bristol-meta">Cambridge Grove, Bristol BS7  ·  <strong>HMPPS</strong>  ·  Prison · Cat B</div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Cell fire detection</span>
           <span class="pill grey">Compartmentation</span>
@@ -8749,6 +8827,22 @@
 </div>
 
 <!-- Letter composer (site-wide — CPIN, audits, processes) -->
+<div id="premises-map-modal" class="modal-backdrop" onclick="if(event.target===this) closePremisesMapModal()">
+  <div class="modal premises-map-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="premises-map-modal-title">Premises map</h2>
+        <div class="sub" id="premises-map-modal-sub"></div>
+      </div>
+      <button type="button" class="modal-close" onclick="closePremisesMapModal()" aria-label="Close map">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="premises-map-container"></div>
+      <div class="premises-map-attribution" id="premises-map-attribution" hidden>© Crown copyright and database rights OS</div>
+    </div>
+  </div>
+</div>
+
 <div id="letter-composer-modal" class="modal-backdrop" onclick="if(event.target===this) closeLetterComposer()">
   <div class="modal letter-composer-modal" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -11454,7 +11548,129 @@
     });
   }
 
+  function getPremisesByName(name) {
+    return PREMISES_LIST.find(function (p) { return p.name === name; }) || null;
+  }
+
+  function getOsMapsApiKey() {
+    return (window.OS_MAPS_CONFIG && window.OS_MAPS_CONFIG.apiKey) || '';
+  }
+
+  function renderPremisesDetailMeta(prem, metaElId) {
+    const el = document.getElementById(metaElId);
+    if (!el || !prem) return;
+    const dept = prem.dept ? '<strong>' + escHtml(prem.dept) + '</strong>' : '';
+    const type = prem.typeLabel ? escHtml(prem.typeLabel) : '';
+    const address = prem.address ? escHtml(prem.address) : '';
+    const mapLink = (prem.lat != null && prem.lng != null)
+      ? '  ·  <button type="button" class="premises-map-link" onclick="openPremisesMapModal(' +
+        JSON.stringify(prem.name) + ')">View on map</button>'
+      : '';
+    el.innerHTML = address + mapLink + (dept ? '  ·  ' + dept : '') + (type ? '  ·  ' + type : '');
+  }
+
+  let premisesMapInstance = null;
+  let premisesMapMarker = null;
+  let premisesMapActiveName = null;
+
+  function destroyPremisesMap() {
+    if (premisesMapInstance) {
+      premisesMapInstance.remove();
+      premisesMapInstance = null;
+      premisesMapMarker = null;
+    }
+    const container = document.getElementById('premises-map-container');
+    if (container) container.innerHTML = '';
+  }
+
+  function closePremisesMapModal() {
+    const modal = document.getElementById('premises-map-modal');
+    if (modal) modal.classList.remove('open');
+    document.body.classList.remove('premises-map-modal-open');
+    destroyPremisesMap();
+    premisesMapActiveName = null;
+  }
+
+  function showPremisesMapSetupMessage(message) {
+    const container = document.getElementById('premises-map-container');
+    const attribution = document.getElementById('premises-map-attribution');
+    if (container) {
+      container.innerHTML = '<div class="premises-map-setup-msg">' + escHtml(message) + '</div>';
+    }
+    if (attribution) attribution.hidden = true;
+  }
+
+  function initPremisesOsMap(prem) {
+    const apiKey = getOsMapsApiKey();
+    const container = document.getElementById('premises-map-container');
+    const attribution = document.getElementById('premises-map-attribution');
+    if (!container) return;
+
+    if (!apiKey || apiKey === 'YOUR_OS_PROJECT_API_KEY') {
+      showPremisesMapSetupMessage(
+        'Add your OS Data Hub Project API key in v3/os-maps-config.local.js (copy from os-maps-config.example.js). Enable OS Maps API on the project.'
+      );
+      return;
+    }
+    if (!window.L) {
+      showPremisesMapSetupMessage('Map library did not load. Check your network connection and try again.');
+      return;
+    }
+    if (prem.lat == null || prem.lng == null) {
+      showPremisesMapSetupMessage('No map coordinates are set for this premises yet.');
+      return;
+    }
+
+    container.innerHTML = '';
+    destroyPremisesMap();
+
+    premisesMapInstance = L.map(container, {
+      center: [prem.lat, prem.lng],
+      zoom: 17,
+      minZoom: 6,
+      maxZoom: 20,
+      zoomControl: true
+    });
+
+    L.tileLayer(
+      'https://api.os.uk/maps/raster/v1/zxy/Road_3857/{z}/{x}/{y}.png?key=' + encodeURIComponent(apiKey),
+      {
+        maxZoom: 20,
+        attribution: '© Crown copyright and database rights OS'
+      }
+    ).addTo(premisesMapInstance);
+
+    premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
+    premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
+
+    if (attribution) attribution.hidden = false;
+
+    setTimeout(function () {
+      if (premisesMapInstance) premisesMapInstance.invalidateSize();
+    }, 50);
+  }
+
+  function openPremisesMapModal(premisesName) {
+    const prem = getPremisesByName(premisesName);
+    if (!prem) return;
+
+    const modal = document.getElementById('premises-map-modal');
+    const titleEl = document.getElementById('premises-map-modal-title');
+    const subEl = document.getElementById('premises-map-modal-sub');
+    if (!modal) return;
+
+    premisesMapActiveName = premisesName;
+    if (titleEl) titleEl.textContent = prem.name;
+    if (subEl) subEl.textContent = prem.address || '';
+
+    modal.classList.add('open');
+    document.body.classList.add('premises-map-modal-open');
+    initPremisesOsMap(prem);
+  }
+
   function initPremisesDetailPage() {
+    const prem = getPremisesByName('Temple Quay House');
+    renderPremisesDetailMeta(prem, 'premises-detail-meta');
     setPremisesDetailTab('overview');
     renderPremisesDetailList('premises-tq-processes-list', PREMISES_TQ_PROCESSES);
     renderPremisesDetailList('premises-tq-documents-list', PREMISES_TQ_DOCUMENTS);
@@ -11462,6 +11678,8 @@
   }
 
   function initPremisesBristolPage() {
+    const prem = getPremisesByName('HMP Bristol');
+    renderPremisesDetailMeta(prem, 'premises-bristol-meta');
     setPremisesBristolTab('overview');
     renderPremisesDetailList('premises-bristol-processes-list', PREMISES_BRISTOL_PROCESSES);
     renderPremisesDetailList('premises-bristol-documents-list', PREMISES_BRISTOL_DOCUMENTS);
@@ -11562,7 +11780,7 @@
   }
 
   const PREMISES_LIST = [
-    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' } },
+    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', lat: 51.45224, lng: -2.58352, category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' } },
     { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreTrend: 'down', scoreDelta: 5, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' } },
     { name: 'HMP Maidstone', ref: 'PRM-0002118', address: 'County Road, Maidstone ME14 1UZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 38, scoreClass: 'score-high', lastAudit: 'Aug 2024', lastAuditSort: 202408, patch: true, work: { pill: 'blue', label: 'Audit in progress' } },
     { name: 'Maidstone Magistrates Court', ref: 'PRM-0001922', address: 'Barker Road, Maidstone ME16 8EQ', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 34, scoreTrend: 'down', scoreDelta: 2, scoreClass: 'score-mid', lastAudit: 'Mar 2024', lastAuditSort: 202403, patch: true, work: { pill: 'grey', label: 'Concern open' } },
@@ -11572,7 +11790,7 @@
     { name: 'HMP Belmarsh', ref: 'PRM-0002088', address: 'Western Way, Thamesmead SE28 0EB', category: 'prison', typeLabel: 'Prison · Cat A', dept: 'HMPPS', score: 29, scoreClass: 'score-mid', lastAudit: 'Feb 2024', lastAuditSort: 202402, patch: false, work: { pill: 'purple', label: 'Follow-up visit due' } },
     { name: 'Lewes Crown Court', ref: 'PRM-0001935', address: 'High Street, Lewes BN7 2UX', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 30, scoreClass: 'score-mid', lastAudit: 'Apr 2024', lastAuditSort: 202404, patch: true, work: { pill: 'grey', label: 'Concern investigating' } },
     { name: 'Royal Courts of Justice', ref: 'PRM-0001601', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Dec 2024', lastAuditSort: 202412, patch: true, work: { pill: 'grey', label: 'Support meeting' } },
-    { name: 'HMP Bristol', ref: 'PRM-0002140', address: 'Cambridge Grove, Bristol BS7 8PS', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 44, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, patch: true, route: 'premisesdetail-bristol', work: { pill: 'amber', label: 'Alterations notice' } },
+    { name: 'HMP Bristol', ref: 'PRM-0002140', address: 'Cambridge Grove, Bristol BS7 8PS', lat: 51.47608, lng: -2.59648, category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 44, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, patch: true, route: 'premisesdetail-bristol', work: { pill: 'amber', label: 'Alterations notice' } },
     { name: 'HMP Swaleside', ref: 'PRM-0002155', address: 'Brabazon Road, Eastchurch ME12 4AX', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 41, scoreClass: 'score-high', lastAudit: 'Nov 2024', lastAuditSort: 202411, patch: true, work: { pill: 'amber', label: 'CPIN open' } },
     { name: 'HMP Wandsworth', ref: 'PRM-0002095', address: 'Heathfield Road, London SW18 3HU', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 35, scoreClass: 'score-mid', lastAudit: 'Jan 2024', lastAuditSort: 202401, patch: false, work: { pill: 'grey', label: 'Appeal lodged' } },
     { name: 'HMP Isis', ref: 'PRM-0002162', address: 'Marsh Way, Thamesmead SE28 0NZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 33, scoreClass: 'score-mid', lastAudit: 'Oct 2023', lastAuditSort: 202310, patch: true, work: { pill: 'purple', label: 'Follow-up opened' } },
@@ -18278,6 +18496,8 @@
         closeListDateRangeModal();
       } else if (document.getElementById('setup-lookup-modal')?.classList.contains('open')) {
         closeSetupLookupModal();
+      } else if (document.getElementById('premises-map-modal')?.classList.contains('open')) {
+        closePremisesMapModal();
       } else {
         closeNewModal();
       }
