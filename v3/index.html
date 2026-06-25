@@ -6218,7 +6218,8 @@
 
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="os-maps-config.local.js"></script>
+<script>window.OS_MAPS_CONFIG = window.OS_MAPS_CONFIG || { apiKey: '' };</script>
+<script src="os-maps-config.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="/feedback-config.js"></script>
 </head>
@@ -11556,6 +11557,19 @@
     return (window.OS_MAPS_CONFIG && window.OS_MAPS_CONFIG.apiKey) || '';
   }
 
+  function loadOptionalOsMapsLocalConfig() {
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+    var existing = document.querySelector('script[data-os-maps-local]');
+    if (existing) return;
+    var s = document.createElement('script');
+    s.src = 'os-maps-config.local.js';
+    s.setAttribute('data-os-maps-local', '1');
+    s.onerror = function () { /* optional local override — ignore if missing */ };
+    document.head.appendChild(s);
+  }
+
+  loadOptionalOsMapsLocalConfig();
+
   function renderPremisesDetailMeta(prem, metaElId) {
     const el = document.getElementById(metaElId);
     if (!el || !prem) return;
@@ -11608,7 +11622,7 @@
 
     if (!apiKey || apiKey === 'YOUR_OS_PROJECT_API_KEY') {
       showPremisesMapSetupMessage(
-        'Add your OS Data Hub Project API key in v3/os-maps-config.local.js (copy from os-maps-config.example.js). Enable OS Maps API on the project.'
+        'Add your OS Data Hub Project API key in v3/os-maps-config.js (see os-maps-config.example.js). Enable OS Maps API on the project.'
       );
       return;
     }
