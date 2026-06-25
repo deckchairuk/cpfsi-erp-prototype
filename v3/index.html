@@ -2911,6 +2911,30 @@
     gap: 16px;
   }
   .premises-audit-banner strong { font-size: 15px; }
+  .premises-audit-banners {
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .premises-audit-banner.is-follow-up {
+    background: #f6f2fc;
+    border-color: #c9b8e8;
+  }
+  .premises-audit-more {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-start;
+  }
+  .premises-audit-more:hover { color: var(--accent-dark); }
   .premises-marker-banner {
     display: flex;
     justify-content: space-between;
@@ -6593,29 +6617,7 @@
       </div>
     </div>
 
-    <div class="premises-audit-banner">
-      <div>
-        <strong>Audit in progress</strong>
-        <div style="font-size:13px;color:var(--ink-2);margin-top:4px;">A-2026-0314  ·  Reactive (CPIN-2026-0418)  ·  Stage 2 — Site visit</div>
-      </div>
-      <button class="btn primary" onclick="continueAudit('A-2026-0314')">Continue audit →</button>
-    </div>
-
-    <div class="premises-audit-banner" style="margin-top:10px;border-color:#c9b8e8;background:#f6f2fc;">
-      <div>
-        <strong>Demo: audit ready to close</strong>
-        <div style="font-size:13px;color:var(--ink-2);margin-top:4px;">A-2026-0399  ·  Temple Quay House  ·  Stage 5 — outcomes sent, all threads settled</div>
-      </div>
-      <button class="btn primary" onclick="continueAudit('A-2026-0399')">Open demo →</button>
-    </div>
-
-    <div class="premises-audit-banner" style="margin-top:10px;border-color:#c9b8e8;background:#faf8ff;">
-      <div>
-        <strong>Demo: follow-up at Stage 5</strong>
-        <div style="font-size:13px;color:var(--ink-2);margin-top:4px;">F-2026-0398  ·  From A-2026-0399  ·  Check previous action plans</div>
-      </div>
-      <button class="btn" onclick="continueAudit('F-2026-0398')">Open demo →</button>
-    </div>
+    <div id="premises-in-progress-audits" class="premises-audit-banners"></div>
 
     <div class="tabs" id="premises-detail-tabs">
       <button type="button" class="active" data-premises-tab="overview" onclick="setPremisesDetailTab('overview')">Overview</button>
@@ -6667,7 +6669,7 @@
       <div class="card">
         <h3>Quick actions</h3>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <button class="btn" onclick="continueAudit('A-2026-0314')">▶ Continue current audit</button>
+          <button class="btn" id="premises-primary-audit-btn" onclick="continueAudit('A-2026-0314')" hidden>▶ Continue current audit</button>
           <button class="btn" onclick="startNewAuditFromPremises('Temple Quay House')">+ New audit</button>
           <button class="btn" onclick="startBizSupportFromPremises('Temple Quay House')">+ Log business support</button>
           <button class="btn" onclick="openScIntakeForm('Temple Quay House')">+ Log safety concern</button>
@@ -11170,9 +11172,9 @@
   };
 
   const PROCESSES_LIST = [
-    { id: 'A-2026-0314', type: 'audit', premises: 'Temple Quay House', score: 47, scoreTrend: 'up', scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 2 of 5  ·  Site visit', owner: 'Phil Gower', ownerInitials: 'PG', age: '8 days', mine: true, patch: true, route: 'audit' },
-    { id: 'A-2026-0399', type: 'audit', premises: 'Temple Quay House', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Outcomes sent  ·  Ready to close', owner: 'Phil Gower', ownerInitials: 'PG', age: '9 days', mine: true, patch: true, route: 'audit', demoClose: true },
-    { id: 'F-2026-0398', type: 'follow-up', premises: 'Temple Quay House', score: 44, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Action plans', owner: 'Phil Gower', ownerInitials: 'PG', age: '2 days', mine: true, patch: true, route: 'audit' },
+    { id: 'A-2026-0314', type: 'audit', premises: 'Temple Quay House', score: 47, scoreTrend: 'up', scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 2 of 5  ·  Site visit', trigger: 'Reactive (CPIN-2026-0418)', owner: 'Phil Gower', ownerInitials: 'PG', age: '8 days', mine: true, patch: true, route: 'audit' },
+    { id: 'A-2026-0399', type: 'audit', premises: 'Temple Quay House', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Outcomes sent  ·  Ready to close', trigger: 'Reactive (CPIN-2026-0418)', owner: 'Phil Gower', ownerInitials: 'PG', age: '9 days', mine: true, patch: true, route: 'audit', demoClose: true },
+    { id: 'F-2026-0398', type: 'follow-up', premises: 'Temple Quay House', score: 44, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Action plans', trigger: 'Follow-up from A-2026-0399', owner: 'Phil Gower', ownerInitials: 'PG', age: '2 days', mine: true, patch: true, route: 'audit' },
     { id: 'F-2026-0142', type: 'follow-up', premises: 'HMP Lewes', score: 42, scoreTrend: 'down', scoreClass: 'score-high', status: 'awaiting-action-plan', statusText: 'Awaiting action plan', owner: 'Phil Gower', ownerInitials: 'PG', age: '12 days', mine: true, patch: true, prison: true },
     { id: 'A-2026-0301', type: 'audit', premises: 'HMP Maidstone', score: 38, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 4 of 5  ·  Outcomes', owner: 'Steve France', ownerInitials: 'SF', age: '23 days', mine: false, patch: true, prison: true },
     { id: 'C-2026-0089', type: 'consultation', premises: 'Charing Cross House refurb', score: 36, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Reviewing  ·  <strong style="color:var(--amber);">SLA: 5 days</strong>', owner: 'Phil Gower', ownerInitials: 'PG', age: '10 days', mine: true, patch: true, hasSla: true },
@@ -11520,6 +11522,111 @@
     { pill: 'blue', pillLabel: 'Audit', title: 'Audit closed', sub: 'Score 40 → 42  ·  Sep 2024', when: 'Sep 2024' }
   ];
 
+  let premisesAuditsExpanded = {};
+
+  function parseProcessAgeDays(age) {
+    if (!age) return 9999;
+    const m = String(age).match(/(\d+)/);
+    const n = m ? parseInt(m[1], 10) : 9999;
+    if (/month/i.test(age)) return n * 30;
+    if (/week/i.test(age)) return n * 7;
+    return n;
+  }
+
+  function stripHtmlText(html) {
+    const el = document.createElement('div');
+    el.innerHTML = html || '';
+    return (el.textContent || el.innerText || '').trim();
+  }
+
+  function isPremisesAuditOpen(p) {
+    return (p.type === 'audit' || p.type === 'follow-up') &&
+      (p.status === 'in-progress' || p.status === 'open');
+  }
+
+  function getPremisesInProgressAudits(premisesName) {
+    return PROCESSES_LIST
+      .filter(function (p) { return p.premises === premisesName && isPremisesAuditOpen(p); })
+      .sort(function (a, b) {
+        return parseProcessAgeDays(a.age) - parseProcessAgeDays(b.age);
+      });
+  }
+
+  function getPremisesAuditBannerTitle(p) {
+    if (p.type === 'follow-up') return 'Follow-up audit in progress';
+    return 'Audit in progress';
+  }
+
+  function getPremisesAuditBannerSubtitle(p) {
+    const parts = [p.id];
+    if (p.trigger) parts.push(p.trigger);
+    const status = stripHtmlText(p.statusText);
+    if (status) parts.push(status);
+    return parts.join('  ·  ');
+  }
+
+  function expandPremisesInProgressAudits(premisesName) {
+    premisesAuditsExpanded[premisesName] = true;
+    renderPremisesInProgressAudits(premisesName);
+  }
+
+  function renderPremisesInProgressAudits(premisesName, containerId) {
+    containerId = containerId || 'premises-in-progress-audits';
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const audits = getPremisesInProgressAudits(premisesName);
+    const expanded = !!premisesAuditsExpanded[premisesName];
+    const visible = expanded ? audits : audits.slice(0, 1);
+    const hiddenCount = audits.length - visible.length;
+
+    if (!audits.length) {
+      el.innerHTML = '';
+      el.hidden = true;
+      const primaryBtn = document.getElementById('premises-primary-audit-btn');
+      if (primaryBtn) primaryBtn.hidden = true;
+      return;
+    }
+
+    el.hidden = false;
+    let html = '';
+
+    visible.forEach(function (p, i) {
+      const isFollowUp = p.type === 'follow-up';
+      const isPrimary = i === 0 && !expanded;
+      html += '<div class="premises-audit-banner' + (isFollowUp ? ' is-follow-up' : '') + '">';
+      html += '<div>';
+      html += '<strong>' + escHtml(getPremisesAuditBannerTitle(p)) + '</strong>';
+      html += '<div style="font-size:13px;color:var(--ink-2);margin-top:4px;">' + escHtml(getPremisesAuditBannerSubtitle(p)) + '</div>';
+      html += '</div>';
+      html += '<button class="btn' + (isPrimary ? ' primary' : '') + '" type="button" data-continue-audit="' + escHtml(p.id) + '">';
+      html += (isPrimary ? 'Continue audit →' : 'Open audit →');
+      html += '</button>';
+      html += '</div>';
+    });
+
+    if (hiddenCount > 0) {
+      html += '<button type="button" class="premises-audit-more" data-premises-audit-expand="' + escHtml(premisesName) + '">';
+      html += 'Show ' + hiddenCount + ' more audit' + (hiddenCount === 1 ? '' : 's') + ' in progress';
+      html += '</button>';
+    } else if (expanded && audits.length > 1) {
+      html += '<button type="button" class="premises-audit-more" data-premises-audit-collapse="' + escHtml(premisesName) + '">';
+      html += 'Show fewer';
+      html += '</button>';
+    }
+
+    el.innerHTML = html;
+
+    const primaryBtn = document.getElementById('premises-primary-audit-btn');
+    if (primaryBtn && audits.length) {
+      primaryBtn.hidden = false;
+      primaryBtn.textContent = '▶ Continue ' + (audits[0].type === 'follow-up' ? 'follow-up' : 'audit') + ' (' + audits[0].id + ')';
+      primaryBtn.onclick = function () { continueAudit(audits[0].id); };
+    } else if (primaryBtn) {
+      primaryBtn.hidden = true;
+    }
+  }
+
   function renderPremisesDetailList(elId, items) {
     const el = document.getElementById(elId);
     if (!el) return;
@@ -11586,13 +11693,25 @@
 
   loadOsMapsConfigFile();
 
-  // OS Vector Tile API (EPSG:3857): native tiles to ~zoom 17; API allows 18 with overzoom.
-  const OS_VTS_MAX_ZOOM = 17;
+  // OS Vector Tile API (EPSG:3857): open data tiles z6–15; z16+ needs premium OS MasterMap licence.
+  const OS_VTS_NATIVE_MAX_ZOOM = 15;
+  const OS_VTS_MAX_ZOOM = 16;
   const OS_VTS_DEFAULT_ZOOM = 16;
   const OS_VTS_STYLE_BASE = 'https://api.os.uk/maps/vector/v1/vts/resources/styles';
 
   function getOsVtsStyleUrl(apiKey) {
     return OS_VTS_STYLE_BASE + '?srs=3857&key=' + apiKey;
+  }
+
+  function patchOsVtsStyleForOpenTier(style) {
+    const patched = JSON.parse(JSON.stringify(style));
+    Object.keys(patched.sources || {}).forEach(function (key) {
+      const src = patched.sources[key];
+      if (src && src.type === 'vector') {
+        src.maxzoom = OS_VTS_NATIVE_MAX_ZOOM;
+      }
+    });
+    return patched;
   }
 
   function verifyOsMapsApiKey(apiKey) {
@@ -11622,6 +11741,32 @@
     e.preventDefault();
     const name = mapBtn.getAttribute('data-premises-map');
     if (name) openPremisesMapModal(name);
+  });
+
+  document.addEventListener('click', function (e) {
+    const expandBtn = e.target.closest('[data-premises-audit-expand]');
+    if (expandBtn) {
+      e.preventDefault();
+      const name = expandBtn.getAttribute('data-premises-audit-expand');
+      if (name) expandPremisesInProgressAudits(name);
+      return;
+    }
+    const collapseBtn = e.target.closest('[data-premises-audit-collapse]');
+    if (collapseBtn) {
+      e.preventDefault();
+      const name = collapseBtn.getAttribute('data-premises-audit-collapse');
+      if (name) {
+        premisesAuditsExpanded[name] = false;
+        renderPremisesInProgressAudits(name);
+      }
+      return;
+    }
+    const auditBtn = e.target.closest('[data-continue-audit]');
+    if (auditBtn) {
+      e.preventDefault();
+      const id = auditBtn.getAttribute('data-continue-audit');
+      if (id) continueAudit(id);
+    }
   });
 
   function renderPremisesDetailMeta(prem, metaElId) {
@@ -11716,31 +11861,43 @@
     container.innerHTML = '';
     destroyPremisesMap();
 
-    premisesMapInstance = L.map(container, {
-      center: [prem.lat, prem.lng],
-      zoom: OS_VTS_DEFAULT_ZOOM,
-      minZoom: 6,
-      maxZoom: OS_VTS_MAX_ZOOM,
-      zoomControl: true
-    });
+    fetch(getOsVtsStyleUrl(apiKey))
+      .then(function (r) {
+        if (!r.ok) throw new Error('style ' + r.status);
+        return r.json();
+      })
+      .then(function (style) {
+        premisesMapInstance = L.map(container, {
+          center: [prem.lat, prem.lng],
+          zoom: OS_VTS_DEFAULT_ZOOM,
+          minZoom: 6,
+          maxZoom: OS_VTS_MAX_ZOOM,
+          maxBounds: [[85, -180], [-85, 180]],
+          maxBoundsViscosity: 1,
+          zoomControl: true
+        });
 
-    premisesMapVectorLayer = L.maplibreGL({
-      style: getOsVtsStyleUrl(apiKey),
-      attribution: '© Crown copyright and database rights OS'
-    }).addTo(premisesMapInstance);
+        premisesMapVectorLayer = L.maplibreGL({
+          style: patchOsVtsStyleForOpenTier(style),
+          attribution: '© Crown copyright and database rights OS'
+        }).addTo(premisesMapInstance);
 
-    premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
-    premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
+        premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
+        premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
 
-    if (attribution) attribution.hidden = false;
+        if (attribution) attribution.hidden = false;
 
-    setTimeout(function () {
-      if (premisesMapInstance) premisesMapInstance.invalidateSize();
-      const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
-        ? premisesMapVectorLayer.getMaplibreMap()
-        : null;
-      if (glMap) glMap.resize();
-    }, 80);
+        setTimeout(function () {
+          if (premisesMapInstance) premisesMapInstance.invalidateSize();
+          const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
+            ? premisesMapVectorLayer.getMaplibreMap()
+            : null;
+          if (glMap) glMap.resize();
+        }, 80);
+      })
+      .catch(function () {
+        showPremisesMapSetupMessage('Could not load the map style. Check your OS Vector Tile API key and try again.');
+      });
   }
 
   function openPremisesMapModal(premisesName) {
@@ -11777,6 +11934,7 @@
   function initPremisesDetailPage() {
     const prem = getPremisesByName('Temple Quay House');
     renderPremisesDetailMeta(prem, 'premises-detail-meta');
+    renderPremisesInProgressAudits('Temple Quay House');
     setPremisesDetailTab('overview');
     renderPremisesDetailList('premises-tq-processes-list', PREMISES_TQ_PROCESSES);
     renderPremisesDetailList('premises-tq-documents-list', PREMISES_TQ_DOCUMENTS);
