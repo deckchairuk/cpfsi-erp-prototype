@@ -6218,8 +6218,10 @@
 
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script>window.OS_MAPS_CONFIG = window.OS_MAPS_CONFIG || { apiKey: '' };</script>
-<script src="os-maps-config.js"></script>
+<script>
+  // Default key for static deploys (e.g. GitHub Pages). Override via os-maps-config.js if present.
+  window.OS_MAPS_CONFIG = { apiKey: 'tjPc23pZAsmksMRQoIFf4yJgLbbAlH2z' };
+</script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="../feedback-config.js"></script>
 </head>
@@ -11557,6 +11559,33 @@
     return (window.OS_MAPS_CONFIG && window.OS_MAPS_CONFIG.apiKey) || '';
   }
 
+  function loadOsMapsConfigFile() {
+    if (window.__osMapsConfigLoaded) return window.__osMapsConfigLoaded;
+    window.__osMapsConfigLoaded = fetch('os-maps-config.js', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (text) {
+        if (!text) return;
+        const m = text.match(/apiKey\s*:\s*['"]([^'"]+)['"]/);
+        if (m && m[1] && m[1] !== 'YOUR_OS_PROJECT_API_KEY') {
+          window.OS_MAPS_CONFIG = window.OS_MAPS_CONFIG || {};
+          window.OS_MAPS_CONFIG.apiKey = m[1];
+        }
+      })
+      .catch(function () {});
+    return window.__osMapsConfigLoaded;
+  }
+
+  loadOsMapsConfigFile();
+
+  function verifyOsMapsApiKey(apiKey) {
+    const testUrl = 'https://api.os.uk/maps/raster/v1/zxy/Road_3857/10/511/340.png?key=' + apiKey;
+    return fetch(testUrl).then(function (r) {
+      return { ok: r.ok, status: r.status };
+    }).catch(function () {
+      return { ok: false, status: 0 };
+    });
+  }
+
   function loadOptionalOsMapsLocalConfig() {
     if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
     var existing = document.querySelector('script[data-os-maps-local]');
@@ -11629,7 +11658,7 @@
 
     if (!apiKey || apiKey === 'YOUR_OS_PROJECT_API_KEY') {
       showPremisesMapSetupMessage(
-        'Add your OS Data Hub Project API key in v3/os-maps-config.js (see os-maps-config.example.js). Enable OS Maps API on the project.'
+        'OS Maps API key is missing. Add your Project API key in v3/os-maps-config.js or the inline config in index.html.'
       );
       return;
     }
@@ -11641,6 +11670,26 @@
       showPremisesMapSetupMessage('No map coordinates are set for this premises yet.');
       return;
     }
+
+    container.innerHTML = '<div class="premises-map-setup-msg">Loading map…</div>';
+    if (attribution) attribution.hidden = true;
+
+    verifyOsMapsApiKey(apiKey).then(function (result) {
+      if (!result.ok) {
+        const hint = result.status === 401
+          ? 'The OS API rejected this key (401). Check the key in os-maps-config.js — letter I vs l is easy to mistype.'
+          : 'Could not reach OS Maps API (HTTP ' + (result.status || 'network error') + ').';
+        showPremisesMapSetupMessage(hint);
+        return;
+      }
+      renderPremisesOsMap(prem, apiKey);
+    });
+  }
+
+  function renderPremisesOsMap(prem, apiKey) {
+    const container = document.getElementById('premises-map-container');
+    const attribution = document.getElementById('premises-map-attribution');
+    if (!container) return;
 
     container.innerHTML = '';
     destroyPremisesMap();
@@ -11654,16 +11703,12 @@
     });
 
     L.tileLayer(
-      'https://api.os.uk/maps/raster/v1/zxy/Road_3857/{z}/{x}/{y}.png?key=' + encodeURIComponent(apiKey),
+      'https://api.os.uk/maps/raster/v1/zxy/Road_3857/{z}/{x}/{y}.png?key=' + apiKey,
       {
         maxZoom: 20,
         attribution: '© Crown copyright and database rights OS'
       }
-    ).addTo(premisesMapInstance).on('tileerror', function () {
-      showPremisesMapSetupMessage(
-        'OS map tiles could not be loaded. Check that OS Maps API is enabled on your project and that this API key is valid.'
-      );
-    });
+    ).addTo(premisesMapInstance);
 
     premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
     premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
@@ -11690,12 +11735,17 @@
 
     modal.classList.add('open');
     document.body.classList.add('premises-map-modal-open');
-    try {
-      initPremisesOsMap(prem);
-    } catch (err) {
-      console.error('Premises map failed to open:', err);
-      showPremisesMapSetupMessage('Could not open the map. Check the browser console for details.');
-    }
+
+    const startMap = function () {
+      try {
+        initPremisesOsMap(prem);
+      } catch (err) {
+        console.error('Premises map failed to open:', err);
+        showPremisesMapSetupMessage('Could not open the map. Check the browser console for details.');
+      }
+    };
+
+    loadOsMapsConfigFile().then(startMap);
   }
 
   window.openPremisesMapModal = openPremisesMapModal;
