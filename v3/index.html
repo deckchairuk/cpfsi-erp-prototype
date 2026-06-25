@@ -6224,7 +6224,7 @@
   .premises-map-attribution {
     position: absolute;
     right: 10px;
-    bottom: 10px;
+    bottom: 38px;
     z-index: 500;
     font-size: 11px;
     color: var(--ink-3);
@@ -6233,6 +6233,89 @@
     border-radius: 4px;
     border: 1px solid var(--line-2);
     pointer-events: none;
+  }
+  .premises-map-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 600;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+    max-width: calc(100% - 24px);
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    font-size: 13px;
+  }
+  .premises-map-toolbar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .premises-map-toolbar select {
+    font: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    max-width: 140px;
+  }
+  .premises-map-toolbar .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .premises-map-toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--line-2);
+    flex-shrink: 0;
+  }
+  .premises-map-external-link {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+  }
+  .premises-map-external-link:hover { color: var(--accent-dark); }
+  .premises-map-statusbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.94);
+    border-top: 1px solid var(--line-2);
+    font-size: 12px;
+    color: var(--ink-2);
+    pointer-events: none;
+  }
+  .premises-map-statusbar strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  #premises-map-container .leaflet-control-scale {
+    margin-bottom: 36px;
+    margin-left: 10px;
+  }
+  #premises-map-container .leaflet-control-zoom {
+    margin-bottom: 36px;
+    margin-right: 10px;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   }
   .premises-map-setup-msg {
     display: flex;
@@ -8851,7 +8934,29 @@
       <button type="button" class="modal-close" onclick="closePremisesMapModal()" aria-label="Close map">×</button>
     </div>
     <div class="modal-body">
+      <div class="premises-map-toolbar" id="premises-map-toolbar" hidden>
+        <label>
+          Map style
+          <select id="premises-map-style" aria-label="Map style">
+            <option value="default">Standard</option>
+            <option value="outdoor">Outdoor</option>
+            <option value="greyscale">Greyscale</option>
+          </select>
+        </label>
+        <span class="premises-map-toolbar-divider" aria-hidden="true"></span>
+        <label>
+          <input type="checkbox" id="premises-map-boundaries" />
+          Boundaries
+        </label>
+        <button type="button" class="btn" id="premises-map-recenter">Recenter</button>
+        <span class="premises-map-toolbar-divider" aria-hidden="true"></span>
+        <a class="premises-map-external-link" id="premises-map-google" href="#" target="_blank" rel="noopener noreferrer">Google Maps</a>
+        <a class="premises-map-external-link" id="premises-map-w3w" href="#" target="_blank" rel="noopener noreferrer">what3words</a>
+      </div>
       <div id="premises-map-container"></div>
+      <div class="premises-map-statusbar" id="premises-map-statusbar" hidden>
+        <span id="premises-map-coords">—</span>
+      </div>
       <div class="premises-map-attribution" id="premises-map-attribution" hidden>© Crown copyright and database rights OS</div>
     </div>
   </div>
@@ -11698,9 +11803,25 @@
   const OS_VTS_MAX_ZOOM = 16;
   const OS_VTS_DEFAULT_ZOOM = 16;
   const OS_VTS_STYLE_BASE = 'https://api.os.uk/maps/vector/v1/vts/resources/styles';
+  const OS_VTS_OPEN_STYLE_BASE = 'https://raw.githubusercontent.com/OrdnanceSurvey/OS-Vector-Tile-API-Stylesheets/main';
+  const OS_VTS_OPEN_STYLES = {
+    default: { label: 'Standard', file: null },
+    outdoor: { label: 'Outdoor', file: 'OS_VTS_3857_Open_Outdoor.json' },
+    greyscale: { label: 'Greyscale', file: 'OS_VTS_3857_Open_Greyscale.json' }
+  };
 
   function getOsVtsStyleUrl(apiKey) {
     return OS_VTS_STYLE_BASE + '?srs=3857&key=' + apiKey;
+  }
+
+  function getOsBoundariesTileUrl(apiKey) {
+    return 'https://api.os.uk/maps/vector/v1/vts/boundaries/tile/{z}/{y}/{x}.pbf?srs=3857&key=' + encodeURIComponent(apiKey);
+  }
+
+  function appendOsVtsQuery(url, apiKey) {
+    if (!url || url.indexOf('key=') >= 0) return url;
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return url + sep + 'srs=3857&key=' + encodeURIComponent(apiKey);
   }
 
   function patchOsVtsStyleForOpenTier(style) {
@@ -11712,6 +11833,149 @@
       }
     });
     return patched;
+  }
+
+  function patchOsVtsStyleApiKey(style, apiKey) {
+    const patched = JSON.parse(JSON.stringify(style));
+    Object.keys(patched.sources || {}).forEach(function (key) {
+      const src = patched.sources[key];
+      if (!src) return;
+      if (src.tiles) {
+        src.tiles = src.tiles.map(function (url) { return appendOsVtsQuery(url, apiKey); });
+      }
+      if (src.url) {
+        src.url = appendOsVtsQuery(src.url, apiKey);
+      }
+    });
+    if (patched.glyphs) {
+      patched.glyphs = appendOsVtsQuery(patched.glyphs, apiKey);
+    }
+    return patched;
+  }
+
+  function fetchOsVtsBaseStyle(styleId, apiKey) {
+    const spec = OS_VTS_OPEN_STYLES[styleId] || OS_VTS_OPEN_STYLES.default;
+    const url = spec.file
+      ? OS_VTS_OPEN_STYLE_BASE + '/' + spec.file
+      : getOsVtsStyleUrl(apiKey);
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('style ' + r.status);
+      return r.json();
+    }).then(function (style) {
+      const patched = patchOsVtsStyleApiKey(style, apiKey);
+      return patchOsVtsStyleForOpenTier(patched);
+    });
+  }
+
+  function mergeBoundariesIntoStyle(baseStyle, apiKey) {
+    const merged = JSON.parse(JSON.stringify(baseStyle));
+    merged.sources['os-boundaries'] = {
+      type: 'vector',
+      tiles: [getOsBoundariesTileUrl(apiKey)],
+      maxzoom: OS_VTS_NATIVE_MAX_ZOOM
+    };
+    premisesMapBoundaryLayerIds = [];
+    const boundaryLayers = [
+      { id: 'os-bnd-county-line', type: 'line', 'source-layer': 'Boundary_line', minzoom: 8,
+        paint: { 'line-color': '#7b5ea7', 'line-width': 1.6, 'line-opacity': 0.85 } },
+      { id: 'os-bnd-ward-line', type: 'line', 'source-layer': 'Community_ward', minzoom: 11,
+        paint: { 'line-color': '#4a7c59', 'line-width': 1.2, 'line-opacity': 0.75, 'line-dasharray': [2, 2] } }
+    ];
+    boundaryLayers.forEach(function (layer) {
+      const copy = JSON.parse(JSON.stringify(layer));
+      copy.source = 'os-boundaries';
+      copy.layout = { visibility: premisesMapBoundariesOn ? 'visible' : 'none' };
+      merged.layers.push(copy);
+      premisesMapBoundaryLayerIds.push(copy.id);
+    });
+    return merged;
+  }
+
+  function formatPremisesCoords(lat, lng) {
+    const latDir = lat >= 0 ? 'N' : 'S';
+    const lngDir = lng >= 0 ? 'E' : 'W';
+    return Math.abs(lat).toFixed(4) + '° ' + latDir + ', ' + Math.abs(lng).toFixed(4) + '° ' + lngDir;
+  }
+
+  function updatePremisesMapCoordsDisplay(lat, lng) {
+    const el = document.getElementById('premises-map-coords');
+    if (!el || lat == null || lng == null) return;
+    el.innerHTML = '<strong>Coordinates</strong> ' + escHtml(formatPremisesCoords(lat, lng));
+  }
+
+  function updatePremisesMapExternalLinks(prem) {
+    const google = document.getElementById('premises-map-google');
+    const w3w = document.getElementById('premises-map-w3w');
+    if (!prem || prem.lat == null || prem.lng == null) return;
+    const q = encodeURIComponent(prem.lat + ',' + prem.lng);
+    if (google) {
+      google.href = 'https://www.google.com/maps/search/?api=1&query=' + q;
+    }
+    if (w3w) {
+      w3w.href = 'https://what3words.com/' + prem.lat + ',' + prem.lng;
+    }
+  }
+
+  function setPremisesMapChromeVisible(visible) {
+    ['premises-map-toolbar', 'premises-map-statusbar'].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = !visible;
+    });
+    const attribution = document.getElementById('premises-map-attribution');
+    if (attribution) attribution.hidden = !visible;
+  }
+
+  function setPremisesMapBoundariesVisible(visible) {
+    premisesMapBoundariesOn = !!visible;
+    const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
+      ? premisesMapVectorLayer.getMaplibreMap()
+      : null;
+    if (!glMap || !glMap.isStyleLoaded()) return;
+    premisesMapBoundaryLayerIds.forEach(function (id) {
+      if (glMap.getLayer(id)) {
+        glMap.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+      }
+    });
+  }
+
+  function bindPremisesMapMoveEvents() {
+    if (!premisesMapInstance || premisesMapMoveBound) return;
+    premisesMapMoveBound = true;
+    premisesMapInstance.on('move', function () {
+      const center = premisesMapInstance.getCenter();
+      updatePremisesMapCoordsDisplay(center.lat, center.lng);
+    });
+  }
+
+  function recenterPremisesMap() {
+    if (!premisesMapInstance || !premisesMapPrem) return;
+    premisesMapInstance.setView([premisesMapPrem.lat, premisesMapPrem.lng], OS_VTS_DEFAULT_ZOOM, { animate: true });
+    if (premisesMapMarker) premisesMapMarker.openPopup();
+    updatePremisesMapCoordsDisplay(premisesMapPrem.lat, premisesMapPrem.lng);
+  }
+
+  function applyPremisesMapStyle(styleId) {
+    if (!premisesMapApiKey || !premisesMapVectorLayer) return;
+    premisesMapStyleId = styleId || 'default';
+    const select = document.getElementById('premises-map-style');
+    if (select && select.value !== premisesMapStyleId) select.value = premisesMapStyleId;
+
+    fetchOsVtsBaseStyle(premisesMapStyleId, premisesMapApiKey).then(function (style) {
+      const merged = mergeBoundariesIntoStyle(style, premisesMapApiKey);
+      const glMap = premisesMapVectorLayer.getMaplibreMap
+        ? premisesMapVectorLayer.getMaplibreMap()
+        : null;
+      if (!glMap) return;
+      glMap.setStyle(merged);
+      glMap.once('styledata', function onStyleData() {
+        if (!glMap.isStyleLoaded()) return;
+        glMap.off('styledata', onStyleData);
+        setPremisesMapBoundariesVisible(premisesMapBoundariesOn);
+        glMap.resize();
+      });
+    }).catch(function () {
+      showPremisesMapSetupMessage('Could not switch map style. Try again.');
+    });
   }
 
   function verifyOsMapsApiKey(apiKey) {
@@ -11785,8 +12049,19 @@
   let premisesMapMarker = null;
   let premisesMapVectorLayer = null;
   let premisesMapActiveName = null;
+  let premisesMapPrem = null;
+  let premisesMapApiKey = null;
+  let premisesMapStyleId = 'default';
+  let premisesMapBoundariesOn = false;
+  let premisesMapBoundaryLayerIds = [];
+  let premisesMapScaleControl = null;
+  let premisesMapMoveBound = false;
 
   function destroyPremisesMap() {
+    if (premisesMapScaleControl && premisesMapInstance) {
+      premisesMapInstance.removeControl(premisesMapScaleControl);
+      premisesMapScaleControl = null;
+    }
     if (premisesMapVectorLayer && premisesMapInstance) {
       premisesMapInstance.removeLayer(premisesMapVectorLayer);
       premisesMapVectorLayer = null;
@@ -11798,6 +12073,8 @@
     }
     const container = document.getElementById('premises-map-container');
     if (container) container.innerHTML = '';
+    premisesMapMoveBound = false;
+    premisesMapBoundaryLayerIds = [];
   }
 
   function closePremisesMapModal() {
@@ -11806,21 +12083,28 @@
     document.body.classList.remove('premises-map-modal-open');
     destroyPremisesMap();
     premisesMapActiveName = null;
+    premisesMapPrem = null;
+    premisesMapApiKey = null;
+    premisesMapStyleId = 'default';
+    premisesMapBoundariesOn = false;
+    setPremisesMapChromeVisible(false);
+    const styleSelect = document.getElementById('premises-map-style');
+    const boundaries = document.getElementById('premises-map-boundaries');
+    if (styleSelect) styleSelect.value = 'default';
+    if (boundaries) boundaries.checked = false;
   }
 
   function showPremisesMapSetupMessage(message) {
     const container = document.getElementById('premises-map-container');
-    const attribution = document.getElementById('premises-map-attribution');
     if (container) {
       container.innerHTML = '<div class="premises-map-setup-msg">' + escHtml(message) + '</div>';
     }
-    if (attribution) attribution.hidden = true;
+    setPremisesMapChromeVisible(false);
   }
 
   function initPremisesOsMap(prem) {
     const apiKey = getOsMapsApiKey();
     const container = document.getElementById('premises-map-container');
-    const attribution = document.getElementById('premises-map-attribution');
     if (!container) return;
 
     if (!apiKey || apiKey === 'YOUR_OS_PROJECT_API_KEY') {
@@ -11839,7 +12123,7 @@
     }
 
     container.innerHTML = '<div class="premises-map-setup-msg">Loading map…</div>';
-    if (attribution) attribution.hidden = true;
+    setPremisesMapChromeVisible(false);
 
     verifyOsMapsApiKey(apiKey).then(function (result) {
       if (!result.ok) {
@@ -11855,49 +12139,62 @@
 
   function renderPremisesOsMap(prem, apiKey) {
     const container = document.getElementById('premises-map-container');
-    const attribution = document.getElementById('premises-map-attribution');
     if (!container) return;
+
+    premisesMapPrem = prem;
+    premisesMapApiKey = apiKey;
+    premisesMapStyleId = 'default';
+    premisesMapBoundariesOn = false;
 
     container.innerHTML = '';
     destroyPremisesMap();
 
-    fetch(getOsVtsStyleUrl(apiKey))
-      .then(function (r) {
-        if (!r.ok) throw new Error('style ' + r.status);
-        return r.json();
-      })
-      .then(function (style) {
-        premisesMapInstance = L.map(container, {
-          center: [prem.lat, prem.lng],
-          zoom: OS_VTS_DEFAULT_ZOOM,
-          minZoom: 6,
-          maxZoom: OS_VTS_MAX_ZOOM,
-          maxBounds: [[85, -180], [-85, 180]],
-          maxBoundsViscosity: 1,
-          zoomControl: true
-        });
+    fetchOsVtsBaseStyle('default', apiKey).then(function (style) {
+      const merged = mergeBoundariesIntoStyle(style, apiKey);
 
-        premisesMapVectorLayer = L.maplibreGL({
-          style: patchOsVtsStyleForOpenTier(style),
-          attribution: '© Crown copyright and database rights OS'
-        }).addTo(premisesMapInstance);
-
-        premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
-        premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
-
-        if (attribution) attribution.hidden = false;
-
-        setTimeout(function () {
-          if (premisesMapInstance) premisesMapInstance.invalidateSize();
-          const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
-            ? premisesMapVectorLayer.getMaplibreMap()
-            : null;
-          if (glMap) glMap.resize();
-        }, 80);
-      })
-      .catch(function () {
-        showPremisesMapSetupMessage('Could not load the map style. Check your OS Vector Tile API key and try again.');
+      premisesMapInstance = L.map(container, {
+        center: [prem.lat, prem.lng],
+        zoom: OS_VTS_DEFAULT_ZOOM,
+        minZoom: 6,
+        maxZoom: OS_VTS_MAX_ZOOM,
+        maxBounds: [[85, -180], [-85, 180]],
+        maxBoundsViscosity: 1,
+        zoomControl: false
       });
+
+      L.control.zoom({ position: 'bottomright' }).addTo(premisesMapInstance);
+
+      premisesMapVectorLayer = L.maplibreGL({
+        style: merged,
+        attribution: '© Crown copyright and database rights OS'
+      }).addTo(premisesMapInstance);
+
+      premisesMapMarker = L.marker([prem.lat, prem.lng]).addTo(premisesMapInstance);
+      premisesMapMarker.bindPopup('<strong>' + escHtml(prem.name) + '</strong><br>' + escHtml(prem.address || '')).openPopup();
+
+      premisesMapScaleControl = L.control.scale({ imperial: true, metric: true, position: 'bottomleft' });
+      premisesMapScaleControl.addTo(premisesMapInstance);
+
+      bindPremisesMapMoveEvents();
+      updatePremisesMapCoordsDisplay(prem.lat, prem.lng);
+      updatePremisesMapExternalLinks(prem);
+      setPremisesMapChromeVisible(true);
+
+      const styleSelect = document.getElementById('premises-map-style');
+      const boundaries = document.getElementById('premises-map-boundaries');
+      if (styleSelect) styleSelect.value = 'default';
+      if (boundaries) boundaries.checked = false;
+
+      setTimeout(function () {
+        if (premisesMapInstance) premisesMapInstance.invalidateSize();
+        const glMap = premisesMapVectorLayer && premisesMapVectorLayer.getMaplibreMap
+          ? premisesMapVectorLayer.getMaplibreMap()
+          : null;
+        if (glMap) glMap.resize();
+      }, 80);
+    }).catch(function () {
+      showPremisesMapSetupMessage('Could not load the map style. Check your OS Vector Tile API key and try again.');
+    });
   }
 
   function openPremisesMapModal(premisesName) {
@@ -11930,6 +12227,27 @@
 
   window.openPremisesMapModal = openPremisesMapModal;
   window.closePremisesMapModal = closePremisesMapModal;
+
+  (function initPremisesMapControls() {
+    const styleSelect = document.getElementById('premises-map-style');
+    const boundaries = document.getElementById('premises-map-boundaries');
+    const recenterBtn = document.getElementById('premises-map-recenter');
+    if (styleSelect) {
+      styleSelect.addEventListener('change', function () {
+        applyPremisesMapStyle(styleSelect.value);
+      });
+    }
+    if (boundaries) {
+      boundaries.addEventListener('change', function () {
+        setPremisesMapBoundariesVisible(boundaries.checked);
+      });
+    }
+    if (recenterBtn) {
+      recenterBtn.addEventListener('click', function () {
+        recenterPremisesMap();
+      });
+    }
+  })();
 
   function initPremisesDetailPage() {
     const prem = getPremisesByName('Temple Quay House');
