@@ -1248,6 +1248,7 @@
     if (!panel) return;
     setConcernActivityBarVisible(true);
     setConcernLogType(mode || concernLogType || 'time');
+    if (typeof resetActivityLogDate === 'function') resetActivityLogDate('concern-time-date');
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
     document.body.classList.add('concern-float-panel-open');
@@ -1267,11 +1268,17 @@
       concernActivityLog.notes.unshift({ id: 'sn' + stamp.ts, text: text, at: stamp.at, ts: stamp.ts });
       document.getElementById('concern-note-text').value = '';
     } else if (concernLogType === 'time') {
+      const timeStamp = typeof getActivityLogStampForTime === 'function'
+        ? getActivityLogStampForTime('concern-time-date')
+        : (typeof cpinLogTimestamp === 'function' ? cpinLogTimestamp() : { at: 'Today', ts: Date.now(), logDate: null });
+      if (!timeStamp) return;
       concernActivityLog.times.unshift({
-        id: 'st' + stamp.ts,
+        id: 'st' + timeStamp.ts,
         activity: document.getElementById('concern-time-activity')?.value || 'Desk-based investigation',
         minutes: parseInt(document.getElementById('concern-time-duration')?.value || '30', 10),
-        at: stamp.at, ts: stamp.ts
+        at: timeStamp.at,
+        ts: timeStamp.ts,
+        logDate: timeStamp.logDate
       });
     }
     persistConcernPatch(activeConcernId, { activityLog: concernActivityLog });

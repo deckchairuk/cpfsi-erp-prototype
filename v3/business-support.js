@@ -1056,6 +1056,7 @@
     if (!panel) return;
     setBsActivityBarVisible(true);
     setBsLogType(mode || bsLogType || 'time');
+    if (typeof resetActivityLogDate === 'function') resetActivityLogDate('bs-time-date');
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bs-float-panel-open');
@@ -1086,11 +1087,17 @@
       bsActivityLog.notes.unshift({ id: 'bn' + stamp.ts, text: text, at: stamp.at, ts: stamp.ts });
       document.getElementById('bs-note-text').value = '';
     } else if (bsLogType === 'time') {
+      const timeStamp = typeof getActivityLogStampForTime === 'function'
+        ? getActivityLogStampForTime('bs-time-date')
+        : (typeof cpinLogTimestamp === 'function' ? cpinLogTimestamp() : { at: 'Today', ts: Date.now(), logDate: null });
+      if (!timeStamp) return;
       bsActivityLog.times.unshift({
-        id: 'bt' + stamp.ts,
+        id: 'bt' + timeStamp.ts,
         activity: document.getElementById('bs-time-activity')?.value || 'Meeting',
         minutes: parseInt(document.getElementById('bs-time-duration')?.value || '30', 10),
-        at: stamp.at, ts: stamp.ts
+        at: timeStamp.at,
+        ts: timeStamp.ts,
+        logDate: timeStamp.logDate
       });
     } else if (bsLogType === 'file') {
       const desc = document.getElementById('bs-file-desc')?.value?.trim() || 'File';

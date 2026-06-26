@@ -550,6 +550,35 @@
     color: var(--ink-3);
     font-size: 12px;
   }
+  .dash-reminders-list {
+    margin-top: 6px;
+    font-size: 13px;
+  }
+  .dash-reminder-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-2);
+    line-height: 1.45;
+  }
+  .dash-reminder-row:last-child { border-bottom: none; }
+  .dash-reminder-detail {
+    min-width: 0;
+    flex: 1;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  .dash-reminder-premises {
+    flex-shrink: 0;
+    max-width: 46%;
+    text-align: right;
+    font-weight: 500;
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+  .dash-reminder-detail .highlight-amber { color: var(--amber); }
 
   /* Process page layout */
   .process-grid {
@@ -2105,12 +2134,15 @@
 
   .audit-quick-log {
     display: grid;
-    grid-template-columns: 240px 1fr 120px;
+    grid-template-columns: 132px 240px 1fr 120px;
     gap: 12px;
     align-items: end;
   }
+  .audit-quick-log.audit-quick-log--compact {
+    grid-template-columns: 132px 1fr 120px;
+  }
   #global-log-fields-time .audit-quick-log {
-    grid-template-columns: 1fr 1fr 120px;
+    grid-template-columns: 132px 1fr 1fr 120px;
   }
   .audit-quick-log label,
   .audit-note-form label {
@@ -2305,7 +2337,101 @@
     line-height: 1;
   }
   .cpin-pin.pinned { color: var(--amber); }
-  .cpins-panel[hidden] { display: none; }
+  .cpin-card-menu-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+  .cpin-card-menu-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--ink-3);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .cpin-card-menu-btn:hover,
+  .cpin-card-menu-btn[aria-expanded="true"] {
+    background: var(--line-2);
+    color: var(--ink);
+  }
+  .cpin-card-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 40;
+    min-width: 196px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(11, 12, 12, 0.12);
+    padding: 4px;
+  }
+  .cpin-card-menu[hidden] { display: none !important; }
+  .cpin-card-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--ink-2);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .cpin-card-menu button:hover { background: var(--line-2); color: var(--ink); }
+  .cpin-card-menu button.danger { color: var(--red); }
+  .cpin-card-menu button.danger:hover { background: #fef2f2; }
+  .cpin-card.is-flagged {
+    background: #fffdf5;
+    border-color: #f0d9a8;
+  }
+  .cpin-card.is-pending-review {
+    opacity: 0.92;
+    border-style: dashed;
+  }
+  .cpin-review-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 10px;
+  }
+  .cpin-admin-review-banner {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fffdf5;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .cpin-admin-review-banner strong { color: var(--ink); }
+  .cpin-admin-review-banner.pending { border-color: #f0d9a8; background: #fffdf5; }
+  .cpin-admin-review-banner.approved-flag { border-color: #f0d9a8; }
+  .cpin-admin-review-banner.rejected { border-color: var(--line); background: var(--bg); }
+  .admin-cpin-review-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-cpin-review-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .admin-cpin-review-item .meta {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .admin-cpin-review-item .notes {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin: 8px 0 10px;
+  }
+  .admin-cpin-review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   .cpins-pinned-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -3003,6 +3129,139 @@
     font-size: 12px;
     color: var(--ink-3);
     margin-top: 2px;
+  }
+  .premises-details-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .premises-details-layout { grid-template-columns: 1fr; }
+  }
+  .premises-details-main { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .premises-details-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: sticky;
+    top: 12px;
+  }
+  @media (max-width: 1100px) {
+    .premises-details-aside { position: static; }
+  }
+  .premises-details-section {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .premises-details-section-hd {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .premises-details-section-body { padding: 0; }
+  .premises-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 700px) {
+    .premises-details-grid { grid-template-columns: 1fr; }
+  }
+  .premises-details-grid.cols-1 { grid-template-columns: 1fr; }
+  .premises-details-col {
+    min-width: 0;
+    border-right: 1px solid var(--line-2);
+  }
+  .premises-details-grid.cols-1 .premises-details-col,
+  .premises-details-grid .premises-details-col:last-child { border-right: none; }
+  @media (max-width: 700px) {
+    .premises-details-col { border-right: none; border-bottom: 1px solid var(--line-2); }
+    .premises-details-col:last-child { border-bottom: none; }
+  }
+  .premises-details-field {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-2);
+    min-height: 58px;
+  }
+  .premises-details-col .premises-details-field:last-child { border-bottom: none; }
+  .premises-details-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .premises-details-field .value {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.45;
+    white-space: pre-line;
+  }
+  .premises-details-field .value.is-empty { color: var(--ink-3); }
+  .premises-details-aside-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .premises-details-aside-card-hd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--line-2);
+    background: var(--bg);
+  }
+  .premises-details-aside-card-body { padding: 12px 14px; }
+  .premises-details-rbip-indicator {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .premises-details-rbip-flag {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  .premises-details-rbip-flag.amber { background: linear-gradient(135deg, #f47738 55%, #ffdd00 55%); }
+  .premises-details-rbip-flag.red { background: #d4351c; color: #fff; }
+  .premises-details-rbip-flag.green { background: #00703c; color: #fff; }
+  .premises-details-aside-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+  }
+  .premises-details-aside-field label {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 3px;
+  }
+  .premises-details-aside-field .value {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .premises-details-activity-empty {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    padding: 8px 0;
   }
   .setup-lookup-modal-hd {
     display: flex;
@@ -3902,6 +4161,9 @@
 
   .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 16px; }
   .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding: 4px 12px;
     border: 1px solid var(--line);
     background: var(--surface);
@@ -3914,6 +4176,29 @@
     background: var(--ink);
     color: white;
     border-color: var(--ink);
+    padding-right: 8px;
+  }
+  .chip-dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 2px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.9;
+    flex-shrink: 0;
+  }
+  .chip-dismiss:hover,
+  .chip-dismiss:focus-visible {
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
   }
 
   /* Prompts panel content */
@@ -4269,7 +4554,8 @@
     color: var(--ink);
   }
   .feedback-field input,
-  .feedback-field textarea {
+  .feedback-field textarea,
+  .feedback-field select {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 6px;
@@ -4281,7 +4567,8 @@
   }
   .feedback-field textarea { min-height: 100px; resize: vertical; }
   .feedback-field input:focus,
-  .feedback-field textarea:focus {
+  .feedback-field textarea:focus,
+  .feedback-field select:focus {
     outline: 3px solid transparent;
     box-shadow: 0 0 0 3px var(--gov-focus);
     border-color: var(--ink);
@@ -5024,6 +5311,62 @@
   .prem-row .prem-work-none {
     color: var(--ink-3);
     font-size: 12px;
+  }
+  .prem-site-tag {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.3;
+  }
+  .prem-site-tag--parent {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .prem-site-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    font-size: inherit;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prem-site-link:hover { color: var(--accent-dark); }
+  .premises-site-banner {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line-2);
+    background: var(--bg);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .premises-site-banner strong { color: var(--ink); }
+  .premises-site-overview {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+  .premises-site-overview .card { margin: 0; }
+  .premises-site-sibling-list {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 13px;
+  }
+  .premises-site-sibling-list a {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
   .prem-row--head {
     background: var(--bg);
@@ -6495,7 +6838,7 @@
   <main>
     <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  Admin</div>
     <h1>Admin and settings</h1>
-    <div class="meta">User management, system configuration and permissions. Views not in scope for this prototype.</div>
+    <div class="meta">User management, system configuration and permissions. CPIN review queue is demo-ready below.</div>
     <div class="card" style="margin-top:20px;max-width:560px;">
       <h3 style="margin-top:0;">Planned areas</h3>
       <ul style="margin:0;padding-left:20px;line-height:1.8;color:var(--ink-2);font-size:13px;">
@@ -6505,6 +6848,12 @@
         <li>Audit edit permissions (e.g. amend findings after letters sent)</li>
       </ul>
       <p style="font-size:12px;color:var(--ink-3);margin:16px 0 0;">Prototype demo: <button type="button" class="btn" onclick="grantAuditEditPermission()">Grant audit edit permission</button> for the Temple Quay audit.</p>
+    </div>
+
+    <div class="card" style="margin-top:20px;max-width:720px;">
+      <h3 style="margin-top:0;">CPIN review queue</h3>
+      <div class="help" style="margin-bottom:12px;">Inspectors can flag erroneous CPINs or request removal from the CPINs list. Approve or reject here before a CPIN is removed from the system.</div>
+      <div id="admin-cpin-review-list"></div>
     </div>
   </main>
 </div>
@@ -6558,11 +6907,7 @@
         <button class="btn" style="width:100%;margin-top:8px;" onclick="show('time')">+ Log time</button>
 
         <div style="margin-top:16px;font-size:12px;color:var(--ink-3);">Reminders</div>
-        <div style="font-size:13px;margin-top:6px;">
-          <div style="padding:6px 0;border-bottom:1px solid var(--line-2);">2 consultations <span style="color:var(--amber);">· SLA approaching</span></div>
-          <div style="padding:6px 0;border-bottom:1px solid var(--line-2);">1 follow-up due in 12 days</div>
-          <div style="padding:6px 0;">1 28-DAP closing Friday</div>
-        </div>
+        <div id="dash-reminders-list" class="dash-reminders-list"></div>
       </div>
 
       <!-- BOTTOM LEFT: Suggested patch -->
@@ -6629,9 +6974,9 @@
       <div class="filter-group">
         <div class="filter-group-label">Type</div>
         <div class="filter-chips filter-chips--scroll premises-filters-type" role="group" aria-label="Premises type">
-          <button class="chip" data-premises-type="prison" type="button">Prisons</button>
-          <button class="chip" data-premises-type="court" type="button">Courts</button>
-          <button class="chip" data-premises-type="government-office" type="button">Government Dept</button>
+          <button class="chip" data-premises-type="prison" data-chip-label="Prisons" type="button">Prisons</button>
+          <button class="chip" data-premises-type="court" data-chip-label="Courts" type="button">Courts</button>
+          <button class="chip" data-premises-type="government-office" data-chip-label="Government Dept" type="button">Government Dept</button>
         </div>
       </div>
     </div>
@@ -6687,7 +7032,8 @@
         <div class="prem-ref" id="premises-detail-ref">PRM-0001847</div>
         <h1>Temple Quay House</h1>
         <div class="meta" id="premises-detail-meta">Temple Back East, Bristol BS1  ·  <strong>HMCTS</strong>  ·  Government office</div>
-        <div style="margin-top:12px;display:flex;gap:8px;">
+        <div id="premises-detail-site" class="premises-site-banner" hidden></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Sprinkler system</span>
           <span class="pill grey">Smoke ventilation</span>
         </div>
@@ -6704,12 +7050,14 @@
 
     <div class="tabs" id="premises-detail-tabs">
       <button type="button" class="active" data-premises-tab="overview" onclick="setPremisesDetailTab('overview')">Overview</button>
+      <button type="button" data-premises-tab="details" onclick="setPremisesDetailTab('details')">Details</button>
       <button type="button" data-premises-tab="processes" onclick="setPremisesDetailTab('processes')">Processes  ·  6</button>
       <button type="button" data-premises-tab="documents" onclick="setPremisesDetailTab('documents')">Documents  ·  4</button>
       <button type="button" data-premises-tab="history" onclick="setPremisesDetailTab('history')">History</button>
     </div>
 
     <div id="premises-tab-overview" class="premises-tab-panel active">
+    <div id="premises-detail-site-overview" class="premises-site-overview" hidden></div>
     <div class="card-row">
       <div class="card">
         <h3>Duty Holders</h3>
@@ -6765,6 +7113,10 @@
     </div>
     </div>
 
+    <div id="premises-tab-details" class="premises-tab-panel">
+      <div id="premises-tq-details"></div>
+    </div>
+
     <div id="premises-tab-processes" class="premises-tab-panel">
       <div class="help" style="margin-bottom:12px;">Open and recent processes linked to this premises — audits, CPINs, follow-ups and support.</div>
       <div class="premises-detail-list" id="premises-tq-processes-list"></div>
@@ -6795,6 +7147,7 @@
         <div class="prem-ref">PRM-0002140</div>
         <h1>HMP Bristol</h1>
         <div class="meta" id="premises-bristol-meta">Cambridge Grove, Bristol BS7  ·  <strong>HMPPS</strong>  ·  Prison · Cat B</div>
+        <div id="premises-bristol-site" class="premises-site-banner" hidden></div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Cell fire detection</span>
           <span class="pill grey">Compartmentation</span>
@@ -6831,12 +7184,14 @@
 
     <div class="tabs" id="premises-bristol-tabs">
       <button type="button" class="active" data-premises-tab="overview" onclick="setPremisesBristolTab('overview')">Overview</button>
+      <button type="button" data-premises-tab="details" onclick="setPremisesBristolTab('details')">Details</button>
       <button type="button" data-premises-tab="processes" onclick="setPremisesBristolTab('processes')">Processes  ·  4</button>
       <button type="button" data-premises-tab="documents" onclick="setPremisesBristolTab('documents')">Documents  ·  2</button>
       <button type="button" data-premises-tab="history" onclick="setPremisesBristolTab('history')">History</button>
     </div>
 
     <div id="premises-bristol-overview" class="premises-tab-panel active">
+      <div id="premises-bristol-site-overview" class="premises-site-overview" hidden></div>
       <div class="card-row">
         <div class="card">
           <h3>Duty Holders</h3>
@@ -6875,6 +7230,10 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="premises-bristol-details" class="premises-tab-panel">
+      <div id="premises-bristol-details-root"></div>
     </div>
 
     <div id="premises-bristol-processes" class="premises-tab-panel">
@@ -7205,6 +7564,7 @@
               <button class="chip" data-cpin-filter="patch">My patch</button>
               <button class="chip" data-cpin-filter="premises-needed">Premises needed</button>
               <button class="chip" data-cpin-filter="in-progress">In progress</button>
+              <button class="chip" data-cpin-filter="flagged" type="button">Flagged / pending removal</button>
             </div>
           </div>
           <div class="filter-group">
@@ -7215,7 +7575,7 @@
           </div>
         </div>
 
-        <p class="cpin-pin-hint">Pin priority CPINs with <span class="cpin-pin-demo" aria-hidden="true">☆</span> on any card — pinned items stay at the top for <strong>everyone</strong> on this team, across all views.</p>
+        <p class="cpin-pin-hint">Pin priority CPINs with <span class="cpin-pin-demo" aria-hidden="true">☆</span> on any card — pinned items stay at the top for <strong>everyone</strong> on this team, across all views. Use <strong>⋯</strong> on a card to flag duplicates or request removal (admin approval required).</p>
 
         <div class="list-results-bar">
           <div class="list-results-line">
@@ -7264,6 +7624,7 @@
       </div>
       <div id="cpin-detail-actions" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
+    <div id="cpin-admin-review-banner" class="cpin-admin-review-banner" hidden></div>
 
     <div class="cpin-single-workflow">
       <div class="setup-section cpin-key-section">
@@ -7927,7 +8288,8 @@
       <button type="button" class="chip" data-concern-log-type="interim" onclick="setConcernLogType('interim')">Interim activity</button>
     </div>
     <div id="concern-log-fields-time">
-      <div class="audit-quick-log">
+      <div class="audit-quick-log audit-quick-log--compact">
+        <div><label for="concern-time-date">Date</label><input type="date" id="concern-time-date" /></div>
         <div><label>Activity</label><select id="concern-time-activity"><option>Desk-based investigation</option><option>Phone call</option><option>Meeting</option></select></div>
         <div><label>Duration</label><select id="concern-time-duration"><option value="30">30m</option><option value="60">1h</option><option value="90" selected>1h 30m</option></select></div>
       </div>
@@ -8175,7 +8537,8 @@
       <button type="button" class="chip" data-bs-log-type="file" onclick="setBsLogType('file')">File</button>
     </div>
     <div id="bs-log-fields-time">
-      <div class="audit-quick-log">
+      <div class="audit-quick-log audit-quick-log--compact">
+        <div><label for="bs-time-date">Date</label><input type="date" id="bs-time-date" /></div>
         <div><label>Activity</label><select id="bs-time-activity"><option>Meeting</option><option>Phone call</option><option>Email</option><option>Preparation</option></select></div>
         <div><label>Duration</label><select id="bs-time-duration"><option value="30">30m</option><option value="60" selected>1h</option><option value="90">1h 30m</option><option value="120">2h</option></select></div>
       </div>
@@ -8438,10 +8801,13 @@
           <h4>Pinned views</h4>
           <div class="view-item active" data-view-label="Open and mine" role="menuitem" tabindex="0"><span class="view-item-label">Open and mine</span><span class="pin">★ 12</span></div>
           <div class="view-item" data-view-label="My patch (open)" role="menuitem" tabindex="0"><span class="view-item-label">My patch (open)</span><span class="pin">★ 38</span></div>
+          <div class="view-item" data-view-label="All open processes" role="menuitem" tabindex="0"><span class="view-item-label">All open processes</span><span class="pin">★</span></div>
+          <div class="view-item" data-view-label="All processes" role="menuitem" tabindex="0"><span class="view-item-label">All processes</span><span class="pin">★</span></div>
           <div class="view-item" data-view-label="Worst score first" role="menuitem" tabindex="0"><span class="view-item-label">Worst score first</span><span class="pin">★</span></div>
           <div class="view-item" data-view-label="Awaiting action plan" role="menuitem" tabindex="0"><span class="view-item-label">Awaiting action plan</span><span class="pin">★</span></div>
 
           <h4 style="margin-top:16px;">Shared views</h4>
+          <div class="view-item" data-view-label="Not mine (open)" role="menuitem" tabindex="0"><span class="view-item-label">Not mine (open)</span><span class="pin">★</span></div>
           <div class="view-item" data-view-label="Whole team, open" role="menuitem" tabindex="0"><span class="view-item-label">Whole team, open</span></div>
           <div class="view-item" data-view-label="Prisons only" role="menuitem" tabindex="0"><span class="view-item-label">Prisons only</span></div>
           <div class="view-item" data-view-label="SLA approaching" role="menuitem" tabindex="0"><span class="view-item-label">SLA approaching</span></div>
@@ -8480,7 +8846,7 @@
           <div class="filter-group">
             <div class="filter-group-label">Dept</div>
             <div class="filter-chips filter-chips--scroll process-filters-dept" role="group" aria-label="Government department">
-              <button class="chip" data-process-dept="government-office" type="button">Government Dept</button>
+              <button class="chip" data-process-dept="government-office" data-chip-label="Government Dept" type="button">Government Dept</button>
             </div>
           </div>
         </div>
@@ -9280,6 +9646,10 @@
       <div id="audit-log-fields-time">
         <div class="audit-quick-log">
           <div>
+            <label for="audit-time-date">Date</label>
+            <input type="date" id="audit-time-date" />
+          </div>
+          <div>
             <label>Activity</label>
             <select id="audit-time-activity"></select>
           </div>
@@ -9369,6 +9739,10 @@
       <div id="cpin-log-fields-time">
         <div class="audit-quick-log">
           <div>
+            <label for="cpin-time-date">Date</label>
+            <input type="date" id="cpin-time-date" />
+          </div>
+          <div>
             <label>Activity</label>
             <select id="cpin-time-activity"></select>
           </div>
@@ -9451,6 +9825,10 @@
       </div>
       <div id="global-log-fields-time">
         <div class="audit-quick-log">
+          <div>
+            <label for="global-time-date">Date</label>
+            <input type="date" id="global-time-date" />
+          </div>
           <div>
             <label>What for</label>
             <select id="global-time-what"></select>
@@ -9663,6 +10041,53 @@
       <div class="feedback-actions" style="margin-top:16px;">
         <button type="button" class="btn" onclick="closeSaveProcessViewModal()">Cancel</button>
         <button type="button" class="btn primary" onclick="confirmSaveProcessView()">Save view</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="cpin-review-modal" class="modal-backdrop" onclick="if(event.target===this) closeCpinReviewModal()">
+  <div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="cpin-review-modal-title">Flag CPIN</h2>
+        <div class="sub" id="cpin-review-modal-sub">Mark this CPIN as erroneous. An admin must approve before it is hidden or removed.</div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeCpinReviewModal()" title="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="cpin-review-readonly" hidden>
+        <div class="inset" id="cpin-review-status-panel" style="margin-bottom:14px;"></div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px;" id="cpin-review-readonly-meta"></div>
+        <div class="feedback-actions">
+          <button type="button" class="btn" onclick="closeCpinReviewModal()">Close</button>
+          <button type="button" class="btn" id="cpin-review-withdraw-btn" onclick="withdrawCpinReviewRequest()">Withdraw request</button>
+        </div>
+      </div>
+      <div id="cpin-review-form">
+        <div class="feedback-field">
+          <label>CPIN</label>
+          <div id="cpin-review-ref" style="font-size:13px;font-weight:600;color:var(--ink);"></div>
+        </div>
+        <div class="feedback-field">
+          <label for="cpin-review-reason">Reason</label>
+          <select id="cpin-review-reason">
+            <option value="duplicate">Duplicate submission (logged twice or more)</option>
+            <option value="not_cpfsi">Not a CPFSI premises</option>
+            <option value="other">Other erroneous entry</option>
+          </select>
+        </div>
+        <div class="feedback-field">
+          <label for="cpin-review-notes">Notes</label>
+          <textarea id="cpin-review-notes" rows="4" placeholder="e.g. Same incident as CPIN-2026-0417 — FRS submitted twice. Or: retail unit — not on crown premises register."></textarea>
+        </div>
+        <div class="inset" style="font-size:12px;margin-top:4px;" id="cpin-review-approval-note">
+          Your request is sent to an admin for approval. Flagged CPINs stay visible with a warning; removal takes effect only after approval.
+        </div>
+        <div class="feedback-actions" style="margin-top:16px;">
+          <button type="button" class="btn" onclick="closeCpinReviewModal()">Cancel</button>
+          <button type="button" class="btn primary" id="cpin-review-submit-btn" onclick="submitCpinReviewRequest()">Submit for admin approval</button>
+        </div>
       </div>
     </div>
   </div>
@@ -10056,6 +10481,7 @@
     if (screen === 'premisesdetail') initPremisesDetailPage();
     if (screen === 'premisesdetail-bristol') initPremisesBristolPage();
     if (screen === 'dashboard') initDashboardPage();
+    if (screen === 'admin') initAdminPage();
     if (screen === 'audit') {
       renderAuditFindings();
       updateAuditEditWarning();
@@ -11437,8 +11863,10 @@
     if (!view || view === 'Worst score first') return true;
     if (view === 'Open and mine') return p.mine && p.status !== 'closed';
     if (view === 'My patch (open)') return p.patch && p.status !== 'closed';
+    if (view === 'All open processes' || view === 'Whole team, open') return p.status !== 'closed';
+    if (view === 'All processes') return true;
+    if (view === 'Not mine (open)') return !p.mine && p.status !== 'closed';
     if (view === 'Awaiting action plan') return p.status === 'awaiting-action-plan';
-    if (view === 'Whole team, open') return p.status !== 'closed';
     if (view === 'Prisons only') return !!p.prison && p.status !== 'closed';
     if (view === 'SLA approaching') return !!p.hasSla && p.status !== 'closed';
     if (view === 'Closed this month') return p.status === 'closed';
@@ -11558,12 +11986,26 @@
     renderProcessesList();
   }
 
-  function setProcessDeptFilter(dept) {
-    if (processesDeptFilter === dept) processesDeptFilter = null;
-    else processesDeptFilter = dept;
-    document.querySelectorAll('.process-filters-dept .chip').forEach(chip => {
-      chip.classList.toggle('on', chip.dataset.processDept === processesDeptFilter);
+  function syncProcessDeptFilterChips() {
+    document.querySelectorAll('.process-filters-dept .chip').forEach(function (chip) {
+      const dept = chip.dataset.processDept;
+      const label = chip.dataset.chipLabel || chip.textContent.trim();
+      const isOn = dept === processesDeptFilter;
+      chip.classList.toggle('on', isOn);
+      if (isOn) {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>' +
+          '<span class="chip-dismiss" role="button" tabindex="0" aria-label="Clear ' + escHtml(label) + ' filter">×</span>';
+      } else {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>';
+      }
     });
+  }
+
+  function setProcessDeptFilter(dept) {
+    if (dept == null) processesDeptFilter = null;
+    else if (processesDeptFilter === dept) processesDeptFilter = null;
+    else processesDeptFilter = dept;
+    syncProcessDeptFilterChips();
     renderProcessesList();
   }
 
@@ -11766,10 +12208,312 @@
     document.querySelectorAll('#premises-bristol-tabs button').forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.premisesTab === tab);
     });
-    ['overview', 'processes', 'documents', 'history'].forEach(function (t) {
+    ['overview', 'details', 'processes', 'documents', 'history'].forEach(function (t) {
       const panel = document.getElementById('premises-bristol-' + t);
       if (panel) panel.classList.toggle('active', t === tab);
     });
+  }
+
+  function formatPremisesDetailDisplay(value) {
+    if (value === true) return 'Yes';
+    if (value === false) return 'No';
+    if (value === 0 || value === '0') return '0';
+    if (value == null || value === '') return '—';
+    return String(value);
+  }
+
+  function renderPremisesDetailsField(label, value) {
+    const display = formatPremisesDetailDisplay(value);
+    const emptyClass = display === '—' ? ' is-empty' : '';
+    return '<div class="premises-details-field"><label>' + escHtml(label) + '</label>' +
+      '<div class="value' + emptyClass + '">' + escHtml(display) + '</div></div>';
+  }
+
+  function renderPremisesDetailsFieldsCol(fields) {
+    return '<div class="premises-details-col">' +
+      fields.map(function (f) { return renderPremisesDetailsField(f.label, f.value); }).join('') +
+      '</div>';
+  }
+
+  function renderPremisesDetailsSection(section) {
+    const cols = section.columns || [];
+    const gridClass = cols.length === 1 ? 'premises-details-grid cols-1' : 'premises-details-grid';
+    let html = '<section class="premises-details-section">';
+    if (section.title) {
+      html += '<div class="premises-details-section-hd">' + escHtml(section.title) + '</div>';
+    }
+    html += '<div class="premises-details-section-body"><div class="' + gridClass + '">';
+    cols.forEach(function (col) {
+      html += renderPremisesDetailsFieldsCol(col);
+    });
+    html += '</div></div></section>';
+    return html;
+  }
+
+  function renderPremisesDetailsAsideCard(title, bodyHtml) {
+    return '<div class="premises-details-aside-card">' +
+      '<div class="premises-details-aside-card-hd">' + escHtml(title) + '</div>' +
+      '<div class="premises-details-aside-card-body">' + bodyHtml + '</div></div>';
+  }
+
+  function renderPremisesDetailsAsideFields(fields) {
+    return '<div class="premises-details-aside-grid">' +
+      fields.map(function (f) {
+        return '<div class="premises-details-aside-field"><label>' + escHtml(f.label) + '</label>' +
+          '<div class="value">' + escHtml(formatPremisesDetailDisplay(f.value)) + '</div></div>';
+      }).join('') +
+      '</div>';
+  }
+
+  function getPremisesLocationDetails(prem) {
+    if (!prem) return null;
+    const custom = PREMISES_LOCATION_DETAILS[prem.name];
+    if (custom) return custom;
+    return buildDefaultPremisesLocationDetails(prem);
+  }
+
+  function buildDefaultPremisesLocationDetails(prem) {
+    const postcodeMatch = (prem.address || '').match(/([A-Z]{1,2}\d[\dA-Z]?\s*\d[A-Z]{2})/i);
+    const postcode = postcodeMatch ? postcodeMatch[1].toUpperCase() : '';
+    const flag = prem.score >= 40 ? 'amber' : (prem.score >= 30 ? 'amber' : 'green');
+    return {
+      intro: {
+        left: [
+          { label: 'Location Name', value: prem.name },
+          { label: 'Record Type', value: 'Premises' },
+          { label: 'Correspondence Print Address', value: prem.name + '\n' + (prem.address || '') },
+          { label: 'Benchmark GFP', value: '12' },
+          { label: 'Benchmark Management', value: '9' },
+          { label: 'Benchmark Maintenance', value: '4' },
+          { label: 'RBIP Group Picklist', value: prem.dept || '—' },
+          { label: 'Extant Crown Step-Away Notice', value: false }
+        ],
+        right: [
+          { label: 'Location Ref', value: prem.ref ? prem.ref.replace('PRM-', 'LOC-') : '—' },
+          { label: 'Parent Location', value: prem.parentSite ? prem.parentSite.name + ' (' + prem.parentSite.ref + ')' : '' },
+          { label: 'Premises Type', value: prem.typeLabel || '—' }
+        ]
+      },
+      aside: {
+        flag: flag,
+        rbipScore: prem.score,
+        shortAuditRecent: [],
+        shortAuditHistoric: [],
+        fullAuditRecent: [{ label: 'Most Recent Initial Full Audit Date', value: prem.lastAudit || '—' }],
+        fullAuditHistoric: [],
+        followUp: []
+      },
+      sections: [
+        {
+          title: 'Risk Profile Troubleshoot',
+          columns: [
+            [
+              { label: 'GFP Risk Profile', value: '4' },
+              { label: 'Management Risk Profile', value: '-1' },
+              { label: 'Maintenance Risk Profile', value: '0' }
+            ],
+            [
+              { label: 'Consolidated GFP Risk Profile', value: '' },
+              { label: 'Consolidated Management Risk Profile', value: '' },
+              { label: 'Consolidated Maintenance Risk Profile', value: '' }
+            ]
+          ]
+        },
+        {
+          title: 'General Information',
+          columns: [
+            [
+              { label: 'Address Line 1', value: prem.name },
+              { label: 'Address Line 2', value: (prem.address || '').replace(postcode, '').replace(/,\s*$/, '').trim() },
+              { label: 'Floors Occupied', value: '' },
+              { label: 'Town/City', value: '—' },
+              { label: 'County', value: '—' },
+              { label: 'Postcode', value: postcode }
+            ],
+            [
+              { label: 'UPRN', value: '' },
+              { label: 'X Coordinate', value: prem.lng != null ? prem.lng.toFixed(5) : '' },
+              { label: 'Y Coordinate', value: prem.lat != null ? prem.lat.toFixed(5) : '' },
+              { label: 'Region', value: '—' },
+              { label: 'Country', value: 'United Kingdom' },
+              { label: 'Lat/Long', value: prem.lat != null ? formatPremisesCoords(prem.lat, prem.lng) : '' }
+            ]
+          ]
+        }
+      ]
+    };
+  }
+
+  function renderPremisesLocationDetails(premisesName, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const prem = getPremisesByName(premisesName);
+    const details = getPremisesLocationDetails(prem);
+    if (!details) {
+      el.innerHTML = '<div class="help">No location details are available for this premises yet.</div>';
+      return;
+    }
+
+    let mainHtml = '<div class="premises-details-main">';
+    if (details.intro) {
+      mainHtml += '<div class="premises-details-section"><div class="premises-details-section-body">' +
+        '<div class="premises-details-grid">' +
+        renderPremisesDetailsFieldsCol(details.intro.left) +
+        renderPremisesDetailsFieldsCol(details.intro.right) +
+        '</div></div></div>';
+    }
+    (details.sections || []).forEach(function (section) {
+      mainHtml += renderPremisesDetailsSection(section);
+    });
+    mainHtml += '</div>';
+
+    let asideHtml = '';
+    const aside = details.aside || {};
+    asideHtml += renderPremisesDetailsAsideCard('Recent Assurance/Short Audit History',
+      renderPremisesDetailsAsideFields((aside.shortAuditRecent || []).concat(aside.shortAuditHistoric || []).length
+        ? (aside.shortAuditRecent || []).concat(aside.shortAuditHistoric || [])
+        : [
+          { label: 'Most Recent Assurance/Short Audit Date', value: '' },
+          { label: 'Most Recent Assurance/Short Audit Score', value: '' },
+          { label: 'Most Recent Assur/Short Audit Outcome', value: '' },
+          { label: 'Historic Assurance/Short Audit Date', value: '' },
+          { label: 'Historic Assurance/Short Audit Score', value: '' },
+          { label: 'Historic Assur/Short Audit Outcome', value: '' }
+        ])
+    );
+    const fullFields = (aside.fullAuditRecent || []).concat(aside.fullAuditHistoric || []);
+    asideHtml += renderPremisesDetailsAsideCard('Recent Initial Full Audit History',
+      fullFields.length ? renderPremisesDetailsAsideFields(fullFields) :
+        renderPremisesDetailsAsideFields([
+          { label: 'Most Recent Initial Full Audit Date', value: '' },
+          { label: 'Most Recent Initial Full Audit Score', value: '' },
+          { label: 'Historic Initial Full Audit Date', value: '' },
+          { label: 'Historic Initial Full Audit Score', value: '' }
+        ])
+    );
+    if ((aside.followUp || []).length) {
+      asideHtml += renderPremisesDetailsAsideCard('Recent Follow Up Full Audit History',
+        renderPremisesDetailsAsideFields(aside.followUp));
+    }
+    asideHtml += renderPremisesDetailsAsideCard('Activity',
+      '<div class="premises-details-activity-empty">No past activity. Past meetings and tasks marked as done show up here.</div>'
+    );
+
+    el.innerHTML = '<div class="premises-details-layout">' + mainHtml +
+      '<aside class="premises-details-aside">' + asideHtml + '</aside></div>';
+  }
+
+  function getPremisesByRef(ref) {
+    return PREMISES_LIST.find(function (p) { return p.ref === ref; }) || null;
+  }
+
+  function getPremisesSiteChildren(siteRef) {
+    return PREMISES_LIST.filter(function (p) {
+      return p.parentSite && p.parentSite.ref === siteRef;
+    });
+  }
+
+  function getPremisesSiteSiblings(prem) {
+    if (!prem || !prem.parentSite) return [];
+    return getPremisesSiteChildren(prem.parentSite.ref).filter(function (p) {
+      return p.name !== prem.name;
+    });
+  }
+
+  function renderPremisesSiteTagHtml(p) {
+    if (p.isParentSite) {
+      const count = (p.sitePremises && p.sitePremises.length) ||
+        getPremisesSiteChildren(p.ref).length;
+      if (!count) return '';
+      return '<span class="prem-site-tag prem-site-tag--parent">Multi-premises site · ' + count + ' units</span>';
+    }
+    if (!p.parentSite) return '';
+    const parent = getPremisesByRef(p.parentSite.ref);
+    const label = 'Part of ' + p.parentSite.name;
+    if (parent && parent.route) {
+      return '<span class="prem-site-tag"><button type="button" class="prem-site-link" data-premises-route="' +
+        escHtml(parent.route) + '">' + escHtml(label) + '</button></span>';
+    }
+    return '<span class="prem-site-tag">' + escHtml(label) + '</span>';
+  }
+
+  function renderPremisesSiteBanner(prem, elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (!prem || (!prem.parentSite && !prem.isParentSite)) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    if (prem.parentSite) {
+      const parent = getPremisesByRef(prem.parentSite.ref);
+      html += '<strong>Part of a larger site.</strong> This premises is tagged as part of <strong>' +
+        escHtml(prem.parentSite.name) + '</strong>';
+      if (parent && parent.route) {
+        html += ' — <button type="button" class="prem-site-link" data-premises-route="' +
+          escHtml(parent.route) + '">View site record</button>';
+      }
+      html += '. Each unit is audited and scored individually.';
+      const siblings = getPremisesSiteSiblings(prem);
+      if (siblings.length) {
+        html += '<ul class="premises-site-sibling-list">';
+        siblings.forEach(function (s) {
+          html += '<li>' + escHtml(s.name) + (s.ref ? ' <span class="prem-ref">' + escHtml(s.ref) + '</span>' : '') + '</li>';
+        });
+        html += '</ul>';
+      }
+    } else if (prem.isParentSite) {
+      const children = getPremisesSiteChildren(prem.ref);
+      const names = (prem.sitePremises && prem.sitePremises.length)
+        ? prem.sitePremises.map(function (n) { return PREMISES_LIST.find(function (p) { return p.name === n; }); }).filter(Boolean)
+        : children;
+      html += '<strong>Multi-premises site record.</strong> ' + escHtml(prem.name) +
+        ' groups ' + names.length + ' individually managed premises: ';
+      html += names.map(function (c) { return escHtml(c.name); }).join(', ') + '.';
+    }
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function renderPremisesSiteOverviewCard(prem, elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (!prem || (!prem.parentSite && !prem.isParentSite)) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+
+    let body = '';
+    if (prem.parentSite) {
+      const siblings = getPremisesSiteSiblings(prem);
+      body = '<p style="margin:0 0 8px;font-size:13px;color:var(--ink-2);line-height:1.5;">Tagged as part of <strong>' +
+        escHtml(prem.parentSite.name) + '</strong>. Related premises on the same site:</p>';
+      body += '<ul class="premises-site-sibling-list">';
+      body += '<li><strong>' + escHtml(prem.name) + '</strong> <span class="prem-ref">(this record)</span></li>';
+      siblings.forEach(function (s) {
+        body += '<li>' + escHtml(s.name) + (s.ref ? ' <span class="prem-ref">' + escHtml(s.ref) + '</span>' : '') + '</li>';
+      });
+      const parent = getPremisesByRef(prem.parentSite.ref);
+      if (parent) {
+        body += '<li>Site: ' + escHtml(parent.name) + (parent.ref ? ' <span class="prem-ref">' + escHtml(parent.ref) + '</span>' : '') + '</li>';
+      }
+      body += '</ul>';
+    } else if (prem.isParentSite) {
+      const children = getPremisesSiteChildren(prem.ref);
+      body = '<p style="margin:0 0 8px;font-size:13px;color:var(--ink-2);line-height:1.5;">This is the umbrella site record. Individual premises are audited separately:</p><ul class="premises-site-sibling-list">';
+      children.forEach(function (c) {
+        const click = c.route ? ' data-premises-route="' + escHtml(c.route) + '"' : '';
+        body += '<li><button type="button" class="prem-site-link"' + click + '>' + escHtml(c.name) + '</button>' +
+          (c.ref ? ' <span class="prem-ref">' + escHtml(c.ref) + '</span>' : '') + '</li>';
+      });
+      body += '</ul>';
+    }
+
+    el.innerHTML = '<div class="card"><h3>Larger site</h3>' + body + '</div>';
+    el.hidden = false;
   }
 
   function getPremisesByName(name) {
@@ -12030,6 +12774,14 @@
       e.preventDefault();
       const id = auditBtn.getAttribute('data-continue-audit');
       if (id) continueAudit(id);
+      return;
+    }
+    const premRouteBtn = e.target.closest('[data-premises-route]');
+    if (premRouteBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const route = premRouteBtn.getAttribute('data-premises-route');
+      if (route) show(route);
     }
   });
 
@@ -12252,7 +13004,10 @@
   function initPremisesDetailPage() {
     const prem = getPremisesByName('Temple Quay House');
     renderPremisesDetailMeta(prem, 'premises-detail-meta');
+    renderPremisesSiteBanner(prem, 'premises-detail-site');
+    renderPremisesSiteOverviewCard(prem, 'premises-detail-site-overview');
     renderPremisesInProgressAudits('Temple Quay House');
+    renderPremisesLocationDetails('Temple Quay House', 'premises-tq-details');
     setPremisesDetailTab('overview');
     renderPremisesDetailList('premises-tq-processes-list', PREMISES_TQ_PROCESSES);
     renderPremisesDetailList('premises-tq-documents-list', PREMISES_TQ_DOCUMENTS);
@@ -12262,6 +13017,9 @@
   function initPremisesBristolPage() {
     const prem = getPremisesByName('HMP Bristol');
     renderPremisesDetailMeta(prem, 'premises-bristol-meta');
+    renderPremisesSiteBanner(prem, 'premises-bristol-site');
+    renderPremisesSiteOverviewCard(prem, 'premises-bristol-site-overview');
+    renderPremisesLocationDetails('HMP Bristol', 'premises-bristol-details-root');
     setPremisesBristolTab('overview');
     renderPremisesDetailList('premises-bristol-processes-list', PREMISES_BRISTOL_PROCESSES);
     renderPremisesDetailList('premises-bristol-documents-list', PREMISES_BRISTOL_DOCUMENTS);
@@ -12335,8 +13093,17 @@
         chip.addEventListener('click', () => setProcessStatusFilter(chip.dataset.processStatus));
       });
       document.querySelectorAll('.process-filters-dept .chip').forEach(chip => {
-        chip.addEventListener('click', () => setProcessDeptFilter(chip.dataset.processDept));
+        chip.addEventListener('click', function (e) {
+          if (e.target.closest('.chip-dismiss')) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (processesDeptFilter === chip.dataset.processDept) setProcessDeptFilter(null);
+            return;
+          }
+          setProcessDeptFilter(chip.dataset.processDept);
+        });
       });
+      syncProcessDeptFilterChips();
       initListControlDropdown('process-sort-dropdown', setProcessSort);
       document.querySelectorAll('[data-proc-sort]').forEach(function (btn) {
         btn.addEventListener('click', function () { setProcessHeaderSort(btn.dataset.procSort); });
@@ -12361,29 +13128,392 @@
     renderProcessesList();
   }
 
+  function premisesDetailSections(d) {
+    return [
+      {
+        title: 'Risk Profile Troubleshoot',
+        columns: [
+          [
+            { label: 'GFP Risk Profile', value: d.gfpRisk },
+            { label: 'Management Risk Profile', value: d.mgmtRisk },
+            { label: 'Maintenance Risk Profile', value: d.maintRisk }
+          ],
+          [
+            { label: 'Consolidated GFP Risk Profile', value: d.consGfp },
+            { label: 'Consolidated Management Risk Profile', value: d.consMgmt },
+            { label: 'Consolidated Maintenance Risk Profile', value: d.consMaint }
+          ]
+        ]
+      },
+      {
+        title: 'General Information',
+        columns: [
+          [
+            { label: 'Address Line 1', value: d.addressLine1 },
+            { label: 'Address Line 2', value: d.addressLine2 },
+            { label: 'Floors Occupied', value: d.floorsOccupied },
+            { label: 'Town/City', value: d.town },
+            { label: 'County', value: d.county },
+            { label: 'Postcode', value: d.postcode }
+          ],
+          [
+            { label: 'UPRN', value: d.uprn },
+            { label: 'X Coordinate', value: d.xCoord },
+            { label: 'Y Coordinate', value: d.yCoord },
+            { label: 'Region', value: d.region },
+            { label: 'Country', value: d.country || 'United Kingdom' },
+            { label: 'Lat/Long', value: d.latLong }
+          ]
+        ]
+      },
+      {
+        columns: [
+          [
+            { label: 'Most Recent Audit Date', value: d.recentAuditDate },
+            { label: 'Historic Audit Date', value: d.historicAuditDate }
+          ],
+          [
+            { label: 'Most Recent Investigation Date', value: d.recentInvestigationDate },
+            { label: 'Historic Investigation Date', value: d.historicInvestigationDate }
+          ]
+        ]
+      },
+      {
+        title: 'RBIP General Troubleshoot',
+        columns: [
+          [
+            { label: 'RBIP — Incident Summary Score', value: d.incidentSummary },
+            { label: 'RBIP Assurance / Short Audit Score', value: d.assurShortScore },
+            { label: 'RBIP Full Audit Score', value: d.fullAuditScore },
+            { label: 'Most Recent GFP Score', value: d.recentGfp },
+            { label: 'Most Recent Management Score', value: d.recentMgmt },
+            { label: 'Most Recent Maintenance Score', value: d.recentMaint }
+          ],
+          [
+            { label: 'RBIP — Fatalities Score', value: d.fatalities },
+            { label: 'Risk Intelligence Score', value: d.riskIntel },
+            { label: 'Legacy System Audit Score', value: d.legacyScore },
+            { label: 'RBIP — Injuries Score', value: d.injuries }
+          ]
+        ]
+      },
+      {
+        title: 'Risk Weighting',
+        columns: [
+          [
+            { label: 'Most Recent Inspection Date Score', value: d.inspectionDateScore },
+            { label: 'RBIP FSO Compliance Score', value: d.fsoCompliance },
+            { label: 'How Many Floors?', value: d.howManyFloors },
+            { label: 'Basement Present?', value: d.basementPresent },
+            { label: 'National Resilience and Security', value: d.nationalResilience },
+            { label: 'Community Impact', value: d.communityImpact },
+            { label: 'Premises Classification', value: d.premisesClassification }
+          ],
+          [
+            { label: 'Floor Area', value: d.floorArea },
+            { label: 'National Infrastructure', value: d.nationalInfra },
+            { label: 'Heritage', value: d.heritage },
+            { label: 'Discretionary Weighting', value: d.discretionaryWeight },
+            { label: 'Discretionary Weighting Reason', value: d.discretionaryReason },
+            { label: 'RBIP Score', value: d.rbipScore },
+            { label: 'RBIP Calculator Score', value: d.rbipCalcScore },
+            { label: 'RBIP Risk Scores', value: d.rbipRiskScores },
+            { label: 'RBIP Consolidated Score', value: d.rbipConsolidated },
+            { label: 'Is Consolidated', value: d.isConsolidated },
+            { label: 'is Risk Scored', value: d.isRiskScored }
+          ]
+        ]
+      },
+      {
+        title: 'Risk Weighting RBIP Troubleshoot',
+        columns: [
+          [
+            { label: 'RBIP Building Height Score', value: d.bldgHeightScore },
+            { label: 'RBIP Basement Present Score', value: d.basementScore }
+          ],
+          [
+            { label: 'RBIP Floor Area Score', value: d.floorAreaScore },
+            { label: 'RBIP National Infrastructure Score', value: d.natInfraScore },
+            { label: 'RBIP National Resilience Score', value: d.natResScore },
+            { label: 'RBIP Heritage Score', value: d.heritageScore },
+            { label: 'RBIP Community Impact Score', value: d.communityScore },
+            { label: 'RBIP Premises Classification Risk Rating', value: d.premisesClassRiskRating },
+            { label: 'Premises Classification Risk', value: d.premisesClassRisk },
+            { label: 'Flag Colour', value: d.flagColour }
+          ]
+        ]
+      },
+      {
+        title: 'ADB B5 Facilities',
+        columns: [
+          [
+            { label: 'Dry Fire Main', value: d.dryFireMain },
+            { label: 'Firefighting Shaft', value: d.firefightingShaft },
+            { label: 'Natural Smoke Extract', value: d.naturalSmoke },
+            { label: 'ADB Basement Smoke Venting', value: d.adbBasement }
+          ],
+          [
+            { label: 'Wet Fire Main', value: d.wetFireMain },
+            { label: 'Firefighting Shaft w/ Firefighters Lift', value: d.ffShaftLift },
+            { label: 'Mechanical Smoke Extract', value: d.mechanicalSmoke },
+            { label: 'Pressurised Means of Escape', value: d.pressurisedEscape }
+          ]
+        ]
+      },
+      {
+        columns: [[{ label: 'Other', value: d.other }]]
+      },
+      {
+        title: 'ePIMS Data',
+        columns: [
+          [
+            { label: 'Property Name', value: d.epimsPropertyName },
+            { label: 'Holding Name', value: d.epimsHoldingName },
+            { label: 'Occupation Name', value: d.epimsOccupationName },
+            { label: 'Building Name', value: d.epimsBuildingName },
+            { label: 'Tenant Department', value: d.epimsTenantDept }
+          ],
+          [
+            { label: 'Property Centre', value: d.epimsPropertyCentre },
+            { label: 'Property Reference', value: d.epimsPropertyRef },
+            { label: 'Holding Type', value: d.epimsHoldingType },
+            { label: 'Holding Reference', value: d.epimsHoldingRef },
+            { label: 'Occupancy Reference', value: d.epimsOccupancyRef },
+            { label: 'Building Floor Area', value: d.epimsBuildingFloorArea },
+            { label: 'Building Usage', value: d.epimsBuildingUsage },
+            { label: 'Number of Floors', value: d.epimsNumFloors },
+            { label: 'Tenant Department Centre', value: d.epimsTenantDeptCentre }
+          ]
+        ]
+      },
+      {
+        columns: [
+          [
+            { label: 'Road', value: d.road },
+            { label: 'Department', value: d.department },
+            { label: 'Tenure Type', value: d.tenureType },
+            { label: 'Listed Building Description', value: d.listedBuilding }
+          ],
+          [
+            { label: 'Sector Name', value: d.sectorName },
+            { label: 'Construction Date', value: d.constructionDate }
+          ]
+        ]
+      },
+      {
+        title: 'System Information',
+        columns: [
+          [
+            { label: 'Exclude from RBIP', value: d.excludeFromRbip },
+            { label: 'FER Location', value: d.ferLocation },
+            { label: 'Historic', value: d.historic }
+          ],
+          [
+            { label: 'Last Modified By', value: d.lastModifiedBy },
+            { label: 'Created By', value: d.createdBy }
+          ]
+        ]
+      }
+    ];
+  }
+
+  const PREMISES_LOCATION_DETAILS = {
+    'Temple Quay House': {
+      intro: {
+        left: [
+          { label: 'Location Name', value: 'Temple Quay House' },
+          { label: 'Record Type', value: 'Premises' },
+          { label: 'Correspondence Print Address', value: 'Temple Quay House\nTemple Back East\nBristol\nBS1 6BH' },
+          { label: 'Benchmark GFP', value: '12' },
+          { label: 'Benchmark Management', value: '9' },
+          { label: 'Benchmark Maintenance', value: '4' },
+          { label: 'RBIP Group Picklist', value: 'HMCTS' },
+          { label: 'Extant Crown Step-Away Notice', value: false }
+        ],
+        right: [
+          { label: 'Location Ref', value: 'LOC-01847' },
+          { label: 'Parent Location', value: 'Temple Quay Estate (PRM-0001840)' },
+          { label: 'Premises Type', value: 'Non-Custodial' }
+        ]
+      },
+      aside: {
+        flag: 'amber',
+        rbipScore: 47,
+        shortAuditRecent: [
+          { label: 'Most Recent Assurance/Short Audit Date', value: '12 Mar 2025' },
+          { label: 'Most Recent Assurance/Short Audit Score', value: '8' },
+          { label: 'Most Recent Assur/Short Audit Outcome', value: 'Satisfactory' }
+        ],
+        shortAuditHistoric: [
+          { label: 'Historic Assurance/Short Audit Date', value: '14 Sep 2023' },
+          { label: 'Historic Assurance/Short Audit Score', value: '6' },
+          { label: 'Historic Assur/Short Audit Outcome', value: 'Improvement required' }
+        ],
+        fullAuditRecent: [
+          { label: 'Most Recent Initial Full Audit Date', value: '15 Jan 2025' },
+          { label: 'Most Recent Initial Full Audit Score', value: '47' }
+        ],
+        fullAuditHistoric: [
+          { label: 'Historic Initial Full Audit Date', value: '22 Sep 2023' },
+          { label: 'Historic Initial Full Audit Score', value: '44' }
+        ],
+        followUp: []
+      },
+      sections: premisesDetailSections({
+        gfpRisk: '4', mgmtRisk: '6', maintRisk: '2', consGfp: '', consMgmt: '', consMaint: '',
+        addressLine1: 'Temple Quay House', addressLine2: 'Temple Back East', floorsOccupied: 'Ground – 6',
+        town: 'Bristol', county: 'Bristol', postcode: 'BS1 6BH', uprn: '310012345678',
+        xCoord: '358842.12', yCoord: '172456.78', region: 'South West',
+        latLong: '51.4522° N, 2.5835° W',
+        recentAuditDate: '15 Jan 2025', historicAuditDate: '22 Sep 2023',
+        recentInvestigationDate: '12 Jun 2026', historicInvestigationDate: '08 Nov 2024',
+        incidentSummary: '0', fatalities: '0', injuries: '0',
+        assurShortScore: '8', riskIntel: '3', fullAuditScore: '47', legacyScore: '',
+        recentGfp: '22', recentMgmt: '15', recentMaint: '10',
+        inspectionDateScore: '2', floorArea: 'Large', fsoCompliance: '0',
+        howManyFloors: '4 – 6', basementPresent: false,
+        nationalInfra: 'Not relevant', heritage: 'Not relevant',
+        nationalResilience: 'Not relevant', communityImpact: 'Medium',
+        premisesClassification: 'Office',
+        discretionaryWeight: '', discretionaryReason: '',
+        rbipScore: '47', rbipCalcScore: '47', rbipRiskScores: '35.2', rbipConsolidated: '0',
+        isConsolidated: false, isRiskScored: true,
+        bldgHeightScore: '3', floorAreaScore: '4', natInfraScore: '0', basementScore: '0',
+        natResScore: '0', heritageScore: '0', communityScore: '2',
+        premisesClassRiskRating: '2', premisesClassRisk: 'Medium risk', flagColour: 'Amber',
+        dryFireMain: 'Not present', wetFireMain: 'Present', firefightingShaft: 'Not present',
+        ffShaftLift: 'Not present', naturalSmoke: 'Present', mechanicalSmoke: 'Present',
+        adbBasement: 'Not present', pressurisedEscape: 'Not present', other: '',
+        epimsPropertyName: 'Temple Quay House', epimsHoldingName: 'HMCTS South West Estate',
+        epimsOccupationName: 'HM Courts & Tribunals Service', epimsBuildingName: 'Temple Quay House',
+        epimsTenantDept: 'HMCTS', epimsPropertyCentre: 'South West', epimsPropertyRef: 'TQH/001',
+        epimsHoldingType: 'Leasehold', epimsHoldingRef: 'HMCTS-TQ-1847', epimsOccupancyRef: 'OCC-88421',
+        epimsBuildingFloorArea: '12,400 m²', epimsBuildingUsage: 'Government office',
+        epimsNumFloors: '6', epimsTenantDeptCentre: 'Bristol',
+        road: 'Temple Back East', department: 'HMCTS', tenureType: 'Leasehold',
+        listedBuilding: 'Not listed', sectorName: 'Courts & tribunals', constructionDate: '1998',
+        excludeFromRbip: false, ferLocation: '', historic: false,
+        lastModifiedBy: 'Phil Gower · 14 Jun 2026', createdBy: 'System import · 05 Mar 2019'
+      })
+    },
+    'HMP Bristol': {
+      intro: {
+        left: [
+          { label: 'Location Name', value: 'HMP Bristol' },
+          { label: 'Record Type', value: 'Premises' },
+          { label: 'Correspondence Print Address', value: 'HMP Bristol\nCambridge Grove\nBristol\nBS7 8PS' },
+          { label: 'Benchmark GFP', value: '12' },
+          { label: 'Benchmark Management', value: '9' },
+          { label: 'Benchmark Maintenance', value: '4' },
+          { label: 'RBIP Group Picklist', value: 'HMPPS' },
+          { label: 'Extant Crown Step-Away Notice', value: true }
+        ],
+        right: [
+          { label: 'Location Ref', value: 'LOC-02140' },
+          { label: 'Parent Location', value: '' },
+          { label: 'Premises Type', value: 'Custodial' }
+        ]
+      },
+      aside: {
+        flag: 'amber',
+        rbipScore: 44,
+        shortAuditRecent: [
+          { label: 'Most Recent Assurance/Short Audit Date', value: '' },
+          { label: 'Most Recent Assurance/Short Audit Score', value: '' },
+          { label: 'Most Recent Assur/Short Audit Outcome', value: '' }
+        ],
+        shortAuditHistoric: [
+          { label: 'Historic Assurance/Short Audit Date', value: '18 Mar 2022' },
+          { label: 'Historic Assurance/Short Audit Score', value: '5' },
+          { label: 'Historic Assur/Short Audit Outcome', value: 'Improvement required' }
+        ],
+        fullAuditRecent: [
+          { label: 'Most Recent Initial Full Audit Date', value: '12 Sep 2024' },
+          { label: 'Most Recent Initial Full Audit Score', value: '44' }
+        ],
+        fullAuditHistoric: [
+          { label: 'Historic Initial Full Audit Date', value: '14 Feb 2022' },
+          { label: 'Historic Initial Full Audit Score', value: '42' }
+        ],
+        followUp: [
+          { label: 'Most Recent Follow Up Full Audit Date', value: '' },
+          { label: 'Most Recent Follow Up Full Audit Score', value: '' },
+          { label: 'Most Recent Follow Up Full Audit Outcome', value: '' }
+        ]
+      },
+      sections: premisesDetailSections({
+        gfpRisk: '5', mgmtRisk: '4', maintRisk: '3', consGfp: '', consMgmt: '', consMaint: '',
+        addressLine1: 'HMP Bristol', addressLine2: 'Cambridge Grove', floorsOccupied: 'All wings',
+        town: 'Bristol', county: 'Bristol', postcode: 'BS7 8PS', uprn: '310098765432',
+        xCoord: '358124.55', yCoord: '175892.31', region: 'South West',
+        latLong: '51.4761° N, 2.5965° W',
+        recentAuditDate: '12 Sep 2024', historicAuditDate: '14 Feb 2022',
+        recentInvestigationDate: '', historicInvestigationDate: '03 Jan 2025',
+        incidentSummary: '0', fatalities: '0', injuries: '0',
+        assurShortScore: '', riskIntel: '4', fullAuditScore: '44', legacyScore: '40',
+        recentGfp: '28', recentMgmt: '10', recentMaint: '6',
+        inspectionDateScore: '3', floorArea: 'Very large', fsoCompliance: '0',
+        howManyFloors: '7 – 10', basementPresent: true,
+        nationalInfra: 'Not relevant', heritage: 'Not relevant',
+        nationalResilience: 'Not relevant', communityImpact: 'Not relevant',
+        premisesClassification: 'Residential institution — prison',
+        discretionaryWeight: '', discretionaryReason: '',
+        rbipScore: '44', rbipCalcScore: '44', rbipRiskScores: '38.5', rbipConsolidated: '0',
+        isConsolidated: false, isRiskScored: true,
+        bldgHeightScore: '5', floorAreaScore: '3', natInfraScore: '0', basementScore: '2',
+        natResScore: '0', heritageScore: '0', communityScore: '0',
+        premisesClassRiskRating: '3', premisesClassRisk: 'High risk', flagColour: 'Amber',
+        dryFireMain: 'Present', wetFireMain: 'Present', firefightingShaft: 'Not present',
+        ffShaftLift: 'Not present', naturalSmoke: 'Present', mechanicalSmoke: 'Present',
+        adbBasement: 'Present', pressurisedEscape: 'Not present',
+        other: 'Wing B alterations notice in force',
+        epimsPropertyName: 'HMP Bristol', epimsHoldingName: 'HMPPS South West',
+        epimsOccupationName: 'HM Prison and Probation Service', epimsBuildingName: 'HMP Bristol',
+        epimsTenantDept: 'HMPPS', epimsPropertyCentre: 'South West', epimsPropertyRef: 'HMP-BRS/001',
+        epimsHoldingType: 'Crown freehold', epimsHoldingRef: 'HMPPS-BRS-2140', epimsOccupancyRef: 'OCC-55210',
+        epimsBuildingFloorArea: '28,600 m²', epimsBuildingUsage: 'Prison — Category B',
+        epimsNumFloors: '8', epimsTenantDeptCentre: 'Bristol',
+        road: 'Cambridge Grove', department: 'HMPPS', tenureType: 'Crown freehold',
+        listedBuilding: 'Not listed', sectorName: 'Prisons', constructionDate: '1883 (multiple phases)',
+        excludeFromRbip: false, ferLocation: '', historic: false,
+        lastModifiedBy: 'Phil Gower · 2 Feb 2026', createdBy: 'System import · 12 Aug 2018'
+      })
+    }
+  };
+
   const PREMISES_LIST = [
-    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', lat: 51.45224, lng: -2.58352, category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' } },
-    { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreTrend: 'down', scoreDelta: 5, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' } },
-    { name: 'HMP Maidstone', ref: 'PRM-0002118', address: 'County Road, Maidstone ME14 1UZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 38, scoreClass: 'score-high', lastAudit: 'Aug 2024', lastAuditSort: 202408, patch: true, work: { pill: 'blue', label: 'Audit in progress' } },
-    { name: 'Maidstone Magistrates Court', ref: 'PRM-0001922', address: 'Barker Road, Maidstone ME16 8EQ', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 34, scoreTrend: 'down', scoreDelta: 2, scoreClass: 'score-mid', lastAudit: 'Mar 2024', lastAuditSort: 202403, patch: true, work: { pill: 'grey', label: 'Concern open' } },
+    { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', lat: 51.45224, lng: -2.58352, category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' }, parentSite: { name: 'Temple Quay Estate', ref: 'PRM-0001840' } },
+    { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreTrend: 'down', scoreDelta: 5, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' }, parentSite: { name: 'Lewes Justice Campus', ref: 'PRM-0002100' } },
+    { name: 'HMP Maidstone', ref: 'PRM-0002118', address: 'County Road, Maidstone ME14 1UZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 38, scoreClass: 'score-high', lastAudit: 'Aug 2024', lastAuditSort: 202408, patch: true, work: { pill: 'blue', label: 'Audit in progress' }, parentSite: { name: 'Maidstone Justice Quarter', ref: 'PRM-0002110' } },
+    { name: 'Maidstone Magistrates Court', ref: 'PRM-0001922', address: 'Barker Road, Maidstone ME16 8EQ', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 34, scoreTrend: 'down', scoreDelta: 2, scoreClass: 'score-mid', lastAudit: 'Mar 2024', lastAuditSort: 202403, patch: true, work: { pill: 'grey', label: 'Concern open' }, parentSite: { name: 'Maidstone Justice Quarter', ref: 'PRM-0002110' } },
     { name: 'Charing Cross House refurb', ref: 'PRM-0001756', address: 'Charing Cross, London WC2N 5HS', category: 'government-office', typeLabel: 'Government office', dept: 'MoJ', score: 36, scoreClass: 'score-mid', lastAudit: 'May 2024', lastAuditSort: 202405, patch: true, work: { pill: 'grey', label: 'Consultation open' } },
     { name: 'Crawley Job Centre Plus', ref: 'PRM-0002201', address: 'County Oak Way, Crawley RH11 7EL', category: 'government-office', typeLabel: 'DWP office', dept: 'DWP', score: 31, scoreClass: 'score-mid', lastAudit: 'Jul 2024', lastAuditSort: 202407, patch: false, work: null },
     { name: 'DWP Crawley', ref: 'PRM-0002204', address: 'Fleming Way, Crawley RH10 9DF', category: 'government-office', typeLabel: 'DWP office', dept: 'DWP', score: 31, scoreClass: 'score-mid', lastAudit: 'Jun 2024', lastAuditSort: 202406, patch: false, work: { pill: 'blue', label: 'Action plan review' } },
     { name: 'HMP Belmarsh', ref: 'PRM-0002088', address: 'Western Way, Thamesmead SE28 0EB', category: 'prison', typeLabel: 'Prison · Cat A', dept: 'HMPPS', score: 29, scoreClass: 'score-mid', lastAudit: 'Feb 2024', lastAuditSort: 202402, patch: false, work: { pill: 'purple', label: 'Follow-up visit due' } },
-    { name: 'Lewes Crown Court', ref: 'PRM-0001935', address: 'High Street, Lewes BN7 2UX', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 30, scoreClass: 'score-mid', lastAudit: 'Apr 2024', lastAuditSort: 202404, patch: true, work: { pill: 'grey', label: 'Concern investigating' } },
-    { name: 'Royal Courts of Justice', ref: 'PRM-0001601', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Dec 2024', lastAuditSort: 202412, patch: true, work: { pill: 'grey', label: 'Support meeting' } },
-    { name: 'HMP Bristol', ref: 'PRM-0002140', address: 'Cambridge Grove, Bristol BS7 8PS', lat: 51.47608, lng: -2.59648, category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 44, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, patch: true, route: 'premisesdetail-bristol', work: { pill: 'amber', label: 'Alterations notice' } },
+    { name: 'Lewes Crown Court', ref: 'PRM-0001935', address: 'High Street, Lewes BN7 2UX', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 30, scoreClass: 'score-mid', lastAudit: 'Apr 2024', lastAuditSort: 202404, patch: true, work: { pill: 'grey', label: 'Concern investigating' }, parentSite: { name: 'Lewes Justice Campus', ref: 'PRM-0002100' } },
+    { name: 'Royal Courts of Justice', ref: 'PRM-0001601', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court · multi-building site', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Dec 2024', lastAuditSort: 202412, patch: true, work: { pill: 'grey', label: 'Support meeting' }, isParentSite: true, sitePremises: ['Royal Courts of Justice', 'RCJ — Thomas More Building', 'RCJ — Planning Court annexe'] },
+    { name: 'HMP Bristol', ref: 'PRM-0002140', address: 'Cambridge Grove, Bristol BS7 8PS', lat: 51.47608, lng: -2.59648, category: 'prison', typeLabel: 'Prison · Cat B · site record', dept: 'HMPPS', score: 44, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, patch: true, route: 'premisesdetail-bristol', work: { pill: 'amber', label: 'Alterations notice' }, isParentSite: true, sitePremises: ['HMP Bristol', 'HMP Bristol — Wing B refurbishment', 'HMP Bristol — Industries & workshops'] },
     { name: 'HMP Swaleside', ref: 'PRM-0002155', address: 'Brabazon Road, Eastchurch ME12 4AX', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 41, scoreClass: 'score-high', lastAudit: 'Nov 2024', lastAuditSort: 202411, patch: true, work: { pill: 'amber', label: 'CPIN open' } },
     { name: 'HMP Wandsworth', ref: 'PRM-0002095', address: 'Heathfield Road, London SW18 3HU', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 35, scoreClass: 'score-mid', lastAudit: 'Jan 2024', lastAuditSort: 202401, patch: false, work: { pill: 'grey', label: 'Appeal lodged' } },
     { name: 'HMP Isis', ref: 'PRM-0002162', address: 'Marsh Way, Thamesmead SE28 0NZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 33, scoreClass: 'score-mid', lastAudit: 'Oct 2023', lastAuditSort: 202310, patch: true, work: { pill: 'purple', label: 'Follow-up opened' } },
     { name: 'Bristol Crown Court', ref: 'PRM-0001910', address: 'Redcliffe Hill, Bristol BS1 6QS', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 27, scoreClass: 'score-mid', lastAudit: 'May 2025', lastAuditSort: 202505, patch: false, work: { pill: 'grey', label: 'Consultation new' } },
     { name: 'Folkestone Tribunal Hearing Centre', ref: 'PRM-0001988', address: 'Folkestone CT20 2QY', category: 'court', typeLabel: 'Tribunal', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Nov 2024', lastAuditSort: 202411, patch: false, work: null },
     { name: 'Reading Job Centre Plus', ref: 'PRM-0002215', address: 'Admiralty House, Reading RG1 3EU', category: 'government-office', typeLabel: 'DWP office', dept: 'DWP', score: 28, scoreClass: 'score-mid', lastAudit: 'Feb 2025', lastAuditSort: 202502, patch: false, work: { pill: 'amber', label: 'CPIN awaiting response' } },
-    { name: 'MoJ HQ London', ref: 'PRM-0001702', address: '102 Petty France, London SW1H 9AJ', category: 'government-office', typeLabel: 'Government office', dept: 'MoJ', score: 19, scoreClass: 'score-low', lastAudit: 'Aug 2023', lastAuditSort: 202308, patch: false, work: { pill: 'grey', label: 'Support workshop' } },
+    { name: 'MoJ HQ London', ref: 'PRM-0001702', address: '102 Petty France, London SW1H 9AJ', category: 'government-office', typeLabel: 'Government office · site record', dept: 'MoJ', score: 19, scoreClass: 'score-low', lastAudit: 'Aug 2023', lastAuditSort: 202308, patch: false, work: { pill: 'grey', label: 'Support workshop' }, isParentSite: true, sitePremises: ['MoJ HQ London', 'MoJ HQ — East Wing'] },
     { name: 'HMCTS Guildford', ref: 'PRM-0001944', address: 'Mount Street, Guildford GU1 3SX', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 24, scoreClass: 'score-low', lastAudit: 'Dec 2023', lastAuditSort: 202312, patch: false, work: null },
     { name: 'HMP Durham', ref: 'PRM-0002178', address: 'Old Elvet, Durham DH1 3HU', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 52, scoreClass: 'score-high', lastAudit: 'May 2025', lastAuditSort: 202505, patch: false, work: null },
     { name: 'HMP Pentonville', ref: 'PRM-0002185', address: 'Caledonian Road, London N7 8TT', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 26, scoreClass: 'score-mid', lastAudit: 'Jun 2023', lastAuditSort: 202306, patch: true, work: null },
-    { name: 'HMP Rochester', ref: 'PRM-0002192', address: 'Fort Road, Rochester ME1 3QS', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 39, scoreClass: 'score-high', lastAudit: 'Mar 2025', lastAuditSort: 202503, patch: true, work: null }
+    { name: 'HMP Rochester', ref: 'PRM-0002192', address: 'Fort Road, Rochester ME1 3QS', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 39, scoreClass: 'score-high', lastAudit: 'Mar 2025', lastAuditSort: 202503, patch: true, work: null },
+    { name: 'Temple Quay Estate', ref: 'PRM-0001840', address: 'Temple Back East, Bristol BS1', category: 'government-office', typeLabel: 'Multi-premises site', dept: 'HMCTS', score: 47, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: false, work: null, isParentSite: true, sitePremises: ['Temple Quay House', 'Temple Quay Riverside Annexe', 'Temple Quay Basement plant room'] },
+    { name: 'Temple Quay Riverside Annexe', ref: 'PRM-0001848', address: 'Temple Quay, Bristol BS1 6BH', category: 'government-office', typeLabel: 'Government office · annexe', dept: 'HMCTS', score: 41, scoreClass: 'score-high', lastAudit: 'Nov 2024', lastAuditSort: 202411, daysSinceAudit: 210, patch: false, work: { pill: 'grey', label: 'Short audit due' }, parentSite: { name: 'Temple Quay Estate', ref: 'PRM-0001840' } },
+    { name: 'Temple Quay Basement plant room', ref: 'PRM-0001849', address: 'Temple Quay House basement, Bristol BS1 6BH', category: 'government-office', typeLabel: 'Plant · basement', dept: 'HMCTS', score: 36, scoreClass: 'score-mid', lastAudit: 'Jun 2024', lastAuditSort: 202406, daysSinceAudit: 360, patch: false, work: null, parentSite: { name: 'Temple Quay Estate', ref: 'PRM-0001840' } },
+    { name: 'HMP Bristol — Wing B refurbishment', ref: 'PRM-0002141', address: 'Cambridge Grove, Bristol BS7 8PS', category: 'prison', typeLabel: 'Prison wing · refurb', dept: 'HMPPS', score: 48, scoreClass: 'score-high', lastAudit: 'Mar 2025', lastAuditSort: 202503, daysSinceAudit: 90, patch: false, work: { pill: 'amber', label: 'Alterations notice' }, parentSite: { name: 'HMP Bristol', ref: 'PRM-0002140' } },
+    { name: 'HMP Bristol — Industries & workshops', ref: 'PRM-0002142', address: 'Cambridge Grove, Bristol BS7 8PS', category: 'prison', typeLabel: 'Prison · industries', dept: 'HMPPS', score: 40, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, daysSinceAudit: 270, patch: false, work: null, parentSite: { name: 'HMP Bristol', ref: 'PRM-0002140' } },
+    { name: 'RCJ — Thomas More Building', ref: 'PRM-0001602', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court · annexe building', dept: 'HMCTS', score: 24, scoreClass: 'score-low', lastAudit: 'Oct 2024', lastAuditSort: 202410, daysSinceAudit: 240, patch: false, work: null, parentSite: { name: 'Royal Courts of Justice', ref: 'PRM-0001601' } },
+    { name: 'RCJ — Planning Court annexe', ref: 'PRM-0001603', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court · annexe', dept: 'HMCTS', score: 20, scoreClass: 'score-low', lastAudit: 'Feb 2025', lastAuditSort: 202502, daysSinceAudit: 120, patch: false, work: { pill: 'grey', label: 'Consultation open' }, parentSite: { name: 'Royal Courts of Justice', ref: 'PRM-0001601' } },
+    { name: 'Lewes Justice Campus', ref: 'PRM-0002100', address: 'Brighton Road / High Street, Lewes BN7', category: 'court', typeLabel: 'Multi-premises site', dept: 'HMCTS / HMPPS', score: 36, scoreClass: 'score-mid', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: false, work: null, isParentSite: true, sitePremises: ['Lewes Crown Court', 'HMP Lewes'] },
+    { name: 'Maidstone Justice Quarter', ref: 'PRM-0002110', address: 'Barker Road / County Road, Maidstone ME14', category: 'court', typeLabel: 'Multi-premises site', dept: 'HMCTS / HMPPS', score: 36, scoreClass: 'score-mid', lastAudit: 'Aug 2024', lastAuditSort: 202408, patch: false, work: null, isParentSite: true, sitePremises: ['Maidstone Magistrates Court', 'HMP Maidstone'] },
+    { name: 'MoJ HQ — East Wing', ref: 'PRM-0001703', address: '102 Petty France, London SW1H 9AJ', category: 'government-office', typeLabel: 'Government office · wing', dept: 'MoJ', score: 21, scoreClass: 'score-low', lastAudit: 'Jul 2024', lastAuditSort: 202407, daysSinceAudit: 330, patch: false, work: null, parentSite: { name: 'MoJ HQ London', ref: 'PRM-0001702' } }
   ];
 
   let premisesScopeFilter = 'patch';
@@ -12431,13 +13561,14 @@
 
   function renderPremRow(p) {
     const address = p.address ? `<span class="prem-address">${p.address}</span>` : '';
+    const siteTag = renderPremisesSiteTagHtml(p);
     const click = p.route ? `onclick="show('${p.route}')"` : '';
     const work = p.work
       ? `<div class="prem-trailing"><span class="pill ${p.work.pill}">${p.work.label}</span></div>`
       : '<div class="prem-trailing"><span class="prem-work-none">none</span></div>';
     return `<div class="prem-row" ${click}>
       <div class="prem-line-primary">
-        <div class="prem-name"><strong>${p.name}</strong>${p.ref ? '<span class="prem-ref">' + p.ref + '</span>' : ''}${address}</div>
+        <div class="prem-name"><strong>${p.name}</strong>${p.ref ? '<span class="prem-ref">' + p.ref + '</span>' : ''}${address}${siteTag}</div>
         <div class="prem-score ${p.scoreClass}">${p.score}</div>
       </div>
       <div class="prem-line-secondary">
@@ -12478,12 +13609,26 @@
     renderPremisesList();
   }
 
-  function setPremisesTypeFilter(type) {
-    if (premisesTypeFilter === type) premisesTypeFilter = null;
-    else premisesTypeFilter = type;
-    document.querySelectorAll('.premises-filters-type .chip').forEach(chip => {
-      chip.classList.toggle('on', chip.dataset.premisesType === premisesTypeFilter);
+  function syncPremisesTypeFilterChips() {
+    document.querySelectorAll('.premises-filters-type .chip').forEach(function (chip) {
+      const type = chip.dataset.premisesType;
+      const label = chip.dataset.chipLabel || chip.textContent.trim();
+      const isOn = type === premisesTypeFilter;
+      chip.classList.toggle('on', isOn);
+      if (isOn) {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>' +
+          '<span class="chip-dismiss" role="button" tabindex="0" aria-label="Clear ' + escHtml(label) + ' filter">×</span>';
+      } else {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>';
+      }
     });
+  }
+
+  function setPremisesTypeFilter(type) {
+    if (type == null) premisesTypeFilter = null;
+    else if (premisesTypeFilter === type) premisesTypeFilter = null;
+    else premisesTypeFilter = type;
+    syncPremisesTypeFilterChips();
     renderPremisesList();
   }
 
@@ -12491,6 +13636,12 @@
   let dashboardProcessesTypeFilter = 'all';
   const DASHBOARD_PROCESS_PREVIEW_LIMIT = 4;
   const DASHBOARD_PATCH_PREMISES_LIMIT = 4;
+  const DASHBOARD_REMINDERS = [
+    { premises: 'Charing Cross House refurb', detail: 'Consultation', highlight: 'SLA approaching (5 days)', route: 'processes' },
+    { premises: 'Bristol Crown Court', detail: 'Consultation', highlight: 'SLA approaching (3 days)', route: 'processes' },
+    { premises: 'HMP Lewes', detail: 'Follow-up', highlight: 'Due in 12 days', route: 'processes' },
+    { premises: 'DWP Crawley', detail: 'Audit action plan', highlight: '28-DAP closing Friday', route: 'processes' }
+  ];
   let processesDateFilter = { type: 'all' };
   let premisesDateFilter = { type: 'all' };
   let cpinsDateFilter = { type: 'all' };
@@ -12735,6 +13886,22 @@
     bindDashboardProcessFiltersOnce();
     renderDashboardProcessesPanel();
     renderDashboardPatchPremisesPanel();
+    renderDashboardRemindersPanel();
+  }
+
+  function renderDashboardRemindersPanel() {
+    const el = document.getElementById('dash-reminders-list');
+    if (!el) return;
+    el.innerHTML = DASHBOARD_REMINDERS.map(function (r) {
+      const click = r.route ? ' onclick="show(\'' + escHtml(r.route) + '\')" style="cursor:pointer;"' : '';
+      const highlight = r.highlight
+        ? ' <span class="highlight-amber">· ' + escHtml(r.highlight) + '</span>'
+        : '';
+      return '<div class="dash-reminder-row"' + click + '>' +
+        '<div class="dash-reminder-detail">' + escHtml(r.detail) + highlight + '</div>' +
+        '<div class="dash-reminder-premises">' + escHtml(r.premises) + '</div>' +
+        '</div>';
+    }).join('');
   }
 
   function getDashboardPatchPremises() {
@@ -13005,7 +14172,15 @@
         chip.addEventListener('click', () => setPremisesScopeFilter(chip.dataset.premisesScope));
       });
       document.querySelectorAll('.premises-filters-type .chip').forEach(chip => {
-        chip.addEventListener('click', () => setPremisesTypeFilter(chip.dataset.premisesType));
+        chip.addEventListener('click', function (e) {
+          if (e.target.closest('.chip-dismiss')) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (premisesTypeFilter === chip.dataset.premisesType) setPremisesTypeFilter(null);
+            return;
+          }
+          setPremisesTypeFilter(chip.dataset.premisesType);
+        });
       });
       initListControlDropdown('premises-sort-dropdown', setPremisesSort);
       document.querySelectorAll('[data-prem-sort]').forEach(function (btn) {
@@ -13067,7 +14242,7 @@
       }).join('');
     }
     const hint = document.getElementById('global-float-log-hint');
-    if (hint) hint.textContent = 'Logged against Phil Gower. Date defaults to today.';
+    if (hint) hint.textContent = 'Logged against Phil Gower. Choose a date — defaults to today.';
   }
 
   function renderGlobalTimeActivity() {
@@ -13141,6 +14316,7 @@
     if (!panel) return;
     setGlobalActivityBarVisible(true);
     initGlobalTimeActivityFields();
+    resetActivityLogDate('global-time-date');
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
     document.body.classList.add('global-float-panel-open');
@@ -13161,14 +14337,16 @@
     const actEl = document.getElementById('global-time-activity');
     const whatEl = document.getElementById('global-time-what');
     if (!durEl || !actEl || !whatEl) return;
-    const stamp = cpinLogTimestamp();
+    const stamp = getActivityLogStampForTime('global-time-date');
+    if (!stamp) return;
     globalTimeLog.unshift({
       id: 'gt' + stamp.ts,
       what: whatEl.value,
       activity: actEl.value,
       minutes: parseInt(durEl.value, 10),
       at: stamp.at,
-      ts: stamp.ts
+      ts: stamp.ts,
+      logDate: stamp.logDate
     });
     saveGlobalTimeLog();
     renderGlobalTimeActivity();
@@ -13198,6 +14376,7 @@
     setAuditActivityBarVisible(true);
     syncAuditActivityForStage(auditStage);
     setAuditLogType(mode || auditLogType || 'time');
+    resetActivityLogDate('audit-time-date');
 
     if (auditLogType === 'time') {
       requestAnimationFrame(function () { document.getElementById('audit-time-duration')?.focus(); });
@@ -13304,7 +14483,7 @@
       what.value = PROTOTYPE_AUDIT_ID + '  ·  Temple Quay House audit';
     }
     if (hint) {
-      hint.textContent = 'Logged against Phil Gower on this audit process.';
+      hint.textContent = 'Logged against Phil Gower on this audit process. Choose a date for time entries — defaults to today.';
     }
   }
 
@@ -13441,13 +14620,16 @@
       const durEl = document.getElementById('audit-time-duration');
       const actEl = document.getElementById('audit-time-activity');
       if (!durEl || !actEl) return;
+      const timeStamp = getActivityLogStampForTime('audit-time-date');
+      if (!timeStamp) return;
       auditActivityLog.times.unshift({
-        id: 't' + stamp.ts,
+        id: 't' + timeStamp.ts,
         activity: actEl.value,
         minutes: parseInt(durEl.value, 10),
         stage: auditStage,
-        at: stamp.at,
-        ts: stamp.ts
+        at: timeStamp.at,
+        ts: timeStamp.ts,
+        logDate: timeStamp.logDate
       });
     } else if (auditLogType === 'note') {
       const ta = document.getElementById('audit-note-text');
@@ -16427,6 +17609,15 @@
   const CPIN_PIN_KEY = 'cpin-pins-v1';
   const CPIN_INTAKE_KEY = 'cpfsi-cpin-intake-v1';
   const CPIN_OVERRIDE_KEY = 'cpfsi-cpin-overrides-v1';
+  const CPIN_REVIEW_REASON_LABELS = {
+    duplicate: 'Duplicate submission',
+    not_cpfsi: 'Not a CPFSI premises',
+    other: 'Other erroneous entry'
+  };
+  const CPIN_REVIEW_ACTION_LABELS = {
+    flag: 'Flag as erroneous',
+    remove: 'Request removal'
+  };
   const CPIN_WORKFLOW_LABELS = {
     incoming: 'Incoming',
     awaiting_premises: 'Awaiting premises',
@@ -16470,6 +17661,325 @@
   let cpinDetailLastId = null;
   let cpinSeverityEditing = false;
   let cpinIntakeDetailsEditing = false;
+  let cpinReviewModalState = { id: null, action: null };
+
+  function getCpinAdminReview(cpin) {
+    return cpin && cpin.adminReview ? cpin.adminReview : null;
+  }
+
+  function cpinIsRemoved(cpin) {
+    const r = getCpinAdminReview(cpin);
+    return !!(r && r.action === 'remove' && r.status === 'approved');
+  }
+
+  function cpinIsFlaggedApproved(cpin) {
+    const r = getCpinAdminReview(cpin);
+    return !!(r && r.action === 'flag' && r.status === 'approved');
+  }
+
+  function cpinHasPendingReview(cpin) {
+    const r = getCpinAdminReview(cpin);
+    return !!(r && r.status === 'pending');
+  }
+
+  function cpinReviewBadgeHtml(cpin) {
+    const r = getCpinAdminReview(cpin);
+    if (!r) return '';
+    if (r.status === 'pending') {
+      return '<span class="pill amber cpin-review-badge">Pending admin review</span>';
+    }
+    if (r.status === 'approved' && r.action === 'flag') {
+      return '<span class="pill amber cpin-review-badge">Flagged erroneous</span>';
+    }
+    return '';
+  }
+
+  function formatCpinReviewSummary(review) {
+    if (!review) return '';
+    const reason = CPIN_REVIEW_REASON_LABELS[review.reason] || review.reason;
+    const action = CPIN_REVIEW_ACTION_LABELS[review.action] || review.action;
+    return action + ' · ' + reason;
+  }
+
+  function closeAllCpinCardMenus() {
+    document.querySelectorAll('.cpin-card-menu').forEach(function (menu) {
+      menu.hidden = true;
+    });
+    document.querySelectorAll('[data-cpin-menu-trigger]').forEach(function (btn) {
+      btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function toggleCpinCardMenu(id, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const card = document.querySelector('.cpin-card[data-cpin-id="' + id + '"]');
+    const menu = card?.querySelector('[data-cpin-menu]');
+    const btn = card?.querySelector('[data-cpin-menu-trigger]');
+    if (!menu || !btn) return;
+    const willOpen = menu.hidden;
+    closeAllCpinCardMenus();
+    menu.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  }
+
+  function openCpinReviewModal(id, action, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    closeAllCpinCardMenus();
+    loadCpinOverrides();
+    const cpin = getCpinById(id);
+    if (!cpin) return;
+    const review = getCpinAdminReview(cpin);
+    cpinReviewModalState = { id: id, action: action || (review ? review.action : 'flag') };
+
+    const modal = document.getElementById('cpin-review-modal');
+    const form = document.getElementById('cpin-review-form');
+    const readonly = document.getElementById('cpin-review-readonly');
+    const title = document.getElementById('cpin-review-modal-title');
+    const sub = document.getElementById('cpin-review-modal-sub');
+    if (!modal || !form || !readonly) return;
+
+    if (review && review.status === 'pending') {
+      form.hidden = true;
+      readonly.hidden = false;
+      if (title) title.textContent = 'CPIN review request';
+      if (sub) sub.textContent = 'Awaiting admin approval before this change takes effect.';
+      const panel = document.getElementById('cpin-review-status-panel');
+      if (panel) {
+        panel.innerHTML =
+          '<strong>' + escHtml(cpin.ref) + '</strong> — ' + escHtml(formatCpinReviewSummary(review)) +
+          (review.notes ? '<div style="margin-top:8px;">' + escHtml(review.notes) + '</div>' : '');
+      }
+      const meta = document.getElementById('cpin-review-readonly-meta');
+      if (meta) {
+        meta.textContent = 'Requested by ' + (review.requestedBy || 'Inspector') +
+          (review.requestedAt ? ' · ' + review.requestedAt : '');
+      }
+      const withdrawBtn = document.getElementById('cpin-review-withdraw-btn');
+      if (withdrawBtn) withdrawBtn.hidden = false;
+    } else if (review && review.status === 'approved' && review.action === 'flag') {
+      form.hidden = true;
+      readonly.hidden = false;
+      if (title) title.textContent = 'CPIN flagged';
+      if (sub) sub.textContent = 'This CPIN was flagged as erroneous by an admin.';
+      const panel = document.getElementById('cpin-review-status-panel');
+      if (panel) {
+        panel.innerHTML =
+          '<strong>' + escHtml(cpin.ref) + '</strong> — ' + escHtml(formatCpinReviewSummary(review)) +
+          (review.notes ? '<div style="margin-top:8px;">' + escHtml(review.notes) + '</div>' : '');
+      }
+      const meta = document.getElementById('cpin-review-readonly-meta');
+      if (meta) {
+        meta.textContent = review.reviewedBy
+          ? 'Approved by ' + review.reviewedBy + (review.reviewedAt ? ' · ' + review.reviewedAt : '')
+          : '';
+      }
+      const withdrawBtn = document.getElementById('cpin-review-withdraw-btn');
+      if (withdrawBtn) withdrawBtn.hidden = true;
+    } else {
+      form.hidden = false;
+      readonly.hidden = true;
+      const isRemove = cpinReviewModalState.action === 'remove';
+      if (title) title.textContent = isRemove ? 'Request CPIN removal' : 'Flag CPIN as erroneous';
+      if (sub) {
+        sub.textContent = isRemove
+          ? 'Ask an admin to remove this CPIN from the system — e.g. duplicate or not CPFSI premises. It stays visible until approved.'
+          : 'Mark this CPIN as erroneous. It remains visible with a warning until an admin confirms.';
+      }
+      const refEl = document.getElementById('cpin-review-ref');
+      if (refEl) refEl.textContent = cpin.ref + (cpin.premises ? ' · ' + cpin.premises : '');
+      const reasonEl = document.getElementById('cpin-review-reason');
+      const notesEl = document.getElementById('cpin-review-notes');
+      if (reasonEl) reasonEl.value = 'duplicate';
+      if (notesEl) notesEl.value = '';
+      const approvalNote = document.getElementById('cpin-review-approval-note');
+      if (approvalNote) {
+        approvalNote.textContent = isRemove
+          ? 'Removal only takes effect after admin approval. Until then this CPIN stays in the queue.'
+          : 'Flagged CPINs stay in the list with a warning badge. An admin can confirm or reject the flag.';
+      }
+      const submitBtn = document.getElementById('cpin-review-submit-btn');
+      if (submitBtn) {
+        submitBtn.textContent = isRemove ? 'Submit removal request' : 'Submit flag for approval';
+      }
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () { document.getElementById('cpin-review-notes')?.focus(); });
+  }
+
+  function closeCpinReviewModal() {
+    document.getElementById('cpin-review-modal')?.classList.remove('open');
+    if (!document.getElementById('new-modal')?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+    cpinReviewModalState = { id: null, action: null };
+  }
+
+  function submitCpinReviewRequest() {
+    const id = cpinReviewModalState.id;
+    const action = cpinReviewModalState.action || 'flag';
+    if (!id) return;
+    const notes = document.getElementById('cpin-review-notes')?.value.trim();
+    if (!notes) {
+      window.alert('Add notes explaining why this CPIN should be flagged or removed.');
+      return;
+    }
+    const reason = document.getElementById('cpin-review-reason')?.value || 'other';
+    const stamp = cpinLogTimestamp();
+    persistCpinPatch(id, {
+      adminReview: {
+        action: action,
+        reason: reason,
+        notes: notes,
+        status: 'pending',
+        requestedBy: CPIN_CURRENT_INSPECTOR,
+        requestedAt: stamp.at,
+        ts: stamp.ts
+      }
+    });
+    closeCpinReviewModal();
+    renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+    if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
+    window.alert('Request submitted. An admin must approve before ' +
+      (action === 'remove' ? 'this CPIN is removed.' : 'the flag is confirmed.'));
+  }
+
+  function withdrawCpinReviewRequest() {
+    const id = cpinReviewModalState.id;
+    if (!id) return;
+    if (!window.confirm('Withdraw this review request?')) return;
+    const patch = Object.assign({}, cpinOverrides[id] || {});
+    delete patch.adminReview;
+    cpinOverrides[id] = patch;
+    saveCpinOverrides();
+    closeCpinReviewModal();
+    renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+    if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
+  }
+
+  function getPendingCpinReviews() {
+    return getAllCpinRecords({ includeRemoved: true }).filter(function (c) {
+      return cpinHasPendingReview(c);
+    });
+  }
+
+  function renderAdminCpinReviews() {
+    const el = document.getElementById('admin-cpin-review-list');
+    if (!el) return;
+    loadCpinOverrides();
+    const pending = getPendingCpinReviews();
+    if (!pending.length) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--ink-3);">No CPINs awaiting review.</div>';
+      return;
+    }
+    el.innerHTML = pending.map(function (cpin) {
+      const r = getCpinAdminReview(cpin);
+      return (
+        '<div class="admin-cpin-review-item" data-cpin-review-id="' + escHtml(cpin.id) + '">' +
+          '<div><strong>' + escHtml(cpin.ref) + '</strong> — ' + escHtml(cpin.premises || 'No premises') + '</div>' +
+          '<div class="meta">' + escHtml(formatCpinReviewSummary(r)) +
+            (r.requestedBy ? ' · Requested by ' + escHtml(r.requestedBy) : '') +
+            (r.requestedAt ? ' · ' + escHtml(r.requestedAt) : '') +
+          '</div>' +
+          '<div class="notes">' + escHtml(r.notes || '') + '</div>' +
+          '<div class="admin-cpin-review-actions">' +
+            '<button type="button" class="btn primary" onclick="approveCpinReview(\'' + cpin.id + '\')">Approve</button>' +
+            '<button type="button" class="btn" onclick="rejectCpinReview(\'' + cpin.id + '\')">Reject</button>' +
+            '<button type="button" class="btn" onclick="show(\'cpin\', { cpinId: \'' + cpin.id + '\' })">Open CPIN</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function initAdminPage() {
+    renderAdminCpinReviews();
+  }
+
+  function approveCpinReview(id) {
+    loadCpinOverrides();
+    const cpin = getCpinById(id);
+    const r = getCpinAdminReview(cpin);
+    if (!cpin || !r || r.status !== 'pending') return;
+    const stamp = cpinLogTimestamp();
+    const next = Object.assign({}, r, {
+      status: 'approved',
+      reviewedBy: 'Admin (demo)',
+      reviewedAt: stamp.at,
+      reviewedTs: stamp.ts
+    });
+    const patch = { adminReview: next };
+    if (r.action === 'remove') patch.removed = true;
+    persistCpinPatch(id, patch);
+    renderAdminCpinReviews();
+    renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+    if (activeCpinId === id) {
+      if (r.action === 'remove') show('cpins');
+      else if (typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
+    }
+    window.alert(r.action === 'remove'
+      ? cpin.ref + ' has been removed from CPIN lists.'
+      : cpin.ref + ' has been flagged as erroneous.');
+  }
+
+  function rejectCpinReview(id) {
+    loadCpinOverrides();
+    const cpin = getCpinById(id);
+    const r = getCpinAdminReview(cpin);
+    if (!cpin || !r || r.status !== 'pending') return;
+    const stamp = cpinLogTimestamp();
+    persistCpinPatch(id, {
+      adminReview: Object.assign({}, r, {
+        status: 'rejected',
+        reviewedBy: 'Admin (demo)',
+        reviewedAt: stamp.at,
+        reviewedTs: stamp.ts
+      })
+    });
+    renderAdminCpinReviews();
+    renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+    if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
+    window.alert('Review request rejected. ' + cpin.ref + ' stays in the queue.');
+  }
+
+  function renderCpinAdminReviewBanner(cpin) {
+    const el = document.getElementById('cpin-admin-review-banner');
+    if (!el) return;
+    const r = getCpinAdminReview(cpin);
+    if (!r || r.status === 'rejected') {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    el.hidden = false;
+    el.className = 'cpin-admin-review-banner';
+    if (r.status === 'pending') {
+      el.classList.add('pending');
+      el.innerHTML =
+        '<strong>Pending admin review.</strong> ' + escHtml(formatCpinReviewSummary(r)) +
+        (r.notes ? ' — ' + escHtml(r.notes) : '') +
+        ' <a href="#" onclick="openCpinReviewModal(\'' + cpin.id + '\', \'' + r.action + '\', event); return false;">View request</a> · ' +
+        '<a href="#" onclick="show(\'admin\'); return false;">Open admin queue</a>';
+    } else if (r.status === 'approved' && r.action === 'flag') {
+      el.classList.add('approved-flag');
+      el.innerHTML =
+        '<strong>Flagged as erroneous.</strong> ' + escHtml(CPIN_REVIEW_REASON_LABELS[r.reason] || '') +
+        (r.notes ? ' — ' + escHtml(r.notes) : '');
+    } else {
+      el.hidden = true;
+    }
+  }
 
   const CPIN_SEVERITY_LABELS = {
     green: 'Green',
@@ -16610,7 +18120,8 @@
     });
   }
 
-  function getAllCpinRecords() {
+  function getAllCpinRecords(opts) {
+    opts = opts || {};
     const seen = new Set();
     const out = [];
     loadCpinIntake()
@@ -16618,7 +18129,9 @@
       .forEach(function (c) {
         if (seen.has(c.id)) return;
         seen.add(c.id);
-        out.push(mergeCpinRecord(c));
+        const merged = mergeCpinRecord(c);
+        if (!opts.includeRemoved && cpinIsRemoved(merged)) return;
+        out.push(merged);
       });
     return out;
   }
@@ -17092,6 +18605,7 @@
     setCpinActivityBarVisible(true);
     syncCpinActivityForStage(cpinStage);
     setCpinLogType(mode || cpinLogType || 'time');
+    resetActivityLogDate('cpin-time-date');
 
     if (cpinLogType === 'time') {
       requestAnimationFrame(function () { document.getElementById('cpin-time-duration')?.focus(); });
@@ -17134,7 +18648,7 @@
       what.value = cpin.ref + (cpin.premises ? '  ·  ' + cpin.premises : '');
     }
     if (hint) {
-      hint.textContent = 'Logged against Phil Gower on this CPIN process.';
+      hint.textContent = 'Logged against Phil Gower on this CPIN process. Choose a date for time entries — defaults to today.';
     }
   }
 
@@ -17223,6 +18737,47 @@
     }).join('');
   }
 
+  function todayIsoDate() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function resetActivityLogDate(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    const today = todayIsoDate();
+    el.value = today;
+    el.max = today;
+  }
+
+  function activityLogTimestampFromDate(isoDate) {
+    const today = todayIsoDate();
+    const dateStr = isoDate || today;
+    const parts = dateStr.split('-');
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    const selected = new Date(y, m, d);
+    const now = new Date();
+    const isToday = dateStr === today;
+    const ts = isToday ? Date.now() : new Date(y, m, d, 12, 0, 0).getTime();
+    const at = isToday
+      ? now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' +
+        now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : selected.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return { at: at, ts: ts, logDate: dateStr };
+  }
+
+  function getActivityLogStampForTime(inputId) {
+    const el = document.getElementById(inputId);
+    const iso = (el && el.value) ? el.value : todayIsoDate();
+    if (iso > todayIsoDate()) {
+      window.alert('You cannot log time for a future date.');
+      return null;
+    }
+    return activityLogTimestampFromDate(iso);
+  }
+
   function cpinLogTimestamp() {
     const now = new Date();
     return {
@@ -17240,12 +18795,15 @@
       const durEl = document.getElementById('cpin-time-duration');
       const actEl = document.getElementById('cpin-time-activity');
       if (!durEl || !actEl) return;
+      const timeStamp = getActivityLogStampForTime('cpin-time-date');
+      if (!timeStamp) return;
       cpinActivityLog.times.unshift({
-        id: 't' + stamp.ts,
+        id: 't' + timeStamp.ts,
         activity: actEl.value,
         minutes: parseInt(durEl.value, 10),
-        at: stamp.at,
-        ts: stamp.ts
+        at: timeStamp.at,
+        ts: timeStamp.ts,
+        logDate: timeStamp.logDate
       });
     } else if (cpinLogType === 'note') {
       const ta = document.getElementById('cpin-note-text');
@@ -17495,12 +19053,19 @@
     if (cpinsActiveFilter === 'patch') return item.patch;
     if (cpinsActiveFilter === 'premises-needed') return cpinNeedsPremises(item);
     if (cpinsActiveFilter === 'in-progress') return cpinIsInProgress(item);
+    if (cpinsActiveFilter === 'flagged') {
+      const r = getCpinAdminReview(item);
+      return !!(r && (r.status === 'pending' || (r.status === 'approved' && r.action === 'flag')));
+    }
     if (cpinsActiveFilter === 'gov-dept') return isGovernmentDeptPremises(item.premises);
     return item.severity === cpinsActiveFilter;
   }
 
   function buildCpinCard(item) {
     const pinned = cpinPins.has(item.id);
+    const review = getCpinAdminReview(item);
+    const pendingReview = cpinHasPendingReview(item);
+    const flaggedApproved = cpinIsFlaggedApproved(item);
     const sevLabel = { red: 'Red', amber: 'Amber', green: 'Green' }[item.severity] || 'Green';
     const sevScore = getCpinSeverityScore(item);
     const pillText = sevLabel + (sevScore !== '' && sevScore != null ? ' ' + sevScore : '');
@@ -17517,19 +19082,61 @@
     const statusHtml = statusLabel
       ? '<div class="cpin-status-label' + statusClass + '">' + escHtml(statusLabel) + '</div>'
       : '<div class="cpin-workflow">Closed</div>';
+    const reviewBadge = cpinReviewBadgeHtml(item);
 
-    return '<div class="cpin-card ' + item.severity + (pinned ? ' is-pinned' : '') + '" role="button" tabindex="0" data-cpin-id="' + escHtml(item.id) + '" onclick="openCpin(\'' + item.id + '\', event)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){openCpin(\'' + item.id + '\', event);}">' +
+    let menuItems = '';
+    if (pendingReview) {
+      menuItems =
+        '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'' + review.action + '\', event)">View review request</button>' +
+        '<button type="button" role="menuitem" onclick="withdrawCpinReviewRequestFor(\'' + item.id + '\', event)">Withdraw request</button>';
+    } else if (flaggedApproved) {
+      menuItems =
+        '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'flag\', event)">View flag details</button>';
+    } else {
+      menuItems =
+        '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'flag\', event)">Flag as erroneous</button>' +
+        '<button type="button" role="menuitem" class="danger" onclick="openCpinReviewModal(\'' + item.id + '\', \'remove\', event)">Request removal</button>';
+    }
+
+    const cardClasses = ['cpin-card', item.severity];
+    if (pinned) cardClasses.push('is-pinned');
+    if (flaggedApproved) cardClasses.push('is-flagged');
+    if (pendingReview) cardClasses.push('is-pending-review');
+
+    return '<div class="' + cardClasses.join(' ') + '" role="button" tabindex="0" data-cpin-id="' + escHtml(item.id) + '" onclick="openCpin(\'' + item.id + '\', event)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){openCpin(\'' + item.id + '\', event);}">' +
       '<div class="cpin-severity"><span class="pill ' + item.severity + '">' + pillText + '</span></div>' +
       '<div class="cpin-body">' +
         '<div style="font-size:12px;color:var(--ink-3);">' + escHtml(item.ref) + '  ·  ' + escHtml(item.when) + '</div>' +
         premisesHtml +
         '<div class="summary">' + escHtml(item.summary) + '</div>' +
         statusHtml +
+        reviewBadge +
       '</div>' +
       '<div class="cpin-meta">' + assigneeHtml +
         '<button type="button" class="cpin-pin' + (pinned ? ' pinned' : '') + '" title="' + (pinned ? 'Unpin' : 'Pin') + '" aria-label="' + (pinned ? 'Unpin' : 'Pin') + '" onclick="toggleCpinPin(\'' + item.id + '\', event)">' + (pinned ? '★' : '☆') + '</button>' +
+        '<span class="cpin-card-menu-wrap">' +
+          '<button type="button" class="cpin-card-menu-btn" data-cpin-menu-trigger aria-label="CPIN actions" aria-haspopup="menu" aria-expanded="false" onclick="toggleCpinCardMenu(\'' + item.id + '\', event)">⋯</button>' +
+          '<div class="cpin-card-menu" role="menu" hidden data-cpin-menu onclick="event.stopPropagation()">' + menuItems + '</div>' +
+        '</span>' +
       '</div>' +
     '</div>';
+  }
+
+  function withdrawCpinReviewRequestFor(id, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    closeAllCpinCardMenus();
+    cpinReviewModalState = { id: id, action: null };
+    if (!window.confirm('Withdraw this review request?')) return;
+    const patch = Object.assign({}, cpinOverrides[id] || {});
+    delete patch.adminReview;
+    cpinOverrides[id] = patch;
+    saveCpinOverrides();
+    renderCpinsLists();
+    if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
+    if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
   }
 
   function renderCpinCardsHtml(items) {
@@ -17726,7 +19333,7 @@
       cpinsActiveFilter = 'premises-needed';
     }
     const hashFilter = hash.match(/filter=([\w-]+)/);
-    if (hashFilter && ['all', 'red', 'amber', 'green', 'patch', 'premises-needed', 'in-progress'].indexOf(hashFilter[1]) >= 0) {
+    if (hashFilter && ['all', 'red', 'amber', 'green', 'patch', 'premises-needed', 'in-progress', 'flagged'].indexOf(hashFilter[1]) >= 0) {
       cpinsActiveFilter = hashFilter[1];
     }
     if (!document.getElementById('cpins')?.dataset.viewsBound) {
@@ -17753,6 +19360,12 @@
         });
       }
       if (cpinsEl) cpinsEl.dataset.viewsBound = '1';
+    }
+    if (!document.body.dataset.cpinCardMenuBound) {
+      document.body.dataset.cpinCardMenuBound = '1';
+      document.addEventListener('mousedown', function (e) {
+        if (!e.target.closest('.cpin-card-menu-wrap')) closeAllCpinCardMenus();
+      });
     }
     switchCpinsTab(cpinsActiveTab);
     setCpinFilter(cpinsActiveFilter);
@@ -18519,6 +20132,10 @@
       show('cpins');
       return;
     }
+    if (cpinIsRemoved(cpin)) {
+      show('cpins');
+      return;
+    }
     const title = document.getElementById('cpin-detail-title');
     const meta = document.getElementById('cpin-detail-meta');
     const hint = document.getElementById('cpin-detail-stage-hint');
@@ -18547,6 +20164,7 @@
       actions.innerHTML = btn;
     }
     renderCpinRagBanner(cpin);
+    renderCpinAdminReviewBanner(cpin);
     renderCpinFrsSubmission(cpin);
     if (cpinDetailLastId !== activeCpinId) {
       cpinSeverityEditing = false;
