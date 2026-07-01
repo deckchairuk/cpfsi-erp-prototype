@@ -5338,35 +5338,14 @@
   }
   .prem-site-link:hover { color: var(--accent-dark); }
   .premises-site-banner {
-    margin-top: 12px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--line-2);
-    background: var(--bg);
-    font-size: 13px;
-    color: var(--ink-2);
-    line-height: 1.5;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.4;
   }
-  .premises-site-banner strong { color: var(--ink); }
-  .premises-site-overview {
-    grid-column: 1 / -1;
-    margin-bottom: 4px;
-  }
-  .premises-site-overview .card { margin: 0; }
-  .premises-site-sibling-list {
-    margin: 8px 0 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 14px;
-    font-size: 13px;
-  }
-  .premises-site-sibling-list a {
-    color: var(--accent);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .premises-site-banner .prem-site-link {
+    font-size: inherit;
+    font-weight: 500;
   }
   .prem-row--head {
     background: var(--bg);
@@ -7057,7 +7036,6 @@
     </div>
 
     <div id="premises-tab-overview" class="premises-tab-panel active">
-    <div id="premises-detail-site-overview" class="premises-site-overview" hidden></div>
     <div class="card-row">
       <div class="card">
         <h3>Duty Holders</h3>
@@ -7191,7 +7169,6 @@
     </div>
 
     <div id="premises-bristol-overview" class="premises-tab-panel active">
-      <div id="premises-bristol-site-overview" class="premises-site-overview" hidden></div>
       <div class="card-row">
         <div class="card">
           <h3>Duty Holders</h3>
@@ -12449,70 +12426,19 @@
     let html = '';
     if (prem.parentSite) {
       const parent = getPremisesByRef(prem.parentSite.ref);
-      html += '<strong>Part of a larger site.</strong> This premises is tagged as part of <strong>' +
-        escHtml(prem.parentSite.name) + '</strong>';
+      html = 'Part of ';
       if (parent && parent.route) {
-        html += ' — <button type="button" class="prem-site-link" data-premises-route="' +
-          escHtml(parent.route) + '">View site record</button>';
-      }
-      html += '. Each unit is audited and scored individually.';
-      const siblings = getPremisesSiteSiblings(prem);
-      if (siblings.length) {
-        html += '<ul class="premises-site-sibling-list">';
-        siblings.forEach(function (s) {
-          html += '<li>' + escHtml(s.name) + (s.ref ? ' <span class="prem-ref">' + escHtml(s.ref) + '</span>' : '') + '</li>';
-        });
-        html += '</ul>';
+        html += '<button type="button" class="prem-site-link" data-premises-route="' +
+          escHtml(parent.route) + '">' + escHtml(prem.parentSite.name) + '</button>';
+      } else {
+        html += escHtml(prem.parentSite.name);
       }
     } else if (prem.isParentSite) {
-      const children = getPremisesSiteChildren(prem.ref);
-      const names = (prem.sitePremises && prem.sitePremises.length)
-        ? prem.sitePremises.map(function (n) { return PREMISES_LIST.find(function (p) { return p.name === n; }); }).filter(Boolean)
-        : children;
-      html += '<strong>Multi-premises site record.</strong> ' + escHtml(prem.name) +
-        ' groups ' + names.length + ' individually managed premises: ';
-      html += names.map(function (c) { return escHtml(c.name); }).join(', ') + '.';
+      const count = (prem.sitePremises && prem.sitePremises.length) ||
+        getPremisesSiteChildren(prem.ref).length;
+      html = 'Multi-premises site · ' + count + ' unit' + (count === 1 ? '' : 's');
     }
     el.innerHTML = html;
-    el.hidden = false;
-  }
-
-  function renderPremisesSiteOverviewCard(prem, elId) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    if (!prem || (!prem.parentSite && !prem.isParentSite)) {
-      el.hidden = true;
-      el.innerHTML = '';
-      return;
-    }
-
-    let body = '';
-    if (prem.parentSite) {
-      const siblings = getPremisesSiteSiblings(prem);
-      body = '<p style="margin:0 0 8px;font-size:13px;color:var(--ink-2);line-height:1.5;">Tagged as part of <strong>' +
-        escHtml(prem.parentSite.name) + '</strong>. Related premises on the same site:</p>';
-      body += '<ul class="premises-site-sibling-list">';
-      body += '<li><strong>' + escHtml(prem.name) + '</strong> <span class="prem-ref">(this record)</span></li>';
-      siblings.forEach(function (s) {
-        body += '<li>' + escHtml(s.name) + (s.ref ? ' <span class="prem-ref">' + escHtml(s.ref) + '</span>' : '') + '</li>';
-      });
-      const parent = getPremisesByRef(prem.parentSite.ref);
-      if (parent) {
-        body += '<li>Site: ' + escHtml(parent.name) + (parent.ref ? ' <span class="prem-ref">' + escHtml(parent.ref) + '</span>' : '') + '</li>';
-      }
-      body += '</ul>';
-    } else if (prem.isParentSite) {
-      const children = getPremisesSiteChildren(prem.ref);
-      body = '<p style="margin:0 0 8px;font-size:13px;color:var(--ink-2);line-height:1.5;">This is the umbrella site record. Individual premises are audited separately:</p><ul class="premises-site-sibling-list">';
-      children.forEach(function (c) {
-        const click = c.route ? ' data-premises-route="' + escHtml(c.route) + '"' : '';
-        body += '<li><button type="button" class="prem-site-link"' + click + '>' + escHtml(c.name) + '</button>' +
-          (c.ref ? ' <span class="prem-ref">' + escHtml(c.ref) + '</span>' : '') + '</li>';
-      });
-      body += '</ul>';
-    }
-
-    el.innerHTML = '<div class="card"><h3>Larger site</h3>' + body + '</div>';
     el.hidden = false;
   }
 
@@ -13005,7 +12931,6 @@
     const prem = getPremisesByName('Temple Quay House');
     renderPremisesDetailMeta(prem, 'premises-detail-meta');
     renderPremisesSiteBanner(prem, 'premises-detail-site');
-    renderPremisesSiteOverviewCard(prem, 'premises-detail-site-overview');
     renderPremisesInProgressAudits('Temple Quay House');
     renderPremisesLocationDetails('Temple Quay House', 'premises-tq-details');
     setPremisesDetailTab('overview');
@@ -13018,7 +12943,6 @@
     const prem = getPremisesByName('HMP Bristol');
     renderPremisesDetailMeta(prem, 'premises-bristol-meta');
     renderPremisesSiteBanner(prem, 'premises-bristol-site');
-    renderPremisesSiteOverviewCard(prem, 'premises-bristol-site-overview');
     renderPremisesLocationDetails('HMP Bristol', 'premises-bristol-details-root');
     setPremisesBristolTab('overview');
     renderPremisesDetailList('premises-bristol-processes-list', PREMISES_BRISTOL_PROCESSES);
