@@ -631,8 +631,8 @@
       list.innerHTML = letters.map(function (ltr) {
         const meta = (ltr.templateLabel || 'Letter') + ' · ' + (ltr.recipientName || 'Recipient') + (ltr.at ? ' · ' + ltr.at : '');
         return '<div class="letter-attachment-item">' +
-          '<div class="letter-attachment-icon">PDF</div>' +
-          '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>' +
+          '<div class="letter-attachment-icon is-word">DOC</div>' +
+          '<div class="letter-attachment-info"><strong>' + escHtml((ltr.fileName || 'Letter.docx').replace(/\.pdf$/i, '.docx')) + '</strong>' +
           '<span>' + escHtml(meta) + '</span></div>' +
           '<button class="btn" type="button" onclick="viewBsLetter(\'' + escHtml(ltr.id) + '\')">View</button>' +
           '</div>';

@@ -1823,6 +1823,26 @@
     opacity: 0.75;
     background: var(--bg);
   }
+  .plan-thread.is-enforcement-track {
+    border-left: 4px solid var(--red);
+    background: #fffafa;
+  }
+  .plan-thread.is-plan-track {
+    border-left: 4px solid var(--amber);
+  }
+  .audit-s5-track-section {
+    margin-top: 20px;
+  }
+  .audit-s5-track-section h3 {
+    margin: 0 0 6px;
+  }
+  .audit-s5-track-section .help {
+    margin-bottom: 12px;
+  }
+  .letter-attachment-icon.is-word {
+    color: #1e4a8c;
+    font-size: 8px;
+  }
   .audit-s5-threads-progress {
     padding: 12px 14px;
     border: 1px solid var(--line);
@@ -7586,11 +7606,11 @@
         <div class="context-card">
           <h3>Duty Holder progress</h3>
           <div class="dh-progress" style="margin:0;" id="audit-context-progress">
-            <strong id="audit-context-progress-label">2 of 3 settled</strong>
+            <strong id="audit-context-progress-label">0 of 3 threads settled</strong>
             <div class="bar"><div id="audit-context-progress-bar"></div></div>
           </div>
           <div class="dh-status-row"><span>Property Directorate</span><span class="pill green">GSS</span></div>
-          <div class="dh-status-row" id="audit-context-hmcts"><span>HMCTS</span><span class="pill amber">28-DAP</span></div>
+          <div class="dh-status-row" id="audit-context-hmcts"><span>HMCTS</span><span class="pill red">EN · 28-DAP</span></div>
           <div class="dh-status-row"><span>Equans</span><span class="pill amber">28-DAP</span></div>
         </div>
 
@@ -7727,7 +7747,7 @@
         <div class="audit-panel" id="audit-panel-4" hidden>
           <h2 style="margin:0;">Outcomes and letters</h2>
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            Record the EMM dialogue, confirm or adjust each Duty Holder's outcome, then generate and send the appropriate letters — one per outcome per Duty Holder.
+            Record the EMM dialogue, confirm or adjust each Duty Holder's outcome, then generate and send the appropriate letters — one per outcome per Duty Holder. System letters are produced as editable Word documents (.docx).
           </div>
           <div id="audit-stage4-content"></div>
           <div class="stage-actions" id="audit-stage4-actions"></div>
@@ -7737,7 +7757,7 @@
         <div class="audit-panel" id="audit-panel-5" hidden>
           <h2 style="margin:0;">Action plans</h2>
           <div style="font-size:13px;color:var(--ink-2);margin:4px 0 16px;">
-            Each Duty Holder with a 28-DAP or EN outcome runs a parallel thread: receive plan → accept or reject → monitor or request a redrawn plan. Repeated rejections may escalate to enforcement.
+            Enforcement notices and 28-day action plans are tracked as <strong>separate threads</strong> per Duty Holder. Each thread is monitored independently until closed.
           </div>
           <div id="audit-stage5-content"></div>
           <div class="stage-actions" id="audit-stage5-actions"></div>
@@ -9419,7 +9439,7 @@
         <!-- Appointment letters -->
         <div class="setup-section">
           <h3 id="setup-appointment-letters-heading">5. Appointment letters</h3>
-          <div class="help" id="setup-appointment-letters-help">Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as PDF attachments and are sent when you start the audit.</div>
+          <div class="help" id="setup-appointment-letters-help">Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as editable Word documents (.docx) and are sent when you start the audit.</div>
           <div class="letter-attachment-list" id="setup-appointment-letters-list"></div>
           <div class="letter-composer-actions" style="margin-top:10px;">
             <button class="btn primary" type="button" onclick="openAuditSetupLetterComposer()">Write letter</button>
@@ -11408,34 +11428,58 @@
     return out;
   }
 
-  function createSettledStage5Thread(dh, selected) {
-    const needsPlan = dhNeedsActionPlan(selected);
+  function createSettledPlanThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, '28dap');
     const thread = {
+      id: id,
       dh: dh,
+      trackType: '28dap',
+      trackLabel: '28-day Action Plan',
+      isEnforcementTrack: false,
       outcomes: selected.slice(),
-      needsPlan: needsPlan,
-      status: needsPlan ? 'settled' : 'settled-at-4',
+      needsPlan: true,
+      status: 'settled',
       settled: true,
-      planReceivedAt: needsPlan ? '18 July 2026' : null,
+      planReceivedAt: '18 July 2026',
       dueDate: null,
       revisionDueDate: null,
-      adequacyDecision: needsPlan ? 'adequate' : null,
-      letters: []
-    };
-    if (needsPlan) {
-      thread.letters = [{
+      adequacyDecision: 'adequate',
+      letters: [{
         id: 'ltr-s5-' + auditDhSlug(dh) + '-sat',
         letterType: 'satisfactory',
         templateId: 'audit-plan-satisfactory',
         templateLabel: 'Satisfactory action plan letter',
         recipientName: dh === 'HMCTS' ? 'Mark Stevens' : (dh === 'Equans' ? 'Sarah Patel' : 'Recipient'),
-        fileName: 'Letter-' + auditDhSlug(dh) + '-Satisfactory-Action-Plan-2026-07-18.pdf',
+        fileName: ensureLetterDocxFileName('Letter-' + auditDhSlug(dh) + '-Satisfactory-Action-Plan-2026-07-18.docx'),
         body: '',
         at: '18 July 2026',
         ts: Date.now()
-      }];
-    }
+      }]
+    };
     return thread;
+  }
+
+  function createSettledEnThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, 'en');
+    return {
+      id: id,
+      dh: dh,
+      trackType: 'en',
+      trackLabel: 'Enforcement Notice',
+      isEnforcementTrack: true,
+      outcomes: selected.slice(),
+      needsPlan: false,
+      status: 'en-settled',
+      settled: true,
+      complianceDueDate: '15 August 2026',
+      enDecision: 'compliant',
+      complianceNotes: 'Remedial works verified on site.',
+      letters: []
+    };
+  }
+
+  function createSettledStage5Thread(dh, selected) {
+    return createSettledPlanThread(dh, selected);
   }
 
   function demoAuditStage4LetterTaskId(dh, outcomeKey, recipientId) {
@@ -11448,10 +11492,10 @@
 
   function createDemoStage4Letters() {
     const specs = [
-      { dh: 'HMCTS', key: 'en', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-en', label: 'Enforcement Notice', file: 'Letter-Mark-Stevens-Enforcement-Notice-2026-07-15.pdf' },
-      { dh: 'HMCTS', key: '28dap', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Mark-Stevens-28-day-Action-Plan-2026-07-15.pdf' },
-      { dh: 'Equans', key: '28dap', rid: 'rp2', rname: 'Sarah Patel', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Sarah-Patel-28-day-Action-Plan-2026-07-15.pdf' },
-      { dh: 'The Property Directorate', key: 'gss', rid: 'rp3', rname: 'Richard Byrne', tmpl: 'audit-outcome-gss', label: 'Generally Suitable & Sufficient', file: 'Letter-Richard-Byrne-Generally-Suitable-Sufficient-2026-07-15.pdf' }
+      { dh: 'HMCTS', key: 'en', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-en', label: 'Enforcement Notice', file: 'Letter-Mark-Stevens-Enforcement-Notice-2026-07-15.docx' },
+      { dh: 'HMCTS', key: '28dap', rid: 'rp1', rname: 'Mark Stevens', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Mark-Stevens-28-day-Action-Plan-2026-07-15.docx' },
+      { dh: 'Equans', key: '28dap', rid: 'rp2', rname: 'Sarah Patel', tmpl: 'audit-outcome-28dap', label: '28-day Action Plan', file: 'Letter-Sarah-Patel-28-day-Action-Plan-2026-07-15.docx' },
+      { dh: 'The Property Directorate', key: 'gss', rid: 'rp3', rname: 'Richard Byrne', tmpl: 'audit-outcome-gss', label: 'Generally Suitable & Sufficient', file: 'Letter-Richard-Byrne-Generally-Suitable-Sufficient-2026-07-15.docx' }
     ];
     const letters = [];
     const lettersConfirmed = {};
@@ -11529,7 +11573,7 @@
         recipientId: 'rp1',
         recipientName: 'Mark Stevens',
         recipientDh: 'HMCTS',
-        fileName: 'Letter-Mark-Stevens-On-site-evaluation-appointment-2026-07-01.pdf',
+        fileName: 'Letter-Mark-Stevens-On-site-evaluation-appointment-2026-07-01.docx',
         body: '',
         at: '1 Jul 2026',
         ts: 1719840600000
@@ -11541,7 +11585,7 @@
         recipientId: 'rp2',
         recipientName: 'Sarah Patel',
         recipientDh: 'Equans',
-        fileName: 'Letter-Sarah-Patel-On-site-evaluation-appointment-2026-07-01.pdf',
+        fileName: 'Letter-Sarah-Patel-On-site-evaluation-appointment-2026-07-01.docx',
         body: '',
         at: '1 Jul 2026',
         ts: 1719840601000
@@ -11553,7 +11597,7 @@
         recipientId: 'rp3',
         recipientName: 'Richard Byrne',
         recipientDh: 'The Property Directorate',
-        fileName: 'Letter-Richard-Byrne-On-site-evaluation-appointment-2026-07-01.pdf',
+        fileName: 'Letter-Richard-Byrne-On-site-evaluation-appointment-2026-07-01.docx',
         body: '',
         at: '1 Jul 2026',
         ts: 1719840602000
@@ -11588,22 +11632,26 @@
   function createDemoStage5StateAllSettled() {
     return {
       threads: {
-        'HMCTS': createSettledStage5Thread('HMCTS', ['en', '28dap']),
-        'Equans': createSettledStage5Thread('Equans', ['28dap']),
-        'The Property Directorate': createSettledStage5Thread('The Property Directorate', ['gss'])
+        [auditStage5ThreadId('HMCTS', 'en')]: createSettledEnThread('HMCTS', ['en', '28dap']),
+        [auditStage5ThreadId('HMCTS', '28dap')]: createSettledPlanThread('HMCTS', ['en', '28dap']),
+        [auditStage5ThreadId('Equans', '28dap')]: createSettledPlanThread('Equans', ['28dap'])
       }
     };
   }
 
-  function seedFollowUpStage5Thread(dh, selected) {
-    const needsPlan = dhNeedsActionPlan(selected);
+  function seedFollowUpPlanThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, '28dap');
     const thread = {
+      id: id,
       dh: dh,
+      trackType: '28dap',
+      trackLabel: '28-day Action Plan',
+      isEnforcementTrack: false,
       outcomes: selected.slice(),
-      needsPlan: needsPlan,
+      needsPlan: true,
       followUp: true,
-      status: needsPlan ? 'fu-check-previous' : 'settled-at-4',
-      settled: !needsPlan,
+      status: 'fu-check-previous',
+      settled: false,
       planReceivedAt: null,
       dueDate: null,
       dueTs: null,
@@ -11616,10 +11664,32 @@
       followUpSeverity: null,
       letters: []
     };
-    if (needsPlan && dh === 'Equans') {
-      thread.previousPlanDue = '19 August 2026';
-    }
+    if (dh === 'Equans') thread.previousPlanDue = '19 August 2026';
     return thread;
+  }
+
+  function seedFollowUpEnThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, 'en');
+    return {
+      id: id,
+      dh: dh,
+      trackType: 'en',
+      trackLabel: 'Enforcement Notice',
+      isEnforcementTrack: true,
+      outcomes: selected.slice(),
+      needsPlan: false,
+      followUp: true,
+      status: 'en-active',
+      settled: false,
+      complianceDueDate: '15 August 2026',
+      enDecision: null,
+      complianceNotes: '',
+      letters: []
+    };
+  }
+
+  function seedFollowUpStage5Thread(dh, selected) {
+    return seedFollowUpPlanThread(dh, selected);
   }
 
   function createDemoFollowUpStage5State() {
@@ -11628,13 +11698,17 @@
       'Equans': ['28dap'],
       'The Property Directorate': ['gss']
     };
-    return {
-      threads: {
-        'HMCTS': seedFollowUpStage5Thread('HMCTS', parentOutcomes['HMCTS']),
-        'Equans': seedFollowUpStage5Thread('Equans', parentOutcomes['Equans']),
-        'The Property Directorate': seedFollowUpStage5Thread('The Property Directorate', parentOutcomes['The Property Directorate'])
+    const threads = {};
+    Object.keys(parentOutcomes).forEach(function (dh) {
+      const selected = parentOutcomes[dh];
+      if (dhNeedsEnforcementTrack(selected)) {
+        threads[auditStage5ThreadId(dh, 'en')] = seedFollowUpEnThread(dh, selected);
       }
-    };
+      if (dhNeedsActionPlan(selected)) {
+        threads[auditStage5ThreadId(dh, '28dap')] = seedFollowUpPlanThread(dh, selected);
+      }
+    });
+    return { threads: threads };
   }
 
   function buildDemoAuditReadyContext() {
@@ -11688,7 +11762,7 @@
         recipientId: 'rp1',
         recipientName: 'Mark Stevens',
         recipientDh: 'HMCTS',
-        fileName: 'Letter-Mark-Stevens-Follow-up-audit-notification-2026-08-01.pdf',
+        fileName: 'Letter-Mark-Stevens-Follow-up-audit-notification-2026-08-01.docx',
         body: '',
         at: '1 Aug 2026',
         ts: 1722513600000
@@ -11700,7 +11774,7 @@
         recipientId: 'rp2',
         recipientName: 'Sarah Patel',
         recipientDh: 'Equans',
-        fileName: 'Letter-Sarah-Patel-Follow-up-audit-notification-2026-08-01.pdf',
+        fileName: 'Letter-Sarah-Patel-Follow-up-audit-notification-2026-08-01.docx',
         body: '',
         at: '1 Aug 2026',
         ts: 1722513601000
@@ -11712,7 +11786,7 @@
         recipientId: 'rp3',
         recipientName: 'Richard Byrne',
         recipientDh: 'The Property Directorate',
-        fileName: 'Letter-Richard-Byrne-Follow-up-audit-notification-2026-08-01.pdf',
+        fileName: 'Letter-Richard-Byrne-Follow-up-audit-notification-2026-08-01.docx',
         body: '',
         at: '1 Aug 2026',
         ts: 1722513602000
@@ -11918,8 +11992,8 @@
     if (letterHelp) {
       letterHelp.textContent = followUp
         ? 'Notify Responsible Persons that a follow-up audit is being carried out to verify remedial action from audit ' +
-          (parentId || 'the previous audit') + '. Saved letters are sent when you start the follow-up.'
-        : 'Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as PDF attachments and are sent when you start the audit.';
+          (parentId || 'the previous audit') + '. Saved letters are editable Word documents (.docx) and are sent when you start the follow-up.'
+        : 'Write templated letters to Responsible Persons linked to your approved Duty Holders. Saved letters appear here as editable Word documents (.docx) and are sent when you start the audit.';
     }
     const dhRpHelp = document.getElementById('setup-dh-rp-help');
     if (dhRpHelp) {
@@ -12428,9 +12502,9 @@
   ];
 
   const PREMISES_TQ_DOCUMENTS = [
-    { pill: 'purple', pillLabel: 'File', title: 'Letter-HMCTS-Appointment-2026-06-18.pdf', sub: 'Appointment letter  ·  Audit A-2026-0314', when: '18 Jun 2026' },
+    { pill: 'purple', pillLabel: 'File', title: 'Letter-HMCTS-Appointment-2026-06-18.docx', sub: 'Appointment letter  ·  Audit A-2026-0314', when: '18 Jun 2026' },
     { pill: 'purple', pillLabel: 'File', title: 'Audit-report-A-2025-0288.pdf', sub: 'Full audit outcome  ·  Score 44', when: 'Jan 2025' },
-    { pill: 'purple', pillLabel: 'File', title: 'Letter-GSS-HMCTS-2025-01.pdf', sub: 'Generally satisfactory standard', when: 'Jan 2025' },
+    { pill: 'purple', pillLabel: 'File', title: 'Letter-GSS-HMCTS-2025-01.docx', sub: 'Generally satisfactory standard', when: 'Jan 2025' },
     { pill: 'purple', pillLabel: 'File', title: 'CPIN-2026-0417-intake.pdf', sub: 'FRS submission record', when: '12 Jun 2026' }
   ];
 
@@ -15661,7 +15735,7 @@
 
     let h = '<div class="setup-section">';
     h += '<h3>Letters</h3>';
-    h += '<div class="help">Open the letter writer to see each recipient\'s package of letters — one per confirmed outcome for their Duty Holder.</div>';
+    h += '<div class="help">Open the letter writer to see each recipient\'s package of letters — one per confirmed outcome for their Duty Holder. Letters are saved as editable Word documents (.docx) for future redaction.</div>';
     h += '<div class="letter-attachment-list" id="audit-stage4-letters-list">';
 
     if (!savedEntries.length) {
@@ -15671,8 +15745,8 @@
         const ltr = l.saved;
         const meta = (ltr.templateLabel || l.def.label) + ' · ' + (ltr.recipientName || l.recipientName) + ' · ' + l.dh + (ltr.at ? ' · ' + ltr.at : '');
         h += '<div class="letter-attachment-item">';
-        h += '<div class="letter-attachment-icon">PDF</div>';
-        h += '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>';
+        h += letterAttachmentIconHtml();
+        h += '<div class="letter-attachment-info"><strong>' + escHtml(ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')) + '</strong>';
         h += '<span>' + escHtml(meta) + '</span></div>';
         h += '<button class="btn" type="button" onclick="viewAuditStage4Letter(\'' + escHtml(l.id) + '\')">View</button>';
         h += '</div>';
@@ -16042,7 +16116,7 @@
       savedStage4.forEach(function (l) {
         letters.push({
           name: (l.dutyHolder || l.recipientName || 'Duty Holder') + ' — ' + (l.templateLabel || 'Letter'),
-          file: l.fileName || ('Letter-' + letterFileSlug(l.dutyHolder || l.recipientName) + '.pdf')
+          file: ensureLetterDocxFileName(l.fileName || ('Letter-' + letterFileSlug(l.dutyHolder || l.recipientName) + '.docx'))
         });
       });
     } else if (auditStage4State && Object.keys(auditStage4State.outcomes).length) {
@@ -16051,14 +16125,14 @@
         (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
           const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
           const label = def ? def.label : k;
-          letters.push({ name: dh + ' — ' + label, file: 'Letter-' + shortDh + '-' + (shortLabels[k] || k) + '-2026-06-22.pdf' });
+          letters.push({ name: dh + ' — ' + label, file: 'Letter-' + shortDh + '-' + (shortLabels[k] || k) + '-2026-06-22.docx' });
         });
       });
     } else {
       letters.push(
-        { name: 'HMCTS — 28-Day Action Plan',    file: 'Letter-HMCTS-28DAP-2026-06-22.pdf' },
-        { name: 'Equans — 28-Day Action Plan',   file: 'Letter-Equans-28DAP-2026-06-22.pdf' },
-        { name: 'Property Directorate — GSS',    file: 'Letter-PropertyDirectorate-GSS-2026-06-22.pdf' }
+        { name: 'HMCTS — 28-Day Action Plan',    file: 'Letter-HMCTS-28DAP-2026-06-22.docx' },
+        { name: 'Equans — 28-Day Action Plan',   file: 'Letter-Equans-28DAP-2026-06-22.docx' },
+        { name: 'Property Directorate — GSS',    file: 'Letter-PropertyDirectorate-GSS-2026-06-22.docx' }
       );
     }
 
@@ -16081,8 +16155,96 @@
     return (dh || '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
   }
 
+  const LETTER_FILE_EXT = 'docx';
+
+  function ensureLetterDocxFileName(name) {
+    if (!name) return 'Letter.' + LETTER_FILE_EXT;
+    return String(name).replace(/\.pdf$/i, '.' + LETTER_FILE_EXT);
+  }
+
+  function letterAttachmentIconHtml() {
+    return '<div class="letter-attachment-icon is-word">DOC</div>';
+  }
+
+  function getStage5TrackTypes(selected) {
+    const tracks = [];
+    if ((selected || []).indexOf('28dap') >= 0) tracks.push('28dap');
+    if ((selected || []).indexOf('en') >= 0) tracks.push('en');
+    return tracks;
+  }
+
+  function auditStage5ThreadId(dh, trackType) {
+    return auditDhSlug(dh) + '-' + trackType;
+  }
+
+  function resolveAuditStage5Thread(ref) {
+    if (!auditStage5State || !ref) return null;
+    const threads = auditStage5State.threads;
+    if (threads[ref]) return { id: ref, thread: threads[ref] };
+    const byId = Object.keys(threads).find(function (id) {
+      const t = threads[id];
+      return t.id === ref || t.dh === ref || auditDhSlug(t.dh) === ref;
+    });
+    if (byId) return { id: byId, thread: threads[byId] };
+    return null;
+  }
+
+  function getAuditStage5ThreadsList() {
+    if (!auditStage5State) return [];
+    return Object.keys(auditStage5State.threads).map(function (id) {
+      const thread = auditStage5State.threads[id];
+      return { id: id, thread: thread, dh: thread.dh };
+    });
+  }
+
+  function migrateLegacyStage5Threads() {
+    if (!auditStage5State || !auditStage5State.threads) return;
+    const legacy = Object.assign({}, auditStage5State.threads);
+    const keys = Object.keys(legacy);
+    const looksLegacy = keys.some(function (k) { return k.indexOf('-') < 0 || (legacy[k] && !legacy[k].trackType); });
+    if (!looksLegacy) return;
+    const next = {};
+    keys.forEach(function (dh) {
+      const old = legacy[dh];
+      if (!old) return;
+      const selected = old.outcomes || [];
+      if (old.trackType) {
+        next[dh] = old;
+        return;
+      }
+      getStage5TrackTypes(selected).forEach(function (trackType) {
+        const id = auditStage5ThreadId(old.dh || dh, trackType);
+        if (trackType === 'en') {
+          next[id] = Object.assign({}, old, {
+            id: id,
+            trackType: 'en',
+            trackLabel: 'Enforcement Notice',
+            isEnforcementTrack: true,
+            needsPlan: false,
+            status: old.isEnforcementTrack ? old.status : (old.status === 'enforcement-pending' || old.status === 'fu-enforcement-pending' ? 'en-breach' : 'en-active'),
+            settled: old.enSettled || false
+          });
+        } else {
+          next[id] = Object.assign({}, old, {
+            id: id,
+            trackType: '28dap',
+            trackLabel: '28-day Action Plan',
+            isEnforcementTrack: false,
+            needsPlan: true,
+            status: old.status === 'enforcement-pending' || old.status === 'fu-enforcement-pending' ? 'awaiting' : old.status
+          });
+        }
+      });
+    });
+    auditStage5State.threads = next;
+  }
+
   function dhNeedsActionPlan(selected) {
-    return (selected || []).some(function (k) { return k === '28dap' || k === 'en'; });
+    return (selected || []).indexOf('28dap') >= 0;
+  }
+
+  function dhNeedsEnforcementTrack(selected) {
+    return (selected || []).indexOf('en') >= 0;
   }
 
   const PLAN_RECEIPT_DAYS = 28;
@@ -16162,7 +16324,21 @@
     return (selected || []).map(function (k) { return labels[k] || k; }).join(' + ');
   }
 
+  function getAuditStage5ThreadTrackLabel(thread) {
+    if (thread.trackLabel) return thread.trackLabel;
+    if (thread.isEnforcementTrack || thread.trackType === 'en') return 'Enforcement Notice';
+    if (thread.trackType === '28dap') return '28-day Action Plan';
+    return getAuditStage5OutcomeLabel(thread.outcomes);
+  }
+
   function getAuditStage5ThreadStatusLabel(thread) {
+    if (thread.isEnforcementTrack || thread.trackType === 'en') {
+      if (thread.status === 'en-settled' || thread.settled) return 'Notice closed';
+      if (thread.status === 'en-active') return 'Notice active';
+      if (thread.status === 'en-review') return 'Compliance review';
+      if (thread.status === 'en-breach') return 'Breach recorded';
+      return 'Enforcement notice';
+    }
     if (!thread.needsPlan) return 'Settled at Stage 4';
     if (thread.status === 'settled') return 'Complete';
     if (thread.status === 'monitoring') return 'Monitoring plan';
@@ -16180,6 +16356,11 @@
   }
 
   function getAuditStage5ThreadStatusPill(thread) {
+    if (thread.isEnforcementTrack || thread.trackType === 'en') {
+      if (thread.settled || thread.status === 'en-settled') return 'green';
+      if (thread.status === 'en-breach') return 'red';
+      return 'amber';
+    }
     if (!thread.needsPlan || thread.status === 'settled') return 'green';
     if (thread.status === 'monitoring') return 'blue';
     if (thread.status === 'awaiting-revision' || thread.status === 'enforcement-pending' || thread.status === 'fu-enforcement-pending') return 'amber';
@@ -16198,14 +16379,64 @@
     return { letter: thread.letters[thread.letters.length - 1], index: thread.letters.length - 1 };
   }
 
-  function seedAuditStage5Thread(dh, selected) {
-    const needsPlan = dhNeedsActionPlan(selected);
+  function getAuditStage4EnLetterSent(dh) {
+    if (!auditStage4State || !auditStage4State.letters) return null;
+    let found = null;
+    auditStage4State.letters.forEach(function (l) {
+      if (l.dutyHolder !== dh) return;
+      if (l.outcomeKey === 'en' || l.templateId === 'audit-outcome-en') found = l;
+    });
+    return found;
+  }
+
+  function syncEnThreadFromStage4(thread, dh) {
+    if (!thread || !thread.isEnforcementTrack) return;
+    const letter = getAuditStage4EnLetterSent(dh);
+    if (letter && letter.at) thread.noticeIssuedAt = letter.at;
+    if (letter && letter.ts) thread.noticeIssuedTs = letter.ts;
+    if (!thread.complianceDueDate && letter && letter.ts) {
+      const dueTs = letter.ts + PLAN_RECEIPT_DAYS * 86400000;
+      thread.complianceDueDate = formatUkShortDate(new Date(dueTs));
+      thread.complianceDueTs = dueTs;
+    }
+  }
+
+  function seedEnforcementThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, 'en');
     const thread = {
+      id: id,
       dh: dh,
+      trackType: 'en',
+      trackLabel: 'Enforcement Notice',
+      isEnforcementTrack: true,
       outcomes: selected.slice(),
-      needsPlan: needsPlan,
-      status: needsPlan ? 'awaiting' : 'settled-at-4',
-      settled: !needsPlan,
+      needsPlan: false,
+      status: 'en-active',
+      settled: false,
+      noticeIssuedAt: null,
+      noticeIssuedTs: null,
+      complianceDueDate: null,
+      complianceDueTs: null,
+      enDecision: null,
+      complianceNotes: '',
+      letters: []
+    };
+    syncEnThreadFromStage4(thread, dh);
+    return thread;
+  }
+
+  function seedAuditStage5PlanThread(dh, selected) {
+    const id = auditStage5ThreadId(dh, '28dap');
+    const thread = {
+      id: id,
+      dh: dh,
+      trackType: '28dap',
+      trackLabel: '28-day Action Plan',
+      isEnforcementTrack: false,
+      outcomes: selected.slice(),
+      needsPlan: true,
+      status: 'awaiting',
+      settled: false,
       planReceivedAt: null,
       dueDate: null,
       dueTs: null,
@@ -16217,7 +16448,7 @@
       adequacyDecision: null,
       letters: []
     };
-    if (needsPlan && dh === 'HMCTS') {
+    if (dh === 'HMCTS') {
       if (hmctsPlanSettled) {
         thread.status = 'settled';
         thread.settled = true;
@@ -16229,7 +16460,7 @@
           templateId: 'audit-plan-satisfactory',
           templateLabel: 'Satisfactory action plan letter',
           recipientName: 'Mark Stevens',
-          fileName: 'Letter-Mark-Stevens-Satisfactory-Action-Plan-2026-07-18.pdf',
+          fileName: ensureLetterDocxFileName('Letter-Mark-Stevens-Satisfactory-Action-Plan-2026-07-18.docx'),
           body: '',
           at: '18 July 2026',
           ts: Date.now()
@@ -16239,11 +16470,15 @@
         thread.planReceivedAt = '18 July 2026';
       }
     }
-    if (needsPlan && dh === 'Equans') {
+    if (dh === 'Equans') {
       thread.status = 'awaiting';
     }
     syncThreadPlanDueFromStage4(thread, dh);
     return thread;
+  }
+
+  function seedAuditStage5Thread(dh, selected) {
+    return seedAuditStage5PlanThread(dh, selected);
   }
 
   function initAuditStage5() {
@@ -16251,27 +16486,38 @@
     if (!auditStage5State) {
       auditStage5State = { threads: {} };
     }
+    migrateLegacyStage5Threads();
     const holders = Object.keys(auditStage4State.outcomes);
     const followUp = isFollowUpAudit();
     const parentOut = auditParentOutcomes || {};
     holders.forEach(function (dh) {
       const selected = auditStage4State.outcomes[dh].selected || [];
-      if (!auditStage5State.threads[dh]) {
-        if (followUp) {
-          auditStage5State.threads[dh] = seedFollowUpStage5Thread(dh, parentOut[dh] || selected);
+      if (dhNeedsEnforcementTrack(selected)) {
+        const enId = auditStage5ThreadId(dh, 'en');
+        if (!auditStage5State.threads[enId]) {
+          auditStage5State.threads[enId] = followUp
+            ? seedFollowUpEnThread(dh, parentOut[dh] || selected)
+            : seedEnforcementThread(dh, selected);
         } else {
-          auditStage5State.threads[dh] = seedAuditStage5Thread(dh, selected);
+          const t = auditStage5State.threads[enId];
+          t.outcomes = selected.slice();
+          if (!t.letters) t.letters = [];
+          syncEnThreadFromStage4(t, dh);
         }
-      } else {
-        const t = auditStage5State.threads[dh];
-        t.outcomes = selected.slice();
-        t.needsPlan = dhNeedsActionPlan(selected);
-        if (!t.letters) t.letters = [];
-        if (!t.needsPlan) {
-          t.status = 'settled-at-4';
-          t.settled = true;
+      }
+      if (dhNeedsActionPlan(selected)) {
+        const planId = auditStage5ThreadId(dh, '28dap');
+        if (!auditStage5State.threads[planId]) {
+          auditStage5State.threads[planId] = followUp
+            ? seedFollowUpPlanThread(dh, parentOut[dh] || selected)
+            : seedAuditStage5PlanThread(dh, selected);
+        } else {
+          const t = auditStage5State.threads[planId];
+          t.outcomes = selected.slice();
+          t.needsPlan = true;
+          if (!t.letters) t.letters = [];
+          syncThreadPlanDueFromStage4(t, dh);
         }
-        syncThreadPlanDueFromStage4(t, dh);
       }
     });
     syncHmctsPlanSettledFromStage5();
@@ -16279,7 +16525,8 @@
   }
 
   function syncHmctsPlanSettledFromStage5() {
-    const hmcts = auditStage5State && auditStage5State.threads['HMCTS'];
+    const planId = auditStage5ThreadId('HMCTS', '28dap');
+    const hmcts = auditStage5State && auditStage5State.threads[planId];
     hmctsPlanSettled = !!(hmcts && hmcts.settled);
   }
 
@@ -16290,6 +16537,18 @@
   }
 
   function renderAuditStage5ThreadSteps(thread) {
+    if (thread.isEnforcementTrack || thread.trackType === 'en') {
+      if (thread.status === 'en-settled' || thread.settled) {
+        return '<span class="done">✓ Notice issued</span> → <span class="done">✓ Compliance verified</span> → <span class="done">✓ Closed</span>';
+      }
+      if (thread.status === 'en-breach') {
+        return '<span class="done">✓ Notice issued</span> → <span class="current">Breach — further action</span>';
+      }
+      if (thread.status === 'en-review') {
+        return '<span class="done">✓ Notice issued</span> → <span class="current">Compliance review</span> → <span>Close notice</span>';
+      }
+      return '<span class="current">Notice active</span> → <span>Compliance review</span> → <span>Close notice</span>';
+    }
     if (!thread.needsPlan) {
       return '<span class="done">✓ No action plan required</span>';
     }
@@ -16315,7 +16574,7 @@
       return '<span class="done">✓ Received</span> → <span class="done">✓ Accepted</span> → <span class="done">✓ Complete</span>';
     }
     if (thread.status === 'enforcement-pending' || thread.status === 'fu-enforcement-pending') {
-      return '<span class="done">✓ Plan rejected</span> → <span class="current">Issue enforcement</span>';
+      return '<span class="done">✓ Plan rejected</span> → <span class="current">See enforcement notice thread</span>';
     }
     if (thread.followUp) {
       if (thread.status === 'fu-check-previous') {
@@ -16349,8 +16608,8 @@
       const ltr = item.ltr;
       const meta = (ltr.templateLabel || 'Letter') + (ltr.at ? ' · ' + ltr.at : '');
       h += '<div class="letter-attachment-item">';
-      h += '<div class="letter-attachment-icon">PDF</div>';
-      h += '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>';
+      h += letterAttachmentIconHtml();
+      h += '<div class="letter-attachment-info"><strong>' + escHtml(ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')) + '</strong>';
       h += '<span>' + escHtml(meta) + '</span></div>';
       h += '<button class="btn" type="button" onclick="viewAuditStage5Letter(\'' + slug + '\', ' + item.idx + ')">View</button>';
       h += '</div>';
@@ -16375,24 +16634,92 @@
     return '';
   }
 
-  function renderAuditStage5ThreadCard(dh, thread) {
-    const slug = auditDhSlug(dh);
-    const dhSafe = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    const outcomeLabel = getAuditStage5OutcomeLabel(thread.outcomes);
+  function renderAuditStage5ThreadCard(threadId, thread) {
+    if (thread.isEnforcementTrack || thread.trackType === 'en') {
+      return renderAuditStage5EnforcementCard(threadId, thread);
+    }
+    return renderAuditStage5PlanThreadCard(threadId, thread);
+  }
+
+  function renderAuditStage5EnforcementCard(threadId, thread) {
+    const dh = thread.dh;
+    const idSafe = threadId.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const trackLabel = getAuditStage5ThreadTrackLabel(thread);
     const statusLabel = getAuditStage5ThreadStatusLabel(thread);
     const statusPill = getAuditStage5ThreadStatusPill(thread);
-    let rowClass = 'plan-thread';
-    if (!thread.needsPlan || (thread.settled && thread.status === 'settled-at-4')) rowClass += ' is-thread-closed';
-    else if (thread.settled) rowClass += ' is-thread-settled';
+    let rowClass = 'plan-thread is-enforcement-track';
+    if (thread.settled) rowClass += ' is-thread-settled';
+
+    let h = '<div class="' + rowClass + '" id="plan-thread-' + escHtml(threadId) + '">';
+    h += '<div class="head">';
+    h += '<span class="name">' + escHtml(dh) + '</span>';
+    h += '<span class="pill ' + statusPill + '">' + escHtml(trackLabel) + '  ·  ' + escHtml(statusLabel) + '</span>';
+    h += '</div>';
+
+    if (thread.noticeIssuedAt) {
+      h += '<div style="font-size:12px;color:var(--ink-2);margin-top:4px;">Notice issued ' + escHtml(thread.noticeIssuedAt) +
+        (thread.complianceDueDate ? ' · Compliance due ' + escHtml(thread.complianceDueDate) : '') + '</div>';
+    } else {
+      h += '<div style="font-size:12px;color:var(--ink-2);margin-top:4px;">Enforcement notice issued at Stage 4. Track compliance independently of any 28-day action plan.</div>';
+    }
+
+    if (thread.status === 'en-breach') {
+      h += '<div class="plan-thread-prompt is-inadequate" style="margin-top:10px;"><strong>Breach recorded.</strong> Duty Holder has not complied with the notice. Decide on further enforcement action.</div>';
+    } else if (thread.status === 'en-review') {
+      h += '<div class="plan-thread-prompt is-awaiting-revision" style="margin-top:10px;"><strong>Compliance review in progress.</strong> Record your assessment of remedial works against the notice requirements.</div>';
+    } else if (!thread.settled) {
+      h += '<div class="plan-thread-prompt" style="margin-top:10px;border-color:#f0c4c4;background:#fff5f5;"><strong>Independent enforcement track.</strong> Monitor notice compliance, verify remedial works, then close this thread when satisfied.</div>';
+    }
+
+    h += '<div class="steps">' + renderAuditStage5ThreadSteps(thread) + '</div>';
+
+    if (thread.settled) {
+      h += '<div class="plan-thread-outcome is-complete"><span class="pill green">Closed</span>';
+      h += '<span class="outcome-copy"><strong>Enforcement notice satisfied.</strong> ' + escHtml(thread.complianceNotes || 'Compliance verified.') + '</span></div>';
+    }
+
+    h += renderAuditStage5ThreadLetters(thread, idSafe);
+
+    if (!thread.settled && thread.status === 'en-active') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="startEnComplianceReview(\'' + idSafe + '\')">Record compliance review</button>';
+      h += '<button class="btn" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'enforcement-reminder\')">Write reminder letter</button>';
+      h += '</div>';
+    }
+    if (!thread.settled && thread.status === 'en-review') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="markEnNoticeSatisfied(\'' + idSafe + '\')">Mark notice satisfied</button>';
+      h += '<button class="btn" type="button" onclick="markEnBreach(\'' + idSafe + '\')">Record breach</button>';
+      h += '<button class="btn btn-quiet" type="button" onclick="resetEnComplianceReview(\'' + idSafe + '\')">Change decision</button>';
+      h += '</div>';
+    }
+    if (!thread.settled && thread.status === 'en-breach') {
+      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'enforcement\')">Write further enforcement letter</button>';
+      h += '<button class="btn" type="button" onclick="markEnNoticeSatisfied(\'' + idSafe + '\')">Close as satisfied</button>';
+      h += '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function renderAuditStage5PlanThreadCard(threadId, thread) {
+    const dh = thread.dh;
+    const idSafe = threadId.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const trackLabel = getAuditStage5ThreadTrackLabel(thread);
+    const statusLabel = getAuditStage5ThreadStatusLabel(thread);
+    const statusPill = getAuditStage5ThreadStatusPill(thread);
+    let rowClass = 'plan-thread is-plan-track';
+    if (thread.settled) rowClass += ' is-thread-settled';
     else if (thread.status === 'monitoring') rowClass += ' is-thread-monitoring';
     else if (thread.status === 'reviewing') rowClass += ' is-thread-reviewing';
     else if (thread.status === 'awaiting') rowClass += ' is-thread-awaiting';
     else if (thread.status === 'awaiting-revision') rowClass += ' is-thread-reviewing';
 
-    let h = '<div class="' + rowClass + '" id="plan-thread-' + escHtml(slug) + '">';
+    let h = '<div class="' + rowClass + '" id="plan-thread-' + escHtml(threadId) + '">';
     h += '<div class="head">';
     h += '<span class="name">' + escHtml(dh) + '</span>';
-    h += '<span class="pill ' + statusPill + '">' + escHtml(outcomeLabel) + '  ·  ' + escHtml(statusLabel) + '</span>';
+    h += '<span class="pill ' + statusPill + '">' + escHtml(trackLabel) + '  ·  ' + escHtml(statusLabel) + '</span>';
     h += '</div>';
 
     if (thread.needsPlan && (thread.status === 'awaiting' || thread.status === 'awaiting-revision')) {
@@ -16400,9 +16727,7 @@
       if (dueBadge) h += '<div class="plan-thread-due-row">' + dueBadge + '</div>';
     }
 
-    if (!thread.needsPlan) {
-      h += '<div style="font-size:12px;color:var(--ink-3);">No follow-up required. Closed at Stage 4.</div>';
-    } else if (thread.followUp && thread.status === 'fu-check-previous') {
+    if (thread.followUp && thread.status === 'fu-check-previous') {
       const parentId = getFollowUpParentAuditId();
       h += '<div style="font-size:12px;color:var(--ink-2);">Check whether the previous action plan from' +
         (parentId ? ' <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>' : ' the parent audit') +
@@ -16411,7 +16736,7 @@
       h += '<div style="font-size:12px;color:var(--ink-2);">Duty Holder is making progress but work is not complete' +
         (thread.extensionUntil ? ' — extended to ' + escHtml(thread.extensionUntil) : '') + '. Log interim activity and monitor.</div>';
     } else if (thread.status === 'fu-enforcement-pending' || thread.status === 'enforcement-pending') {
-      h += '<div class="plan-thread-prompt is-inadequate"><strong>Plan rejected repeatedly.</strong> Issue an Enforcement Notice and send the letter.</div>';
+      h += '<div class="plan-thread-prompt is-inadequate"><strong>Plan rejected repeatedly.</strong> Continue monitoring on the separate enforcement notice thread for this Duty Holder.</div>';
     } else if (thread.followUp && thread.status === 'fu-evidence-low') {
       h += '<div class="plan-thread-prompt is-adequate"><strong>Plan actioned with sufficient evidence.</strong> Low severity — send a satisfactory letter and revisit scoring.</div>';
     } else if (thread.followUp && thread.status === 'fu-verify-site') {
@@ -16434,77 +16759,69 @@
     h += renderAuditStage5ThreadOutcome(thread, dh);
 
     if (thread.status === 'settled') {
-      h += renderAuditStage5ThreadLetters(thread, slug, 'satisfactory');
+      h += renderAuditStage5ThreadLetters(thread, idSafe, 'satisfactory');
     } else if (thread.status === 'awaiting-revision') {
-      h += renderAuditStage5ThreadLetters(thread, slug, 'feedback');
+      h += renderAuditStage5ThreadLetters(thread, idSafe, 'feedback');
     } else if (thread.letters && thread.letters.length) {
-      h += renderAuditStage5ThreadLetters(thread, slug);
+      h += renderAuditStage5ThreadLetters(thread, idSafe);
     }
 
     if (thread.needsPlan && thread.status === 'awaiting') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record plan received</button>';
+      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + idSafe + '\')">Record plan received</button>';
       h += '</div>';
     }
     if (thread.needsPlan && thread.status === 'awaiting-revision') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record plan received</button>';
+      h += '<button class="btn primary" type="button" onclick="recordAuditPlanReceived(\'' + idSafe + '\')">Record plan received</button>';
       h += '</div>';
     }
     if (thread.needsPlan && thread.status === 'reviewing') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="markAuditPlanAdequate(\'' + dhSafe + '\')">Accept plan</button>';
-      h += '<button class="btn" type="button" onclick="markAuditPlanInadequate(\'' + dhSafe + '\')">Reject plan</button>';
-      if ((thread.rejectionCount || 0) >= 2) {
-        h += '<button class="btn" type="button" onclick="escalatePlanToEnforcement(\'' + dhSafe + '\')">Escalate to enforcement</button>';
-      }
+      h += '<button class="btn primary" type="button" onclick="markAuditPlanAdequate(\'' + idSafe + '\')">Accept plan</button>';
+      h += '<button class="btn" type="button" onclick="markAuditPlanInadequate(\'' + idSafe + '\')">Reject plan</button>';
       h += '</div>';
     }
     if (thread.needsPlan && thread.status === 'monitoring') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'satisfactory\')">Write acceptance letter</button>';
-      h += '<button class="btn primary" type="button" onclick="markRevisitArranged(\'' + dhSafe + '\')">Revisit arranged — close thread</button>';
-      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + dhSafe + '\')">Change decision</button>';
+      h += '<button class="btn" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'satisfactory\')">Write acceptance letter</button>';
+      h += '<button class="btn primary" type="button" onclick="markRevisitArranged(\'' + idSafe + '\')">Revisit arranged — close thread</button>';
+      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + idSafe + '\')">Change decision</button>';
       h += '</div>';
     }
     if (thread.needsPlan && thread.status === 'adequate-pending-letter') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'satisfactory\')">Write acceptance letter</button>';
-      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + dhSafe + '\')">Change decision</button>';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'satisfactory\')">Write acceptance letter</button>';
+      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + idSafe + '\')">Change decision</button>';
       h += '</div>';
     }
     if (thread.needsPlan && thread.status === 'inadequate-pending-letter') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'feedback\')">Write feedback letter</button>';
-      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + dhSafe + '\')">Change decision</button>';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'feedback\')">Write feedback letter</button>';
+      h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + idSafe + '\')">Change decision</button>';
       h += '</div>';
     }
     if (thread.followUp && thread.needsPlan && thread.status === 'fu-check-previous') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="markFollowUpPlanAccepted(\'' + dhSafe + '\')">Accept plan</button>';
-      h += '<button class="btn" type="button" onclick="markFollowUpPlanRejected(\'' + dhSafe + '\')">Reject plan — request redraw</button>';
-      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">New action plan received</button>';
+      h += '<button class="btn primary" type="button" onclick="markFollowUpPlanAccepted(\'' + idSafe + '\')">Accept plan</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpPlanRejected(\'' + idSafe + '\')">Reject plan — request redraw</button>';
+      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + idSafe + '\')">New action plan received</button>';
       h += '</div>';
     }
     if (thread.followUp && thread.status === 'fu-progress-ok') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + dhSafe + '\')">Record revised plan</button>';
-      h += '<button class="btn" type="button" onclick="markFollowUpPlanActionedLow(\'' + dhSafe + '\')">Now complete — close thread</button>';
-      h += '</div>';
-    }
-    if (thread.status === 'fu-enforcement-pending' || thread.status === 'enforcement-pending') {
-      h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'enforcement\')">Write enforcement notice</button>';
+      h += '<button class="btn" type="button" onclick="recordAuditPlanReceived(\'' + idSafe + '\')">Record revised plan</button>';
+      h += '<button class="btn" type="button" onclick="markFollowUpPlanActionedLow(\'' + idSafe + '\')">Now complete — close thread</button>';
       h += '</div>';
     }
     if (thread.followUp && thread.status === 'fu-evidence-low') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + dhSafe + '\', \'satisfactory\')">Write satisfactory letter</button>';
+      h += '<button class="btn primary" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'satisfactory\')">Write satisfactory letter</button>';
       h += '</div>';
     }
     if (thread.followUp && thread.status === 'fu-verify-site') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn primary" type="button" onclick="markFollowUpVerificationScheduled(\'' + dhSafe + '\')">Verification visit scheduled</button>';
+      h += '<button class="btn primary" type="button" onclick="markFollowUpVerificationScheduled(\'' + idSafe + '\')">Verification visit scheduled</button>';
       h += '</div>';
     }
     h += '</div>';
@@ -16528,18 +16845,18 @@
       return;
     }
 
-    const threads = Object.keys(auditStage5State.threads).map(function (dh) {
-      return { dh: dh, thread: auditStage5State.threads[dh] };
-    });
+    const threads = getAuditStage5ThreadsList();
+    const enThreads = threads.filter(function (t) { return t.thread.isEnforcementTrack || t.thread.trackType === 'en'; });
+    const planThreads = threads.filter(function (t) { return t.thread.trackType === '28dap' || (t.thread.needsPlan && !t.thread.isEnforcementTrack); });
     const settledCount = threads.filter(function (t) { return t.thread.settled; }).length;
     const pct = threads.length ? Math.round((settledCount / threads.length) * 100) : 0;
-    const openCount = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).length;
+    const openCount = threads.filter(function (t) { return !t.thread.settled; }).length;
 
     if (isFollowUpAudit()) {
       const parentId = getFollowUpParentAuditId();
       html += '<div class="audit-stage5-followup-intro">';
-      html += '<strong>Follow-up audit — action plan and enforcement.</strong> ';
-      html += 'Accept or reject action plans from the previous audit. Accepted plans are monitored until revisit; rejected plans need a redrawn submission. ';
+      html += '<strong>Follow-up audit — enforcement and action plans.</strong> ';
+      html += 'Enforcement notices and 28-day action plans are tracked as separate threads per Duty Holder. ';
       if (parentId) {
         html += 'Carried forward from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>.';
       }
@@ -16548,43 +16865,55 @@
 
     html += '<div class="setup-section">';
     html += '<h3>Threads from outcomes</h3>';
-    html += '<div class="help">Derived from Stage 4 outcomes. Each 28-DAP or EN outcome opens a parallel thread until the plan is received, reviewed and settled.</div>';
+    html += '<div class="help">Each EN or 28-DAP outcome opens its own thread. A Duty Holder with both outcomes has two independent tracks.</div>';
     html += '<table class="audit-scoring-dh-table outcome-table" style="margin-top:12px;"><thead><tr>';
-    html += '<th>Duty Holder</th><th>Outcome</th><th>Thread status</th>';
+    html += '<th>Duty Holder</th><th>Thread</th><th>Type</th><th>Status</th>';
     html += '</tr></thead><tbody>';
     threads.forEach(function (t) {
       const pill = getAuditStage5ThreadStatusPill(t.thread);
       html += '<tr>';
-      html += '<td style="font-weight:600;vertical-align:top;">' + escHtml(t.dh) + '</td>';
-      html += '<td style="vertical-align:top;">' + escHtml(getAuditStage5OutcomeLabel(t.thread.outcomes)) + '</td>';
+      html += '<td style="font-weight:600;vertical-align:top;">' + escHtml(t.thread.dh) + '</td>';
+      html += '<td style="vertical-align:top;">' + escHtml(getAuditStage5ThreadTrackLabel(t.thread)) + '</td>';
+      html += '<td style="vertical-align:top;"><span class="pill ' + (t.thread.isEnforcementTrack ? 'red' : 'amber') + '" style="font-size:11px;">' + (t.thread.isEnforcementTrack ? 'Enforcement' : 'Action plan') + '</span></td>';
       html += '<td style="vertical-align:top;"><span class="pill ' + pill + '" style="font-size:11px;">' + escHtml(getAuditStage5ThreadStatusLabel(t.thread)) + '</span></td>';
       html += '</tr>';
     });
     html += '</tbody></table></div>';
 
-    html += '<div class="setup-section">';
-    html += '<h3>Action plan threads</h3>';
-    html += '<div class="help">' + (isFollowUpAudit()
-      ? 'Accept or reject each action plan. Accepted plans are monitored until a revisit is arranged. Rejected plans need a feedback letter and a redrawn submission.'
-      : 'Work each open thread in parallel. Accept plans to monitor until revisit, or reject and request a redrawn plan. Repeated rejections may escalate to enforcement.') + '</div>';
-
     html += '<div class="audit-s5-threads-progress">';
-    if (settledCount === threads.length) {
-      html += '<div class="count" style="color:var(--green);">✓ All ' + threads.length + ' Duty Holder threads settled — ready to close</div>';
+    if (settledCount === threads.length && threads.length) {
+      html += '<div class="count" style="color:var(--green);">✓ All ' + threads.length + ' threads settled — ready to close</div>';
     } else if (openCount) {
-      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' settled  ·  ' + openCount + ' open</div>';
-      html += '<div style="font-size:12px;color:var(--ink-2);">Receive and review action plans for each open thread, then send a satisfactory letter or feedback.</div>';
+      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' threads settled  ·  ' + openCount + ' open</div>';
     } else {
-      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' settled</div>';
+      html += '<div class="count">' + settledCount + ' of ' + threads.length + ' threads settled</div>';
     }
     html += '<div class="bar"><div style="width:' + pct + '%;"></div></div>';
     html += '</div>';
 
-    threads.forEach(function (t) {
-      html += renderAuditStage5ThreadCard(t.dh, t.thread);
-    });
+    if (enThreads.length) {
+      html += '<div class="setup-section audit-s5-track-section">';
+      html += '<h3>Enforcement notice tracking</h3>';
+      html += '<div class="help">Independent workflow for enforcement notices — compliance monitoring, breach decisions and closure are separate from action plan review.</div>';
+      enThreads.forEach(function (t) {
+        html += renderAuditStage5ThreadCard(t.id, t.thread);
+      });
+      html += '</div>';
+    }
+
+    if (planThreads.length) {
+      html += '<div class="setup-section audit-s5-track-section">';
+      html += '<h3>28-day action plan threads</h3>';
+      html += '<div class="help">' + (isFollowUpAudit()
+        ? 'Accept or reject each action plan. Accepted plans are monitored until a revisit is arranged.'
+        : 'Receive, review and accept or reject action plans. Each thread is monitored independently.') + '</div>';
+      planThreads.forEach(function (t) {
+        html += renderAuditStage5ThreadCard(t.id, t.thread);
+      });
+      html += '</div>';
+    }
+
     html += renderAuditStage5CloseSection(threads);
-    html += '</div>';
 
     el.innerHTML = html;
 
@@ -16635,7 +16964,9 @@
         h += '</div>';
       }
     } else {
-      const openDh = threads.filter(function (t) { return t.thread.needsPlan && !t.thread.settled; }).map(function (t) { return t.dh; });
+      const openDh = threads.filter(function (t) { return !t.thread.settled; }).map(function (t) {
+        return t.thread.dh + ' (' + getAuditStage5ThreadTrackLabel(t.thread) + ')';
+      });
       h += '<div class="help">Close is available once every Duty Holder thread is settled.</div>';
       if (openDh.length) {
         h += '<div class="plan-thread-prompt is-awaiting-revision" style="margin-top:10px;">';
@@ -16701,9 +17032,56 @@
     renderAuditStage5();
   }
 
-  function recordAuditPlanReceived(dh) {
-    if (!auditStage5State || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function findAuditStage5Dh(dhOrSlug) {
+    const resolved = resolveAuditStage5Thread(dhOrSlug);
+    return resolved ? resolved.thread.dh : null;
+  }
+
+  function getAuditStage5ThreadRef(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    return resolved ? resolved.thread : null;
+  }
+
+  function startEnComplianceReview(threadId) {
+    const resolved = resolveAuditStage5Thread(threadId);
+    if (!resolved || !resolved.thread.isEnforcementTrack) return;
+    resolved.thread.status = 'en-review';
+    renderAuditStage5();
+  }
+
+  function resetEnComplianceReview(threadId) {
+    const resolved = resolveAuditStage5Thread(threadId);
+    if (!resolved || !resolved.thread.isEnforcementTrack) return;
+    resolved.thread.status = 'en-active';
+    resolved.thread.enDecision = null;
+    renderAuditStage5();
+  }
+
+  function markEnNoticeSatisfied(threadId) {
+    const resolved = resolveAuditStage5Thread(threadId);
+    if (!resolved || !resolved.thread.isEnforcementTrack) return;
+    const t = resolved.thread;
+    t.status = 'en-settled';
+    t.settled = true;
+    t.enDecision = 'compliant';
+    t.complianceNotes = t.complianceNotes || 'Remedial works verified — notice requirements met.';
+    renderAuditStage5();
+  }
+
+  function markEnBreach(threadId) {
+    const resolved = resolveAuditStage5Thread(threadId);
+    if (!resolved || !resolved.thread.isEnforcementTrack) return;
+    const t = resolved.thread;
+    t.status = 'en-breach';
+    t.enDecision = 'breach';
+    t.complianceNotes = 'Breach of enforcement notice recorded.';
+    renderAuditStage5();
+  }
+
+  function recordAuditPlanReceived(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.needsPlan || (t.status !== 'awaiting' && t.status !== 'awaiting-revision' && t.status !== 'fu-check-previous' && t.status !== 'fu-progress-ok')) return;
     const stamp = cpinLogTimestamp();
     t.status = 'reviewing';
@@ -16712,10 +17090,10 @@
     renderAuditStage5();
   }
 
-  function resetAuditPlanReview(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function resetAuditPlanReview(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (['reviewing', 'adequate-pending-letter', 'inadequate-pending-letter', 'monitoring'].indexOf(t.status) < 0) return;
     if (!window.confirm('Change your decision and return to plan review?')) return;
     t.status = 'reviewing';
@@ -16723,10 +17101,10 @@
     renderAuditStage5();
   }
 
-  function markRevisitArranged(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markRevisitArranged(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (t.status !== 'monitoring') return;
     t.status = 'settled';
     t.settled = true;
@@ -16735,39 +17113,30 @@
     renderAuditStage5();
   }
 
-  function escalatePlanToEnforcement(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
-    if (!t.needsPlan) return;
-    t.status = t.followUp ? 'fu-enforcement-pending' : 'enforcement-pending';
-    renderAuditStage5();
-  }
-
-  function markFollowUpPlanAccepted(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpPlanAccepted(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-check-previous') return;
     t.status = 'monitoring';
     t.adequacyDecision = 'adequate';
     renderAuditStage5();
   }
 
-  function markFollowUpPlanRejected(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpPlanRejected(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-check-previous') return;
     t.status = 'inadequate-pending-letter';
     t.adequacyDecision = 'inadequate';
     renderAuditStage5();
   }
 
-  function markFollowUpPlanActionedLow(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpPlanActionedLow(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp) return;
     if (t.status === 'fu-check-previous' || t.status === 'fu-progress-ok') {
       t.status = 'fu-evidence-low';
@@ -16776,39 +17145,39 @@
     }
   }
 
-  function markFollowUpPlanActionedHigh(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpPlanActionedHigh(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-check-previous') return;
     t.status = 'fu-verify-site';
     t.followUpSeverity = 'high';
     renderAuditStage5();
   }
 
-  function markFollowUpMakingProgress(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpMakingProgress(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-check-previous') return;
     t.status = 'fu-progress-ok';
     t.extensionUntil = '30 September 2026';
     renderAuditStage5();
   }
 
-  function markFollowUpNotCooperating(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpNotCooperating(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-check-previous') return;
     t.status = 'fu-enforcement-pending';
     renderAuditStage5();
   }
 
-  function markFollowUpVerificationScheduled(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markFollowUpVerificationScheduled(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.followUp || t.status !== 'fu-verify-site') return;
     t.status = 'settled';
     t.settled = true;
@@ -16816,27 +17185,20 @@
     renderAuditStage5();
   }
 
-  function findAuditStage5Dh(dhOrSlug) {
-    if (!auditStage5State) return null;
-    return Object.keys(auditStage5State.threads).find(function (d) {
-      return d === dhOrSlug || auditDhSlug(d) === dhOrSlug;
-    }) || null;
-  }
-
-  function markAuditPlanAdequate(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markAuditPlanAdequate(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.needsPlan || t.status !== 'reviewing') return;
     t.status = 'monitoring';
     t.adequacyDecision = 'adequate';
     renderAuditStage5();
   }
 
-  function markAuditPlanInadequate(dhOrSlug) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State.threads[dh]) return;
-    const t = auditStage5State.threads[dh];
+  function markAuditPlanInadequate(ref) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const t = resolved.thread;
     if (!t.needsPlan || t.status !== 'reviewing') return;
     t.status = 'inadequate-pending-letter';
     t.adequacyDecision = 'inadequate';
@@ -16847,20 +17209,21 @@
     markAuditPlanAdequate(holder);
   }
 
-  function openAuditStage5LetterComposer(dhOrSlug, letterType) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State || !auditStage5State.threads[dh]) return;
-    const thread = auditStage5State.threads[dh];
+  function openAuditStage5LetterComposer(ref, letterType) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const dh = resolved.thread.dh;
     const recipients = getRecipientsForDutyHolder(dh);
     if (!recipients.length) {
       window.alert('Approve at least one Responsible Person linked to ' + dh + ' before writing letters.');
       return;
     }
-    const templateId = letterType === 'enforcement' ? 'audit-outcome-en'
+    const templateId = (letterType === 'enforcement' || letterType === 'enforcement-reminder') ? 'audit-outcome-en'
       : letterType === 'feedback' ? 'audit-plan-feedback' : 'audit-plan-satisfactory';
     openLetterComposer({
       context: 'audit-stage5',
       saveTo: 'audit-stage5-letter',
+      stage5ThreadId: resolved.id,
       stage5Dh: dh,
       stage5LetterType: letterType,
       templateId: templateId,
@@ -16869,10 +17232,10 @@
     });
   }
 
-  function viewAuditStage5Letter(dhOrSlug, letterIndex) {
-    const dh = findAuditStage5Dh(dhOrSlug);
-    if (!dh || !auditStage5State || !auditStage5State.threads[dh]) return;
-    const letters = auditStage5State.threads[dh].letters || [];
+  function viewAuditStage5Letter(ref, letterIndex) {
+    const resolved = resolveAuditStage5Thread(ref);
+    if (!resolved) return;
+    const letters = resolved.thread.letters || [];
     const saved = letters[letterIndex];
     if (!saved) return;
     openLetterComposer({
@@ -16880,7 +17243,8 @@
       saveTo: 'audit-stage5-letter',
       mode: 'view',
       viewLetterId: saved.id,
-      stage5Dh: dh,
+      stage5ThreadId: resolved.id,
+      stage5Dh: resolved.thread.dh,
       stage5LetterType: saved.letterType || 'satisfactory',
       templateId: saved.templateId
     });
@@ -16888,10 +17252,13 @@
 
   function saveAuditStage5Letter() {
     if (!letterComposerState || !auditStage5State) return;
-    const dh = letterComposerState.stage5Dh;
+    const resolved = letterComposerState.stage5ThreadId
+      ? resolveAuditStage5Thread(letterComposerState.stage5ThreadId)
+      : resolveAuditStage5Thread(letterComposerState.stage5Dh);
+    if (!resolved) return;
+    const dh = resolved.thread.dh;
     const letterType = letterComposerState.stage5LetterType;
-    const t = dh && auditStage5State.threads[dh];
-    if (!t) return;
+    const t = resolved.thread;
 
     const recipients = getRecipientsForDutyHolder(dh);
     const recipientIds = letterComposerState.recipientIds || [];
@@ -16926,7 +17293,7 @@
       recipientId: rp.id,
       recipientName: rp.name,
       recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || dh,
-      fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(template.label) + '-' + dateStr + '.pdf',
+      fileName: ensureLetterDocxFileName('Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(template.label) + '-' + dateStr + '.docx'),
       body: bodyHtml,
       at: stamp.at,
       ts: stamp.ts
@@ -18037,34 +18404,41 @@
   function updateDutyHolderProgress() {
     if (!auditStage5State) return;
     const threads = auditStage5State.threads;
+    const threadList = Object.values(threads);
 
-    function statusForDh(dh) {
-      const t = threads[dh];
-      if (!t) return null;
-      if (t.settled) return { pill: 'green', label: 'Settled' };
-      if (t.status === 'monitoring') return { pill: 'blue', label: 'Monitoring plan' };
-      if (t.status === 'reviewing' || t.status === 'adequate-pending-letter' || t.status === 'inadequate-pending-letter') {
-        return { pill: 'amber', label: 'Action plan under review' };
+    function dhContextLabel(dh) {
+      const dhThreads = threadList.filter(function (t) { return t.dh === dh; });
+      if (!dhThreads.length) return null;
+      if (dhThreads.every(function (t) { return t.settled; })) {
+        return { pill: 'green', label: 'Settled' };
       }
-      if (t.status === 'awaiting-revision') return { pill: 'amber', label: 'Redraw required' };
-      if (t.status === 'enforcement-pending' || t.status === 'fu-enforcement-pending') return { pill: 'red', label: 'Enforcement' };
-      if (t.needsPlan) return { pill: 'grey', label: 'Awaiting action plan' };
-      return { pill: 'green', label: 'Settled' };
+      const open = dhThreads.filter(function (t) { return !t.settled; });
+      const parts = [];
+      open.forEach(function (t) {
+        const tag = (t.isEnforcementTrack || t.trackType === 'en') ? 'EN' : '28-DAP';
+        if (parts.indexOf(tag) < 0) parts.push(tag);
+      });
+      let pill = 'amber';
+      if (open.some(function (t) { return (t.isEnforcementTrack || t.trackType === 'en') && (t.status === 'en-breach' || t.status === 'en-active'); })) {
+        pill = 'red';
+      } else if (open.some(function (t) { return t.status === 'monitoring'; })) {
+        pill = 'blue';
+      }
+      return { pill: pill, label: parts.join(' · ') };
     }
 
-    const hmctsStatus = statusForDh('HMCTS');
+    const hmctsStatus = dhContextLabel('HMCTS');
     const hmctsContext = document.getElementById('audit-context-hmcts');
     if (hmctsContext && hmctsStatus) {
-      const ctxLabel = hmctsStatus.label === 'Settled' ? 'Settled' : (threads['HMCTS'] && threads['HMCTS'].needsPlan ? '28-DAP' : 'Settled');
-      hmctsContext.innerHTML = '<span>HMCTS</span><span class="pill ' + hmctsStatus.pill + '">' + escHtml(ctxLabel) + '</span>';
+      hmctsContext.innerHTML = '<span>HMCTS</span><span class="pill ' + hmctsStatus.pill + '">' + escHtml(hmctsStatus.label) + '</span>';
     }
 
-    const settledCount = Object.values(threads).filter(function (t) { return t.settled; }).length;
-    const total = Object.keys(threads).length;
+    const settledCount = threadList.filter(function (t) { return t.settled; }).length;
+    const total = threadList.length;
 
     const contextLabel = document.getElementById('audit-context-progress-label');
     const contextBar = document.getElementById('audit-context-progress-bar');
-    if (contextLabel) contextLabel.textContent = settledCount + ' of ' + total + ' settled';
+    if (contextLabel) contextLabel.textContent = settledCount + ' of ' + total + ' threads settled';
     if (contextBar) contextBar.style.width = (total ? Math.round((settledCount / total) * 100) : 0) + '%';
   }
 
@@ -22266,9 +22640,11 @@
 
   function getLetterComposerSavedLetters() {
     if (letterComposerUsesAuditStage4()) return getAuditStage4SavedLetters();
-    if (letterComposerUsesAuditStage5() && letterComposerState.stage5Dh && auditStage5State) {
-      const t = auditStage5State.threads[letterComposerState.stage5Dh];
-      return t && t.letters ? t.letters.slice() : [];
+    if (letterComposerUsesAuditStage5() && auditStage5State) {
+      const resolved = letterComposerState.stage5ThreadId
+        ? resolveAuditStage5Thread(letterComposerState.stage5ThreadId)
+        : resolveAuditStage5Thread(letterComposerState.stage5Dh);
+      return resolved && resolved.thread.letters ? resolved.thread.letters.slice() : [];
     }
     if (letterComposerUsesAuditSetup()) return getAuditSetupSavedLetters();
     if (letterComposerUsesBizSupport() && typeof getBizSupportById === 'function' && typeof getBsSavedLetters === 'function') {
@@ -22400,7 +22776,7 @@
         templateId: 'cpin-onsite-appointment',
         templateLabel: 'On-site evaluation appointment',
         recipientName: dh ? dh.name : 'Duty Holder',
-        fileName: 'Letter-OnSiteEval-legacy.pdf',
+        fileName: 'Letter-OnSiteEval-legacy.docx',
         body: o.letterBody,
         at: 'Previously saved',
         ts: 0
@@ -22433,12 +22809,15 @@
       );
     }
     if (context === 'audit-stage5' && letterComposerState) {
-      const dh = letterComposerState.stage5Dh;
-      const thread = auditStage5State && dh && auditStage5State.threads[dh];
+      const resolved = letterComposerState.stage5ThreadId
+        ? resolveAuditStage5Thread(letterComposerState.stage5ThreadId)
+        : resolveAuditStage5Thread(letterComposerState.stage5Dh);
+      const thread = resolved ? resolved.thread : null;
+      const dh = thread ? thread.dh : (letterComposerState.stage5Dh || '');
       return {
         premises: (auditSetup && auditSetup.premises) ? auditSetup.premises + ', Bristol BS1' : 'Temple Quay House, Bristol BS1',
         auditDate: '22 June 2026',
-        dutyHolder: dh || '',
+        dutyHolder: dh,
         planReceivedAt: thread && thread.planReceivedAt ? thread.planReceivedAt : 'recently'
       };
     }
@@ -22533,6 +22912,7 @@
       outcomeLetterId: opts.outcomeLetterId || null,
       stage4Dh: opts.stage4Dh || null,
       stage4OutcomeKey: opts.stage4OutcomeKey || null,
+      stage5ThreadId: opts.stage5ThreadId || null,
       stage5Dh: opts.stage5Dh || null,
       stage5LetterType: opts.stage5LetterType || null,
       templateId: opts.templateId || getDefaultLetterTemplateId(context),
@@ -22614,7 +22994,7 @@
           ? 'Review each recipient\'s outcome letters grouped by Duty Holder.'
           : 'Each recipient receives one letter per confirmed outcome. Preview any letter, then save all.';
       } else if (letterComposerState.context === 'audit-setup') {
-        subEl.textContent = 'Choose a template and recipients — letters are saved here and sent when you start the audit.';
+        subEl.textContent = 'Choose a template and recipients — letters are saved as editable Word documents (.docx) and sent when you start the audit.';
       } else if (letterComposerState.context === 'bizsupport') {
         subEl.textContent = 'Choose a template and recipients — letters are saved to this business support record and the activity log.';
       } else if (isConcern) {
@@ -22986,7 +23366,7 @@
           recipientId: rp.id,
           recipientName: rp.name,
           recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || dhName,
-          fileName: 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.pdf',
+          fileName: ensureLetterDocxFileName('Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.docx'),
           body: bodyHtml,
           at: stamp.at,
           ts: stamp.ts + idx
@@ -23060,8 +23440,8 @@
         const ctx = Object.assign({}, ctxBase, { addressee: rp });
         bodyHtml = template.buildBody(ctx);
       }
-      const fileName = 'Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(template.label) + '-' +
-        new Date().toISOString().slice(0, 10) + '.pdf';
+      const fileName = ensureLetterDocxFileName('Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(template.label) + '-' +
+        new Date().toISOString().slice(0, 10) + '.docx');
       return {
         id: 'ltr-' + Date.now() + '-' + rp.id,
         templateId: template.id,
@@ -23192,8 +23572,8 @@
       list.innerHTML = letters.map(function (ltr) {
         const meta = (ltr.templateLabel || 'Letter') + ' · ' + (ltr.recipientName || 'Recipient') + (ltr.at ? ' · ' + ltr.at : '');
         return '<div class="letter-attachment-item">' +
-          '<div class="letter-attachment-icon">PDF</div>' +
-          '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>' +
+          letterAttachmentIconHtml() +
+          '<div class="letter-attachment-info"><strong>' + escHtml(ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')) + '</strong>' +
           '<span>' + escHtml(meta) + '</span></div></div>';
       }).join('');
     }
@@ -23236,8 +23616,8 @@
       list.innerHTML = letters.map(function (ltr) {
         const meta = (ltr.templateLabel || 'Letter') + ' · ' + (ltr.recipientName || 'Duty Holder') + (ltr.at ? ' · ' + ltr.at : '');
         return '<div class="letter-attachment-item">' +
-          '<div class="letter-attachment-icon">PDF</div>' +
-          '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>' +
+          letterAttachmentIconHtml() +
+          '<div class="letter-attachment-info"><strong>' + escHtml(ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')) + '</strong>' +
           '<span>' + escHtml(meta) + '</span></div>' +
           '<button class="btn" type="button" onclick="viewCpinOnsiteLetter(\'' + escHtml(ltr.id) + '\')">View</button>' +
           '</div>';
@@ -23263,8 +23643,8 @@
       list.innerHTML = letters.map(function (ltr) {
         const meta = (ltr.templateLabel || 'Letter') + ' · ' + (ltr.recipientName || 'Recipient') + (ltr.at ? ' · ' + ltr.at : '');
         return '<div class="letter-attachment-item">' +
-          '<div class="letter-attachment-icon">PDF</div>' +
-          '<div class="letter-attachment-info"><strong>' + escHtml(ltr.fileName || 'Letter.pdf') + '</strong>' +
+          letterAttachmentIconHtml() +
+          '<div class="letter-attachment-info"><strong>' + escHtml(ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')) + '</strong>' +
           '<span>' + escHtml(meta) + '</span></div>' +
           '<button class="btn" type="button" onclick="viewAuditSetupLetter(\'' + escHtml(ltr.id) + '\')">View</button>' +
           '</div>';
@@ -24381,7 +24761,7 @@
   }
 
   function previewSetupLetterPdf() {
-    window.alert('PDF preview would open the appointment letter as sent. In the live system this uses the same template as final send.');
+    window.alert('Word preview would open the appointment letter as an editable .docx. In the live system this uses the same template as final send, allowing future redaction.');
   }
 
   function validateAuditSetup() {
