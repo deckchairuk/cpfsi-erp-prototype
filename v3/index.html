@@ -2628,6 +2628,98 @@
   #admin-action-modal .admin-modal-readonly strong {
     color: var(--ink);
   }
+  .admin-search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 8px 0 12px;
+  }
+  .admin-search-bar input[type="search"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .admin-entity-ref {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .admin-detail-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .admin-detail-header h1 {
+    margin: 4px 0 6px;
+  }
+  .admin-detail-meta {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .admin-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .admin-detail-list {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+  .admin-detail-list .row-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .admin-detail-list .row-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .admin-table .name-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    text-align: left;
+  }
+  .admin-table .name-link:hover {
+    text-decoration: underline;
+  }
+  .admin-layout.wide {
+    max-width: 1100px;
+  }
+  .admin-entity-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .admin-entity-chips .chip-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .admin-entity-chips .chip-link:hover {
+    text-decoration: underline;
+  }
+  .admin-entity-chips .chip-sep {
+    color: var(--ink-3);
+    font-size: 12px;
+  }
   .cpins-pinned-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -7011,13 +7103,17 @@
 ========================================================= -->
 <div id="admin" class="screen">
   <main>
+    <div id="admin-list-shell">
     <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  Admin</div>
     <h1>Admin and settings</h1>
-    <div class="meta">User management, system configuration and permissions.</div>
+    <div class="meta">User management, premises register, Duty Holders, Responsible Persons, system configuration and permissions.</div>
 
-    <div class="admin-layout">
+    <div class="admin-layout wide">
       <div class="admin-tabs" role="tablist" id="admin-tabs" aria-label="Admin sections">
         <button type="button" class="admin-tab on" role="tab" aria-selected="true" data-admin-tab="users" onclick="setAdminTab('users')">Users</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="premises" onclick="setAdminTab('premises')">Premises</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="duty-holders" onclick="setAdminTab('duty-holders')">Duty Holders</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="responsible-persons" onclick="setAdminTab('responsible-persons')">Responsible Persons</button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="patches" onclick="setAdminTab('patches')">Patches</button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="templates" onclick="setAdminTab('templates')">Templates</button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="reports" onclick="setAdminTab('reports')">Reports</button>
@@ -7129,7 +7225,107 @@
             <div id="admin-cpin-review-list"></div>
           </section>
         </div>
+
+        <div class="admin-tab-panel" id="admin-tab-duty-holders" role="tabpanel" data-admin-panel="duty-holders" hidden>
+          <section class="card admin-section">
+            <h3>Duty Holder register</h3>
+            <div class="help">Organisations with fire safety responsibilities. A Duty Holder can be linked to multiple premises; each premises may have several Duty Holders.</div>
+            <div class="admin-search-bar">
+              <input type="search" id="admin-dh-search" placeholder="Search by name or reference…" oninput="setAdminDhSearch(this.value)" />
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Organisation</th>
+                    <th>Type</th>
+                    <th>Premises</th>
+                    <th>Responsible Persons</th>
+                    <th>Patch</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-duty-holders-body"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn" onclick="openAdminAddDutyHolderModal()">+ Add Duty Holder</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-responsible-persons" role="tabpanel" data-admin-panel="responsible-persons" hidden>
+          <section class="card admin-section">
+            <h3>Responsible Person register</h3>
+            <div class="help">Individuals linked to one or more Duty Holders for correspondence, appointments and outcome letters.</div>
+            <div class="admin-search-bar">
+              <input type="search" id="admin-rp-search" placeholder="Search by name, email or reference…" oninput="setAdminRpSearch(this.value)" />
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Duty Holders</th>
+                    <th>Premises</th>
+                    <th>Last contact</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-responsible-persons-body"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn" onclick="openAdminAddResponsiblePersonModal()">+ Add Responsible Person</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-premises" role="tabpanel" data-admin-panel="premises" hidden>
+          <section class="card admin-section">
+            <h3>Premises register</h3>
+            <div class="help">Crown premises records with location details, RBIP scores and linked Duty Holders. Fields mirror the Details tab on each premises record.</div>
+            <div class="admin-search-bar">
+              <input type="search" id="admin-premises-search" placeholder="Search by name, reference or department…" oninput="setAdminPremisesSearch(this.value)" />
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Premises</th>
+                    <th>Type</th>
+                    <th>Department</th>
+                    <th>RBIP</th>
+                    <th>Duty Holders</th>
+                    <th>Patch</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-premises-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </div>
+    </div>
+    </div>
+
+    <div id="admin-premises-detail-shell" hidden>
+      <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  <a onclick="navigateAdminTab('users')">Admin</a> /  <a onclick="closeAdminPremisesDetail()">Premises</a> /  <span id="admin-premises-detail-crumb">Premises</span></div>
+      <div id="admin-premises-detail-content"></div>
+    </div>
+
+    <div id="admin-dh-detail-shell" hidden>
+      <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  <a onclick="navigateAdminTab('users')">Admin</a> /  <a onclick="closeAdminDutyHolderDetail()">Duty Holders</a> /  <span id="admin-dh-detail-crumb">Duty Holder</span></div>
+      <div id="admin-dh-detail-content"></div>
+    </div>
+
+    <div id="admin-rp-detail-shell" hidden>
+      <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  <a onclick="navigateAdminTab('users')">Admin</a> /  <a onclick="closeAdminResponsiblePersonDetail()">Responsible Persons</a> /  <span id="admin-rp-detail-crumb">Responsible Person</span></div>
+      <div id="admin-rp-detail-content"></div>
     </div>
   </main>
 </div>
@@ -10620,6 +10816,34 @@
     return 'audit/' + id + '/stage-' + clamped;
   }
 
+  const ADMIN_ROUTE_TABS = [
+    'users', 'premises', 'duty-holders', 'responsible-persons',
+    'patches', 'templates', 'reports', 'audit-perms', 'cpin'
+  ];
+
+  function adminTabSupportsDetail(tabId) {
+    return tabId === 'premises' || tabId === 'duty-holders' || tabId === 'responsible-persons';
+  }
+
+  function buildAdminRouteHash(tabId, detailId) {
+    const tab = ADMIN_ROUTE_TABS.indexOf(tabId) >= 0 ? tabId : 'users';
+    let hash = 'admin/' + tab;
+    if (detailId && adminTabSupportsDetail(tab)) {
+      hash += '/' + encodeURIComponent(detailId);
+    }
+    return hash;
+  }
+
+  function setAdminHash(tabId, detailId) {
+    const hash = buildAdminRouteHash(tabId, detailId);
+    if (window.location.hash === '#' + hash) return;
+    window.location.hash = hash;
+  }
+
+  function navigateAdminTab(tabId) {
+    setAdminHash(tabId, null);
+  }
+
   function setAuditHash(auditId, stage) {
     const hash = buildAuditRouteHash(auditId, stage);
     if (window.location.hash === '#' + hash) {
@@ -10727,6 +10951,13 @@
     } else if (id === 'cpin' && activeCpinId) hash = 'cpin/' + activeCpinId;
     else if (id === 'concern' && typeof activeConcernId === 'function' && activeConcernId()) hash = 'concern/' + activeConcernId();
     else if (id === 'bizsupport' && typeof activeBizSupportId === 'function' && activeBizSupportId()) hash = 'bizsupport/' + activeBizSupportId();
+    else if (id === 'admin') {
+      if (opts.adminTab) {
+        hash = buildAdminRouteHash(opts.adminTab, opts.adminDetailId || null);
+      } else {
+        hash = buildAdminRouteHash('users', null);
+      }
+    }
 
     if (window.location.hash !== '#' + hash) {
       window.location.hash = hash;
@@ -10772,13 +11003,23 @@
       return { screen: 'cpins', stage: null, cpinId: null, concernId: null, bizsupportId: null };
     }
     if (raw === 'concerns') {
-      return { screen: 'concerns', stage: null, cpinId: null, concernId: null, bizsupportId: null };
+      return { screen: 'concerns', stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
     }
-    return { screen: raw, stage: null, cpinId: null, concernId: null, bizsupportId: null };
+    const adminMatch = raw.match(/^admin(?:\/([a-z-]+))?(?:\/(.+))?$/);
+    if (adminMatch) {
+      const tab = adminMatch[1] || 'users';
+      const adminTab = ADMIN_ROUTE_TABS.indexOf(tab) >= 0 ? tab : 'users';
+      const adminDetailId = adminMatch[2] ? decodeURIComponent(adminMatch[2]) : null;
+      return {
+        screen: 'admin', stage: null, cpinId: null, concernId: null, bizsupportId: null,
+        adminTab: adminTab, adminDetailId: adminDetailId, legacy: false
+      };
+    }
+    return { screen: raw, stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
   }
 
   function renderFromHash() {
-    let { screen, stage, auditId, cpinId, concernId, bizsupportId, legacy } = parseRoute();
+    let { screen, stage, auditId, cpinId, concernId, bizsupportId, legacy, adminTab, adminDetailId } = parseRoute();
 
     if (screen !== 'login' && !isAuthenticated()) {
       screen = 'login';
@@ -10879,6 +11120,12 @@
       return;
     }
 
+    if (screen === 'admin') {
+      render('admin');
+      initAdminPage({ tab: adminTab || 'users', detailId: adminDetailId });
+      return;
+    }
+
     render(screen);
     if (screen === 'auditsetup') {
       auditStage = 1;
@@ -10894,7 +11141,6 @@
     if (screen === 'premisesdetail') initPremisesDetailPage();
     if (screen === 'premisesdetail-bristol') initPremisesBristolPage();
     if (screen === 'dashboard') initDashboardPage();
-    if (screen === 'admin') initAdminPage();
     if (screen === 'audit') {
       renderAuditFindings();
       updateAuditEditWarning();
@@ -18823,20 +19069,52 @@
     }).join('');
   }
 
-  function initAdminPage() {
-    setAdminTab('users');
+  function initAdminPage(routeOpts) {
+    routeOpts = routeOpts || {};
+    const tab = routeOpts.tab || 'users';
+    const detailId = routeOpts.detailId || null;
+
+    resetAdminDetailViews();
+    adminDhSearch = '';
+    adminRpSearch = '';
+    adminPremisesSearch = '';
+    const dhSearch = document.getElementById('admin-dh-search');
+    const rpSearch = document.getElementById('admin-rp-search');
+    const premSearch = document.getElementById('admin-premises-search');
+    if (dhSearch) dhSearch.value = '';
+    if (rpSearch) rpSearch.value = '';
+    if (premSearch) premSearch.value = '';
+    setAdminTab(tab, { skipHash: true });
     renderAdminUsers();
+    renderAdminPremises();
+    renderAdminDutyHolders();
+    renderAdminResponsiblePersons();
     renderAdminPatches();
     renderAdminTemplates();
     renderAdminReports();
     renderAdminAuditPermissions();
     renderAdminCpinReviews();
+    applyAdminDetailRoute(tab, detailId);
+  }
+
+  function applyAdminDetailRoute(tab, detailId) {
+    if (!detailId) return;
+    if (tab === 'duty-holders' && getAdminDutyHolderById(detailId)) {
+      openAdminDutyHolderDetail(detailId, true);
+    } else if (tab === 'responsible-persons' && getAdminResponsiblePersonById(detailId)) {
+      openAdminResponsiblePersonDetail(detailId, true);
+    } else if (tab === 'premises' && getAdminPremisesByRef(detailId)) {
+      openAdminPremisesDetail(detailId, true);
+    } else {
+      setAdminHash(tab, null);
+    }
   }
 
   let adminActiveTab = 'users';
   let adminModalSubmitFn = null;
 
-  function setAdminTab(tabId) {
+  function setAdminTab(tabId, opts) {
+    opts = opts || {};
     adminActiveTab = tabId;
     document.querySelectorAll('.admin-tab').forEach(function (btn) {
       const on = btn.dataset.adminTab === tabId;
@@ -18848,6 +19126,13 @@
       panel.classList.toggle('active', on);
       panel.hidden = !on;
     });
+    if (!opts.skipHash) {
+      resetAdminDetailViews();
+      adminDhDetailId = null;
+      adminRpDetailId = null;
+      adminPremisesDetailRef = null;
+      setAdminHash(tabId, null);
+    }
   }
 
   function closeAdminModal() {
@@ -18983,7 +19268,898 @@
     { id: 'r-sla', name: 'Process SLA breaches', schedule: 'Weekly', audience: 'Team managers' }
   ];
 
+  const ADMIN_PREMISES_DH_LINKS = {
+    'PRM-0001847': ['hmcts', 'equans', 'propdir'],
+    'PRM-0002140': ['hmpps-se', 'serco', 'moj-prop'],
+    'PRM-0002204': ['dwp', 'mitie', 'equans'],
+    'PRM-0001702': ['moj-prop', 'propdir'],
+    'PRM-0002103': ['hmpps-se'],
+    'PRM-0002118': ['hmpps-se', 'serco'],
+    'PRM-0001922': ['hmcts'],
+    'PRM-0001910': ['hmcts'],
+    'PRM-0001944': ['hmcts'],
+    'PRM-0002155': ['hmpps-se', 'g4s'],
+    'PRM-0002141': ['hmpps-se', 'serco'],
+    'PRM-0001601': ['hmcts', 'propdir']
+  };
+
+  const ADMIN_DUTY_HOLDERS = [
+    {
+      id: 'dh-hmcts', key: 'hmcts', ref: 'DH-0001042', name: 'HMCTS', type: 'Government department',
+      role: 'Government department  ·  Property responsibility', email: 'firesafety@hmcts.gov.uk',
+      phone: '0300 303 0656', address: '102 Petty France, London SW1H 9AJ', patch: 'London & South East',
+      status: 'active',
+      processes: [
+        { label: 'Audit A-2026-0314', sub: 'Stage 2 — Site visit  ·  Temple Quay House', when: 'Jun 2026' },
+        { label: 'Audit A-2025-0288', sub: 'Closed — GSS  ·  Score 44', when: 'Jan 2025' }
+      ],
+      notes: 'Primary Duty Holder at Temple Quay House. Mark Stevens is the main Responsible Person for fire safety correspondence.'
+    },
+    {
+      id: 'dh-equans', key: 'equans', ref: 'DH-0002087', name: 'Equans', type: 'FM company',
+      role: 'FM company  ·  Maintenance responsibility', email: 'compliance@equans.co.uk',
+      phone: '0800 783 9210', address: 'Neon, Q10 Quorum, Benton Lane, Newcastle NE12 8BU', patch: 'Kent, Surrey, Sussex',
+      status: 'active',
+      processes: [
+        { label: 'Audit A-2026-0314', sub: '28-DAP outcome  ·  Temple Quay House', when: 'Jul 2026' }
+      ],
+      notes: 'Hard and soft services contractor. Electrical compliance tracked separately via David Hussain.'
+    },
+    {
+      id: 'dh-propdir', key: 'propdir', ref: 'DH-0000315', name: 'The Property Directorate', type: 'Internal',
+      role: 'Internal  ·  Strategic property responsibility', email: 'property.directorate@justice.gov.uk',
+      phone: '020 3334 3555', address: '102 Petty France, London SW1H 9AJ', patch: 'National',
+      status: 'active',
+      processes: [
+        { label: 'Audit A-2026-0314', sub: 'GSS outcome  ·  Temple Quay House', when: 'Jul 2026' }
+      ],
+      notes: 'Strategic property oversight for MoJ estate. GSS issued at Temple Quay — no action plan required.'
+    },
+    {
+      id: 'dh-moj-prop', key: 'moj-prop', ref: 'DH-0000891', name: 'Ministry of Justice Property', type: 'Government department',
+      role: 'Government department  ·  National portfolio', email: 'estates@moj.gov.uk',
+      phone: '020 3334 3555', address: '102 Petty France, London SW1H 9AJ', patch: 'National',
+      status: 'active',
+      processes: [
+        { label: 'Business support BS-2026-0142', sub: 'Fire door training  ·  HMP Bristol', when: 'May 2026' }
+      ],
+      notes: 'National portfolio Duty Holder for MoJ-operated sites.'
+    },
+    {
+      id: 'dh-hmpps-se', key: 'hmpps-se', ref: 'DH-0001520', name: 'HMPPS — South East', type: 'Government department',
+      role: 'Government department  ·  Regional estates', email: 'hmpps.se.estates@justice.gov.uk',
+      phone: '020 3334 4102', address: 'Cleland House, London SW1P 4LN', patch: 'London & South East',
+      status: 'active',
+      processes: [
+        { label: 'Alterations notice', sub: 'HMP Bristol — Wing B refurbishment', when: 'Mar 2024' }
+      ],
+      notes: 'Regional HMPPS estates team for South East prisons.'
+    },
+    {
+      id: 'dh-serco', key: 'serco', ref: 'DH-0001874', name: 'Serco FM', type: 'FM company',
+      role: 'FM company  ·  Prison maintenance', email: 'facilities@serco.com',
+      phone: '0330 123 9222', address: 'Serco House, Hook, Hampshire RG27 9UY', patch: 'South West',
+      status: 'active',
+      processes: [],
+      notes: 'Facilities management contractor for selected HMPPS sites.'
+    },
+    {
+      id: 'dh-mitie', key: 'mitie', ref: 'DH-0002101', name: 'Mitie', type: 'FM company',
+      role: 'FM company  ·  Maintenance', email: 'compliance@mitie.com',
+      phone: '020 3123 8000', address: '32 London Bridge Street, London SE1 9SG', patch: 'Midlands',
+      status: 'active',
+      processes: [],
+      notes: ''
+    },
+    {
+      id: 'dh-dwp', key: 'dwp', ref: 'DH-0002208', name: 'DWP Estates', type: 'Government department',
+      role: 'Government department  ·  Regional estates', email: 'dwp.estates@dwp.gov.uk',
+      phone: '0345 604 3349', address: 'Caxton House, London SW1H 9NA', patch: 'Midlands',
+      status: 'active',
+      processes: [
+        { label: 'Audit A-2026-0298', sub: 'Stage 5 — Action plan  ·  DWP Crawley', when: 'Apr 2026' }
+      ],
+      notes: ''
+    },
+    {
+      id: 'dh-capita', key: 'capita', ref: 'DH-0001144', name: 'Capita Facilities Management', type: 'FM company',
+      role: 'FM company  ·  Hard services', email: 'fm.contracts@capita.co.uk',
+      phone: '020 7799 1525', address: '2 Kingdom Street, London W2 6BD', patch: 'London & South East',
+      status: 'inactive',
+      processes: [],
+      notes: 'Contract ended Q1 2026 — record retained for historical correspondence.'
+    },
+    {
+      id: 'dh-g4s', key: 'g4s', ref: 'DH-0001203', name: 'G4S Facilities', type: 'FM company',
+      role: 'FM company  ·  Soft services', email: 'facilities@g4s.com',
+      phone: '0800 587 4577', address: '6th Floor, 50 Broadway, London SW1H 0DB', patch: 'National',
+      status: 'active',
+      processes: [],
+      notes: ''
+    }
+  ];
+
+  const ADMIN_RESPONSIBLE_PERSONS = [
+    {
+      id: 'rp-mstevens', key: 'mstevens', ref: 'RP-0005521', name: 'Mark Stevens',
+      jobTitle: 'Property Director', role: 'Property Director', linkedDhKey: 'hmcts', linkedDhKeys: ['hmcts'], linkedDhName: 'HMCTS',
+      email: 'mark.stevens@hmcts.gov.uk', phone: '07700 900 421', patch: 'London & South East',
+      status: 'active', premisesCount: 12, lastContact: '15 Jul 2026',
+      premises: ['Temple Quay House', 'Winchester Crown Court'],
+      letters: [
+        { label: 'Enforcement Notice', sub: 'Audit A-2026-0314  ·  Temple Quay House', when: '15 Jul 2026' },
+        { label: '28-day Action Plan', sub: 'Audit A-2026-0314  ·  Temple Quay House', when: '15 Jul 2026' }
+      ],
+      notes: 'Primary contact for HMCTS fire safety at Temple Quay House.'
+    },
+    {
+      id: 'rp-spatel', key: 'spatel', ref: 'RP-0005522', name: 'Sarah Patel',
+      jobTitle: 'Maintenance Lead', role: 'Maintenance Lead', linkedDhKey: 'equans', linkedDhKeys: ['equans'], linkedDhName: 'Equans',
+      email: 'sarah.patel@equans.co.uk', phone: '07700 900 882', patch: 'Kent, Surrey, Sussex',
+      status: 'active', premisesCount: 8, lastContact: '15 Jul 2026',
+      premises: ['Temple Quay House', 'DWP Crawley'],
+      letters: [
+        { label: '28-day Action Plan', sub: 'Audit A-2026-0314  ·  Temple Quay House', when: '15 Jul 2026' }
+      ],
+      notes: ''
+    },
+    {
+      id: 'rp-kallen', key: 'kallen', ref: 'RP-0005528', name: 'Karen Allen',
+      jobTitle: 'Facilities Coordinator', role: 'Facilities Coordinator', linkedDhKey: 'hmcts', linkedDhKeys: ['hmcts'], linkedDhName: 'HMCTS',
+      email: 'karen.allen@hmcts.gov.uk', phone: '07700 900 519', patch: 'London & South East',
+      status: 'active', premisesCount: 5, lastContact: '18 Jun 2026',
+      premises: ['Temple Quay House'],
+      letters: [
+        { label: 'Audit appointment letter', sub: 'Audit A-2026-0314', when: '18 Jun 2026' }
+      ],
+      notes: 'Secondary HMCTS contact for appointment scheduling.'
+    },
+    {
+      id: 'rp-rbyrne', key: 'rbyrne', ref: 'RP-0004410', name: 'Robert Byrne',
+      jobTitle: 'Senior Surveyor', role: 'Senior Surveyor', linkedDhKey: 'propdir', linkedDhKeys: ['propdir', 'moj-prop'], linkedDhName: 'The Property Directorate',
+      email: 'robert.byrne@justice.gov.uk', phone: '07700 900 104', patch: 'National',
+      status: 'active', premisesCount: 24, lastContact: '15 Jul 2026',
+      premises: ['Temple Quay House', 'MoJ HQ — Petty France'],
+      letters: [
+        { label: 'Generally Suitable & Sufficient', sub: 'Audit A-2026-0314  ·  Temple Quay House', when: '15 Jul 2026' }
+      ],
+      notes: ''
+    },
+    {
+      id: 'rp-dhussain', key: 'dhussain', ref: 'RP-0005533', name: 'David Hussain',
+      jobTitle: 'Electrical Compliance Lead', role: 'Electrical Compliance Lead', linkedDhKey: 'equans', linkedDhKeys: ['equans', 'mitie'], linkedDhName: 'Equans',
+      email: 'david.hussain@equans.co.uk', phone: '07700 900 773', patch: 'Kent, Surrey, Sussex',
+      status: 'active', premisesCount: 6, lastContact: '10 Jun 2026',
+      premises: ['Temple Quay House'],
+      letters: [],
+      notes: 'Technical specialist — not always included on outcome letters.'
+    },
+    {
+      id: 'rp-jwong', key: 'jwong', ref: 'RP-0006104', name: 'James Wong',
+      jobTitle: 'Portfolio Manager', role: 'Portfolio Manager', linkedDhKey: 'moj-prop', linkedDhKeys: ['moj-prop'], linkedDhName: 'Ministry of Justice Property',
+      email: 'james.wong@justice.gov.uk', phone: '07700 900 331', patch: 'National',
+      status: 'active', premisesCount: 18, lastContact: '02 May 2026',
+      premises: ['HMP Bristol', 'MoJ HQ — Petty France'],
+      letters: [],
+      notes: ''
+    },
+    {
+      id: 'rp-jgower', key: 'jgower', ref: 'RP-0007102', name: 'James Gower',
+      jobTitle: 'Regional Fire Safety Lead', role: 'Regional Fire Safety Lead', linkedDhKey: 'hmpps-se', linkedDhKeys: ['hmpps-se', 'moj-prop'], linkedDhName: 'HMPPS — South East',
+      email: 'james.gower@justice.gov.uk', phone: '07700 900 612', patch: 'London & South East',
+      status: 'active', premisesCount: 9, lastContact: 'Feb 2026',
+      premises: ['HMP Bristol', 'HMP Lewes'],
+      letters: [],
+      notes: 'Regional fire safety lead for HMPPS South East.'
+    },
+    {
+      id: 'rp-smitchell', key: 'smitchell', ref: 'RP-0007108', name: 'Sarah Mitchell',
+      jobTitle: 'Estates Manager', role: 'Estates Manager', linkedDhKey: 'hmpps-se', linkedDhKeys: ['hmpps-se'], linkedDhName: 'HMPPS — South East',
+      email: 'sarah.mitchell@justice.gov.uk', phone: '07700 900 618', patch: 'London & South East',
+      status: 'active', premisesCount: 7, lastContact: 'Mar 2026',
+      premises: ['HMP Bristol', 'HMP Coldingley'],
+      letters: [],
+      notes: ''
+    },
+    {
+      id: 'rp-tclarke', key: 'tclarke', ref: 'RP-0007201', name: 'Tom Clarke',
+      jobTitle: 'Contract Manager', role: 'Contract Manager', linkedDhKey: 'serco', linkedDhKeys: ['serco', 'hmpps-se'], linkedDhName: 'Serco FM',
+      email: 'tom.clarke@serco.com', phone: '07700 900 720', patch: 'South West',
+      status: 'active', premisesCount: 4, lastContact: 'Jan 2026',
+      premises: ['HMP Bristol'],
+      letters: [],
+      notes: ''
+    },
+    {
+      id: 'rp-pbanks', key: 'pbanks', ref: 'RP-0007301', name: 'Paula Banks',
+      jobTitle: 'Regional Manager', role: 'Regional Manager', linkedDhKey: 'dwp', linkedDhKeys: ['dwp'], linkedDhName: 'DWP Estates',
+      email: 'paula.banks@dwp.gov.uk', phone: '07700 900 801', patch: 'Midlands',
+      status: 'active', premisesCount: 15, lastContact: 'Apr 2026',
+      premises: ['DWP Crawley', 'DWP Leeds'],
+      letters: [],
+      notes: ''
+    },
+    {
+      id: 'rp-lchen', key: 'lchen', ref: 'RP-0006301', name: 'Lisa Chen',
+      jobTitle: 'Contract Manager', role: 'Contract Manager', linkedDhKey: 'capita', linkedDhKeys: ['capita'], linkedDhName: 'Capita Facilities Management',
+      email: 'lisa.chen@capita.co.uk', phone: '07700 900 640', patch: 'London & South East',
+      status: 'inactive', premisesCount: 2, lastContact: 'Dec 2025',
+      premises: ['HMCTS Croydon'],
+      letters: [],
+      notes: 'Inactive — Capita contract ended.'
+    }
+  ];
+
   let adminUserRoles = null;
+  let adminDhSearch = '';
+  let adminRpSearch = '';
+  let adminPremisesSearch = '';
+  let adminDhDetailId = null;
+  let adminRpDetailId = null;
+  let adminPremisesDetailRef = null;
+
+  function getAdminPremisesRegisterList() {
+    return Object.keys(ADMIN_PREMISES_DH_LINKS).map(function (ref) {
+      const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
+      if (!prem) return null;
+      return {
+        id: 'prem-' + ref.replace(/[^a-z0-9]/gi, '').toLowerCase(),
+        ref: ref,
+        name: prem.name,
+        prem: prem,
+        dhKeys: ADMIN_PREMISES_DH_LINKS[ref] || []
+      };
+    }).filter(Boolean);
+  }
+
+  function getAdminPremisesByRef(ref) {
+    return getAdminPremisesRegisterList().find(function (p) { return p.ref === ref; }) || null;
+  }
+
+  function getAdminPremisesForDhKey(dhKey) {
+    return Object.keys(ADMIN_PREMISES_DH_LINKS).filter(function (ref) {
+      return (ADMIN_PREMISES_DH_LINKS[ref] || []).indexOf(dhKey) >= 0;
+    }).map(function (ref) {
+      const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
+      if (!prem) return null;
+      return { ref: ref, name: prem.name, prem: prem };
+    }).filter(Boolean);
+  }
+
+  function getAdminDutyHoldersForPremisesRef(ref) {
+    const keys = ADMIN_PREMISES_DH_LINKS[ref] || [];
+    return keys.map(function (k) { return getAdminDutyHolderByKey(k); }).filter(Boolean);
+  }
+
+  function getAdminRpDhKeys(rp) {
+    if (rp.linkedDhKeys && rp.linkedDhKeys.length) return rp.linkedDhKeys.slice();
+    return rp.linkedDhKey ? [rp.linkedDhKey] : [];
+  }
+
+  function getAdminRpDhLabels(rp) {
+    return getAdminRpDhKeys(rp).map(function (k) {
+      const dh = getAdminDutyHolderByKey(k);
+      return dh ? dh.name : k;
+    });
+  }
+
+  function getAdminPremisesCountForRp(rp) {
+    const refs = {};
+    getAdminRpDhKeys(rp).forEach(function (dhKey) {
+      getAdminPremisesForDhKey(dhKey).forEach(function (p) { refs[p.ref] = true; });
+    });
+    return Object.keys(refs).length;
+  }
+
+  function getAdminRpsForPremisesRef(ref) {
+    const dhKeys = ADMIN_PREMISES_DH_LINKS[ref] || [];
+    const seen = {};
+    const out = [];
+    dhKeys.forEach(function (dhKey) {
+      getAdminRpsForDhKey(dhKey).forEach(function (rp) {
+        if (!seen[rp.id]) {
+          seen[rp.id] = true;
+          out.push(rp);
+        }
+      });
+    });
+    return out;
+  }
+
+  function getAdminDutyHolderById(id) {
+    return ADMIN_DUTY_HOLDERS.find(function (d) { return d.id === id; });
+  }
+
+  function getAdminDutyHolderByKey(key) {
+    return ADMIN_DUTY_HOLDERS.find(function (d) { return d.key === key; });
+  }
+
+  function getAdminResponsiblePersonById(id) {
+    return ADMIN_RESPONSIBLE_PERSONS.find(function (r) { return r.id === id; });
+  }
+
+  function getAdminRpsForDhKey(dhKey) {
+    const keys = SETUP_DH_TO_RP_KEYS[dhKey] || [];
+    return ADMIN_RESPONSIBLE_PERSONS.filter(function (rp) {
+      return getAdminRpDhKeys(rp).indexOf(dhKey) >= 0 || keys.indexOf(rp.key) >= 0;
+    });
+  }
+
+  function resetAdminDetailViews() {
+    adminDhDetailId = null;
+    adminRpDetailId = null;
+    adminPremisesDetailRef = null;
+    const listShell = document.getElementById('admin-list-shell');
+    const premShell = document.getElementById('admin-premises-detail-shell');
+    const dhShell = document.getElementById('admin-dh-detail-shell');
+    const rpShell = document.getElementById('admin-rp-detail-shell');
+    if (listShell) listShell.hidden = false;
+    if (premShell) premShell.hidden = true;
+    if (dhShell) dhShell.hidden = true;
+    if (rpShell) rpShell.hidden = true;
+  }
+
+  function setAdminDhSearch(value) {
+    adminDhSearch = (value || '').trim().toLowerCase();
+    renderAdminDutyHolders();
+  }
+
+  function setAdminRpSearch(value) {
+    adminRpSearch = (value || '').trim().toLowerCase();
+    renderAdminResponsiblePersons();
+  }
+
+  function setAdminPremisesSearch(value) {
+    adminPremisesSearch = (value || '').trim().toLowerCase();
+    renderAdminPremises();
+  }
+
+  function filterAdminPremises() {
+    const rows = getAdminPremisesRegisterList();
+    if (!adminPremisesSearch) return rows;
+    return rows.filter(function (entry) {
+      const prem = entry.prem;
+      return (entry.name || '').toLowerCase().indexOf(adminPremisesSearch) >= 0 ||
+        (entry.ref || '').toLowerCase().indexOf(adminPremisesSearch) >= 0 ||
+        (prem.dept || '').toLowerCase().indexOf(adminPremisesSearch) >= 0 ||
+        (prem.typeLabel || '').toLowerCase().indexOf(adminPremisesSearch) >= 0;
+    });
+  }
+
+  function filterAdminDutyHolders() {
+    if (!adminDhSearch) return ADMIN_DUTY_HOLDERS.slice();
+    return ADMIN_DUTY_HOLDERS.filter(function (d) {
+      return (d.name || '').toLowerCase().indexOf(adminDhSearch) >= 0 ||
+        (d.ref || '').toLowerCase().indexOf(adminDhSearch) >= 0 ||
+        (d.type || '').toLowerCase().indexOf(adminDhSearch) >= 0;
+    });
+  }
+
+  function filterAdminResponsiblePersons() {
+    if (!adminRpSearch) return ADMIN_RESPONSIBLE_PERSONS.slice();
+    return ADMIN_RESPONSIBLE_PERSONS.filter(function (r) {
+      const dhLabels = getAdminRpDhLabels(r).join(' ').toLowerCase();
+      return (r.name || '').toLowerCase().indexOf(adminRpSearch) >= 0 ||
+        (r.ref || '').toLowerCase().indexOf(adminRpSearch) >= 0 ||
+        (r.email || '').toLowerCase().indexOf(adminRpSearch) >= 0 ||
+        dhLabels.indexOf(adminRpSearch) >= 0;
+    });
+  }
+
+  function adminStatusPill(status) {
+    if (status === 'active') return 'green';
+    if (status === 'inactive') return 'grey';
+    return 'grey';
+  }
+
+  function adminDhNameButton(dh) {
+    const id = dh.id.replace(/'/g, "\\'");
+    return '<button type="button" class="name-link" onclick="openAdminDutyHolderDetail(\'' + id + '\')">' + escHtml(dh.name) + '</button>';
+  }
+
+  function adminRpNameButton(rp) {
+    const id = rp.id.replace(/'/g, "\\'");
+    return '<button type="button" class="name-link" onclick="openAdminResponsiblePersonDetail(\'' + id + '\')">' + escHtml(rp.name) + '</button>';
+  }
+
+  function adminPremisesNameButton(entry) {
+    const ref = entry.ref.replace(/'/g, "\\'");
+    return '<button type="button" class="name-link" onclick="openAdminPremisesDetail(\'' + ref + '\')">' + escHtml(entry.name) + '</button>';
+  }
+
+  function adminEntityChipLinks(items, renderFn) {
+    if (!items.length) return '—';
+    return '<span class="admin-entity-chips">' + items.map(function (item, idx) {
+      return (idx ? '<span class="chip-sep">·</span>' : '') + renderFn(item);
+    }).join('') + '</span>';
+  }
+
+  function renderAdminPremises() {
+    const body = document.getElementById('admin-premises-body');
+    if (!body) return;
+    const rows = filterAdminPremises();
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="7" class="admin-empty">No premises match your search.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (entry) {
+      const prem = entry.prem;
+      const dhs = getAdminDutyHoldersForPremisesRef(entry.ref);
+      const dhCell = adminEntityChipLinks(dhs, function (dh) {
+        const idSafe = dh.id.replace(/'/g, "\\'");
+        return '<button type="button" class="chip-link" onclick="openAdminDutyHolderDetail(\'' + idSafe + '\')">' + escHtml(dh.name) + '</button>';
+      });
+      const refSafe = entry.ref.replace(/'/g, "\\'");
+      const scoreClass = prem.scoreClass || 'score-mid';
+      return '<tr>' +
+        '<td><div>' + adminPremisesNameButton(entry) + '</div><div class="admin-entity-ref">' + escHtml(entry.ref) + '</div></td>' +
+        '<td>' + escHtml(prem.typeLabel || '—') + '</td>' +
+        '<td>' + escHtml(prem.dept || '—') + '</td>' +
+        '<td><span class="pill ' + escHtml(scoreClass) + '" style="font-variant-numeric:tabular-nums;">' + prem.score + '</span></td>' +
+        '<td>' + dhCell + '</td>' +
+        '<td>' + (prem.patch ? 'Kent, Surrey, Sussex' : '—') + '</td>' +
+        '<td class="actions"><button type="button" class="btn" onclick="openAdminPremisesDetail(\'' + refSafe + '\')">View</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderAdminDutyHolders() {
+    const body = document.getElementById('admin-duty-holders-body');
+    if (!body) return;
+    const rows = filterAdminDutyHolders();
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="7" class="admin-empty">No Duty Holders match your search.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (d) {
+      const rpCount = getAdminRpsForDhKey(d.key).length;
+      const premCount = getAdminPremisesForDhKey(d.key).length;
+      const statusLabel = d.status === 'active' ? 'Active' : 'Inactive';
+      const idSafe = d.id.replace(/'/g, "\\'");
+      return '<tr>' +
+        '<td><div>' + adminDhNameButton(d) + '</div><div class="admin-entity-ref">' + escHtml(d.ref) + '</div></td>' +
+        '<td>' + escHtml(d.type) + '</td>' +
+        '<td>' + premCount + '</td>' +
+        '<td>' + rpCount + '</td>' +
+        '<td>' + escHtml(d.patch) + '</td>' +
+        '<td><span class="pill ' + adminStatusPill(d.status) + '">' + escHtml(statusLabel) + '</span></td>' +
+        '<td class="actions">' +
+          '<button type="button" class="btn" onclick="openAdminDutyHolderDetail(\'' + idSafe + '\')">View</button> ' +
+          '<button type="button" class="btn" onclick="openAdminEditDutyHolderModal(\'' + idSafe + '\')">Edit</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderAdminResponsiblePersons() {
+    const body = document.getElementById('admin-responsible-persons-body');
+    if (!body) return;
+    const rows = filterAdminResponsiblePersons();
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="7" class="admin-empty">No Responsible Persons match your search.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (r) {
+      const statusLabel = r.status === 'active' ? 'Active' : 'Inactive';
+      const idSafe = r.id.replace(/'/g, "\\'");
+      const dhKeys = getAdminRpDhKeys(r);
+      const dhs = dhKeys.map(function (k) { return getAdminDutyHolderByKey(k); }).filter(Boolean);
+      const dhCell = dhs.length
+        ? adminEntityChipLinks(dhs, function (dh) {
+          const dhId = dh.id.replace(/'/g, "\\'");
+          return '<button type="button" class="chip-link" onclick="openAdminDutyHolderDetail(\'' + dhId + '\')">' + escHtml(dh.name) + '</button>';
+        })
+        : escHtml(r.linkedDhName || '—');
+      const premCount = getAdminPremisesCountForRp(r);
+      return '<tr>' +
+        '<td><div>' + adminRpNameButton(r) + '</div><div class="admin-entity-ref">' + escHtml(r.ref) + '</div></td>' +
+        '<td>' + escHtml(r.jobTitle || r.role) + '</td>' +
+        '<td>' + dhCell + '</td>' +
+        '<td>' + premCount + '</td>' +
+        '<td>' + escHtml(r.lastContact || '—') + '</td>' +
+        '<td><span class="pill ' + adminStatusPill(r.status) + '">' + escHtml(statusLabel) + '</span></td>' +
+        '<td class="actions">' +
+          '<button type="button" class="btn" onclick="openAdminResponsiblePersonDetail(\'' + idSafe + '\')">View</button> ' +
+          '<button type="button" class="btn" onclick="openAdminEditResponsiblePersonModal(\'' + idSafe + '\')">Edit</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function openAdminDutyHolderDetail(id, skipHash) {
+    const d = getAdminDutyHolderById(id);
+    if (!d) return;
+    adminDhDetailId = id;
+    const listShell = document.getElementById('admin-list-shell');
+    const premShell = document.getElementById('admin-premises-detail-shell');
+    const shell = document.getElementById('admin-dh-detail-shell');
+    const content = document.getElementById('admin-dh-detail-content');
+    const crumb = document.getElementById('admin-dh-detail-crumb');
+    if (listShell) listShell.hidden = true;
+    if (premShell) premShell.hidden = true;
+    if (shell) shell.hidden = false;
+    if (crumb) crumb.textContent = d.name;
+    if (!content) return;
+
+    const rps = getAdminRpsForDhKey(d.key);
+    const premises = getAdminPremisesForDhKey(d.key);
+    const statusLabel = d.status === 'active' ? 'Active' : 'Inactive';
+
+    let html = '<div class="admin-detail-header">';
+    html += '<div>';
+    html += '<div class="admin-entity-ref">' + escHtml(d.ref) + '</div>';
+    html += '<h1>' + escHtml(d.name) + '</h1>';
+    html += '<div class="admin-detail-meta">' + escHtml(d.role) + '  ·  ' + escHtml(d.patch) + '</div>';
+    html += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+    html += '<span class="pill ' + adminStatusPill(d.status) + '">' + escHtml(statusLabel) + '</span>';
+    html += '<span class="pill grey">' + escHtml(d.type) + '</span>';
+    html += '<span class="pill grey">' + premises.length + ' premises</span>';
+    html += '</div></div>';
+    html += '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">';
+    html += '<button type="button" class="btn" onclick="closeAdminDutyHolderDetail()">← Back to list</button>';
+    html += '<button type="button" class="btn primary" onclick="openAdminEditDutyHolderModal(\'' + d.id.replace(/'/g, "\\'") + '\')">Edit record</button>';
+    html += '</div></div>';
+
+    html += '<div class="admin-detail-grid">';
+    html += '<section class="card admin-section"><h3>Contact</h3><div class="admin-detail-list">';
+    html += '<div class="row-item"><strong>Email</strong><br>' + escHtml(d.email || '—') + '</div>';
+    html += '<div class="row-item"><strong>Phone</strong><br>' + escHtml(d.phone || '—') + '</div>';
+    html += '<div class="row-item"><strong>Address</strong><br>' + escHtml(d.address || '—') + '</div>';
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Responsible Persons</h3>';
+    if (!rps.length) {
+      html += '<div class="admin-empty">No Responsible Persons linked to this Duty Holder.</div>';
+    } else {
+      html += '<div class="admin-detail-list">';
+      rps.forEach(function (rp) {
+        const idSafe = rp.id.replace(/'/g, "\\'");
+        html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminResponsiblePersonDetail(\'' + idSafe + '\')">' + escHtml(rp.name) + '</button>';
+        html += '<div class="admin-entity-ref">' + escHtml(rp.ref) + '  ·  ' + escHtml(rp.jobTitle || rp.role) + '</div></div>';
+      });
+      html += '</div>';
+    }
+    html += '</section>';
+
+    html += '<section class="card admin-section"><h3>Premises</h3><div class="admin-detail-list">';
+    premises.forEach(function (p) {
+      const refSafe = p.ref.replace(/'/g, "\\'");
+      html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminPremisesDetail(\'' + refSafe + '\')">' + escHtml(p.name) + '</button>';
+      html += '<div class="admin-entity-ref">' + escHtml(p.ref) + '</div></div>';
+    });
+    if (!premises.length) html += '<div class="admin-empty">No premises linked in the register.</div>';
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Recent processes</h3><div class="admin-detail-list">';
+    (d.processes || []).forEach(function (p) {
+      html += '<div class="row-item"><strong>' + escHtml(p.label) + '</strong><br><span style="color:var(--ink-3);font-size:12px;">' + escHtml(p.sub) + '  ·  ' + escHtml(p.when) + '</span></div>';
+    });
+    if (!(d.processes || []).length) html += '<div class="admin-empty">No linked processes in this prototype.</div>';
+    html += '</div></section>';
+    html += '</div>';
+
+    if (d.notes) {
+      html += '<section class="card admin-section" style="margin-top:16px;"><h3>Notes</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.6;">' + escHtml(d.notes) + '</div></section>';
+    }
+
+    content.innerHTML = html;
+    if (!skipHash) setAdminHash('duty-holders', id);
+  }
+
+  function closeAdminDutyHolderDetail(skipHash) {
+    resetAdminDetailViews();
+    setAdminTab('duty-holders', { skipHash: true });
+    if (!skipHash) setAdminHash('duty-holders', null);
+  }
+
+  function openAdminResponsiblePersonDetail(id, skipHash) {
+    const r = getAdminResponsiblePersonById(id);
+    if (!r) return;
+    adminRpDetailId = id;
+    const listShell = document.getElementById('admin-list-shell');
+    const dhShell = document.getElementById('admin-dh-detail-shell');
+    const premShell = document.getElementById('admin-premises-detail-shell');
+    const shell = document.getElementById('admin-rp-detail-shell');
+    const content = document.getElementById('admin-rp-detail-content');
+    const crumb = document.getElementById('admin-rp-detail-crumb');
+    if (listShell) listShell.hidden = true;
+    if (dhShell) dhShell.hidden = true;
+    if (premShell) premShell.hidden = true;
+    if (shell) shell.hidden = false;
+    if (crumb) crumb.textContent = r.name;
+    if (!content) return;
+
+    const dhKeys = getAdminRpDhKeys(r);
+    const dhs = dhKeys.map(function (k) { return getAdminDutyHolderByKey(k); }).filter(Boolean);
+    const statusLabel = r.status === 'active' ? 'Active' : 'Inactive';
+    const premRefs = {};
+    dhs.forEach(function (dh) {
+      getAdminPremisesForDhKey(dh.key).forEach(function (p) { premRefs[p.ref] = p; });
+    });
+    const linkedPremises = Object.keys(premRefs).map(function (ref) { return premRefs[ref]; });
+
+    let html = '<div class="admin-detail-header">';
+    html += '<div>';
+    html += '<div class="admin-entity-ref">' + escHtml(r.ref) + '</div>';
+    html += '<h1>' + escHtml(r.name) + '</h1>';
+    html += '<div class="admin-detail-meta">' + escHtml(r.jobTitle || r.role);
+    if (dhs.length) {
+      html += '  ·  ';
+      html += dhs.map(function (dh, idx) {
+        const dhIdSafe = dh.id.replace(/'/g, "\\'");
+        return (idx ? ', ' : '') + '<button type="button" class="name-link" onclick="openAdminDutyHolderDetail(\'' + dhIdSafe + '\')">' + escHtml(dh.name) + '</button>';
+      }).join('');
+    } else if (r.linkedDhName) {
+      html += '  ·  ' + escHtml(r.linkedDhName);
+    }
+    html += '</div>';
+    html += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+    html += '<span class="pill ' + adminStatusPill(r.status) + '">' + escHtml(statusLabel) + '</span>';
+    html += '<span class="pill grey">' + linkedPremises.length + ' premises</span>';
+    if (dhs.length > 1) html += '<span class="pill grey">' + dhs.length + ' Duty Holders</span>';
+    html += '</div></div>';
+    html += '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">';
+    html += '<button type="button" class="btn" onclick="closeAdminResponsiblePersonDetail()">← Back to list</button>';
+    html += '<button type="button" class="btn primary" onclick="openAdminEditResponsiblePersonModal(\'' + r.id.replace(/'/g, "\\'") + '\')">Edit record</button>';
+    html += '</div></div>';
+
+    html += '<div class="admin-detail-grid">';
+    html += '<section class="card admin-section"><h3>Contact</h3><div class="admin-detail-list">';
+    html += '<div class="row-item"><strong>Email</strong><br>' + escHtml(r.email || '—') + '</div>';
+    html += '<div class="row-item"><strong>Phone</strong><br>' + escHtml(r.phone || '—') + '</div>';
+    html += '<div class="row-item"><strong>Patch</strong><br>' + escHtml(r.patch || '—') + '</div>';
+    html += '<div class="row-item"><strong>Last contact</strong><br>' + escHtml(r.lastContact || '—') + '</div>';
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Duty Holders</h3><div class="admin-detail-list">';
+    if (!dhs.length) {
+      html += '<div class="admin-empty">No Duty Holders linked.</div>';
+    } else {
+      dhs.forEach(function (dh) {
+        const dhIdSafe = dh.id.replace(/'/g, "\\'");
+        html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminDutyHolderDetail(\'' + dhIdSafe + '\')">' + escHtml(dh.name) + '</button>';
+        html += '<div class="admin-entity-ref">' + escHtml(dh.ref) + '  ·  ' + escHtml(dh.type) + '</div></div>';
+      });
+    }
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Premises</h3><div class="admin-detail-list">';
+    linkedPremises.forEach(function (p) {
+      const refSafe = p.ref.replace(/'/g, "\\'");
+      html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminPremisesDetail(\'' + refSafe + '\')">' + escHtml(p.name) + '</button>';
+      html += '<div class="admin-entity-ref">' + escHtml(p.ref) + '</div></div>';
+    });
+    if (!linkedPremises.length) html += '<div class="admin-empty">No premises linked via Duty Holders.</div>';
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Recent letters</h3><div class="admin-detail-list">';
+    (r.letters || []).forEach(function (l) {
+      html += '<div class="row-item"><strong>' + escHtml(l.label) + '</strong><br><span style="color:var(--ink-3);font-size:12px;">' + escHtml(l.sub) + '  ·  ' + escHtml(l.when) + '</span></div>';
+    });
+    if (!(r.letters || []).length) html += '<div class="admin-empty">No letters on record in this prototype.</div>';
+    html += '</div></section>';
+    html += '</div>';
+
+    if (r.notes) {
+      html += '<section class="card admin-section" style="margin-top:16px;"><h3>Notes</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.6;">' + escHtml(r.notes) + '</div></section>';
+    }
+
+    content.innerHTML = html;
+    if (!skipHash) setAdminHash('responsible-persons', id);
+  }
+
+  function closeAdminResponsiblePersonDetail(skipHash) {
+    resetAdminDetailViews();
+    setAdminTab('responsible-persons', { skipHash: true });
+    if (!skipHash) setAdminHash('responsible-persons', null);
+  }
+
+  function openAdminPremisesDetail(ref, skipHash) {
+    const entry = getAdminPremisesByRef(ref);
+    if (!entry) return;
+    const prem = entry.prem;
+    adminPremisesDetailRef = ref;
+    const listShell = document.getElementById('admin-list-shell');
+    const dhShell = document.getElementById('admin-dh-detail-shell');
+    const rpShell = document.getElementById('admin-rp-detail-shell');
+    const shell = document.getElementById('admin-premises-detail-shell');
+    const content = document.getElementById('admin-premises-detail-content');
+    const crumb = document.getElementById('admin-premises-detail-crumb');
+    if (listShell) listShell.hidden = true;
+    if (dhShell) dhShell.hidden = true;
+    if (rpShell) rpShell.hidden = true;
+    if (shell) shell.hidden = false;
+    if (crumb) crumb.textContent = entry.name;
+    if (!content) return;
+
+    const details = getPremisesLocationDetails(prem);
+    const dhs = getAdminDutyHoldersForPremisesRef(ref);
+    const rps = getAdminRpsForPremisesRef(ref);
+    const aside = details && details.aside ? details.aside : {};
+    const flagClass = aside.flag || 'amber';
+
+    let html = '<div class="admin-detail-header">';
+    html += '<div>';
+    html += '<div class="admin-entity-ref">' + escHtml(entry.ref) + '</div>';
+    html += '<h1>' + escHtml(entry.name) + '</h1>';
+    html += '<div class="admin-detail-meta">' + escHtml(prem.address || '') + (prem.dept ? '  ·  ' + escHtml(prem.dept) : '') + '</div>';
+    html += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+    html += '<span class="pill ' + escHtml(prem.scoreClass || 'score-mid') + '">RBIP ' + prem.score + '</span>';
+    if (prem.work && prem.work.label) html += '<span class="pill ' + escHtml(prem.work.pill || 'grey') + '">' + escHtml(prem.work.label) + '</span>';
+    html += '<span class="pill grey">' + dhs.length + ' Duty Holder' + (dhs.length === 1 ? '' : 's') + '</span>';
+    html += '</div></div>';
+    html += '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">';
+    html += '<button type="button" class="btn" onclick="closeAdminPremisesDetail()">← Back to list</button>';
+    if (prem.route === 'premisesdetail') {
+      html += '<button type="button" class="btn" onclick="show(\'premisesdetail\')">Open premises record</button>';
+    } else if (prem.route === 'premisesdetail-bristol') {
+      html += '<button type="button" class="btn" onclick="show(\'premisesdetail-bristol\')">Open premises record</button>';
+    } else {
+      html += '<button type="button" class="btn" onclick="show(\'premises\')">Open premises register</button>';
+    }
+    html += '</div></div>';
+
+    html += '<div class="admin-detail-grid" style="margin-bottom:16px;">';
+    html += '<section class="card admin-section"><h3>Duty Holders at this premises</h3><div class="admin-detail-list">';
+    dhs.forEach(function (dh) {
+      const dhIdSafe = dh.id.replace(/'/g, "\\'");
+      html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminDutyHolderDetail(\'' + dhIdSafe + '\')">' + escHtml(dh.name) + '</button>';
+      html += '<div class="admin-entity-ref">' + escHtml(dh.ref) + '  ·  ' + escHtml(dh.type) + '</div></div>';
+    });
+    if (!dhs.length) html += '<div class="admin-empty">No Duty Holders linked.</div>';
+    html += '</div></section>';
+
+    html += '<section class="card admin-section"><h3>Responsible Persons</h3><div class="admin-detail-list">';
+    rps.forEach(function (rp) {
+      const rpIdSafe = rp.id.replace(/'/g, "\\'");
+      html += '<div class="row-item"><button type="button" class="name-link" onclick="openAdminResponsiblePersonDetail(\'' + rpIdSafe + '\')">' + escHtml(rp.name) + '</button>';
+      html += '<div class="admin-entity-ref">' + escHtml(rp.ref) + '  ·  ' + escHtml(rp.jobTitle || rp.role) + '</div></div>';
+    });
+    if (!rps.length) html += '<div class="admin-empty">No Responsible Persons linked via Duty Holders.</div>';
+    html += '</div></section>';
+    html += '</div>';
+
+    if (details) {
+      html += '<div class="help" style="margin-bottom:12px;">Location details — same fields as the Details tab on the premises record.</div>';
+      html += '<div class="premises-details-layout">';
+      html += '<div class="premises-details-main">';
+      if (details.intro) {
+        html += '<div class="premises-details-section"><div class="premises-details-section-body"><div class="premises-details-grid">';
+        html += renderPremisesDetailsFieldsCol(details.intro.left);
+        html += renderPremisesDetailsFieldsCol(details.intro.right);
+        html += '</div></div></div>';
+      }
+      (details.sections || []).forEach(function (section) {
+        html += renderPremisesDetailsSection(section);
+      });
+      html += '</div>';
+      html += '<aside class="premises-details-aside">';
+      html += '<div class="premises-details-rbip-indicator">';
+      html += '<div class="premises-details-rbip-flag ' + escHtml(flagClass) + '" aria-hidden="true"></div>';
+      html += '<div><div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.05em;">RBIP score</div>';
+      html += '<div style="font-size:28px;font-weight:700;line-height:1.1;">' + escHtml(String(aside.rbipScore != null ? aside.rbipScore : prem.score)) + '</div></div></div>';
+      if (aside.shortAuditRecent && aside.shortAuditRecent.length) {
+        html += renderPremisesDetailsAsideCard('Recent Assurance/Short Audit History', renderPremisesDetailsAsideFields(aside.shortAuditRecent));
+      }
+      if (aside.fullAuditRecent && aside.fullAuditRecent.length) {
+        html += renderPremisesDetailsAsideCard('Recent Initial Full Audit History', renderPremisesDetailsAsideFields(aside.fullAuditRecent));
+      }
+      if (aside.fullAuditHistoric && aside.fullAuditHistoric.length) {
+        html += renderPremisesDetailsAsideCard('Historic Initial Full Audit History', renderPremisesDetailsAsideFields(aside.fullAuditHistoric));
+      }
+      html += '</aside></div>';
+    } else {
+      html += '<div class="admin-empty">No location details available for this premises.</div>';
+    }
+
+    content.innerHTML = html;
+    if (!skipHash) setAdminHash('premises', ref);
+  }
+
+  function closeAdminPremisesDetail(skipHash) {
+    resetAdminDetailViews();
+    setAdminTab('premises', { skipHash: true });
+    if (!skipHash) setAdminHash('premises', null);
+  }
+
+  function openAdminAddDutyHolderModal() {
+    openAdminModal({
+      title: 'Add Duty Holder',
+      sub: 'Register a new organisation in the Duty Holder directory.',
+      body:
+        '<div class="field-wrap"><label for="admin-add-dh-name">Organisation name</label><input type="text" id="admin-add-dh-name" placeholder="e.g. Acme FM Ltd" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-dh-type">Type</label><select id="admin-add-dh-type">' +
+          '<option>Government department</option><option>FM company</option><option>Internal</option><option>Contracting authority</option>' +
+        '</select></div>' +
+        '<div class="field-wrap"><label for="admin-add-dh-email">Contact email</label><input type="email" id="admin-add-dh-email" placeholder="contact@organisation.gov.uk" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-dh-patch">Patch</label><select id="admin-add-dh-patch">' + adminPatchOptions('Kent, Surrey, Sussex') + '</select></div>',
+      primaryLabel: 'Add Duty Holder',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Duty Holder added (prototype).');
+      }
+    });
+  }
+
+  function openAdminEditDutyHolderModal(id) {
+    const d = getAdminDutyHolderById(id);
+    if (!d) return;
+    openAdminModal({
+      title: 'Edit Duty Holder',
+      sub: d.ref + '  ·  ' + d.name,
+      body:
+        '<div class="field-wrap"><label for="admin-edit-dh-name">Organisation name</label><input type="text" id="admin-edit-dh-name" value="' + escHtml(d.name) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-type">Type</label><input type="text" id="admin-edit-dh-type" value="' + escHtml(d.type) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-email">Contact email</label><input type="email" id="admin-edit-dh-email" value="' + escHtml(d.email || '') + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-phone">Phone</label><input type="text" id="admin-edit-dh-phone" value="' + escHtml(d.phone || '') + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-patch">Patch</label><select id="admin-edit-dh-patch">' + adminPatchOptions(d.patch) + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-status">Status</label><select id="admin-edit-dh-status">' +
+          '<option value="active"' + (d.status === 'active' ? ' selected' : '') + '>Active</option>' +
+          '<option value="inactive"' + (d.status === 'inactive' ? ' selected' : '') + '>Inactive</option>' +
+        '</select></div>' +
+        '<div class="field-wrap"><label for="admin-edit-dh-notes">Notes</label><textarea id="admin-edit-dh-notes">' + escHtml(d.notes || '') + '</textarea></div>',
+      primaryLabel: 'Save changes',
+      onSubmit: function () {
+        closeAdminModal();
+        if (adminDhDetailId === id) openAdminDutyHolderDetail(id);
+        adminPrototypeToast('Duty Holder record updated (prototype).');
+      }
+    });
+  }
+
+  function openAdminAddResponsiblePersonModal() {
+    const dhOptions = ADMIN_DUTY_HOLDERS.filter(function (d) { return d.status === 'active'; }).map(function (d) {
+      return '<option value="' + escHtml(d.key) + '">' + escHtml(d.name) + '</option>';
+    }).join('');
+    openAdminModal({
+      title: 'Add Responsible Person',
+      sub: 'Register an individual and link them to one or more Duty Holders.',
+      body:
+        '<div class="field-wrap"><label for="admin-add-rp-name">Full name</label><input type="text" id="admin-add-rp-name" placeholder="e.g. Alex Morgan" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-role">Job title</label><input type="text" id="admin-add-rp-role" placeholder="e.g. Facilities Manager" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-dh">Primary Duty Holder</label><select id="admin-add-rp-dh">' + dhOptions + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-dh-extra">Additional Duty Holders (optional)</label><input type="text" id="admin-add-rp-dh-extra" placeholder="Comma-separated organisation names" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-email">Email</label><input type="email" id="admin-add-rp-email" placeholder="name@organisation.gov.uk" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-phone">Phone</label><input type="text" id="admin-add-rp-phone" placeholder="07700 900 000" /></div>',
+      primaryLabel: 'Add Responsible Person',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Responsible Person added (prototype).');
+      }
+    });
+  }
+
+  function openAdminEditResponsiblePersonModal(id) {
+    const r = getAdminResponsiblePersonById(id);
+    if (!r) return;
+    const dhOptions = ADMIN_DUTY_HOLDERS.map(function (d) {
+      const keys = getAdminRpDhKeys(r);
+      const selected = keys.indexOf(d.key) >= 0 || d.key === r.linkedDhKey;
+      return '<option value="' + escHtml(d.key) + '"' + (selected ? ' selected' : '') + '>' + escHtml(d.name) + '</option>';
+    }).join('');
+    openAdminModal({
+      title: 'Edit Responsible Person',
+      sub: r.ref + '  ·  ' + r.name,
+      body:
+        '<div class="field-wrap"><label for="admin-edit-rp-name">Full name</label><input type="text" id="admin-edit-rp-name" value="' + escHtml(r.name) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-role">Job title</label><input type="text" id="admin-edit-rp-role" value="' + escHtml(r.jobTitle || r.role) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-dh">Duty Holders</label><select id="admin-edit-rp-dh" multiple size="5">' + dhOptions + '</select>' +
+        '<div class="help" style="margin-top:6px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple Duty Holders.</div></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-email">Email</label><input type="email" id="admin-edit-rp-email" value="' + escHtml(r.email || '') + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-phone">Phone</label><input type="text" id="admin-edit-rp-phone" value="' + escHtml(r.phone || '') + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-status">Status</label><select id="admin-edit-rp-status">' +
+          '<option value="active"' + (r.status === 'active' ? ' selected' : '') + '>Active</option>' +
+          '<option value="inactive"' + (r.status === 'inactive' ? ' selected' : '') + '>Inactive</option>' +
+        '</select></div>' +
+        '<div class="field-wrap"><label for="admin-edit-rp-notes">Notes</label><textarea id="admin-edit-rp-notes">' + escHtml(r.notes || '') + '</textarea></div>',
+      primaryLabel: 'Save changes',
+      onSubmit: function () {
+        closeAdminModal();
+        if (adminRpDetailId === id) openAdminResponsiblePersonDetail(id);
+        adminPrototypeToast('Responsible Person record updated (prototype).');
+      }
+    });
+  }
 
   function getAdminUserById(id) {
     return ADMIN_USERS.find(function (u) { return u.id === id; });
