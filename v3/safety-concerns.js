@@ -1177,7 +1177,7 @@
     renderConcernsLists();
     if (startAudit && spawnedAuditId && typeof seedAuditSetupFromConcern === 'function') {
       seedAuditSetupFromConcern(Object.assign({}, c, patch), spawnedAuditId);
-      if (typeof show === 'function') show('auditsetup');
+      if (typeof openAuditSetup === 'function') openAuditSetup(spawnedAuditId);
     } else {
       refreshConcernDetailPage();
     }

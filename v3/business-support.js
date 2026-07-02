@@ -715,7 +715,7 @@
       }
       if (spawned && rec.spawnedAuditId) {
         spawned.hidden = false;
-        spawned.innerHTML = '<a class="btn primary" href="#" onclick="show(\'auditsetup\'); return false;">Open audit ' + escHtml(rec.spawnedAuditId) + '</a>';
+        spawned.innerHTML = '<a class="btn primary" href="#" onclick="openAuditSetup(\'' + escHtml(rec.spawnedAuditId) + '\'); return false;">Open audit ' + escHtml(rec.spawnedAuditId) + '</a>';
       } else if (spawned) spawned.hidden = true;
     } else {
       if (open) open.hidden = false;
@@ -933,8 +933,8 @@
       }
     }
     persistBsPatch(activeBizSupportId, patch);
-    if (rec.furtherRequired === 'yes' && rec.followOnProcess === 'audit' && spawnedAuditId && typeof show === 'function') {
-      show('auditsetup');
+    if (rec.furtherRequired === 'yes' && rec.followOnProcess === 'audit' && spawnedAuditId && typeof openAuditSetup === 'function') {
+      openAuditSetup(spawnedAuditId);
     } else if (rec.furtherRequired === 'yes' && rec.followOnProcess === 'bizsupport') {
       startBizSupportFromPremises(bsPrimaryPremises(rec));
     } else if (rec.furtherRequired === 'yes' && rec.followOnProcess === 'concern') {

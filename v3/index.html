@@ -7357,7 +7357,7 @@
             <div class="row"><span class="k">Appointment letter</span><span class="v">Sent to all Duty Holders</span></div>
           </div>
           <div class="stage-actions">
-            <button class="btn" onclick="show('auditsetup')">View setup</button>
+            <button class="btn" onclick="openAuditSetup()">View setup</button>
             <button class="btn primary" onclick="setAuditStage(2)">Continue to site visit →</button>
           </div>
         </div>
@@ -10314,6 +10314,69 @@
     initAuditMobileHelpers();
   }
 
+  function buildAuditRouteHash(auditId, stage) {
+    const id = auditId || activeAuditId || PROTOTYPE_AUDIT_ID;
+    const n = parseInt(stage, 10) || 1;
+    if (n <= 1) return 'audit/' + id + '/setup';
+    const clamped = Math.min(Math.max(2, n), AUDIT_STAGE_COUNT);
+    return 'audit/' + id + '/stage-' + clamped;
+  }
+
+  function setAuditHash(auditId, stage) {
+    const hash = buildAuditRouteHash(auditId, stage);
+    if (window.location.hash === '#' + hash) {
+      renderFromHash();
+    } else {
+      window.location.hash = hash;
+    }
+  }
+
+  function ensureAuditContextShell(auditId, setup) {
+    ensureAuditContextsInit();
+    setup = setup || auditSetup || defaultAuditSetup();
+    if (!auditContexts[auditId]) {
+      auditContexts[auditId] = {
+        auditId: auditId,
+        premises: setup.premises || 'Temple Quay House',
+        stage: 1,
+        findings: [],
+        siteVisitTypeLocked: false,
+        themedArticles: [],
+        expandedArticles: {},
+        scoringDetailExpanded: {},
+        setup: setup,
+        lettersSent: false,
+        hmctsPlanSettled: false,
+        activityLog: createEmptyActivityLog()
+      };
+    } else if (setup) {
+      auditContexts[auditId].setup = setup;
+    }
+  }
+
+  function openAuditSetup(auditId) {
+    snapshotActiveAuditContext();
+    auditId = auditId || activeAuditId || PROTOTYPE_AUDIT_ID;
+    ensureAuditContextsInit();
+    const draftKey = setupDraftKey(auditId);
+    const draft = localStorage.getItem(draftKey);
+    let setup = null;
+    if (draft) {
+      try { setup = JSON.parse(draft); } catch (e) { /* ignore */ }
+    }
+    if (!setup && auditContexts[auditId] && auditContexts[auditId].setup) {
+      setup = JSON.parse(JSON.stringify(auditContexts[auditId].setup));
+    }
+    if (!setup) setup = defaultAuditSetup();
+    setup.spawnedAuditId = auditId;
+    ensureAuditContextShell(auditId, setup);
+    applyAuditContext(auditId);
+    auditStage = 1;
+    auditContexts[auditId].stage = 1;
+    localStorage.setItem(draftKey, JSON.stringify(setup));
+    setAuditHash(auditId, 1);
+  }
+
   function show(id, opts) {
     opts = opts || {};
     const slash = id.indexOf('/');
@@ -10329,6 +10392,18 @@
       } else if (screen === 'bizsupport') {
         if (typeof setActiveBizSupportId === 'function') setActiveBizSupportId(rest);
         id = 'bizsupport';
+      } else if (screen === 'audit') {
+        const parts = rest.split('/');
+        const auditRouteId = parts[0];
+        if (auditRouteId) activeAuditId = auditRouteId;
+        if (parts[1] === 'setup') {
+          id = 'auditsetup';
+        } else if (parts[1] && parts[1].indexOf('stage-') === 0) {
+          auditStage = parseInt(parts[1].slice(6), 10) || auditStage;
+          id = 'audit';
+        } else {
+          id = 'audit';
+        }
       }
     }
     closeGlobalSearch();
@@ -10347,11 +10422,10 @@
     if (id !== 'cpin') cpinDetailLastId = null;
 
     let hash = id;
-    const auditStageRoute = id.match(/^audit-stage-([1-6])$/);
-    if (auditStageRoute) {
-      hash = id;
+    if (id === 'auditsetup') {
+      hash = buildAuditRouteHash(activeAuditId, 1);
     } else if (id === 'audit') {
-      hash = 'audit-stage-' + auditStage;
+      hash = buildAuditRouteHash(activeAuditId, auditStage);
     } else if (id === 'cpin' && activeCpinId) hash = 'cpin/' + activeCpinId;
     else if (id === 'concern' && typeof activeConcernId === 'function' && activeConcernId()) hash = 'concern/' + activeConcernId();
     else if (id === 'bizsupport' && typeof activeBizSupportId === 'function' && activeBizSupportId()) hash = 'bizsupport/' + activeBizSupportId();
@@ -10365,15 +10439,28 @@
 
   function parseRoute() {
     const raw = (window.location.hash || '#login').slice(1);
-    const auditMatch = raw.match(/^audit-stage-([1-6])$/);
+    const auditMatch = raw.match(/^audit\/([^/]+)(?:\/(setup|stage-([1-6])))?$/);
     if (auditMatch) {
-      let stage = parseInt(auditMatch[1], 10);
+      const auditId = auditMatch[1];
+      if (auditMatch[2] === 'setup') {
+        return { screen: 'auditsetup', stage: 1, auditId: auditId, cpinId: null, concernId: null, bizsupportId: null, legacy: false };
+      }
+      if (auditMatch[3]) {
+        let stage = parseInt(auditMatch[3], 10);
+        if (stage > AUDIT_STAGE_COUNT) stage = AUDIT_STAGE_COUNT;
+        return { screen: 'audit', stage: stage, auditId: auditId, cpinId: null, concernId: null, bizsupportId: null, legacy: false };
+      }
+      return { screen: 'audit', stage: null, auditId: auditId, cpinId: null, concernId: null, bizsupportId: null, legacy: false };
+    }
+    const legacyAuditMatch = raw.match(/^audit-stage-([1-6])$/);
+    if (legacyAuditMatch) {
+      let stage = parseInt(legacyAuditMatch[1], 10);
       if (stage > AUDIT_STAGE_COUNT) stage = AUDIT_STAGE_COUNT;
-      return { screen: 'audit', stage: stage, cpinId: null, concernId: null, bizsupportId: null };
+      return { screen: 'audit', stage: stage, auditId: null, cpinId: null, concernId: null, bizsupportId: null, legacy: true };
     }
     const cpinMatch = raw.match(/^cpin(?:\/([^/]+))?$/);
     if (cpinMatch) {
-      return { screen: 'cpin', stage: null, cpinId: cpinMatch[1] || null, concernId: null, bizsupportId: null };
+      return { screen: 'cpin', stage: null, cpinId: cpinMatch[1] || null, concernId: null, bizsupportId: null, legacy: false };
     }
     const concernMatch = raw.match(/^concern(?:\/([^/]+))?$/);
     if (concernMatch) {
@@ -10393,32 +10480,70 @@
   }
 
   function renderFromHash() {
-    let { screen, stage, cpinId, concernId, bizsupportId } = parseRoute();
+    let { screen, stage, auditId, cpinId, concernId, bizsupportId, legacy } = parseRoute();
 
     if (screen !== 'login' && !isAuthenticated()) {
       screen = 'login';
       stage = null;
+      auditId = null;
       cpinId = null;
     }
 
-    // Legacy #audit links redirect to the current stage
-    if (screen === 'audit' && !stage) {
-      window.location.hash = 'audit-stage-' + auditStage;
+    if (legacy) {
+      window.location.hash = buildAuditRouteHash(activeAuditId || PROTOTYPE_AUDIT_ID, stage);
       return;
     }
 
-    if (screen === 'audit' && stage) {
+    if (screen === 'auditsetup' && auditId) {
       ensureAuditContextsInit();
-      applyAuditContext(activeAuditId);
+      if (!auditContexts[auditId]) {
+        openAuditSetup(auditId);
+        return;
+      }
+      applyAuditContext(auditId);
+      auditStage = 1;
+      render('auditsetup');
+      updateAuditContextLabels();
+      initAuditSetupPage();
+      initAuditActivity();
+      return;
+    }
+
+    if (screen === 'audit' && auditId) {
+      ensureAuditContextsInit();
+      if (!auditContexts[auditId]) {
+        window.alert('Audit not found.');
+        show('processes');
+        return;
+      }
+      applyAuditContext(auditId);
+      if (!stage) {
+        const ctxStage = Math.min(Math.max(1, parseInt(auditContexts[auditId].stage, 10) || 2), AUDIT_STAGE_COUNT);
+        if (ctxStage === 1) {
+          window.location.hash = buildAuditRouteHash(auditId, 1);
+          return;
+        }
+        stage = ctxStage;
+      }
+      if (stage === 1) {
+        window.location.hash = buildAuditRouteHash(auditId, 1);
+        return;
+      }
       auditStage = stage;
-      if (auditContexts[activeAuditId]) auditContexts[activeAuditId].stage = stage;
-      render(screen);
+      auditContexts[auditId].stage = stage;
+      render('audit');
       layoutAuditStageRail();
       applyAuditStageUI(stage);
       initAuditActivity();
       renderAuditFindings();
       updateAuditEditWarning();
       updateAuditContextLabels();
+      return;
+    }
+
+    // Legacy #audit links redirect to the current audit and stage
+    if (screen === 'audit' && !stage) {
+      window.location.hash = buildAuditRouteHash(activeAuditId || PROTOTYPE_AUDIT_ID, auditStage);
       return;
     }
 
@@ -10989,7 +11114,7 @@
     applyAuditContext(followUpId);
     auditStage = 1;
     localStorage.removeItem(setupDraftKey(followUpId));
-    show('auditsetup');
+    openAuditSetup(followUpId);
   }
 
   function extractParentOutcomesFromCtx(ctx) {
@@ -11572,7 +11697,7 @@
     };
     applyAuditContext(auditId);
     localStorage.removeItem(setupDraftKey(auditId));
-    show('auditsetup');
+    openAuditSetup(auditId);
   }
 
   function continueAudit(auditId) {
@@ -11580,26 +11705,15 @@
     ensureAuditContextsInit();
     const id = auditId || PROTOTYPE_AUDIT_ID;
     if (!auditContexts[id]) {
-      window.alert('Audit not found.');
+      openAuditSetup(id);
       return;
     }
     applyAuditContext(id);
     const ctx = auditContexts[id];
     const stage = Math.min(Math.max(1, parseInt(ctx.stage, 10) || 2), AUDIT_STAGE_COUNT);
     ctx.stage = stage;
-
-    if (stage === 1) {
-      show('auditsetup');
-      return;
-    }
-
     auditStage = stage;
-    const hash = 'audit-stage-' + stage;
-    if (window.location.hash === '#' + hash) {
-      renderFromHash();
-    } else {
-      window.location.hash = hash;
-    }
+    setAuditHash(id, stage);
   }
 
   function startAudit() {
@@ -11647,20 +11761,17 @@
     touchAuditActivity();
 
     auditStage = 2;
-    window.location.hash = 'audit-stage-2';
+    auditContexts[activeAuditId].stage = 2;
+    setAuditHash(activeAuditId, 2);
   }
 
   function setAuditStage(n) {
     snapshotActiveAuditContext();
     n = Math.min(Math.max(1, parseInt(n, 10) || 1), AUDIT_STAGE_COUNT);
     auditStage = n;
+    if (auditContexts[activeAuditId]) auditContexts[activeAuditId].stage = n;
     closeAuditStagesPanel();
-    const hash = 'audit-stage-' + n;
-    if (window.location.hash !== '#' + hash) {
-      window.location.hash = hash;
-    } else {
-      applyAuditStageUI(n);
-    }
+    setAuditHash(activeAuditId, n);
   }
 
   function layoutAuditStageRail() {
@@ -16257,7 +16368,7 @@
     applyAuditContext(followUpId);
     auditStage = 1;
     localStorage.removeItem(setupDraftKey(followUpId));
-    show('auditsetup');
+    openAuditSetup(followUpId);
   }
 
   function closeFollowUpAudit() {
@@ -19571,7 +19682,7 @@
       if (txt) txt.textContent = (cpin.closeReason || 'Closed.') + ' Default time 0.5h logged.';
       const link = document.getElementById('cpin-spawned-audit-link');
       if (link && cpin.spawnedAuditId) {
-        link.innerHTML = '<a href="#" onclick="show(\'auditsetup\'); return false;">Audit ' + escHtml(cpin.spawnedAuditId) + ' started automatically</a>';
+        link.innerHTML = '<a href="#" onclick="openAuditSetup(\'' + escHtml(cpin.spawnedAuditId) + '\'); return false;">Audit ' + escHtml(cpin.spawnedAuditId) + ' started automatically</a>';
       } else if (link) link.innerHTML = '';
       return;
     }
@@ -20284,7 +20395,7 @@
     if (actions) {
       let btn = '';
       if (cpin.spawnedAuditId) {
-        btn = '<button class="btn primary" type="button" onclick="show(\'auditsetup\')">Open audit ' + escHtml(cpin.spawnedAuditId) + '</button>';
+        btn = '<button class="btn primary" type="button" onclick="openAuditSetup(\'' + escHtml(cpin.spawnedAuditId) + '\')">Open audit ' + escHtml(cpin.spawnedAuditId) + '</button>';
       }
       actions.innerHTML = btn;
     }
@@ -20538,7 +20649,7 @@
     renderCpinsLists();
     if (startAudit && spawnedAuditId) {
       seedAuditSetupFromCpin(Object.assign({}, cpin, patch), spawnedAuditId);
-      show('auditsetup');
+      openAuditSetup(spawnedAuditId);
     } else {
       initCpinDetailPage();
     }
