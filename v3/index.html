@@ -2445,6 +2445,169 @@
     flex-wrap: wrap;
     gap: 8px;
   }
+  .admin-layout {
+    max-width: 920px;
+    margin-top: 20px;
+  }
+  .admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0;
+  }
+  .admin-tab {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-3);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .admin-tab:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .admin-tab.on {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .admin-tab-panel {
+    display: none;
+    padding-top: 16px;
+  }
+  .admin-tab-panel.active {
+    display: block;
+  }
+  .admin-section {
+    margin-top: 0;
+  }
+  .admin-section h3 {
+    margin-top: 0;
+  }
+  .admin-section .help {
+    margin-bottom: 12px;
+  }
+  .admin-table-wrap {
+    overflow-x: auto;
+    margin-top: 8px;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .admin-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .admin-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--line-2);
+    vertical-align: middle;
+    color: var(--ink-2);
+  }
+  .admin-table tr:last-child td {
+    border-bottom: none;
+  }
+  .admin-table .actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .admin-table .actions .btn {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .admin-template-preview {
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .admin-empty {
+    font-size: 13px;
+    color: var(--ink-3);
+    padding: 8px 0;
+  }
+  .admin-perm-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-perm-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .admin-perm-item .meta {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .admin-perm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  #admin-action-modal .modal {
+    max-width: 520px;
+  }
+  #admin-action-modal .field-wrap {
+    margin-bottom: 14px;
+  }
+  #admin-action-modal .field-wrap:last-child {
+    margin-bottom: 0;
+  }
+  #admin-action-modal .field-wrap label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+  #admin-action-modal .field-wrap input,
+  #admin-action-modal .field-wrap select,
+  #admin-action-modal .field-wrap textarea {
+    width: 100%;
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  #admin-action-modal .field-wrap textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  #admin-action-modal .admin-modal-readonly {
+    font-size: 13px;
+    color: var(--ink-2);
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    border: 1px solid var(--line-2);
+    margin-bottom: 14px;
+  }
+  #admin-action-modal .admin-modal-readonly strong {
+    color: var(--ink);
+  }
   .cpins-pinned-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -6830,24 +6993,139 @@
   <main>
     <div class="crumbs"><a onclick="show('dashboard')">Dashboard</a> /  Admin</div>
     <h1>Admin and settings</h1>
-    <div class="meta">User management, system configuration and permissions. CPIN review queue is demo-ready below.</div>
-    <div class="card" style="margin-top:20px;max-width:560px;">
-      <h3 style="margin-top:0;">Planned areas</h3>
-      <ul style="margin:0;padding-left:20px;line-height:1.8;color:var(--ink-2);font-size:13px;">
-        <li>User accounts and roles</li>
-        <li>Organisation and patch configuration</li>
-        <li>Letter templates and report definitions</li>
-        <li>Audit edit permissions (e.g. amend findings after letters sent)</li>
-      </ul>
-      <p style="font-size:12px;color:var(--ink-3);margin:16px 0 0;">Prototype demo: <button type="button" class="btn" onclick="grantAuditEditPermission()">Grant audit edit permission</button> for the Temple Quay audit.</p>
-    </div>
+    <div class="meta">User management, system configuration and permissions.</div>
 
-    <div class="card" style="margin-top:20px;max-width:720px;">
-      <h3 style="margin-top:0;">CPIN review queue</h3>
-      <div class="help" style="margin-bottom:12px;">Inspectors can flag erroneous CPINs or request removal from the CPINs list. Approve or reject here before a CPIN is removed from the system.</div>
-      <div id="admin-cpin-review-list"></div>
+    <div class="admin-layout">
+      <div class="admin-tabs" role="tablist" id="admin-tabs" aria-label="Admin sections">
+        <button type="button" class="admin-tab on" role="tab" aria-selected="true" data-admin-tab="users" onclick="setAdminTab('users')">Users</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="patches" onclick="setAdminTab('patches')">Patches</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="templates" onclick="setAdminTab('templates')">Templates</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="reports" onclick="setAdminTab('reports')">Reports</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="audit-perms" onclick="setAdminTab('audit-perms')">Audit permissions</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="cpin" onclick="setAdminTab('cpin')">CPIN review</button>
+      </div>
+
+      <div class="admin-tab-panels">
+        <div class="admin-tab-panel active" id="admin-tab-users" role="tabpanel" data-admin-panel="users">
+          <section class="card admin-section">
+            <h3>User accounts and roles</h3>
+            <div class="help">Manage who can access CPFSI, their role and patch assignment.</div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="admin-users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Patch</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-body"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn" onclick="openAdminInviteUserModal()">+ Invite user</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-patches" role="tabpanel" data-admin-panel="patches" hidden>
+          <section class="card admin-section">
+            <h3>Organisation and patch configuration</h3>
+            <div class="help">Geographic patches group premises and assign lead inspectors.</div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Patch</th>
+                    <th>Lead inspector</th>
+                    <th>Premises</th>
+                    <th>Inspectors</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-patches-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-templates" role="tabpanel" data-admin-panel="templates" hidden>
+          <section class="card admin-section">
+            <h3>Letter templates</h3>
+            <div class="help">Standard letters generated from process stages.</div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Template</th>
+                    <th>Used in</th>
+                    <th>Version</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-templates-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-reports" role="tabpanel" data-admin-panel="reports" hidden>
+          <section class="card admin-section">
+            <h3>Report definitions</h3>
+            <div class="help">Scheduled and on-demand reports for management information.</div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Report</th>
+                    <th>Schedule</th>
+                    <th>Audience</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-audit-perms" role="tabpanel" data-admin-panel="audit-perms" hidden>
+          <section class="card admin-section">
+            <h3>Audit edit permissions</h3>
+            <div class="help">Inspectors may need to amend findings after outcome letters have been sent. Approve requests here.</div>
+            <div id="admin-audit-perm-list"></div>
+            <p style="font-size:12px;color:var(--ink-3);margin:16px 0 0;" id="admin-audit-perm-demo-hint"></p>
+          </section>
+        </div>
+
+        <div class="admin-tab-panel" id="admin-tab-cpin" role="tabpanel" data-admin-panel="cpin" hidden>
+          <section class="card admin-section">
+            <h3>CPIN review queue</h3>
+            <div class="help">Approve or reject flag and removal requests from inspectors.</div>
+            <div id="admin-cpin-review-list"></div>
+          </section>
+        </div>
+      </div>
     </div>
   </main>
+</div>
+
+<div id="admin-action-modal" class="modal-backdrop" onclick="if(event.target===this) closeAdminModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="admin-modal-title">Admin action</h2>
+        <div class="sub" id="admin-modal-sub"></div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeAdminModal()" title="Close">×</button>
+    </div>
+    <div class="modal-body" id="admin-modal-body"></div>
+    <div class="modal-footer" id="admin-modal-footer"></div>
+  </div>
 </div>
 
 <!-- =========================================================
@@ -10779,6 +11057,7 @@
   let auditStage5State = null;
   let auditEditPermission = false;
   let auditEditPermissionRequested = false;
+  let auditEditPermissionRequests = [];
   let auditFindingEditId = null;
   let auditActiveArticleKey = null;
   let auditExpandedArticles = { A: true, D: true };
@@ -14801,6 +15080,17 @@
   function requestAuditEditPermission() {
     if (!window.confirm('Audit outcomes already sent. Are you sure you want to edit findings? Permission needs to be requested from an admin user.')) return;
     auditEditPermissionRequested = true;
+    const stamp = cpinLogTimestamp();
+    if (!auditEditPermissionRequests.some(function (r) { return r.auditId === activeAuditId; })) {
+      auditEditPermissionRequests.push({
+        id: 'aep-' + stamp.ts,
+        auditId: activeAuditId || PROTOTYPE_AUDIT_ID,
+        premises: (auditSetup && auditSetup.premises) || 'Temple Quay House',
+        requestedBy: 'Phil Gower',
+        requestedAt: stamp.at,
+        reason: 'Amend findings after outcome letters sent'
+      });
+    }
     auditActivityLog.notes.unshift({
       id: 'n-perm-' + Date.now(),
       text: 'Edit permission requested — findings amendment after outcome letters sent.',
@@ -14810,21 +15100,43 @@
     });
     touchAuditActivity();
     updateAuditEditWarning();
+    renderAdminAuditPermissions();
   }
 
-  function grantAuditEditPermission() {
+  function grantAuditEditPermission(auditId, opts) {
+    opts = opts || {};
+    auditId = auditId || activeAuditId || PROTOTYPE_AUDIT_ID;
     auditEditPermission = true;
     auditEditPermissionRequested = false;
-    auditActivityLog.notes.unshift({
-      id: 'n-grant-' + Date.now(),
-      text: 'Admin granted permission to amend findings and reissue outcome letters.',
-      stage: auditStage,
-      at: 'Today',
-      ts: Date.now()
-    });
-    touchAuditActivity();
-    updateAuditEditWarning();
-    window.alert('Audit edit permission granted for this session.');
+    auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
+    if (activeAuditId === auditId || !activeAuditId) {
+      auditActivityLog.notes.unshift({
+        id: 'n-grant-' + Date.now(),
+        text: 'Admin granted permission to amend findings and reissue outcome letters.',
+        stage: auditStage,
+        at: 'Today',
+        ts: Date.now()
+      });
+      touchAuditActivity();
+      updateAuditEditWarning();
+    }
+    renderAdminAuditPermissions();
+    if (!opts.silent) {
+      window.alert('Audit edit permission granted for ' + auditId + ' (this session).');
+    }
+  }
+
+  function denyAuditEditPermission(auditId, opts) {
+    opts = opts || {};
+    auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
+    if (auditId === activeAuditId) {
+      auditEditPermissionRequested = false;
+      updateAuditEditWarning();
+    }
+    renderAdminAuditPermissions();
+    if (!opts.silent) {
+      window.alert('Permission request declined.');
+    }
   }
 
   // ── Stage 4: Outcomes and letters ────────────────────────────────────────
@@ -18128,8 +18440,8 @@
           '</div>' +
           '<div class="notes">' + escHtml(r.notes || '') + '</div>' +
           '<div class="admin-cpin-review-actions">' +
-            '<button type="button" class="btn primary" onclick="approveCpinReview(\'' + cpin.id + '\')">Approve</button>' +
-            '<button type="button" class="btn" onclick="rejectCpinReview(\'' + cpin.id + '\')">Reject</button>' +
+            '<button type="button" class="btn primary" onclick="openAdminApproveCpinModal(\'' + cpin.id + '\')">Approve</button>' +
+            '<button type="button" class="btn" onclick="openAdminRejectCpinModal(\'' + cpin.id + '\')">Reject</button>' +
             '<button type="button" class="btn" onclick="show(\'cpin\', { cpinId: \'' + cpin.id + '\' })">Open CPIN</button>' +
           '</div>' +
         '</div>'
@@ -18138,10 +18450,516 @@
   }
 
   function initAdminPage() {
+    setAdminTab('users');
+    renderAdminUsers();
+    renderAdminPatches();
+    renderAdminTemplates();
+    renderAdminReports();
+    renderAdminAuditPermissions();
     renderAdminCpinReviews();
   }
 
-  function approveCpinReview(id) {
+  let adminActiveTab = 'users';
+  let adminModalSubmitFn = null;
+
+  function setAdminTab(tabId) {
+    adminActiveTab = tabId;
+    document.querySelectorAll('.admin-tab').forEach(function (btn) {
+      const on = btn.dataset.adminTab === tabId;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.admin-tab-panel').forEach(function (panel) {
+      const on = panel.dataset.adminPanel === tabId;
+      panel.classList.toggle('active', on);
+      panel.hidden = !on;
+    });
+  }
+
+  function closeAdminModal() {
+    const modal = document.getElementById('admin-action-modal');
+    if (modal) modal.classList.remove('open');
+    adminModalSubmitFn = null;
+  }
+
+  function submitAdminModal() {
+    if (adminModalSubmitFn) adminModalSubmitFn();
+  }
+
+  function openAdminModal(opts) {
+    const title = document.getElementById('admin-modal-title');
+    const sub = document.getElementById('admin-modal-sub');
+    const body = document.getElementById('admin-modal-body');
+    const footer = document.getElementById('admin-modal-footer');
+    if (!title || !body || !footer) return;
+    title.textContent = opts.title || 'Admin action';
+    if (sub) sub.textContent = opts.sub || '';
+    body.innerHTML = opts.body || '';
+    footer.innerHTML =
+      '<button type="button" class="btn" onclick="closeAdminModal()">' + escHtml(opts.cancelLabel || 'Cancel') + '</button>' +
+      '<button type="button" class="btn primary" onclick="submitAdminModal()">' + escHtml(opts.primaryLabel || 'Save') + '</button>';
+    adminModalSubmitFn = opts.onSubmit || function () {
+      closeAdminModal();
+      adminPrototypeToast(opts.successMessage);
+    };
+    document.getElementById('admin-action-modal').classList.add('open');
+    const firstInput = body.querySelector('input, select, textarea');
+    if (firstInput) firstInput.focus();
+  }
+
+  function adminRoleOptions(selected) {
+    return Object.keys(ADMIN_ROLE_LABELS).map(function (key) {
+      return '<option value="' + key + '"' + (selected === key ? ' selected' : '') + '>' + escHtml(ADMIN_ROLE_LABELS[key]) + '</option>';
+    }).join('');
+  }
+
+  function adminPatchOptions(selected) {
+    return ADMIN_PATCHES.map(function (p) {
+      return '<option value="' + escHtml(p.name) + '"' + (selected === p.name ? ' selected' : '') + '>' + escHtml(p.name) + '</option>';
+    }).join('');
+  }
+
+  function adminInspectorOptions(selected) {
+    return ADMIN_USERS.filter(function (u) { return u.status === 'active'; }).map(function (u) {
+      return '<option value="' + escHtml(u.name) + '"' + (selected === u.name ? ' selected' : '') + '>' + escHtml(u.name) + '</option>';
+    }).join('');
+  }
+
+  function adminPrototypeToast(message) {
+    window.alert(message || 'Saved (prototype only — not persisted).');
+  }
+
+  const ADMIN_USERS = [
+    { id: 'u-pg', name: 'Phil Gower', email: 'phil.gower@cpfsi.gov.uk', role: 'admin', patch: 'Kent, Surrey, Sussex', status: 'active' },
+    { id: 'u-sf', name: 'Steve France', email: 'steve.france@cpfsi.gov.uk', role: 'inspector', patch: 'London & South East', status: 'active' },
+    { id: 'u-hm', name: 'Hannah Munro', email: 'hannah.munro@cpfsi.gov.uk', role: 'inspector', patch: 'Midlands', status: 'active' },
+    { id: 'u-jw', name: 'James Wright', email: 'james.wright@cpfsi.gov.uk', role: 'inspector', patch: 'North West', status: 'active' },
+    { id: 'u-lc', name: 'Laura Chen', email: 'laura.chen@cpfsi.gov.uk', role: 'readonly', patch: 'National', status: 'invited' }
+  ];
+
+  const ADMIN_ROLE_LABELS = {
+    admin: 'System admin',
+    inspector: 'Inspector',
+    readonly: 'Read-only'
+  };
+
+  const ADMIN_PATCHES = [
+    { id: 'p-kss', name: 'Kent, Surrey, Sussex', lead: 'Phil Gower', premises: 142, inspectors: 4 },
+    { id: 'p-lse', name: 'London & South East', lead: 'Steve France', premises: 198, inspectors: 5 },
+    { id: 'p-mid', name: 'Midlands', lead: 'Hannah Munro', premises: 167, inspectors: 4 },
+    { id: 'p-nw', name: 'North West', lead: 'James Wright', premises: 121, inspectors: 3 }
+  ];
+
+  const ADMIN_LETTER_TEMPLATES = [
+    {
+      id: 'tpl-audit-appt',
+      name: 'Audit appointment letter',
+      usedIn: 'Audit setup',
+      version: 'v3.2',
+      status: 'active',
+      preview: 'Dear {{duty_holder_contact}},\n\nRe: Fire safety audit — {{premises_name}}\n\nWe write to confirm the appointment for a reactive audit on {{appointment_date}} at {{appointment_time}}.\n\nYours sincerely,\n{{inspector_name}}\nCrown Premises Fire Safety Inspectorate'
+    },
+    {
+      id: 'tpl-followup',
+      name: 'Follow-up audit notification',
+      usedIn: 'Follow-up audit setup',
+      version: 'v2.1',
+      status: 'active',
+      preview: 'Dear {{duty_holder_contact}},\n\nFollowing the audit of {{premises_name}} ({{audit_ref}}), a follow-up visit is required on {{appointment_date}}.\n\nUnresolved issues from the previous audit will be verified on site.\n\nYours sincerely,\n{{inspector_name}}'
+    },
+    {
+      id: 'tpl-outcome-en',
+      name: 'Outcome letter — Enforcement Notice',
+      usedIn: 'Audit stage 4',
+      version: 'v4.0',
+      status: 'active',
+      preview: 'Dear {{duty_holder}},\n\nRe: {{premises_name}} — Audit outcome\n\nFollowing our audit on {{visit_date}}, I am issuing an Enforcement Notice in respect of the failings identified.\n\n[Outcome detail and deadlines]\n\nYours sincerely,\n{{inspector_name}}'
+    },
+    {
+      id: 'tpl-outcome-28dap',
+      name: 'Outcome letter — 28-day Action Plan',
+      usedIn: 'Audit stage 4',
+      version: 'v3.8',
+      status: 'active',
+      preview: 'Dear {{duty_holder}},\n\nRe: {{premises_name}} — 28-day Action Plan\n\nYou are required to submit an action plan within 28 days addressing the failings set out in the audit report.\n\nYours sincerely,\n{{inspector_name}}'
+    },
+    {
+      id: 'tpl-cpin-ack',
+      name: 'CPIN acknowledgement',
+      usedIn: 'CPIN intake',
+      version: 'v1.4',
+      status: 'active',
+      preview: 'Dear {{contact_name}},\n\nWe acknowledge receipt of Crown Premises Incident Notification {{cpin_ref}} relating to {{premises_name}}.\n\nThis CPIN is assigned for evaluation.\n\nCrown Premises Fire Safety Inspectorate'
+    },
+    {
+      id: 'tpl-plan-feedback',
+      name: 'Action plan feedback',
+      usedIn: 'Audit stage 5',
+      version: 'v1.0',
+      status: 'draft',
+      preview: 'Dear {{duty_holder}},\n\nRe: Action plan for {{premises_name}}\n\nWe have reviewed your submitted action plan. [Adequate / requires revision]\n\nYours sincerely,\n{{inspector_name}}'
+    }
+  ];
+
+  const ADMIN_REPORTS = [
+    { id: 'r-rbip', name: 'RBIP summary by patch', schedule: 'Monthly', audience: 'Regional leads' },
+    { id: 'r-audit-q', name: 'Audit outcomes quarterly', schedule: 'Quarterly', audience: 'CPFSI board' },
+    { id: 'r-cpin', name: 'CPIN statistics', schedule: 'Weekly', audience: 'Operations team' },
+    { id: 'r-enforcement', name: 'Enforcement notices issued', schedule: 'On demand', audience: 'Legal liaison' },
+    { id: 'r-sla', name: 'Process SLA breaches', schedule: 'Weekly', audience: 'Team managers' }
+  ];
+
+  let adminUserRoles = null;
+
+  function getAdminUserById(id) {
+    return ADMIN_USERS.find(function (u) { return u.id === id; });
+  }
+
+  function openAdminInviteUserModal() {
+    openAdminModal({
+      title: 'Invite user',
+      sub: 'Send an invitation to join CPFSI. The user receives an email to set their password.',
+      body:
+        '<div class="field-wrap"><label for="admin-invite-name">Full name</label><input type="text" id="admin-invite-name" placeholder="e.g. Alex Morgan" /></div>' +
+        '<div class="field-wrap"><label for="admin-invite-email">Work email</label><input type="email" id="admin-invite-email" placeholder="name@cpfsi.gov.uk" /></div>' +
+        '<div class="field-wrap"><label for="admin-invite-role">Role</label><select id="admin-invite-role">' + adminRoleOptions('inspector') + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-invite-patch">Patch</label><select id="admin-invite-patch">' + adminPatchOptions('Kent, Surrey, Sussex') + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-invite-message">Personal message (optional)</label><textarea id="admin-invite-message" placeholder="Welcome to the team…"></textarea></div>',
+      primaryLabel: 'Send invitation',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Invitation sent (prototype).');
+      }
+    });
+  }
+
+  function openAdminEditUserModal(userId) {
+    const u = getAdminUserById(userId);
+    if (!u) return;
+    const role = getAdminUserRoles()[userId] || u.role;
+    openAdminModal({
+      title: 'Edit user',
+      sub: u.email,
+      body:
+        '<div class="field-wrap"><label for="admin-edit-name">Full name</label><input type="text" id="admin-edit-name" value="' + escHtml(u.name) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-email">Work email</label><input type="email" id="admin-edit-email" value="' + escHtml(u.email) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-edit-role">Role</label><select id="admin-edit-role">' + adminRoleOptions(role) + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-edit-patch">Patch</label><select id="admin-edit-patch">' + adminPatchOptions(u.patch) + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-edit-status">Status</label><select id="admin-edit-status">' +
+          '<option value="active"' + (u.status === 'active' ? ' selected' : '') + '>Active</option>' +
+          '<option value="invited"' + (u.status === 'invited' ? ' selected' : '') + '>Invited</option>' +
+          '<option value="suspended">Suspended</option>' +
+        '</select></div>',
+      primaryLabel: 'Save changes',
+      onSubmit: function () {
+        const newRole = document.getElementById('admin-edit-role')?.value;
+        if (newRole) getAdminUserRoles()[userId] = newRole;
+        closeAdminModal();
+        renderAdminUsers();
+        adminPrototypeToast('User account updated (prototype).');
+      }
+    });
+  }
+
+  function openAdminResetPasswordModal(userId) {
+    const u = getAdminUserById(userId);
+    if (!u) return;
+    openAdminModal({
+      title: 'Reset password',
+      sub: 'Send a password reset link to ' + u.name,
+      body:
+        '<div class="admin-modal-readonly"><strong>' + escHtml(u.name) + '</strong><br>' + escHtml(u.email) + '</div>' +
+        '<div class="field-wrap"><label for="admin-reset-reason">Reason for reset (logged)</label><input type="text" id="admin-reset-reason" placeholder="e.g. User locked out" /></div>' +
+        '<div class="field-wrap"><label><input type="checkbox" id="admin-reset-notify" checked /> Notify user by email</label></div>',
+      primaryLabel: 'Send reset link',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Password reset email sent to ' + u.email + ' (prototype).');
+      }
+    });
+  }
+
+  function openAdminEditPatchModal(patchId) {
+    const p = ADMIN_PATCHES.find(function (x) { return x.id === patchId; });
+    if (!p) return;
+    openAdminModal({
+      title: 'Edit patch',
+      sub: 'Assign lead inspector and describe geographic coverage.',
+      body:
+        '<div class="field-wrap"><label for="admin-patch-name">Patch name</label><input type="text" id="admin-patch-name" value="' + escHtml(p.name) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-patch-lead">Lead inspector</label><select id="admin-patch-lead">' + adminInspectorOptions(p.lead) + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-patch-regions">Regions / local authorities</label><textarea id="admin-patch-regions" placeholder="One per line…">Kent\nSurrey\nEast Sussex\nWest Sussex</textarea></div>' +
+        '<div class="field-wrap"><label for="admin-patch-notes">Admin notes</label><textarea id="admin-patch-notes" placeholder="Boundary changes, handover notes…"></textarea></div>',
+      primaryLabel: 'Save patch',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Patch configuration saved (prototype).');
+      }
+    });
+  }
+
+  function openAdminPreviewTemplateModal(templateId) {
+    const t = ADMIN_LETTER_TEMPLATES.find(function (x) { return x.id === templateId; });
+    if (!t) return;
+    openAdminModal({
+      title: 'Preview template',
+      sub: t.name + ' · ' + t.version,
+      body:
+        '<div class="admin-modal-readonly" style="white-space:pre-wrap;font-family:inherit;line-height:1.55;">' + escHtml(t.preview) + '</div>' +
+        '<div class="help" style="margin:0;">Merge fields such as {{premises_name}} are replaced when the letter is generated.</div>',
+      primaryLabel: 'Close',
+      cancelLabel: 'Back',
+      onSubmit: function () { closeAdminModal(); }
+    });
+  }
+
+  function openAdminEditTemplateModal(templateId) {
+    const t = ADMIN_LETTER_TEMPLATES.find(function (x) { return x.id === templateId; });
+    if (!t) return;
+    openAdminModal({
+      title: 'Edit letter template',
+      sub: t.usedIn,
+      body:
+        '<div class="field-wrap"><label for="admin-tpl-name">Template name</label><input type="text" id="admin-tpl-name" value="' + escHtml(t.name) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-tpl-version">Version</label><input type="text" id="admin-tpl-version" value="' + escHtml(t.version) + '" /></div>' +
+        '<div class="field-wrap"><label for="admin-tpl-status">Status</label><select id="admin-tpl-status">' +
+          '<option value="active"' + (t.status === 'active' ? ' selected' : '') + '>Active</option>' +
+          '<option value="draft"' + (t.status === 'draft' ? ' selected' : '') + '>Draft</option>' +
+        '</select></div>' +
+        '<div class="field-wrap"><label for="admin-tpl-body">Letter body</label><textarea id="admin-tpl-body" style="min-height:160px;">' + escHtml(t.preview) + '</textarea></div>',
+      primaryLabel: 'Save template',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Template saved as draft (prototype).');
+      }
+    });
+  }
+
+  function openAdminRunReportModal(reportId) {
+    const r = ADMIN_REPORTS.find(function (x) { return x.id === reportId; });
+    if (!r) return;
+    openAdminModal({
+      title: 'Run report',
+      sub: r.name,
+      body:
+        '<div class="field-wrap"><label for="admin-report-from">Date from</label><input type="date" id="admin-report-from" value="2026-04-01" /></div>' +
+        '<div class="field-wrap"><label for="admin-report-to">Date to</label><input type="date" id="admin-report-to" value="2026-06-30" /></div>' +
+        '<div class="field-wrap"><label for="admin-report-patch">Patch filter</label><select id="admin-report-patch"><option value="">All patches</option>' + adminPatchOptions('') + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-report-format">Export format</label><select id="admin-report-format"><option value="csv">CSV</option><option value="xlsx">Excel (.xlsx)</option><option value="pdf">PDF summary</option></select></div>',
+      primaryLabel: 'Run and download',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Report queued for download (prototype).');
+      }
+    });
+  }
+
+  function openAdminScheduleReportModal(reportId) {
+    const r = ADMIN_REPORTS.find(function (x) { return x.id === reportId; });
+    if (!r) return;
+    openAdminModal({
+      title: 'Schedule report',
+      sub: r.name,
+      body:
+        '<div class="field-wrap"><label for="admin-schedule-freq">Frequency</label><select id="admin-schedule-freq">' +
+          '<option' + (r.schedule === 'Weekly' ? ' selected' : '') + '>Weekly</option>' +
+          '<option' + (r.schedule === 'Monthly' ? ' selected' : '') + '>Monthly</option>' +
+          '<option' + (r.schedule === 'Quarterly' ? ' selected' : '') + '>Quarterly</option>' +
+          '<option>On demand only</option>' +
+        '</select></div>' +
+        '<div class="field-wrap"><label for="admin-schedule-day">Run on</label><select id="admin-schedule-day"><option>Monday 08:00</option><option>1st of month 08:00</option><option>First Monday of quarter</option></select></div>' +
+        '<div class="field-wrap"><label for="admin-schedule-recipients">Email recipients</label><input type="text" id="admin-schedule-recipients" value="' + escHtml(r.audience) + '@cpfsi.gov.uk" placeholder="comma-separated" /></div>' +
+        '<div class="field-wrap"><label for="admin-schedule-format">Format</label><select id="admin-schedule-format"><option>CSV</option><option>PDF summary</option></select></div>',
+      primaryLabel: 'Save schedule',
+      onSubmit: function () {
+        closeAdminModal();
+        adminPrototypeToast('Report schedule updated (prototype).');
+      }
+    });
+  }
+
+  function openAdminGrantPermModal(auditId) {
+    const req = auditEditPermissionRequests.find(function (r) { return r.auditId === auditId; });
+    openAdminModal({
+      title: 'Grant audit edit permission',
+      sub: auditId + (req ? ' — ' + req.premises : ''),
+      body:
+        (req
+          ? '<div class="admin-modal-readonly">Requested by <strong>' + escHtml(req.requestedBy) + '</strong> · ' + escHtml(req.requestedAt) + '<br><br>' + escHtml(req.reason) + '</div>'
+          : '<div class="admin-modal-readonly">Grant permission to amend findings and reissue outcome letters for this audit.</div>') +
+        '<div class="field-wrap"><label for="admin-grant-notes">Admin notes (optional)</label><textarea id="admin-grant-notes" placeholder="Reason for granting permission…"></textarea></div>' +
+        '<div class="field-wrap"><label><input type="checkbox" id="admin-grant-notify" checked /> Notify inspector by email</label></div>',
+      primaryLabel: 'Grant permission',
+      onSubmit: function () {
+        closeAdminModal();
+        grantAuditEditPermission(auditId, { silent: true });
+        adminPrototypeToast('Edit permission granted for ' + auditId + ' (this session).');
+      }
+    });
+  }
+
+  function openAdminDenyPermModal(auditId) {
+    const req = auditEditPermissionRequests.find(function (r) { return r.auditId === auditId; });
+    openAdminModal({
+      title: 'Decline permission request',
+      sub: auditId,
+      body:
+        (req ? '<div class="admin-modal-readonly">' + escHtml(req.requestedBy) + ' — ' + escHtml(req.reason) + '</div>' : '') +
+        '<div class="field-wrap"><label for="admin-deny-reason">Reason for declining</label><textarea id="admin-deny-reason" placeholder="Explain why the request cannot be approved…"></textarea></div>' +
+        '<div class="field-wrap"><label><input type="checkbox" id="admin-deny-notify" checked /> Notify inspector</label></div>',
+      primaryLabel: 'Decline request',
+      onSubmit: function () {
+        closeAdminModal();
+        denyAuditEditPermission(auditId, { silent: true });
+        adminPrototypeToast('Permission request declined (prototype).');
+      }
+    });
+  }
+
+  function openAdminApproveCpinModal(cpinId) {
+    loadCpinOverrides();
+    const cpin = getCpinById(cpinId);
+    const r = getCpinAdminReview(cpin);
+    if (!cpin || !r) return;
+    openAdminModal({
+      title: 'Approve CPIN review',
+      sub: cpin.ref + ' — ' + formatCpinReviewSummary(r),
+      body:
+        '<div class="admin-modal-readonly"><strong>' + escHtml(cpin.premises || 'No premises') + '</strong><br>' +
+        escHtml(r.notes || 'No notes provided.') + '</div>' +
+        '<div class="field-wrap"><label for="admin-cpin-approve-note">Admin note (optional)</label><textarea id="admin-cpin-approve-note" placeholder="Recorded in the audit trail…"></textarea></div>',
+      primaryLabel: r.action === 'remove' ? 'Approve removal' : 'Approve flag',
+      onSubmit: function () {
+        closeAdminModal();
+        approveCpinReview(cpinId, { silent: true });
+        adminPrototypeToast(cpin.ref + ' review approved (prototype).');
+      }
+    });
+  }
+
+  function openAdminRejectCpinModal(cpinId) {
+    loadCpinOverrides();
+    const cpin = getCpinById(cpinId);
+    const r = getCpinAdminReview(cpin);
+    if (!cpin || !r) return;
+    openAdminModal({
+      title: 'Reject CPIN review',
+      sub: cpin.ref,
+      body:
+        '<div class="admin-modal-readonly">' + escHtml(formatCpinReviewSummary(r)) + '<br><br>' + escHtml(r.notes || '') + '</div>' +
+        '<div class="field-wrap"><label for="admin-cpin-reject-reason">Reason for rejection</label><textarea id="admin-cpin-reject-reason" placeholder="Explain why the request is rejected…"></textarea></div>' +
+        '<div class="field-wrap"><label><input type="checkbox" id="admin-cpin-reject-notify" checked /> Notify requester</label></div>',
+      primaryLabel: 'Reject request',
+      onSubmit: function () {
+        closeAdminModal();
+        rejectCpinReview(cpinId, { silent: true });
+        adminPrototypeToast('Review request rejected. ' + cpin.ref + ' stays in the queue.');
+      }
+    });
+  }
+
+  function getAdminUserRoles() {
+    if (!adminUserRoles) {
+      adminUserRoles = {};
+      ADMIN_USERS.forEach(function (u) { adminUserRoles[u.id] = u.role; });
+    }
+    return adminUserRoles;
+  }
+
+  function renderAdminUsers() {
+    const body = document.getElementById('admin-users-body');
+    if (!body) return;
+    const roles = getAdminUserRoles();
+    body.innerHTML = ADMIN_USERS.map(function (u) {
+      const role = roles[u.id] || u.role;
+      const statusPill = u.status === 'active' ? 'green' : (u.status === 'invited' ? 'amber' : 'grey');
+      return '<tr>' +
+        '<td><strong style="color:var(--ink);">' + escHtml(u.name) + '</strong></td>' +
+        '<td>' + escHtml(u.email) + '</td>' +
+        '<td>' + escHtml(ADMIN_ROLE_LABELS[role] || role) + '</td>' +
+        '<td>' + escHtml(u.patch) + '</td>' +
+        '<td><span class="pill ' + statusPill + '">' + escHtml(u.status === 'active' ? 'Active' : (u.status === 'invited' ? 'Invited' : u.status)) + '</span></td>' +
+        '<td class="actions">' +
+        '<button type="button" class="btn" onclick="openAdminEditUserModal(\'' + escHtml(u.id) + '\')">Edit</button> ' +
+        '<button type="button" class="btn" onclick="openAdminResetPasswordModal(\'' + escHtml(u.id) + '\')">Reset password</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+
+  function renderAdminPatches() {
+    const body = document.getElementById('admin-patches-body');
+    if (!body) return;
+    body.innerHTML = ADMIN_PATCHES.map(function (p) {
+      return '<tr>' +
+        '<td><strong style="color:var(--ink);">' + escHtml(p.name) + '</strong></td>' +
+        '<td>' + escHtml(p.lead) + '</td>' +
+        '<td>' + p.premises + '</td>' +
+        '<td>' + p.inspectors + '</td>' +
+        '<td class="actions"><button type="button" class="btn" onclick="openAdminEditPatchModal(\'' + escHtml(p.id) + '\')">Edit</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderAdminTemplates() {
+    const body = document.getElementById('admin-templates-body');
+    if (!body) return;
+    body.innerHTML = ADMIN_LETTER_TEMPLATES.map(function (t) {
+      const statusPill = t.status === 'active' ? 'green' : 'amber';
+      return '<tr>' +
+        '<td><strong style="color:var(--ink);">' + escHtml(t.name) + '</strong></td>' +
+        '<td>' + escHtml(t.usedIn) + '</td>' +
+        '<td>' + escHtml(t.version) + '</td>' +
+        '<td><span class="pill ' + statusPill + '">' + escHtml(t.status === 'active' ? 'Active' : 'Draft') + '</span></td>' +
+        '<td class="actions">' +
+        '<button type="button" class="btn" onclick="openAdminPreviewTemplateModal(\'' + escHtml(t.id) + '\')">Preview</button> ' +
+        '<button type="button" class="btn" onclick="openAdminEditTemplateModal(\'' + escHtml(t.id) + '\')">Edit</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+
+  function renderAdminReports() {
+    const body = document.getElementById('admin-reports-body');
+    if (!body) return;
+    body.innerHTML = ADMIN_REPORTS.map(function (r) {
+      return '<tr>' +
+        '<td><strong style="color:var(--ink);">' + escHtml(r.name) + '</strong></td>' +
+        '<td>' + escHtml(r.schedule) + '</td>' +
+        '<td>' + escHtml(r.audience) + '</td>' +
+        '<td class="actions">' +
+        '<button type="button" class="btn" onclick="openAdminRunReportModal(\'' + escHtml(r.id) + '\')">Run now</button> ' +
+        '<button type="button" class="btn" onclick="openAdminScheduleReportModal(\'' + escHtml(r.id) + '\')">Schedule</button>' +
+        '</td></tr>';
+    }).join('');
+  }
+
+  function renderAdminAuditPermissions() {
+    const el = document.getElementById('admin-audit-perm-list');
+    const hint = document.getElementById('admin-audit-perm-demo-hint');
+    if (!el) return;
+    const pending = auditEditPermissionRequests.slice();
+    if (!pending.length) {
+      el.innerHTML = '<div class="admin-empty">No pending requests.</div>';
+    } else {
+      el.innerHTML = pending.map(function (r) {
+        return '<div class="admin-perm-item">' +
+          '<div><strong>' + escHtml(r.auditId) + '</strong> — ' + escHtml(r.premises) + '</div>' +
+          '<div class="meta">Requested by ' + escHtml(r.requestedBy) + ' · ' + escHtml(r.requestedAt) + '</div>' +
+          '<div style="font-size:13px;color:var(--ink-2);margin-top:6px;">' + escHtml(r.reason) + '</div>' +
+          '<div class="admin-perm-actions">' +
+          '<button type="button" class="btn primary" onclick="openAdminGrantPermModal(\'' + escHtml(r.auditId) + '\')">Grant permission</button>' +
+          '<button type="button" class="btn" onclick="openAdminDenyPermModal(\'' + escHtml(r.auditId) + '\')">Decline</button>' +
+          '<button type="button" class="btn" onclick="continueAudit(\'' + escHtml(r.auditId) + '\')">Open audit</button>' +
+          '</div></div>';
+      }).join('');
+    }
+    if (hint) {
+      const demoAudit = PROTOTYPE_AUDIT_ID;
+      hint.innerHTML = 'Prototype shortcut: <button type="button" class="btn" onclick="openAdminGrantPermModal(\'' + escHtml(demoAudit) + '\')">Grant edit permission</button> for the Temple Quay audit (' + escHtml(demoAudit) + ') without a request.';
+    }
+  }
+
+  function approveCpinReview(id, opts) {
+    opts = opts || {};
     loadCpinOverrides();
     const cpin = getCpinById(id);
     const r = getCpinAdminReview(cpin);
@@ -18163,12 +18981,15 @@
       if (r.action === 'remove') show('cpins');
       else if (typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
     }
-    window.alert(r.action === 'remove'
-      ? cpin.ref + ' has been removed from CPIN lists.'
-      : cpin.ref + ' has been flagged as erroneous.');
+    if (!opts.silent) {
+      window.alert(r.action === 'remove'
+        ? cpin.ref + ' has been removed from CPIN lists.'
+        : cpin.ref + ' has been flagged as erroneous.');
+    }
   }
 
-  function rejectCpinReview(id) {
+  function rejectCpinReview(id, opts) {
+    opts = opts || {};
     loadCpinOverrides();
     const cpin = getCpinById(id);
     const r = getCpinAdminReview(cpin);
@@ -18186,7 +19007,9 @@
     renderCpinsLists();
     if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
     if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
-    window.alert('Review request rejected. ' + cpin.ref + ' stays in the queue.');
+    if (!opts.silent) {
+      window.alert('Review request rejected. ' + cpin.ref + ' stays in the queue.');
+    }
   }
 
   function renderCpinAdminReviewBanner(cpin) {
