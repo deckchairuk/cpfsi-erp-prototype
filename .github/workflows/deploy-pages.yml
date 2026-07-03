@@ -1,0 +1,53 @@
+# Deploy static prototype to GitHub Pages (with deploy retries for transient failures).
+#
+# One-time setup in GitHub: Settings → Pages → Build and deployment → Source → GitHub Actions.
+# If the legacy "pages build and deployment" workflow is stuck queued, cancel it in Actions first.
+
+name: Deploy CPFSI prototype
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy retry (2 of 3)
+        id: deployment2
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy retry (3 of 3)
+        if: steps.deployment2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
