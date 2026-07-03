@@ -6291,6 +6291,47 @@
 
     main {
       padding: 16px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    #dashboard h1 {
+      font-size: 20px;
+      line-height: 1.2;
+    }
+    #dashboard .meta {
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    #dashboard .dash-grid,
+    #dashboard .dash-grid .card {
+      min-width: 0;
+    }
+    #dashboard .card {
+      padding: 14px 16px;
+    }
+    #dashboard .card > div[style*="display:flex"] {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    #dashboard .dash-cpin-toggle {
+      align-self: flex-start;
+    }
+    #dashboard .dash-reminder-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    #dashboard .dash-reminder-premises {
+      max-width: none;
+      text-align: left;
+    }
+    #dash-processes-card table.data {
+      table-layout: auto;
+    }
+    #dash-processes-card table.data td {
+      white-space: normal;
     }
 
     .dash-grid {
@@ -6309,18 +6350,42 @@
       margin-bottom: 0;
     }
 
-    .process-grid {
+    .process-grid,
+    #audit .process-grid,
+    #bizsupport .process-grid {
       grid-template-columns: 1fr;
     }
     .process-grid > .audit-stage-rail-slot,
     #audit .audit-process-sidebar > .audit-stage-rail-slot {
       display: none;
     }
+    #audit .process-grid {
+      gap: 12px;
+    }
     #audit .audit-process-sidebar {
       order: 2;
     }
     #audit .stage-content {
       order: 1;
+      padding: 14px 16px;
+    }
+    #audit .crumbs {
+      font-size: 12px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    #audit .audit-panel > div:has(> h2) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    #audit .context-rail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    #audit .context-rail .context-card:last-child {
+      grid-column: 1 / -1;
     }
     .audit-process-options-desktop {
       display: none !important;
@@ -6755,6 +6820,12 @@
   }
 
   @media (max-width: 480px) {
+    #audit .context-rail {
+      grid-template-columns: 1fr;
+    }
+    #audit .context-rail .context-card:last-child {
+      grid-column: auto;
+    }
     .week-summary {
       grid-template-columns: 1fr;
     }
