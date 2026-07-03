@@ -4487,10 +4487,10 @@
     align-items: center;
     gap: 4px;
     min-height: 36px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border: 1px solid var(--line);
     background: var(--surface);
-    border-radius: 14px;
+    border-radius: 999px;
     font-size: 12px;
     color: var(--ink-2);
     cursor: pointer;
@@ -4499,7 +4499,7 @@
     background: var(--ink);
     color: white;
     border-color: var(--ink);
-    padding-right: 8px;
+    padding-right: 10px;
   }
   .chip-dismiss {
     display: inline-flex;
@@ -6026,9 +6026,56 @@
     margin-top: 0;
     margin-bottom: 0;
   }
+  /* CPINs — RAG + Queue on one row; Dept below; chips wrap within each group */
+  #cpins .process-filters-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  #cpins .cpin-filters-primary-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px 24px;
+    width: 100%;
+    min-width: 0;
+  }
+  #cpins .process-filters-bar .filter-group,
+  #cpins .cpin-filters-primary-row .filter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+  #cpins .cpin-filters-primary-row .filter-group {
+    flex: 1 1 200px;
+  }
+  #cpins .process-filters-bar > .filter-group {
+    width: 100%;
+  }
+  #cpins .process-filters-bar .filter-group + .filter-group {
+    margin-top: 0;
+  }
+  #cpins .process-filters-bar .filter-group-label {
+    margin-bottom: 0;
+  }
+  #cpins .process-filters-bar .filter-chips,
+  #cpins .process-filters-bar .filter-chips--scroll {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  #cpins .process-filters-bar .filter-chips .chip {
+    flex-shrink: 0;
+    max-width: 100%;
+  }
   @media (min-width: 841px) {
     #premises .process-filters-bar,
-    #cpins .process-filters-bar,
     #concerns .process-filters-bar {
       display: flex;
       flex-wrap: nowrap;
@@ -6036,7 +6083,6 @@
       gap: 16px 24px;
     }
     #premises .process-filters-bar .filter-group,
-    #cpins .process-filters-bar .filter-group,
     #concerns .process-filters-bar .filter-group {
       display: flex;
       align-items: center;
@@ -6045,18 +6091,15 @@
       flex-shrink: 0;
     }
     #premises .process-filters-bar .filter-group + .filter-group,
-    #cpins .process-filters-bar .filter-group + .filter-group,
     #concerns .process-filters-bar .filter-group + .filter-group {
       margin-top: 0;
     }
     #premises .process-filters-bar .filter-group-label,
-    #cpins .process-filters-bar .filter-group-label,
     #concerns .process-filters-bar .filter-group-label {
       margin-bottom: 0;
       white-space: nowrap;
     }
     #premises .process-filters-bar .filter-chips--scroll,
-    #cpins .process-filters-bar .filter-chips--scroll,
     #concerns .process-filters-bar .filter-chips--scroll {
       flex-wrap: nowrap;
       overflow-x: visible;
@@ -6543,6 +6586,11 @@
       scrollbar-width: none;
       margin-bottom: 0;
       padding: 2px 0 8px;
+    }
+    #cpins .process-filters-bar .filter-chips--scroll {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      padding: 0;
     }
     .filter-chips--scroll::-webkit-scrollbar {
       display: none;
@@ -8153,6 +8201,7 @@
 
       <div class="cpin-results">
         <div class="process-filters-bar">
+          <div class="cpin-filters-primary-row">
           <div class="filter-group">
             <div class="filter-group-label">RAG</div>
             <div class="filter-chips filter-chips--scroll cpin-filters cpin-filters-rag" role="group" aria-label="RAG severity">
@@ -8170,6 +8219,7 @@
               <button class="chip" data-cpin-filter="in-progress">In progress</button>
               <button class="chip" data-cpin-filter="flagged" type="button">Flagged / pending removal</button>
             </div>
+          </div>
           </div>
           <div class="filter-group">
             <div class="filter-group-label">Dept</div>
