@@ -189,6 +189,15 @@
     list.unshift(record);
     localStorage.setItem(SC_INTAKE_KEY, JSON.stringify(list));
     renderConcernsLists();
+    if (typeof window.logAdminChange === 'function') {
+      window.logAdminChange({
+        user: 'System',
+        area: 'Concern',
+        action: 'Concern reported',
+        detail: record.ref + (matched ? ' — ' + premises : ' — premises not matched'),
+        route: 'concern:' + record.id
+      });
+    }
     return record;
   }
 
@@ -1117,11 +1126,21 @@
   function saveConcernPremises(name) {
     const c = getConcernById(activeConcernId);
     if (!c) return;
+    const oldPremises = c.premises || null;
     const premises = name || null;
     let workflow = c.workflow;
     if (premises && workflow === 'awaiting_premises') workflow = 'unassigned';
     if (!premises) workflow = 'awaiting_premises';
     persistConcernPatch(activeConcernId, { premises: premises, workflow: workflow, dutyHolders: [] });
+    if ((premises || null) !== oldPremises && typeof window.logAdminChange === 'function') {
+      window.logAdminChange({
+        user: 'Phil Gower',
+        area: 'Concern',
+        action: premises ? 'Premises linked' : 'Premises cleared',
+        detail: c.ref + ' — ' + (oldPremises || 'None') + ' → ' + (premises || 'None'),
+        route: 'concern:' + activeConcernId
+      });
+    }
     refreshConcernDetailPage();
     renderConcernsLists();
   }

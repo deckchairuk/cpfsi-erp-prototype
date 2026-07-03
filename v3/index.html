@@ -115,6 +115,26 @@
   .logo:hover { color: var(--accent); }
   .logo span { color: var(--ink-3); font-weight: 400; }
   .logo:hover span { color: var(--ink-2); }
+  .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+  }
+  .topbar-crown {
+    display: block;
+    height: 36px;
+    width: auto;
+    flex-shrink: 0;
+  }
+  .topbar-brand-text {
+    white-space: nowrap;
+  }
+  .topbar-brand-sub {
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+  .topbar-brand:hover .topbar-brand-sub { color: var(--ink-2); }
   .nav-wrap {
     display: flex;
     align-items: center;
@@ -612,6 +632,95 @@
     font-size: 12px;
   }
   .dash-reminder-detail .highlight-amber { color: var(--amber); }
+  .dash-reminders-more {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .reminders-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .reminder-row {
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    text-align: left;
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .reminder-row:hover { border-color: var(--ink-3); background: var(--bg); }
+  .reminder-row:focus-visible {
+    outline: 3px solid transparent;
+    box-shadow: 0 0 0 3px var(--ink);
+  }
+  .reminder-due {
+    min-width: 0;
+  }
+  .reminder-due-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .reminder-due-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .reminder-due.is-urgent .reminder-due-date { color: var(--amber-text); }
+  .reminder-due.is-overdue .reminder-due-date { color: var(--red-text); }
+  .reminder-body { min-width: 0; }
+  .reminder-task {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .reminder-detail {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .reminder-premises {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 6px;
+  }
+  .reminder-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .reminder-process-id {
+    font-size: 12px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .reminder-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .reminder-meta {
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  }
 
   /* Process page layout */
   .process-grid {
@@ -2676,6 +2785,11 @@
     border-radius: 6px;
     font-size: 13px;
     font-family: inherit;
+  }
+  .admin-change-log-detail {
+    font-size: 13px;
+    color: var(--ink-2);
+    max-width: 36em;
   }
   .admin-entity-ref {
     font-size: 11px;
@@ -5681,6 +5795,12 @@
     font-size: inherit;
     font-weight: 500;
   }
+  .premises-admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
   .prem-row--head {
     background: var(--bg);
     cursor: default;
@@ -6297,13 +6417,13 @@
       gap: 10px;
       align-items: center;
     }
-    .logo {
+    .topbar-brand {
       order: 1;
       flex: 1;
       min-width: 0;
-      text-align: left;
     }
-    .logo span { display: none; }
+    .topbar-brand-sub { display: none; }
+    .topbar-crown { height: 30px; }
     .nav-wrap {
       order: 0;
       position: fixed;
@@ -7160,7 +7280,10 @@
     <span class="nav-menu-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Open main menu</span>
   </button>
-  <button type="button" class="logo" onclick="show('dashboard')" title="Go to dashboard">CPFSI <span>·  Fire Safety MIS</span></button>
+  <button type="button" class="topbar-brand logo" onclick="show('dashboard')" title="Go to dashboard">
+    <img src="assets/cpfsi-logo.png" alt="" class="topbar-crown" width="36" height="36" aria-hidden="true">
+    <span class="topbar-brand-text">CPFSI <span class="topbar-brand-sub">· Fire Safety MIS</span></span>
+  </button>
   <button type="button" class="nav-drawer-backdrop" id="nav-drawer-backdrop" tabindex="-1" aria-hidden="true" onclick="closeNavDrawer()"></button>
   <div class="nav-wrap" id="nav-drawer">
     <nav class="nav-main" id="nav-main" aria-label="Main">
@@ -7201,6 +7324,7 @@
       </button>
       <div class="user-menu" id="user-menu" hidden role="menu" aria-label="Account menu">
         <button type="button" role="menuitem" onclick="closeUserMenu();show('time')">Time log</button>
+        <button type="button" role="menuitem" onclick="closeUserMenu();show('reminders')">Reminders</button>
         <button type="button" role="menuitem" onclick="openCpinReportFromMenu()">Submit CPIN</button>
         <button type="button" role="menuitem" onclick="openSafetyConcernReportFromMenu()">Log safety concern</button>
         <button type="button" role="menuitem" onclick="closeUserMenu();show('admin')">Admin and settings</button>
@@ -7293,6 +7417,7 @@
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="reports" onclick="setAdminTab('reports')">Reports</button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="audit-perms" onclick="setAdminTab('audit-perms')">Audit permissions</button>
         <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="cpin" onclick="setAdminTab('cpin')">CPIN review</button>
+        <button type="button" class="admin-tab" role="tab" aria-selected="false" data-admin-tab="change-log" onclick="setAdminTab('change-log')">Change log</button>
       </div>
 
       <div class="admin-tab-panels">
@@ -7400,6 +7525,31 @@
           </section>
         </div>
 
+        <div class="admin-tab-panel" id="admin-tab-change-log" role="tabpanel" data-admin-panel="change-log" hidden>
+          <section class="card admin-section">
+            <h3>Change log</h3>
+            <div class="help">Record of premises, CPIN, concern, audit and admin changes across the system.</div>
+            <div class="admin-search-bar">
+              <input type="search" id="admin-change-log-search" placeholder="Search by user, area, change or subject…" oninput="setAdminChangeLogSearch(this.value)" />
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="admin-change-log-table">
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>User</th>
+                    <th>Area</th>
+                    <th>Change</th>
+                    <th>Subject</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-change-log-body"></tbody>
+              </table>
+            </div>
+            <p class="help" style="margin:12px 0 0;" id="admin-change-log-count"></p>
+          </section>
+        </div>
+
         <div class="admin-tab-panel" id="admin-tab-duty-holders" role="tabpanel" data-admin-panel="duty-holders" hidden>
           <section class="card admin-section">
             <h3>Duty Holder register</h3>
@@ -7480,6 +7630,9 @@
                 </thead>
                 <tbody id="admin-premises-body"></tbody>
               </table>
+            </div>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn primary" onclick="openAdminAddPremisesModal()">+ Add premises</button>
             </div>
           </section>
         </div>
@@ -7568,6 +7721,7 @@
 
         <div style="margin-top:16px;font-size:12px;color:var(--ink-3);">Reminders</div>
         <div id="dash-reminders-list" class="dash-reminders-list"></div>
+        <a class="dash-reminders-more" href="#" onclick="show('reminders'); return false;">See all reminders →</a>
       </div>
 
       <!-- BOTTOM LEFT: Suggested patch -->
@@ -7617,7 +7771,7 @@
       <div class="screen-head-text">
         <div class="screen-head-title-row">
           <h1>Premises</h1>
-          <button type="button" class="screen-head-new">+ Add premises</button>
+          <button type="button" class="screen-head-new" onclick="openPremisesListAddModal()">+ Add premises</button>
         </div>
         <div class="meta">2,847 premises across the Crown estate</div>
       </div>
@@ -7693,6 +7847,7 @@
         <h1>Temple Quay House</h1>
         <div class="meta" id="premises-detail-meta">Temple Back East, Bristol BS1  ·  <strong>HMCTS</strong>  ·  Government office</div>
         <div id="premises-detail-site" class="premises-site-banner" hidden></div>
+        <div id="premises-detail-admin-actions" class="premises-admin-actions" hidden></div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Sprinkler system</span>
           <span class="pill grey">Smoke ventilation</span>
@@ -7714,6 +7869,7 @@
       <button type="button" data-premises-tab="processes" onclick="setPremisesDetailTab('processes')">Processes  ·  6</button>
       <button type="button" data-premises-tab="documents" onclick="setPremisesDetailTab('documents')">Documents  ·  4</button>
       <button type="button" data-premises-tab="history" onclick="setPremisesDetailTab('history')">History</button>
+      <button type="button" data-premises-tab="related" onclick="setPremisesDetailTab('related')">Related premises</button>
     </div>
 
     <div id="premises-tab-overview" class="premises-tab-panel active">
@@ -7791,6 +7947,10 @@
       <div class="premises-detail-list" id="premises-tq-history-list"></div>
     </div>
 
+    <div id="premises-tab-related" class="premises-tab-panel">
+      <div id="premises-tq-related"></div>
+    </div>
+
   </main>
 </div>
 
@@ -7807,6 +7967,7 @@
         <h1>HMP Bristol</h1>
         <div class="meta" id="premises-bristol-meta">Cambridge Grove, Bristol BS7  ·  <strong>HMPPS</strong>  ·  Prison · Cat B</div>
         <div id="premises-bristol-site" class="premises-site-banner" hidden></div>
+        <div id="premises-bristol-admin-actions" class="premises-admin-actions" hidden></div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Cell fire detection</span>
           <span class="pill grey">Compartmentation</span>
@@ -7847,6 +8008,7 @@
       <button type="button" data-premises-tab="processes" onclick="setPremisesBristolTab('processes')">Processes  ·  4</button>
       <button type="button" data-premises-tab="documents" onclick="setPremisesBristolTab('documents')">Documents  ·  2</button>
       <button type="button" data-premises-tab="history" onclick="setPremisesBristolTab('history')">History</button>
+      <button type="button" data-premises-tab="related" onclick="setPremisesBristolTab('related')">Related premises</button>
     </div>
 
     <div id="premises-bristol-overview" class="premises-tab-panel active">
@@ -7902,6 +8064,9 @@
     </div>
     <div id="premises-bristol-history" class="premises-tab-panel">
       <div class="premises-detail-list" id="premises-bristol-history-list"></div>
+    </div>
+    <div id="premises-bristol-related" class="premises-tab-panel">
+      <div id="premises-bristol-related-root"></div>
     </div>
 
   </main>
@@ -9227,6 +9392,23 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- =========================================================
+     REMINDERS
+========================================================= -->
+<div id="reminders" class="screen">
+  <main>
+    <div class="screen-head">
+      <div class="screen-head-text">
+        <div class="screen-head-title-row">
+          <h1>Reminders</h1>
+        </div>
+        <div class="meta">Tasks and deadlines for your patch and assigned work — sorted by due date.</div>
+      </div>
+    </div>
+    <div id="reminders-list" class="reminders-list" aria-live="polite"></div>
+  </main>
 </div>
 
 <!-- =========================================================
@@ -10772,6 +10954,9 @@
     'cpfsi-cpin-overrides-v1',
     'cpin-pins-v1',
     'audit-setup-draft-v1',
+    'cpfsi-admin-change-log-v1',
+    'cpfsi-premises-overrides-v1',
+    'cpfsi-premises-custom-v1',
     'prototype-feedback-name'
   ];
 
@@ -10995,7 +11180,7 @@
 
   const ADMIN_ROUTE_TABS = [
     'users', 'premises', 'duty-holders', 'responsible-persons',
-    'patches', 'templates', 'reports', 'audit-perms', 'cpin'
+    'patches', 'templates', 'reports', 'audit-perms', 'cpin', 'change-log'
   ];
 
   function adminTabSupportsDetail(tabId) {
@@ -11319,6 +11504,7 @@
     if (screen === 'premisesdetail') initPremisesDetailPage();
     if (screen === 'premisesdetail-bristol') initPremisesBristolPage();
     if (screen === 'dashboard') initDashboardPage();
+    if (screen === 'reminders') initRemindersPage();
     if (screen === 'audit') {
       renderAuditFindings();
       updateAuditEditWarning();
@@ -11362,6 +11548,7 @@
       bizsupport: 'nav-processes',
       reports: 'nav-reports',
       time: 'nav-dashboard',
+      reminders: 'nav-dashboard',
       admin: null
     };
     const navId = navMap[id];
@@ -11479,6 +11666,8 @@
   // Initial load: respect the hash if there is one, else login.
   window.addEventListener('load', () => {
     ensureAuditContextsInit();
+    loadPremisesCustomIntoRegistry();
+    loadPremisesOverrides();
     applyAuditContext(PROTOTYPE_AUDIT_ID);
     initAccessibility();
     renderFromHash();
@@ -11793,9 +11982,11 @@
       return Object.assign({}, dh, { status: 'accepted' });
     });
     setup.responsiblePersons = [
-      { id: 'rp1', key: 'mstevens', ref: 'RP-0008821', name: 'Mark Stevens', role: 'Property Director', initials: 'MS', fromPremises: true, status: 'accepted', linkedDh: 'hmcts' },
-      { id: 'rp2', key: 'spatel', ref: 'RP-0009104', name: 'Sarah Patel', role: 'Maintenance Lead', initials: 'SP', fromPremises: true, status: 'accepted', linkedDh: 'equans' },
-      { id: 'rp3', key: 'rbyrne', ref: 'RP-0007742', name: 'Richard Byrne', role: 'Property Officer', initials: 'RB', fromPremises: true, status: 'accepted', linkedDh: 'propdir' }
+      { id: 'rp1', key: 'mstevens', ref: 'RP-0008821', name: 'Mark Stevens', role: 'Property Director', initials: 'MS', fromPremises: true, status: 'accepted', linkedDh: 'hmcts', isPrimary: true },
+      { id: 'rp-kallen', key: 'kallen', ref: 'RP-0005528', name: 'Karen Allen', role: 'HMCTS  ·  Facilities Coordinator', initials: 'KA', fromPremises: true, status: 'accepted', linkedDh: 'hmcts' },
+      { id: 'rp2', key: 'spatel', ref: 'RP-0009104', name: 'Sarah Patel', role: 'Maintenance Lead', initials: 'SP', fromPremises: true, status: 'accepted', linkedDh: 'equans', isPrimary: true },
+      { id: 'rp-dhussain', key: 'dhussain', ref: 'RP-0005533', name: 'David Hussain', role: 'Equans  ·  Electrical Compliance Lead', initials: 'DH', fromPremises: true, status: 'accepted', linkedDh: 'equans' },
+      { id: 'rp3', key: 'rbyrne', ref: 'RP-0007742', name: 'Richard Byrne', role: 'Property Officer', initials: 'RB', fromPremises: true, status: 'accepted', linkedDh: 'propdir', isPrimary: true }
     ];
     setup.inspectors = [];
     setup.appointmentDate = '2026-07-07';
@@ -12028,13 +12219,12 @@
     const lettersDrafted = {};
     const baseTs = 1721039400000;
     specs.forEach(function (s, i) {
-      const taskId = demoAuditStage4LetterTaskId(s.dh, s.key, s.rid);
-      const slotId = demoAuditStage4LetterSlotId(s.dh, s.key);
+      const taskId = demoAuditStage4LetterSlotId(s.dh, s.key);
       letters.push({
         id: 'ltr-s4-demo-' + taskId,
         letterTaskId: taskId,
         outcomeLetterId: taskId,
-        outcomeSlotId: slotId,
+        outcomeSlotId: taskId,
         dutyHolder: s.dh,
         outcomeKey: s.key,
         templateId: s.tmpl,
@@ -12081,9 +12271,11 @@
       return Object.assign({}, dh, { status: 'accepted' });
     });
     setup.responsiblePersons = [
-      { id: 'rp1', key: 'mstevens', ref: 'RP-0008821', name: 'Mark Stevens', role: 'Property Director', initials: 'MS', fromPremises: true, status: 'accepted', linkedDh: 'hmcts' },
-      { id: 'rp2', key: 'spatel', ref: 'RP-0009104', name: 'Sarah Patel', role: 'Maintenance Lead', initials: 'SP', fromPremises: true, status: 'accepted', linkedDh: 'equans' },
-      { id: 'rp3', key: 'rbyrne', ref: 'RP-0007742', name: 'Richard Byrne', role: 'Property Officer', initials: 'RB', fromPremises: true, status: 'accepted', linkedDh: 'propdir' }
+      { id: 'rp1', key: 'mstevens', ref: 'RP-0008821', name: 'Mark Stevens', role: 'Property Director', initials: 'MS', fromPremises: true, status: 'accepted', linkedDh: 'hmcts', isPrimary: true },
+      { id: 'rp-kallen', key: 'kallen', ref: 'RP-0005528', name: 'Karen Allen', role: 'HMCTS  ·  Facilities Coordinator', initials: 'KA', fromPremises: true, status: 'accepted', linkedDh: 'hmcts' },
+      { id: 'rp2', key: 'spatel', ref: 'RP-0009104', name: 'Sarah Patel', role: 'Maintenance Lead', initials: 'SP', fromPremises: true, status: 'accepted', linkedDh: 'equans', isPrimary: true },
+      { id: 'rp-dhussain', key: 'dhussain', ref: 'RP-0005533', name: 'David Hussain', role: 'Equans  ·  Electrical Compliance Lead', initials: 'DH', fromPremises: true, status: 'accepted', linkedDh: 'equans' },
+      { id: 'rp3', key: 'rbyrne', ref: 'RP-0007742', name: 'Richard Byrne', role: 'Property Officer', initials: 'RB', fromPremises: true, status: 'accepted', linkedDh: 'propdir', isPrimary: true }
     ];
     setup.inspectors = [];
     setup.appointmentDate = '2026-07-14';
@@ -13201,7 +13393,7 @@
     document.querySelectorAll('#premises-bristol-tabs button').forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.premisesTab === tab);
     });
-    ['overview', 'details', 'processes', 'documents', 'history'].forEach(function (t) {
+    ['overview', 'details', 'processes', 'documents', 'history', 'related'].forEach(function (t) {
       const panel = document.getElementById('premises-bristol-' + t);
       if (panel) panel.classList.toggle('active', t === tab);
     });
@@ -13411,6 +13603,131 @@
     return getPremisesSiteChildren(prem.parentSite.ref).filter(function (p) {
       return p.name !== prem.name;
     });
+  }
+
+  function getRelatedPremises(prem) {
+    if (!prem) return [];
+    const related = [];
+    const seen = new Set();
+    function add(p, role, isCurrent) {
+      if (!p || seen.has(p.ref)) return;
+      seen.add(p.ref);
+      related.push({ prem: p, role: role, isCurrent: !!isCurrent });
+    }
+    if (prem.isParentSite) {
+      add(prem, 'Site record', true);
+      getPremisesSiteChildren(prem.ref).forEach(function (child) {
+        add(child, 'Part of site', child.ref === prem.ref);
+      });
+    } else if (prem.parentSite) {
+      const parent = getPremisesByRef(prem.parentSite.ref);
+      if (parent) add(parent, 'Parent site', parent.ref === prem.ref);
+      add(prem, 'This premises', true);
+      getPremisesSiteSiblings(prem).forEach(function (sibling) {
+        add(sibling, 'Related premises', sibling.ref === prem.ref);
+      });
+    }
+    return related;
+  }
+
+  function countRelatedPremises(prem) {
+    return getRelatedPremises(prem).filter(function (row) { return !row.isCurrent; }).length;
+  }
+
+  function openPremisesRecord(prem) {
+    if (!prem) return;
+    if (prem.route) {
+      show(prem.route);
+      return;
+    }
+    openPremisesInAdmin(prem.ref);
+  }
+
+  function openPremisesRecordByRef(ref) {
+    openPremisesRecord(getPremisesByRef(ref));
+  }
+
+  function openPremisesInAdmin(ref) {
+    show('admin', { adminTab: 'premises', adminDetailId: ref });
+  }
+
+  let adminPremisesEditPendingRef = null;
+  let adminPremisesAddPendingParentRef = null;
+
+  function openPremisesEditInAdmin(ref) {
+    adminPremisesEditPendingRef = ref;
+    show('admin', { adminTab: 'premises', adminDetailId: ref });
+  }
+
+  function openAdminAddRelatedPremises(parentRef) {
+    adminPremisesAddPendingParentRef = parentRef || null;
+    show('admin', { adminTab: 'premises' });
+  }
+
+  function renderPremisesAdminActions(prem, elId) {
+    const el = document.getElementById(elId);
+    if (!el || !prem) return;
+    const refSafe = prem.ref.replace(/'/g, "\\'");
+    el.innerHTML =
+      '<button type="button" class="btn" onclick="openPremisesInAdmin(\'' + refSafe + '\')">Manage in admin</button>' +
+      '<button type="button" class="btn" onclick="openPremisesEditInAdmin(\'' + refSafe + '\')">Edit premises</button>';
+    el.hidden = false;
+  }
+
+  function updatePremisesRelatedTabLabel(prem, tabsSelector) {
+    const count = countRelatedPremises(prem);
+    const btn = document.querySelector(tabsSelector + ' [data-premises-tab="related"]');
+    if (!btn) return;
+    btn.textContent = count ? 'Related premises  ·  ' + count : 'Related premises';
+  }
+
+  function renderPremisesRelatedTab(prem, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el || !prem) return;
+    const related = getRelatedPremises(prem);
+    if (!related.length) {
+      el.innerHTML =
+        '<div class="admin-empty">No related premises — this record is not part of a multi-premises site.</div>' +
+        '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button type="button" class="btn" onclick="openPremisesEditInAdmin(\'' + prem.ref.replace(/'/g, "\\'") + '\')">Edit premises</button>' +
+          '<button type="button" class="btn" onclick="openPremisesInAdmin(\'' + prem.ref.replace(/'/g, "\\'") + '\')">Manage in admin</button>' +
+        '</div>';
+      return;
+    }
+    const groupLabel = prem.isParentSite
+      ? 'Multi-premises site — premises grouped under this site record.'
+      : ('Part of ' + prem.parentSite.name + ' — related premises in the same group.');
+    let html = '<div class="help" style="margin-bottom:12px;">' + escHtml(groupLabel) + '</div>';
+    html += '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>' +
+      '<th>Premises</th><th>Relationship</th><th>Department</th><th>RBIP</th><th class="actions">Actions</th>' +
+      '</tr></thead><tbody>';
+    related.forEach(function (row) {
+      const p = row.prem;
+      const refSafe = p.ref.replace(/'/g, "\\'");
+      html += '<tr' + (row.isCurrent ? ' style="background:var(--bg);"' : '') + '>' +
+        '<td><div><strong>' + escHtml(p.name) + '</strong>' +
+          (row.isCurrent ? ' <span class="pill grey" style="margin-left:6px;">This record</span>' : '') +
+        '</div><div class="admin-entity-ref">' + escHtml(p.ref) + '</div></td>' +
+        '<td>' + escHtml(row.role) + '</td>' +
+        '<td>' + escHtml(p.dept || '—') + '</td>' +
+        '<td><span class="pill ' + escHtml(p.scoreClass || 'score-mid') + '">' + p.score + '</span></td>' +
+        '<td class="actions">' +
+          (row.isCurrent
+            ? '<button type="button" class="btn" onclick="openPremisesEditInAdmin(\'' + refSafe + '\')">Edit</button>'
+            : '<button type="button" class="btn" onclick="openPremisesRecordByRef(\'' + refSafe + '\')">Open</button>') +
+        '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button type="button" class="btn" onclick="openPremisesInAdmin(\'' + prem.ref.replace(/'/g, "\\'") + '\')">Manage in admin</button>' +
+      '<button type="button" class="btn" onclick="openPremisesEditInAdmin(\'' + prem.ref.replace(/'/g, "\\'") + '\')">Edit premises</button>';
+    if (prem.isParentSite || prem.parentSite) {
+      const groupRef = prem.isParentSite ? prem.ref : prem.parentSite.ref;
+      html += '<button type="button" class="btn" onclick="openAdminAddRelatedPremises(\'' + groupRef.replace(/'/g, "\\'") + '\')">+ Add related premises</button>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
   }
 
   function renderPremisesSiteTagHtml(p) {
@@ -13947,8 +14264,11 @@
     const prem = getPremisesByName('Temple Quay House');
     renderPremisesDetailMeta(prem, 'premises-detail-meta');
     renderPremisesSiteBanner(prem, 'premises-detail-site');
+    renderPremisesAdminActions(prem, 'premises-detail-admin-actions');
+    updatePremisesRelatedTabLabel(prem, '#premises-detail-tabs');
     renderPremisesInProgressAudits('Temple Quay House');
     renderPremisesLocationDetails('Temple Quay House', 'premises-tq-details');
+    renderPremisesRelatedTab(prem, 'premises-tq-related');
     setPremisesDetailTab('overview');
     renderPremisesDetailList('premises-tq-processes-list', PREMISES_TQ_PROCESSES);
     renderPremisesDetailList('premises-tq-documents-list', PREMISES_TQ_DOCUMENTS);
@@ -13959,7 +14279,10 @@
     const prem = getPremisesByName('HMP Bristol');
     renderPremisesDetailMeta(prem, 'premises-bristol-meta');
     renderPremisesSiteBanner(prem, 'premises-bristol-site');
+    renderPremisesAdminActions(prem, 'premises-bristol-admin-actions');
+    updatePremisesRelatedTabLabel(prem, '#premises-bristol-tabs');
     renderPremisesLocationDetails('HMP Bristol', 'premises-bristol-details-root');
+    renderPremisesRelatedTab(prem, 'premises-bristol-related-root');
     setPremisesBristolTab('overview');
     renderPremisesDetailList('premises-bristol-processes-list', PREMISES_BRISTOL_PROCESSES);
     renderPremisesDetailList('premises-bristol-documents-list', PREMISES_BRISTOL_DOCUMENTS);
@@ -14576,11 +14899,24 @@
   let dashboardProcessesTypeFilter = 'all';
   const DASHBOARD_PROCESS_PREVIEW_LIMIT = 4;
   const DASHBOARD_PATCH_PREMISES_LIMIT = 4;
-  const DASHBOARD_REMINDERS = [
-    { premises: 'Charing Cross House refurb', detail: 'Consultation', highlight: 'SLA approaching (5 days)', route: 'processes' },
-    { premises: 'Bristol Crown Court', detail: 'Consultation', highlight: 'SLA approaching (3 days)', route: 'processes' },
-    { premises: 'HMP Lewes', detail: 'Follow-up', highlight: 'Due in 12 days', route: 'processes' },
-    { premises: 'DWP Crawley', detail: 'Audit action plan', highlight: '28-DAP closing Friday', route: 'processes' }
+  const DASHBOARD_REMINDERS_PREVIEW = 4;
+  const REMINDERS_PROTOTYPE_TODAY = '2026-06-22';
+  const REMINDERS_LIST = [
+    { id: 'rem-001', premises: 'Bristol Crown Court', task: 'Consultation response due', detail: 'Review fire strategy submission and respond within SLA.', dueDate: '2026-06-25', processId: 'C-2026-0075', processType: 'consultation', route: 'processes' },
+    { id: 'rem-002', premises: 'Royal Courts of Justice', task: 'Business support meeting prep', detail: 'Prepare agenda and briefing notes ahead of the scheduled meeting.', dueDate: '2026-06-25', processId: 'B-2026-0044', processType: 'support', route: 'bizsupport/bs-0044' },
+    { id: 'rem-003', premises: 'Maidstone Magistrates Court', task: 'Safety concern — initial contact', detail: 'Contact Duty Holder and confirm hazard details on record.', dueDate: '2026-06-26', processId: 'SC-2026-0073', processType: 'concern', route: 'concerns' },
+    { id: 'rem-004', premises: 'Charing Cross House refurb', task: 'Consultation response due', detail: 'MoJ refurbishment fire strategy — SLA response required.', dueDate: '2026-06-27', processId: 'C-2026-0089', processType: 'consultation', route: 'processes' },
+    { id: 'rem-005', premises: 'DWP Crawley', task: '28-DAP action plan review', detail: 'Duty holder action plan closes — confirm compliance or escalate.', dueDate: '2026-06-27', processId: 'A-2026-0298', processType: 'audit', route: 'audit:A-2026-0298' },
+    { id: 'rem-006', premises: 'Temple Quay House', task: 'CPIN desk evaluation follow-up', detail: 'Complete desk evaluation and confirm whether an audit is required.', dueDate: '2026-06-28', processId: 'CPIN-2026-0418', processType: 'cpin', route: 'cpin/cpin-0418' },
+    { id: 'rem-007', premises: 'Temple Quay House', task: 'Log time for site visit week', detail: 'Outstanding time entries from audit A-2026-0314 site visit.', dueDate: '2026-06-28', processId: 'A-2026-0314', processType: 'audit', route: 'time' },
+    { id: 'rem-008', premises: 'HMP Bristol', task: 'Audit planning — scope sign-off', detail: 'Confirm audit scope with HMPPS regional lead before stage 2.', dueDate: '2026-06-29', processId: 'A-2026-0320', processType: 'audit', route: 'audit:A-2026-0320' },
+    { id: 'rem-009', premises: 'Lewes Crown Court', task: 'Safety concern — review site photos', detail: 'Assess photos from Duty Holder and decide next steps.', dueDate: '2026-06-30', processId: 'SC-2026-0061', processType: 'concern', route: 'concerns' },
+    { id: 'rem-010', premises: 'Premises not yet linked', task: 'CPIN — match premises', detail: 'Link incoming CPIN to RBIP premises record.', dueDate: '2026-07-01', processId: 'CPIN-2026-0412', processType: 'cpin', route: 'cpin/cpin-0412' },
+    { id: 'rem-011', premises: 'Temple Quay House', task: 'Audit ready to close', detail: 'Stage 5 outcomes sent — close audit or spawn follow-up.', dueDate: '2026-07-02', processId: 'A-2026-0399', processType: 'audit', route: 'audit:A-2026-0399' },
+    { id: 'rem-012', premises: 'HMP Lewes', task: 'Follow-up visit due', detail: 'Schedule and complete 28-DAP follow-up visit.', dueDate: '2026-07-04', processId: 'F-2026-0142', processType: 'follow-up', route: 'audit:F-2026-0142' },
+    { id: 'rem-013', premises: 'Temple Quay House', task: 'Follow-up action plans', detail: 'Review duty holder action plans from audit A-2026-0399.', dueDate: '2026-07-05', processId: 'F-2026-0398', processType: 'follow-up', route: 'audit:F-2026-0398' },
+    { id: 'rem-014', premises: 'Temple Quay House', task: 'RBIP score review', detail: 'Premises score trending up — review audit history and open work.', dueDate: '2026-07-08', processId: null, processType: null, route: 'premisesdetail' },
+    { id: 'rem-015', premises: 'MoJ HQ London', task: 'Business support workshop', detail: 'Deliver fire safety workshop — materials and attendance list.', dueDate: '2026-07-12', processId: 'B-2026-0039', processType: 'support', route: 'bizsupport/bs-0039' }
   ];
   let processesDateFilter = { type: 'all' };
   let premisesDateFilter = { type: 'all' };
@@ -14829,16 +15165,102 @@
     renderDashboardRemindersPanel();
   }
 
+  function getSortedReminders() {
+    return REMINDERS_LIST.slice().sort(function (a, b) {
+      return a.dueDate.localeCompare(b.dueDate);
+    });
+  }
+
+  function formatReminderUkDate(iso) {
+    if (!iso) return '';
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return parseInt(parts[2], 10) + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+  }
+
+  function getReminderDueMeta(dueDate) {
+    const today = new Date(REMINDERS_PROTOTYPE_TODAY + 'T00:00:00');
+    const due = new Date(dueDate + 'T00:00:00');
+    const diffDays = Math.round((due - today) / 86400000);
+    if (diffDays < 0) {
+      return {
+        className: 'is-overdue',
+        dateLabel: formatReminderUkDate(dueDate),
+        subLabel: Math.abs(diffDays) + ' day' + (Math.abs(diffDays) === 1 ? '' : 's') + ' overdue'
+      };
+    }
+    if (diffDays === 0) {
+      return { className: 'is-urgent', dateLabel: 'Today', subLabel: 'Due today' };
+    }
+    if (diffDays === 1) {
+      return { className: 'is-urgent', dateLabel: 'Tomorrow', subLabel: 'Due tomorrow' };
+    }
+    return {
+      className: diffDays <= 7 ? 'is-urgent' : '',
+      dateLabel: formatReminderUkDate(dueDate),
+      subLabel: 'Due in ' + diffDays + ' days'
+    };
+  }
+
+  function openReminder(id) {
+    const reminder = REMINDERS_LIST.find(function (r) { return r.id === id; });
+    if (!reminder || !reminder.route) return;
+    selectGlobalSearchResult(reminder.route);
+  }
+
+  function buildReminderRowHtml(r) {
+    const due = getReminderDueMeta(r.dueDate);
+    const typeMeta = r.processType ? (PROCESS_TYPE_PILLS[r.processType] || { label: r.processType, pill: 'grey' }) : null;
+    const clickable = !!r.route;
+    const tag = clickable ? 'button' : 'div';
+    const attrs = clickable
+      ? ' type="button" class="reminder-row" onclick="openReminder(\'' + escHtml(r.id) + '\')"'
+      : ' class="reminder-row"';
+    let html = '<' + tag + attrs + '>' +
+      '<div class="reminder-due ' + due.className + '">' +
+        '<div class="reminder-due-date">' + escHtml(due.dateLabel) + '</div>' +
+        '<div class="reminder-due-sub">' + escHtml(due.subLabel) + '</div>' +
+      '</div>' +
+      '<div class="reminder-body">' +
+        '<div class="reminder-task">' + escHtml(r.task) + '</div>' +
+        '<div class="reminder-detail">' + escHtml(r.detail) + '</div>' +
+        '<div class="reminder-premises">' + escHtml(r.premises) + '</div>' +
+      '</div>' +
+      '<div class="reminder-meta">';
+    if (typeMeta) {
+      html += '<span class="pill ' + typeMeta.pill + '">' + escHtml(typeMeta.label) + '</span>';
+    }
+    if (r.processId) {
+      html += '<span class="reminder-process-id">' + escHtml(r.processId) + '</span>';
+    }
+    html += '</div></' + tag + '>';
+    return html;
+  }
+
+  function renderRemindersPage() {
+    const el = document.getElementById('reminders-list');
+    if (!el) return;
+    const items = getSortedReminders();
+    el.innerHTML = items.length
+      ? items.map(buildReminderRowHtml).join('')
+      : '<div class="audit-feed-empty" style="margin:24px 0;">No reminders.</div>';
+  }
+
+  function initRemindersPage() {
+    renderRemindersPage();
+  }
+
   function renderDashboardRemindersPanel() {
     const el = document.getElementById('dash-reminders-list');
     if (!el) return;
-    el.innerHTML = DASHBOARD_REMINDERS.map(function (r) {
-      const click = r.route ? ' onclick="show(\'' + escHtml(r.route) + '\')" style="cursor:pointer;"' : '';
-      const highlight = r.highlight
-        ? ' <span class="highlight-amber">· ' + escHtml(r.highlight) + '</span>'
-        : '';
+    const preview = getSortedReminders().slice(0, DASHBOARD_REMINDERS_PREVIEW);
+    el.innerHTML = preview.map(function (r) {
+      const due = getReminderDueMeta(r.dueDate);
+      const click = r.route ? ' onclick="openReminder(\'' + escHtml(r.id) + '\')" style="cursor:pointer;"' : '';
       return '<div class="dash-reminder-row"' + click + '>' +
-        '<div class="dash-reminder-detail">' + escHtml(r.detail) + highlight + '</div>' +
+        '<div class="dash-reminder-detail">' + escHtml(r.task) +
+          ' <span class="highlight-amber">· ' + escHtml(due.subLabel) + '</span></div>' +
         '<div class="dash-reminder-premises">' + escHtml(r.premises) + '</div>' +
         '</div>';
     }).join('');
@@ -15698,6 +16120,13 @@
         requestedAt: stamp.at,
         reason: 'Amend findings after outcome letters sent'
       });
+      logAdminChange({
+        user: 'Phil Gower',
+        area: 'Audit',
+        action: 'Edit permission requested',
+        detail: (activeAuditId || PROTOTYPE_AUDIT_ID) + ' — amend findings after outcome letters sent',
+        route: 'audit:' + (activeAuditId || PROTOTYPE_AUDIT_ID) + '/setup'
+      });
     }
     auditActivityLog.notes.unshift({
       id: 'n-perm-' + Date.now(),
@@ -15714,6 +16143,7 @@
   function grantAuditEditPermission(auditId, opts) {
     opts = opts || {};
     auditId = auditId || activeAuditId || PROTOTYPE_AUDIT_ID;
+    const req = auditEditPermissionRequests.find(function (r) { return r.auditId === auditId; });
     auditEditPermission = true;
     auditEditPermissionRequested = false;
     auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
@@ -15729,6 +16159,13 @@
       updateAuditEditWarning();
     }
     renderAdminAuditPermissions();
+    logAdminChange({
+      user: 'Admin (demo)',
+      area: 'Audit',
+      action: 'Edit permission granted',
+      detail: auditId + (req ? ' — ' + req.premises : ''),
+      route: 'audit:' + auditId + '/setup'
+    });
     if (!opts.silent) {
       window.alert('Audit edit permission granted for ' + auditId + ' (this session).');
     }
@@ -15736,12 +16173,20 @@
 
   function denyAuditEditPermission(auditId, opts) {
     opts = opts || {};
+    const req = auditEditPermissionRequests.find(function (r) { return r.auditId === auditId; });
     auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
     if (auditId === activeAuditId) {
       auditEditPermissionRequested = false;
       updateAuditEditWarning();
     }
     renderAdminAuditPermissions();
+    logAdminChange({
+      user: 'Admin (demo)',
+      area: 'Audit',
+      action: 'Edit permission declined',
+      detail: auditId + (req ? ' — ' + req.requestedBy : ''),
+      route: 'audit:' + auditId + '/setup'
+    });
     if (!opts.silent) {
       window.alert('Permission request declined.');
     }
@@ -15847,7 +16292,7 @@
     // Confirm outcomes
     html += '<div class="setup-section">';
     html += '<h3>Confirm outcomes per Duty Holder</h3>';
-    html += '<div class="help">Open the full-screen review to confirm or adjust each Duty Holder\'s outcome. One letter per outcome is sent to each linked Responsible Person.</div>';
+    html += '<div class="help">Open the full-screen review to confirm or adjust each Duty Holder\'s outcome. One letter per outcome per Duty Holder — addressed to a named contact; others named at setup are copied.</div>';
     if (holders.length) {
       if (!allOutcomesConfirmed) {
         html += '<button class="btn primary" onclick="openAuditOutcomeModal()">Review and confirm outcomes →</button>';
@@ -15891,10 +16336,6 @@
     return getAuditStage4RequiredLetters().map(function (l) { return l.id; });
   }
 
-  function getAuditStage4LetterTaskId(dh, outcomeKey, recipientId) {
-    return (dh + '-' + outcomeKey + '-' + recipientId).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-  }
-
   function allAuditStage4LettersSaved() {
     const letters = getAuditStage4RequiredLetters();
     if (!letters.length) return false;
@@ -15927,29 +16368,67 @@
     });
   }
 
+  function getPrimaryRecipientForDutyHolder(dhName) {
+    const recipients = getRecipientsForDutyHolder(dhName);
+    if (!recipients.length) return null;
+    return recipients.find(function (r) { return r.isPrimary; }) || recipients[0];
+  }
+
+  function getAuditStage4LetterCcList(primaryRecipientId) {
+    const primary = getSetupLetterRecipients().find(function (r) { return r.id === primaryRecipientId; });
+    const cc = [];
+    getSetupLetterRecipients().forEach(function (rp) {
+      if (rp.id === primaryRecipientId) return;
+      if (primary && primary.linkedDh && rp.linkedDh !== primary.linkedDh) return;
+      cc.push({ name: rp.name, role: rp.role || getDutyHolderLabelForKey(rp.linkedDh) || '' });
+    });
+    (auditSetup.inspectors || []).forEach(function (insp) {
+      if (!insp || !insp.name) return;
+      cc.push({ name: insp.name, role: insp.role || 'Inspector' });
+    });
+    return cc;
+  }
+
+  function getAuditStage4LetterTaskId(dh, outcomeKey) {
+    return getAuditStage4LetterId(dh, outcomeKey);
+  }
+
+  function auditOutcomesStillRequireFollowUp() {
+    if (!auditStage4State || !auditStage4State.outcomes) return false;
+    return Object.keys(auditStage4State.outcomes).some(function (dh) {
+      const sel = auditStage4State.outcomes[dh].selected || [];
+      return sel.indexOf('28dap') >= 0 || sel.indexOf('en') >= 0;
+    });
+  }
+
+  function auditHasStepAwayIssued() {
+    if (auditSetup && auditSetup.stepAwayIssued) return true;
+    const prem = getPremisesByName(auditSetup && auditSetup.premises);
+    if (prem && prem.work && prem.work.label && prem.work.label.toLowerCase().indexOf('step') >= 0) return true;
+    return false;
+  }
+
   function getAuditStage4RequiredLetters() {
     if (!auditStage4State) return [];
     const letters = [];
     const savedLetters = getAuditStage4SavedLetters();
     Object.keys(auditStage4State.outcomes).forEach(function (dh) {
-      const dhRecipients = getRecipientsForDutyHolder(dh);
+      const primary = getPrimaryRecipientForDutyHolder(dh);
       (auditStage4State.outcomes[dh].selected || []).forEach(function (k) {
         const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
         if (!def) return;
-        const slotId = getAuditStage4LetterId(dh, k);
-        dhRecipients.forEach(function (rp) {
-          const taskId = getAuditStage4LetterTaskId(dh, k, rp.id);
-          letters.push({
-            id: taskId,
-            slotId: slotId,
-            dh: dh,
-            key: k,
-            def: def,
-            recipientId: rp.id,
-            recipientName: rp.name,
-            saved: matchAuditStage4SavedLetter(savedLetters, taskId, slotId, rp.id),
-            confirmed: isAuditStage4LetterConfirmed(taskId)
-          });
+        const taskId = getAuditStage4LetterTaskId(dh, k);
+        letters.push({
+          id: taskId,
+          slotId: taskId,
+          dh: dh,
+          key: k,
+          def: def,
+          recipientId: primary ? primary.id : null,
+          recipientName: primary ? primary.name : 'No contact approved',
+          ccList: primary ? getAuditStage4LetterCcList(primary.id) : [],
+          saved: matchAuditStage4SavedLetter(savedLetters, taskId, taskId, primary ? primary.id : null),
+          confirmed: isAuditStage4LetterConfirmed(taskId)
         });
       });
     });
@@ -15998,13 +16477,7 @@
     const required = getAuditStage4RequiredLetters();
     let task = required.find(function (t) { return t.id === letterId; });
     if (!task) {
-      const entry = findAuditStage4LetterSlotEntry(letterId);
-      if (entry) {
-        const rid = recipientId || letterComposerState.previewRecipientId;
-        const rp = getRecipientsForDutyHolder(entry.dh).find(function (r) { return r.id === rid; }) ||
-          getRecipientsForDutyHolder(entry.dh)[0];
-        if (rp) task = required.find(function (t) { return t.slotId === entry.id && t.recipientId === rp.id; });
-      }
+      task = required.find(function (t) { return t.slotId === letterId; });
     }
     if (!task || !letterComposerState) return false;
     const saved = getAuditStage4SavedLetter(task.id);
@@ -16014,10 +16487,7 @@
     letterComposerState.stage4OutcomeKey = task.key;
     letterComposerState.templateId = (draft && draft.templateId) || (saved && saved.templateId) || getAuditOutcomeTemplateId(task.key);
     letterComposerState.customBody = (draft && draft.customBody) || (saved && saved.body) || null;
-    letterComposerState.previewRecipientId = recipientId || task.recipientId;
-    if (draft && draft.recipientIds) {
-      letterComposerState.recipientIds = draft.recipientIds.slice();
-    }
+    letterComposerState.previewRecipientId = task.recipientId;
     letterComposerState.editing = false;
     return true;
   }
@@ -16035,7 +16505,7 @@
       outcomeKey = selected[0];
       if (outcomeKey) letterComposerState.templateId = getAuditOutcomeTemplateId(outcomeKey);
     }
-    loadAuditStage4LetterSlot(getAuditStage4LetterTaskId(dhName, outcomeKey, recipientId), recipientId);
+    loadAuditStage4LetterSlot(getAuditStage4LetterTaskId(dhName, outcomeKey));
   }
 
   function syncAuditStage4FromTemplate(templateId) {
@@ -16045,48 +16515,30 @@
     const selected = auditStage4State.outcomes[letterComposerState.stage4Dh].selected || [];
     if (selected.indexOf(outcomeKey) < 0) return;
     if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
-    loadAuditStage4LetterSlot(
-      getAuditStage4LetterTaskId(letterComposerState.stage4Dh, outcomeKey, letterComposerState.previewRecipientId),
-      letterComposerState.previewRecipientId
-    );
+    loadAuditStage4LetterSlot(getAuditStage4LetterTaskId(letterComposerState.stage4Dh, outcomeKey));
+  }
+
+  function getAuditStage4LetterPackages() {
+    return getAuditStage4RequiredLetters();
   }
 
   function getAuditStage4RecipientPackages() {
-    const tasks = getAuditStage4RequiredLetters();
-    const recipientMap = {};
-    const allRecipients = getAuditStage4LetterRecipients();
-    tasks.forEach(function (task) {
-      if (!recipientMap[task.recipientId]) {
-        const rp = allRecipients.find(function (r) { return r.id === task.recipientId; });
-        recipientMap[task.recipientId] = {
-          recipientId: task.recipientId,
-          recipientName: task.recipientName,
-          role: rp && rp.role,
-          dh: task.dh,
-          outcomes: [],
-          letters: []
-        };
-      }
-      const pkg = recipientMap[task.recipientId];
-      if (pkg.outcomes.indexOf(task.key) < 0) pkg.outcomes.push(task.key);
-      pkg.letters.push(task);
-    });
-    return Object.values(recipientMap);
+    return getAuditStage4LetterPackages();
   }
 
   function getAuditStage4SavedPackages() {
     const map = {};
     getAuditStage4SavedLetters().forEach(function (ltr) {
-      const rid = ltr.recipientId || 'unknown';
-      if (!map[rid]) {
-        map[rid] = {
-          recipientId: rid,
+      const dh = ltr.dutyHolder || '';
+      if (!map[dh]) {
+        map[dh] = {
+          dh: dh,
           recipientName: ltr.recipientName || 'Recipient',
-          dh: ltr.dutyHolder || '',
+          ccCount: (ltr.ccList && ltr.ccList.length) || 0,
           letters: []
         };
       }
-      map[rid].letters.push(ltr);
+      map[dh].letters.push(ltr);
     });
     return Object.values(map);
   }
@@ -16141,8 +16593,8 @@
         let h = '<div class="letter-package-card">';
         h += '<div class="letter-package-header" style="border-bottom:none;">';
         h += '<div class="letter-package-meta" style="padding-left:0;">';
-        h += '<div class="letter-package-name">' + escHtml(pkg.recipientName) + '</div>';
-        if (pkg.dh) h += '<div class="letter-package-dh">Contact for ' + escHtml(pkg.dh) + '</div>';
+        h += '<div class="letter-package-name">' + escHtml(pkg.dh || pkg.recipientName) + '</div>';
+        h += '<div class="letter-package-dh">' + escHtml(pkg.recipientName) + (pkg.ccCount ? ' · Cc: ' + pkg.ccCount + ' from setup' : '') + '</div>';
         h += '</div></div>';
         h += '<div class="letter-package-letters-label">' + pkg.letters.length + ' saved letter' + (pkg.letters.length === 1 ? '' : 's') + '</div>';
         h += '<div class="letter-package-letters">';
@@ -16159,42 +16611,26 @@
       return;
     }
 
-    const packages = getAuditStage4RecipientPackages();
-    const totalLetters = packages.reduce(function (n, p) { return n + p.letters.length; }, 0);
-    let html = '<div class="letter-package-summary">' + packages.length + ' recipient' + (packages.length === 1 ? '' : 's') +
-      ' · ' + totalLetters + ' letter' + (totalLetters === 1 ? '' : 's') + ' to send</div>';
+    const letters = getAuditStage4RequiredLetters();
+    let html = '<div class="letter-package-summary">' + letters.length + ' letter' + (letters.length === 1 ? '' : 's') +
+      ' to send — one per outcome per Duty Holder</div>';
 
-    html += packages.map(function (pkg) {
-      const included = (letterComposerState.recipientIds || []).indexOf(pkg.recipientId) >= 0;
-      const rpSafe = pkg.recipientId.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      let h = '<div class="letter-package-card' + (included ? ' is-included' : '') + '">';
-      h += '<div class="letter-package-header">';
-      h += '<label class="letter-package-check"><input type="checkbox"' + (included ? ' checked' : '') +
-        ' onchange="toggleLetterRecipient(\'' + rpSafe + '\', this.checked)" />' +
-        '<span class="visually-hidden">Include ' + escHtml(pkg.recipientName) + '</span></label>';
-      h += '<div class="letter-package-meta">';
-      h += '<div class="letter-package-name">' + escHtml(pkg.recipientName) + '</div>';
-      if (pkg.role) h += '<div class="letter-package-role">' + escHtml(pkg.role) + '</div>';
-      h += '<div class="letter-package-dh">Contact for ' + escHtml(pkg.dh) + '</div>';
+    html += letters.map(function (task) {
+      const active = letterComposerState.outcomeLetterId === task.id;
+      const ccCount = (task.ccList || []).length;
+      let h = '<div class="letter-package-card' + (active ? ' is-included' : '') + '">';
+      h += '<div class="letter-package-header" style="border-bottom:none;">';
+      h += '<div class="letter-package-meta" style="padding-left:0;">';
+      h += '<div class="letter-package-name">' + escHtml(task.dh) + ' · ' + escHtml(task.def.label) + '</div>';
+      h += '<div class="letter-package-dh">To: ' + escHtml(task.recipientName) +
+        (ccCount ? ' · Cc: ' + ccCount + ' from setup' : '') + '</div>';
       h += '</div></div>';
-      h += '<div class="letter-package-why"><span class="letter-package-why-label">Because of outcomes for ' + escHtml(pkg.dh) + ':</span>';
-      h += '<div class="letter-package-outcomes">';
-      pkg.outcomes.forEach(function (k) {
-        const def = AUDIT_OUTCOME_DEFS.find(function (d) { return d.key === k; });
-        if (def) h += '<span class="pill ' + def.pill + '" style="font-size:10px;">' + escHtml(def.label) + '</span>';
-      });
-      h += '</div></div>';
-      h += '<div class="letter-package-letters-label">' + pkg.letters.length + ' letter' + (pkg.letters.length === 1 ? '' : 's') + ' to send</div>';
       h += '<div class="letter-package-letters">';
-      pkg.letters.forEach(function (task) {
-        const active = letterComposerState.outcomeLetterId === task.id;
-        h += '<button type="button" class="letter-package-letter' + (active ? ' is-active' : '') + '" onclick="selectAuditStage4LetterTask(\'' + escHtml(task.id) + '\')">';
-        h += '<span class="letter-package-letter-label">' + escHtml(task.def.label) + '</span>';
-        if (task.saved) h += '<span class="letter-package-letter-status">Saved</span>';
-        h += '<span class="letter-package-letter-action">Preview</span>';
-        h += '</button>';
-      });
-      h += '</div></div>';
+      h += '<button type="button" class="letter-package-letter' + (active ? ' is-active' : '') + '" onclick="selectAuditStage4LetterTask(\'' + escHtml(task.id) + '\')">';
+      h += '<span class="letter-package-letter-label">Preview letter</span>';
+      if (task.saved) h += '<span class="letter-package-letter-status">Saved</span>';
+      h += '<span class="letter-package-letter-action">Open</span>';
+      h += '</button></div></div>';
       return h;
     }).join('');
 
@@ -16207,14 +16643,17 @@
     if (draft) {
       try { auditSetup = Object.assign(defaultAuditSetup(), JSON.parse(draft)); } catch (e) { /* keep current */ }
     }
-    const recipients = getAuditStage4LetterRecipients();
-    if (!recipients.length) {
+    const letters = getAuditStage4RequiredLetters();
+    if (!letters.length) {
       window.alert('Approve at least one Responsible Person linked to your Duty Holders before writing letters.');
       return;
     }
-    const letters = getAuditStage4RequiredLetters();
+    const missingContact = letters.find(function (l) { return !l.recipientId; });
+    if (missingContact) {
+      window.alert('Approve a primary contact for ' + missingContact.dh + ' in setup before writing outcome letters.');
+      return;
+    }
     const firstSlot = letters[0];
-    if (!firstSlot) return;
     openLetterComposer({
       context: 'audit-stage4',
       saveTo: 'audit-stage4-letters',
@@ -16222,8 +16661,7 @@
       stage4Dh: firstSlot.dh,
       stage4OutcomeKey: firstSlot.key,
       templateId: getAuditOutcomeTemplateId(firstSlot.key),
-      recipientIds: recipients.map(function (r) { return r.id; }),
-      previewRecipientId: recipients[0].id
+      previewRecipientId: firstSlot.recipientId
     });
   }
 
@@ -16269,7 +16707,7 @@
 
     let h = '<div class="setup-section">';
     h += '<h3>Letters</h3>';
-    h += '<div class="help">Open the letter writer to see each recipient\'s package of letters — one per confirmed outcome for their Duty Holder. Letters are saved as editable Word documents (.docx) for future redaction.</div>';
+    h += '<div class="help">One letter per confirmed outcome per Duty Holder — addressed to the primary contact named at setup. Other Responsible Persons and inspectors from setup are copied on each letter.</div>';
     h += '<div class="letter-attachment-list" id="audit-stage4-letters-list">';
 
     if (!savedEntries.length) {
@@ -16311,13 +16749,11 @@
     }
     const entry = findAuditStage4LetterTask(letterId);
     if (!entry) return;
-    const recipients = getRecipientsForDutyHolder(entry.dh);
-    if (!recipients.length) {
+    if (!entry.recipientId && !getRecipientsForDutyHolder(entry.dh).length) {
       window.alert('Approve at least one Responsible Person linked to ' + entry.dh + ' before writing letters.');
       return;
     }
     const saved = getAuditStage4SavedLetter(letterId);
-    const allRecipients = getAuditStage4LetterRecipients();
     const templateId = saved ? saved.templateId : getAuditOutcomeTemplateId(entry.key);
     const opts = {
       context: 'audit-stage4',
@@ -16326,8 +16762,7 @@
       stage4Dh: entry.dh,
       stage4OutcomeKey: entry.key,
       templateId: templateId,
-      recipientIds: allRecipients.map(function (r) { return r.id; }),
-      previewRecipientId: saved ? saved.recipientId : (entry.recipientId || recipients[0].id)
+      previewRecipientId: saved ? saved.recipientId : (entry.recipientId || getPrimaryRecipientForDutyHolder(entry.dh).id)
     };
     if (saved && saved.body) opts.customBody = saved.body;
     openLetterComposer(opts);
@@ -17479,7 +17914,7 @@
       }
     } else if (allSettled) {
       if (isFollowUpAudit()) {
-        h += '<div class="help">All follow-up threads are settled. Close this follow-up audit to finalise time and scoring.</div>';
+        h += '<div class="help">All follow-up threads are settled. Close this follow-up audit to finalise time and scoring. If outcomes are still 28-DAP or above, a further follow-up audit will start automatically.</div>';
         h += '<div class="plan-thread-outcome is-complete" style="margin-top:10px;">';
         h += '<span class="pill green">Ready to close</span>';
         h += '<span class="outcome-copy"><strong>All Duty Holder threads complete.</strong> Closing finalises this follow-up audit.</span>';
@@ -17552,17 +17987,47 @@
     if (!isFollowUpAudit() || !allAuditStage5ThreadsSettled() || auditClosed) return;
     snapshotActiveAuditContext();
     const stamp = cpinLogTimestamp();
+    const closedAuditId = activeAuditId;
     auditClosed = true;
     auditClosedAt = stamp.at;
+    auditContexts[closedAuditId].closed = true;
+    auditContexts[closedAuditId].closedAt = stamp.at;
+
+    const needsAnotherFollowUp = auditOutcomesStillRequireFollowUp() && !auditHasStepAwayIssued();
+
     auditActivityLog.notes.unshift({
       id: 'n-followup-closed-' + stamp.ts,
-      text: 'Follow-up audit closed. All Duty Holder threads settled.',
+      text: needsAnotherFollowUp
+        ? 'Follow-up audit closed but outcomes still require action (28-DAP or above). Starting further follow-up audit.'
+        : 'Follow-up audit closed. All Duty Holder threads settled.',
       stage: 5,
       at: stamp.at,
       ts: stamp.ts
     });
     touchAuditActivity();
     snapshotActiveAuditContext();
+
+    if (needsAnotherFollowUp) {
+      const nextFollowUpId = seedFollowUpAuditFromParent(closedAuditId);
+      if (nextFollowUpId) {
+        auditContexts[closedAuditId].followUpAuditId = nextFollowUpId;
+        auditFollowUpId = nextFollowUpId;
+        applyAuditContext(nextFollowUpId);
+        auditStage = 1;
+        localStorage.removeItem(setupDraftKey(nextFollowUpId));
+        auditContexts[nextFollowUpId].activityLog.notes.unshift({
+          id: 'n-followup-chain-' + Date.now(),
+          text: 'Further follow-up audit created from ' + closedAuditId + '. Unresolved issues and setup contacts carried forward.',
+          stage: 1,
+          at: stamp.at,
+          ts: Date.now()
+        });
+        openAuditSetup(nextFollowUpId);
+        return;
+      }
+    }
+
+    applyAuditContext(closedAuditId);
     renderAuditStage5();
   }
 
@@ -19292,6 +19757,7 @@
     }
     const reason = document.getElementById('cpin-review-reason')?.value || 'other';
     const stamp = cpinLogTimestamp();
+    const cpin = getCpinById(id);
     persistCpinPatch(id, {
       adminReview: {
         action: action,
@@ -19304,6 +19770,13 @@
       }
     });
     closeCpinReviewModal();
+    logAdminChange({
+      user: CPIN_CURRENT_INSPECTOR,
+      area: 'CPIN',
+      action: 'Review requested',
+      detail: (cpin ? cpin.ref : id) + ' — ' + formatCpinReviewSummary({ action: action, reason: reason }),
+      route: 'cpin:' + id
+    });
     renderCpinsLists();
     if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
     if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
@@ -19315,11 +19788,22 @@
     const id = cpinReviewModalState.id;
     if (!id) return;
     if (!window.confirm('Withdraw this review request?')) return;
+    const cpin = getCpinById(id);
+    const r = getCpinAdminReview(cpin);
     const patch = Object.assign({}, cpinOverrides[id] || {});
     delete patch.adminReview;
     cpinOverrides[id] = patch;
     saveCpinOverrides();
     closeCpinReviewModal();
+    if (cpin && r) {
+      logAdminChange({
+        user: CPIN_CURRENT_INSPECTOR,
+        area: 'CPIN',
+        action: 'Review withdrawn',
+        detail: cpin.ref + ' — ' + formatCpinReviewSummary(r),
+        route: 'cpin:' + id
+      });
+    }
     renderCpinsLists();
     if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
     if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
@@ -19360,6 +19844,476 @@
     }).join('');
   }
 
+  const ADMIN_CHANGE_LOG_KEY = 'cpfsi-admin-change-log-v1';
+  const PREMISES_OVERRIDES_KEY = 'cpfsi-premises-overrides-v1';
+  const PREMISES_CUSTOM_KEY = 'cpfsi-premises-custom-v1';
+  let adminChangeLogSearch = '';
+
+  const ADMIN_CHANGE_LOG_SEED = [
+    { id: 'acl-seed-1', ts: 1751100840000, at: '28 Jun 2026, 09:14', user: 'Phil Gower', area: 'CPIN', action: 'Premises linked', detail: 'Linked Temple Quay House to CPIN-2026-0446', route: 'cpin:cpin-in-0446' },
+    { id: 'acl-seed-2', ts: 1751017200000, at: '27 Jun 2026, 10:00', user: 'Phil Gower', area: 'CPIN', action: 'Review requested', detail: 'CPIN-2026-0412 — Flag as erroneous · Duplicate incident', route: 'cpin:cpin-0412' },
+    { id: 'acl-seed-3', ts: 1751020800000, at: '27 Jun 2026, 11:00', user: 'Admin (demo)', area: 'CPIN', action: 'Review rejected', detail: 'CPIN-2026-0412 — Flag as erroneous · Duplicate incident', route: 'cpin:cpin-0412' },
+    { id: 'acl-seed-4', ts: 1750934400000, at: '26 Jun 2026, 11:00', user: 'Admin (demo)', area: 'Premises', action: 'Address updated', detail: 'Temple Quay House — "Temple Back East, Bristol BS1 6BH" → "Temple Back East, Bristol BS1 6EG"', route: 'admin/premises/PRM-0001847' },
+    { id: 'acl-seed-5', ts: 1750848000000, at: '25 Jun 2026, 12:00', user: 'Phil Gower', area: 'Audit', action: 'Edit permission requested', detail: 'A-2026-0314 — amend findings after outcome letters sent', route: 'audit:A-2026-0314/setup' },
+    { id: 'acl-seed-6', ts: 1750851600000, at: '25 Jun 2026, 13:00', user: 'Admin (demo)', area: 'Audit', action: 'Edit permission granted', detail: 'A-2026-0314 — Temple Quay House', route: 'audit:A-2026-0314/setup' },
+    { id: 'acl-seed-7', ts: 1750765200000, at: '24 Jun 2026, 13:00', user: 'Phil Gower', area: 'Concern', action: 'Premises linked', detail: 'SC-2026-0142 — None → MoJ HQ London', route: 'concern:sc-0142' },
+    { id: 'acl-seed-8', ts: 1750678800000, at: '23 Jun 2026, 14:00', user: 'Admin (demo)', area: 'Users', action: 'Role updated', detail: 'Sarah Chen — Inspector → Lead inspector', route: 'admin/users' }
+  ];
+
+  function loadPremisesCustom() {
+    try {
+      const raw = localStorage.getItem(PREMISES_CUSTOM_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+  }
+
+  function savePremisesCustom(list) {
+    localStorage.setItem(PREMISES_CUSTOM_KEY, JSON.stringify(list));
+  }
+
+  function loadPremisesCustomIntoRegistry() {
+    loadPremisesCustom().forEach(function (prem) {
+      if (!PREMISES_LIST.find(function (p) { return p.ref === prem.ref; })) {
+        PREMISES_LIST.push(prem);
+      }
+    });
+  }
+
+  function getPremisesScoreClass(score) {
+    const n = parseInt(score, 10) || 0;
+    if (n >= 40) return 'score-high';
+    if (n >= 30) return 'score-mid';
+    return 'score-low';
+  }
+
+  function applyPremisesOverridePatch(prem, patch) {
+    if (!prem || !patch) return;
+    if (patch.name != null) prem.name = patch.name;
+    if (patch.address != null) prem.address = patch.address;
+    if (patch.dept != null) prem.dept = patch.dept;
+    if (patch.typeLabel != null) prem.typeLabel = patch.typeLabel;
+    if (patch.category != null) prem.category = patch.category;
+    if (patch.score != null) {
+      prem.score = parseInt(patch.score, 10) || prem.score;
+      prem.scoreClass = getPremisesScoreClass(prem.score);
+    }
+    if (patch.patch != null) prem.patch = !!patch.patch;
+    if (patch.isParentSite != null) prem.isParentSite = !!patch.isParentSite;
+    if (patch.parentSiteRef === '') {
+      delete prem.parentSite;
+    } else if (patch.parentSiteRef) {
+      const parent = getPremisesByRef(patch.parentSiteRef);
+      if (parent) prem.parentSite = { name: parent.name, ref: parent.ref };
+    }
+    if (patch.route != null) prem.route = patch.route || undefined;
+  }
+
+  function loadPremisesOverrides() {
+    try {
+      const raw = localStorage.getItem(PREMISES_OVERRIDES_KEY);
+      if (!raw) return;
+      const map = JSON.parse(raw);
+      Object.keys(map).forEach(function (ref) {
+        const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
+        if (prem) applyPremisesOverridePatch(prem, map[ref]);
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function savePremisesOverride(ref, patch) {
+    let map = {};
+    try {
+      const raw = localStorage.getItem(PREMISES_OVERRIDES_KEY);
+      if (raw) map = JSON.parse(raw);
+    } catch (e) { map = {}; }
+    map[ref] = Object.assign({}, map[ref] || {}, patch);
+    localStorage.setItem(PREMISES_OVERRIDES_KEY, JSON.stringify(map));
+    const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
+    if (prem) applyPremisesOverridePatch(prem, patch);
+  }
+
+  function savePremisesAddressOverride(ref, address) {
+    savePremisesOverride(ref, { address: address });
+  }
+
+  function nextPremisesRef() {
+    let max = 0;
+    PREMISES_LIST.concat(loadPremisesCustom()).forEach(function (p) {
+      const m = (p.ref || '').match(/PRM-(\d+)/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return 'PRM-' + String(max + 1).padStart(7, '0');
+  }
+
+  function getPremisesDhKeys(ref) {
+    if (ADMIN_PREMISES_DH_LINKS[ref]) return ADMIN_PREMISES_DH_LINKS[ref].slice();
+    const custom = loadPremisesCustom().find(function (p) { return p.ref === ref; });
+    if (custom && custom.dhKeys && custom.dhKeys.length) return custom.dhKeys.slice();
+    return [];
+  }
+
+  function adminParentSiteOptions(selectedRef) {
+    const options = ['<option value="">None — standalone premises</option>'];
+    PREMISES_LIST.filter(function (p) {
+      return p.isParentSite || getPremisesSiteChildren(p.ref).length;
+    }).sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (p) {
+      options.push('<option value="' + escHtml(p.ref) + '"' + (selectedRef === p.ref ? ' selected' : '') + '>' +
+        escHtml(p.name) + ' (' + escHtml(p.ref) + ')</option>');
+    });
+    return options.join('');
+  }
+
+  function adminPremisesDeptOptions(selected) {
+    const depts = ['HMCTS', 'HMPPS', 'MoJ', 'DWP'];
+    PREMISES_LIST.forEach(function (p) {
+      if (p.dept && depts.indexOf(p.dept) < 0) depts.push(p.dept);
+    });
+    depts.sort();
+    return depts.map(function (d) {
+      return '<option value="' + escHtml(d) + '"' + (selected === d ? ' selected' : '') + '>' + escHtml(d) + '</option>';
+    }).join('');
+  }
+
+  function readAdminPremisesFormFields() {
+    const name = document.getElementById('admin-prem-name')?.value?.trim();
+    if (!name) {
+      window.alert('Enter a premises name.');
+      return null;
+    }
+    const score = parseInt(document.getElementById('admin-prem-score')?.value, 10);
+    const parentRef = document.getElementById('admin-prem-parent')?.value || '';
+    const isParentSite = !!document.getElementById('admin-prem-is-parent')?.checked;
+    return {
+      name: name,
+      address: document.getElementById('admin-prem-address')?.value?.trim() || '',
+      dept: document.getElementById('admin-prem-dept')?.value || '',
+      typeLabel: document.getElementById('admin-prem-type')?.value?.trim() || 'Premises',
+      category: document.getElementById('admin-prem-category')?.value || 'government-office',
+      score: isNaN(score) ? 30 : score,
+      patch: !!document.getElementById('admin-prem-patch')?.checked,
+      isParentSite: isParentSite,
+      parentSiteRef: isParentSite ? '' : parentRef,
+      route: document.getElementById('admin-prem-route')?.value || ''
+    };
+  }
+
+  function buildPremisesRecordFromForm(ref, fields) {
+    const record = {
+      ref: ref,
+      name: fields.name,
+      address: fields.address,
+      dept: fields.dept,
+      typeLabel: fields.typeLabel,
+      category: fields.category,
+      score: fields.score,
+      scoreClass: getPremisesScoreClass(fields.score),
+      patch: fields.patch,
+      lastAudit: '—',
+      lastAuditSort: 202601,
+      work: null
+    };
+    if (fields.isParentSite) {
+      record.isParentSite = true;
+      record.sitePremises = [fields.name];
+    } else if (fields.parentSiteRef) {
+      const parent = getPremisesByRef(fields.parentSiteRef);
+      if (parent) record.parentSite = { name: parent.name, ref: parent.ref };
+    }
+    if (fields.route) record.route = fields.route;
+    return record;
+  }
+
+  function persistPremisesFromAdminForm(ref, isNew) {
+    const fields = readAdminPremisesFormFields();
+    if (!fields) return null;
+    const prev = getPremisesByRef(ref);
+    if (isNew) {
+      const record = buildPremisesRecordFromForm(ref, fields);
+      const custom = loadPremisesCustom();
+      custom.push(record);
+      savePremisesCustom(custom);
+      PREMISES_LIST.push(record);
+      logAdminChange({
+        user: 'Admin (demo)',
+        area: 'Premises',
+        action: 'Premises added',
+        detail: record.ref + ' — ' + record.name,
+        route: 'admin/premises/' + encodeURIComponent(record.ref)
+      });
+      return record;
+    }
+    savePremisesOverride(ref, {
+      name: fields.name,
+      address: fields.address,
+      dept: fields.dept,
+      typeLabel: fields.typeLabel,
+      category: fields.category,
+      score: fields.score,
+      patch: fields.patch,
+      isParentSite: fields.isParentSite,
+      parentSiteRef: fields.parentSiteRef,
+      route: fields.route
+    });
+    const updated = getPremisesByRef(ref);
+    logAdminChange({
+      user: 'Admin (demo)',
+      area: 'Premises',
+      action: 'Premises updated',
+      detail: ref + ' — ' + fields.name + (prev && prev.name !== fields.name ? ' (was ' + prev.name + ')' : ''),
+      route: 'admin/premises/' + encodeURIComponent(ref)
+    });
+    return updated;
+  }
+
+  function adminPremisesFormBody(prem) {
+    prem = prem || {};
+    const parentRef = prem.parentSite ? prem.parentSite.ref : '';
+    return (
+      '<div class="field-wrap"><label for="admin-prem-name">Premises name</label>' +
+        '<input type="text" id="admin-prem-name" value="' + escHtml(prem.name || '') + '" placeholder="e.g. Temple Quay House" /></div>' +
+      '<div class="field-wrap"><label for="admin-prem-address">Address</label>' +
+        '<textarea id="admin-prem-address" rows="2">' + escHtml(prem.address || '') + '</textarea></div>' +
+      '<div class="field-wrap"><label for="admin-prem-dept">Department</label>' +
+        '<select id="admin-prem-dept">' + adminPremisesDeptOptions(prem.dept || 'HMCTS') + '</select></div>' +
+      '<div class="field-wrap"><label for="admin-prem-type">Premises type</label>' +
+        '<input type="text" id="admin-prem-type" value="' + escHtml(prem.typeLabel || '') + '" placeholder="e.g. Government office" /></div>' +
+      '<div class="field-wrap"><label for="admin-prem-category">Category</label>' +
+        '<select id="admin-prem-category">' +
+          '<option value="government-office"' + ((prem.category || 'government-office') === 'government-office' ? ' selected' : '') + '>Government office</option>' +
+          '<option value="court"' + (prem.category === 'court' ? ' selected' : '') + '>Court</option>' +
+          '<option value="prison"' + (prem.category === 'prison' ? ' selected' : '') + '>Prison</option>' +
+        '</select></div>' +
+      '<div class="field-wrap"><label for="admin-prem-score">RBIP score</label>' +
+        '<input type="number" id="admin-prem-score" min="0" max="99" value="' + escHtml(String(prem.score != null ? prem.score : 30)) + '" /></div>' +
+      '<div class="field-wrap"><label for="admin-prem-parent">Parent site / group</label>' +
+        '<select id="admin-prem-parent"' + (prem.isParentSite ? ' disabled' : '') + '>' + adminParentSiteOptions(parentRef) + '</select>' +
+        '<div class="help" style="margin-top:6px;">Link this premises to a multi-premises site record.</div></div>' +
+      '<div class="field-wrap"><label><input type="checkbox" id="admin-prem-is-parent"' + (prem.isParentSite ? ' checked' : '') + ' /> Multi-premises site record</label></div>' +
+      '<div class="field-wrap"><label><input type="checkbox" id="admin-prem-patch"' + (prem.patch ? ' checked' : '') + ' /> In my patch</label></div>' +
+      '<div class="field-wrap"><label for="admin-prem-route">Detail page route (optional)</label>' +
+        '<input type="text" id="admin-prem-route" value="' + escHtml(prem.route || '') + '" placeholder="e.g. premisesdetail" /></div>'
+    );
+  }
+
+  function bindAdminPremisesFormToggle() {
+    const parentEl = document.getElementById('admin-prem-is-parent');
+    const parentSelect = document.getElementById('admin-prem-parent');
+    if (!parentEl || !parentSelect) return;
+    parentEl.addEventListener('change', function () {
+      parentSelect.disabled = parentEl.checked;
+      if (parentEl.checked) parentSelect.value = '';
+    });
+  }
+
+  function openPremisesListAddModal() {
+    openAdminAddPremisesModal(null, { returnTo: 'premises' });
+  }
+
+  function openAdminAddPremisesModal(parentRef, opts) {
+    opts = opts || {};
+    const draft = {};
+    if (parentRef) {
+      const parent = getPremisesByRef(parentRef);
+      if (parent) draft.parentSite = { ref: parent.ref, name: parent.name };
+    }
+    openAdminModal({
+      title: 'Add premises',
+      sub: 'Register a new Crown premises record.',
+      body: adminPremisesFormBody(draft),
+      primaryLabel: 'Add premises',
+      onSubmit: function () {
+        const ref = nextPremisesRef();
+        const record = persistPremisesFromAdminForm(ref, true);
+        if (!record) return;
+        closeAdminModal();
+        renderAdminPremises();
+        if (opts.returnTo === 'premises') {
+          renderPremisesList();
+        } else {
+          openAdminPremisesDetail(record.ref);
+        }
+        adminPrototypeToast(record.name + ' added to the premises register.');
+      }
+    });
+    bindAdminPremisesFormToggle();
+    if (parentRef) {
+      const parentSelect = document.getElementById('admin-prem-parent');
+      if (parentSelect) parentSelect.value = parentRef;
+    }
+  }
+
+  function openAdminEditPremisesModal(ref) {
+    const entry = getAdminPremisesByRef(ref) || { prem: getPremisesByRef(ref), ref: ref, name: (getPremisesByRef(ref) || {}).name };
+    const prem = entry.prem || getPremisesByRef(ref);
+    if (!prem) return;
+    openAdminModal({
+      title: 'Edit premises',
+      sub: ref + '  ·  ' + prem.name,
+      body: adminPremisesFormBody(prem),
+      primaryLabel: 'Save changes',
+      onSubmit: function () {
+        const updated = persistPremisesFromAdminForm(ref, false);
+        if (!updated) return;
+        closeAdminModal();
+        renderAdminPremises();
+        if (adminPremisesDetailRef === ref) openAdminPremisesDetail(ref, true);
+        if (updated.route === 'premisesdetail') initPremisesDetailPage();
+        if (updated.route === 'premisesdetail-bristol') initPremisesBristolPage();
+        adminPrototypeToast('Premises record updated.');
+      }
+    });
+    bindAdminPremisesFormToggle();
+  }
+
+  function loadAdminChangeLog() {
+    try {
+      const raw = localStorage.getItem(ADMIN_CHANGE_LOG_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    } catch (e) { /* ignore */ }
+    localStorage.setItem(ADMIN_CHANGE_LOG_KEY, JSON.stringify(ADMIN_CHANGE_LOG_SEED.slice()));
+    return ADMIN_CHANGE_LOG_SEED.slice();
+  }
+
+  function saveAdminChangeLog(entries) {
+    localStorage.setItem(ADMIN_CHANGE_LOG_KEY, JSON.stringify(entries));
+  }
+
+  function logAdminChange(opts) {
+    opts = opts || {};
+    const stamp = cpinLogTimestamp();
+    const entries = loadAdminChangeLog();
+    entries.unshift({
+      id: 'acl-' + stamp.ts,
+      ts: stamp.ts,
+      at: stamp.at,
+      user: opts.user || 'System',
+      area: opts.area || 'Admin',
+      action: opts.action || 'Change',
+      detail: opts.detail || '',
+      route: opts.route || null
+    });
+    if (entries.length > 200) entries.length = 200;
+    saveAdminChangeLog(entries);
+    if (adminActiveTab === 'change-log') renderAdminChangeLog();
+    return entries[0];
+  }
+  window.logAdminChange = logAdminChange;
+
+  function setAdminChangeLogSearch(value) {
+    adminChangeLogSearch = (value || '').trim().toLowerCase();
+    renderAdminChangeLog();
+  }
+
+  function openAdminChangeLogEntry(route) {
+    if (!route) return;
+    if (route.indexOf('audit:') === 0) {
+      const rest = route.slice(6);
+      const slash = rest.indexOf('/');
+      const auditId = slash >= 0 ? rest.slice(0, slash) : rest;
+      continueAudit(auditId);
+      return;
+    }
+    if (route.indexOf('admin/') === 0) {
+      const parts = route.slice(6).split('/');
+      show('admin', { adminTab: parts[0] || 'users', adminDetailId: parts[1] ? decodeURIComponent(parts[1]) : null });
+      return;
+    }
+    if (route.indexOf('cpin:') === 0) {
+      show('cpin', { cpinId: route.slice(5) });
+      return;
+    }
+    if (route.indexOf('concern:') === 0) {
+      show('concern/' + route.slice(8));
+      return;
+    }
+    show(route);
+  }
+
+  function renderAdminChangeLog() {
+    const body = document.getElementById('admin-change-log-body');
+    const countEl = document.getElementById('admin-change-log-count');
+    if (!body) return;
+    const q = adminChangeLogSearch;
+    const entries = loadAdminChangeLog().filter(function (entry) {
+      if (!q) return true;
+      const hay = [
+        entry.at, entry.user, entry.area, entry.action, entry.detail
+      ].join(' ').toLowerCase();
+      return hay.indexOf(q) >= 0;
+    });
+    if (!entries.length) {
+      body.innerHTML = '<tr><td colspan="5"><div class="admin-empty">' +
+        (q ? 'No changes match your search.' : 'No changes recorded yet.') +
+        '</div></td></tr>';
+    } else {
+      body.innerHTML = entries.map(function (entry) {
+        const routeSafe = entry.route ? escHtml(entry.route).replace(/'/g, "\\'") : '';
+        const subjectHtml = entry.route
+          ? '<button type="button" class="name-link admin-change-log-detail" onclick="openAdminChangeLogEntry(\'' + routeSafe + '\')">' + escHtml(entry.detail || '—') + '</button>'
+          : '<span class="admin-change-log-detail">' + escHtml(entry.detail || '—') + '</span>';
+        return (
+          '<tr>' +
+            '<td style="white-space:nowrap;">' + escHtml(entry.at || '') + '</td>' +
+            '<td>' + escHtml(entry.user || '') + '</td>' +
+            '<td><span class="pill grey">' + escHtml(entry.area || '') + '</span></td>' +
+            '<td>' + escHtml(entry.action || '') + '</td>' +
+            '<td>' + subjectHtml + '</td>' +
+          '</tr>'
+        );
+      }).join('');
+    }
+    if (countEl) {
+      const total = loadAdminChangeLog().length;
+      countEl.textContent = entries.length === total
+        ? total + ' change' + (total === 1 ? '' : 's') + ' recorded'
+        : 'Showing ' + entries.length + ' of ' + total + ' changes';
+    }
+  }
+
+  function openAdminEditPremisesAddressModal(ref) {
+    const entry = getAdminPremisesByRef(ref);
+    if (!entry) return;
+    const refSafe = ref.replace(/'/g, "\\'");
+    openAdminModal({
+      title: 'Edit premises address',
+      sub: entry.ref + ' · ' + entry.name,
+      body:
+        '<div class="field-wrap"><label for="admin-edit-prem-address">Address</label>' +
+        '<textarea id="admin-edit-prem-address" rows="3">' + escHtml(entry.prem.address || '') + '</textarea></div>' +
+        '<div class="help">Updates the address on the premises register and linked records in this prototype.</div>',
+      primaryLabel: 'Save address',
+      onSubmit: function () {
+        const newAddr = document.getElementById('admin-edit-prem-address')?.value?.trim();
+        if (!newAddr) {
+          window.alert('Enter an address.');
+          return;
+        }
+        const oldAddr = entry.prem.address || '';
+        if (newAddr === oldAddr) {
+          closeAdminModal();
+          return;
+        }
+        savePremisesAddressOverride(ref, newAddr);
+        closeAdminModal();
+        logAdminChange({
+          user: 'Admin (demo)',
+          area: 'Premises',
+          action: 'Address updated',
+          detail: entry.name + ' — "' + oldAddr + '" → "' + newAddr + '"',
+          route: 'admin/premises/' + encodeURIComponent(ref)
+        });
+        if (adminPremisesDetailRef === ref) openAdminPremisesDetail(ref, true);
+        else renderAdminPremises();
+        adminPrototypeToast('Premises address updated.');
+      }
+    });
+  }
+
   function initAdminPage(routeOpts) {
     routeOpts = routeOpts || {};
     const tab = routeOpts.tab || 'users';
@@ -19369,12 +20323,15 @@
     adminDhSearch = '';
     adminRpSearch = '';
     adminPremisesSearch = '';
+    adminChangeLogSearch = '';
     const dhSearch = document.getElementById('admin-dh-search');
     const rpSearch = document.getElementById('admin-rp-search');
     const premSearch = document.getElementById('admin-premises-search');
+    const changeLogSearch = document.getElementById('admin-change-log-search');
     if (dhSearch) dhSearch.value = '';
     if (rpSearch) rpSearch.value = '';
     if (premSearch) premSearch.value = '';
+    if (changeLogSearch) changeLogSearch.value = '';
     setAdminTab(tab, { skipHash: true });
     renderAdminUsers();
     renderAdminPremises();
@@ -19385,6 +20342,12 @@
     renderAdminReports();
     renderAdminAuditPermissions();
     renderAdminCpinReviews();
+    renderAdminChangeLog();
+    if (adminPremisesAddPendingParentRef) {
+      const parentRef = adminPremisesAddPendingParentRef;
+      adminPremisesAddPendingParentRef = null;
+      openAdminAddPremisesModal(parentRef);
+    }
     applyAdminDetailRoute(tab, detailId);
   }
 
@@ -19396,6 +20359,11 @@
       openAdminResponsiblePersonDetail(detailId, true);
     } else if (tab === 'premises' && getAdminPremisesByRef(detailId)) {
       openAdminPremisesDetail(detailId, true);
+      if (adminPremisesEditPendingRef === detailId) {
+        const pendingRef = adminPremisesEditPendingRef;
+        adminPremisesEditPendingRef = null;
+        openAdminEditPremisesModal(pendingRef);
+      }
     } else {
       setAdminHash(tab, null);
     }
@@ -19424,6 +20392,7 @@
       adminPremisesDetailRef = null;
       setAdminHash(tabId, null);
     }
+    if (tabId === 'change-log') renderAdminChangeLog();
   }
 
   function closeAdminModal() {
@@ -19790,17 +20759,23 @@
   let adminPremisesDetailRef = null;
 
   function getAdminPremisesRegisterList() {
-    return Object.keys(ADMIN_PREMISES_DH_LINKS).map(function (ref) {
-      const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
-      if (!prem) return null;
+    const byRef = {};
+    PREMISES_LIST.forEach(function (prem) {
+      byRef[prem.ref] = prem;
+    });
+    loadPremisesCustom().forEach(function (prem) {
+      byRef[prem.ref] = prem;
+    });
+    return Object.keys(byRef).map(function (ref) {
+      const prem = byRef[ref];
       return {
         id: 'prem-' + ref.replace(/[^a-z0-9]/gi, '').toLowerCase(),
         ref: ref,
         name: prem.name,
         prem: prem,
-        dhKeys: ADMIN_PREMISES_DH_LINKS[ref] || []
+        dhKeys: getPremisesDhKeys(ref)
       };
-    }).filter(Boolean);
+    }).sort(function (a, b) { return a.name.localeCompare(b.name); });
   }
 
   function getAdminPremisesByRef(ref) {
@@ -19808,17 +20783,15 @@
   }
 
   function getAdminPremisesForDhKey(dhKey) {
-    return Object.keys(ADMIN_PREMISES_DH_LINKS).filter(function (ref) {
-      return (ADMIN_PREMISES_DH_LINKS[ref] || []).indexOf(dhKey) >= 0;
-    }).map(function (ref) {
-      const prem = PREMISES_LIST.find(function (p) { return p.ref === ref; });
-      if (!prem) return null;
-      return { ref: ref, name: prem.name, prem: prem };
-    }).filter(Boolean);
+    return getAdminPremisesRegisterList().filter(function (entry) {
+      return entry.dhKeys.indexOf(dhKey) >= 0;
+    }).map(function (entry) {
+      return { ref: entry.ref, name: entry.name, prem: entry.prem };
+    });
   }
 
   function getAdminDutyHoldersForPremisesRef(ref) {
-    const keys = ADMIN_PREMISES_DH_LINKS[ref] || [];
+    const keys = getPremisesDhKeys(ref);
     return keys.map(function (k) { return getAdminDutyHolderByKey(k); }).filter(Boolean);
   }
 
@@ -19843,7 +20816,7 @@
   }
 
   function getAdminRpsForPremisesRef(ref) {
-    const dhKeys = ADMIN_PREMISES_DH_LINKS[ref] || [];
+    const dhKeys = getPremisesDhKeys(ref);
     const seen = {};
     const out = [];
     dhKeys.forEach(function (dhKey) {
@@ -20199,7 +21172,10 @@
         '<td><span class="pill ' + escHtml(scoreClass) + '" style="font-variant-numeric:tabular-nums;">' + prem.score + '</span></td>' +
         '<td>' + dhCell + '</td>' +
         '<td>' + (prem.patch ? 'Kent, Surrey, Sussex' : '—') + '</td>' +
-        '<td class="actions"><button type="button" class="btn" onclick="openAdminPremisesDetail(\'' + refSafe + '\')">View</button></td>' +
+        '<td class="actions">' +
+          '<button type="button" class="btn" onclick="openAdminPremisesDetail(\'' + refSafe + '\')">View</button> ' +
+          '<button type="button" class="btn" onclick="openAdminEditPremisesModal(\'' + refSafe + '\')">Edit</button>' +
+        '</td>' +
       '</tr>';
     }).join('');
   }
@@ -20491,6 +21467,8 @@
     html += '</div></div>';
     html += '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">';
     html += '<button type="button" class="btn" onclick="closeAdminPremisesDetail()">← Back to list</button>';
+    html += '<button type="button" class="btn" onclick="openAdminEditPremisesAddressModal(\'' + ref.replace(/'/g, "\\'") + '\')">Edit address</button>';
+    html += '<button type="button" class="btn" onclick="openAdminEditPremisesModal(\'' + ref.replace(/'/g, "\\'") + '\')">Edit premises</button>';
     if (prem.route === 'premisesdetail') {
       html += '<button type="button" class="btn" onclick="show(\'premisesdetail\')">Open premises record</button>';
     } else if (prem.route === 'premisesdetail-bristol') {
@@ -20582,6 +21560,13 @@
         if (!dh) return;
         closeAdminModal();
         renderAdminDutyHolders();
+        logAdminChange({
+          user: 'Admin (demo)',
+          area: 'Duty Holders',
+          action: 'Duty Holder added',
+          detail: dh.ref + ' — ' + dh.name,
+          route: 'admin/duty-holders/' + encodeURIComponent(dh.id)
+        });
         openAdminDutyHolderDetail(dh.id);
         adminPrototypeToast(dh.name + ' added to the Duty Holder register.');
       }
@@ -20612,6 +21597,13 @@
         closeAdminModal();
         renderAdminDutyHolders();
         if (adminDhDetailId === id) openAdminDutyHolderDetail(id);
+        logAdminChange({
+          user: 'Admin (demo)',
+          area: 'Duty Holders',
+          action: 'Duty Holder updated',
+          detail: dh.ref + ' — ' + dh.name,
+          route: 'admin/duty-holders/' + encodeURIComponent(dh.id)
+        });
         adminPrototypeToast('Duty Holder record updated.');
       }
     });
@@ -20642,6 +21634,13 @@
         if (!rp) return;
         closeAdminModal();
         renderAdminResponsiblePersons();
+        logAdminChange({
+          user: 'Admin (demo)',
+          area: 'Responsible Persons',
+          action: 'Responsible Person added',
+          detail: rp.ref + ' — ' + rp.name,
+          route: 'admin/responsible-persons/' + encodeURIComponent(rp.id)
+        });
         openAdminResponsiblePersonDetail(rp.id);
         adminPrototypeToast(rp.name + ' added to the Responsible Person register.');
       }
@@ -20678,6 +21677,13 @@
         closeAdminModal();
         renderAdminResponsiblePersons();
         if (adminRpDetailId === id) openAdminResponsiblePersonDetail(id);
+        logAdminChange({
+          user: 'Admin (demo)',
+          area: 'Responsible Persons',
+          action: 'Responsible Person updated',
+          detail: rp.ref + ' — ' + rp.name,
+          route: 'admin/responsible-persons/' + encodeURIComponent(rp.id)
+        });
         adminPrototypeToast('Responsible Person record updated.');
       }
     });
@@ -20724,10 +21730,20 @@
         '</select></div>',
       primaryLabel: 'Save changes',
       onSubmit: function () {
+        const prevRole = getAdminUserRoles()[userId] || u.role;
         const newRole = document.getElementById('admin-edit-role')?.value;
         if (newRole) getAdminUserRoles()[userId] = newRole;
         closeAdminModal();
         renderAdminUsers();
+        if (newRole && newRole !== prevRole) {
+          logAdminChange({
+            user: 'Admin (demo)',
+            area: 'Users',
+            action: 'Role updated',
+            detail: u.name + ' — ' + (ADMIN_ROLE_LABELS[prevRole] || prevRole) + ' → ' + (ADMIN_ROLE_LABELS[newRole] || newRole),
+            route: 'admin/users'
+          });
+        }
         adminPrototypeToast('User account updated (prototype).');
       }
     });
@@ -21053,6 +22069,13 @@
       if (r.action === 'remove') show('cpins');
       else if (typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
     }
+    logAdminChange({
+      user: 'Admin (demo)',
+      area: 'CPIN',
+      action: 'Review approved',
+      detail: cpin.ref + ' — ' + formatCpinReviewSummary(r),
+      route: 'cpin:' + id
+    });
     if (!opts.silent) {
       window.alert(r.action === 'remove'
         ? cpin.ref + ' has been removed from CPIN lists.'
@@ -21079,6 +22102,13 @@
     renderCpinsLists();
     if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
     if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
+    logAdminChange({
+      user: 'Admin (demo)',
+      area: 'CPIN',
+      action: 'Review rejected',
+      detail: cpin.ref + ' — ' + formatCpinReviewSummary(r),
+      route: 'cpin:' + id
+    });
     if (!opts.silent) {
       window.alert('Review request rejected. ' + cpin.ref + ' stays in the queue.');
     }
@@ -22263,10 +23293,21 @@
     closeAllCpinCardMenus();
     cpinReviewModalState = { id: id, action: null };
     if (!window.confirm('Withdraw this review request?')) return;
+    const cpin = getCpinById(id);
+    const r = getCpinAdminReview(cpin);
     const patch = Object.assign({}, cpinOverrides[id] || {});
     delete patch.adminReview;
     cpinOverrides[id] = patch;
     saveCpinOverrides();
+    if (cpin && r) {
+      logAdminChange({
+        user: CPIN_CURRENT_INSPECTOR,
+        area: 'CPIN',
+        action: 'Review withdrawn',
+        detail: cpin.ref + ' — ' + formatCpinReviewSummary(r),
+        route: 'cpin:' + id
+      });
+    }
     renderCpinsLists();
     if (typeof renderDashboardCpinPanel === 'function') renderDashboardCpinPanel();
     if (activeCpinId === id && typeof refreshCpinDetailPage === 'function') refreshCpinDetailPage();
@@ -23388,6 +24429,7 @@
     const cpin = getCpinById(activeCpinId);
     if (!cpin) return;
     const premises = premisesName || null;
+    const oldPremises = cpin.premises || null;
     let workflow = cpin.workflow;
     if (premises) {
       workflow = cpin.workflow === 'awaiting_premises' ? 'unassigned' : (cpin.workflow === 'incoming' ? 'incoming' : cpin.workflow);
@@ -23405,6 +24447,15 @@
       suggestedDutyHolders: [],
       responsiblePersons: premisesChanged ? [] : (cpin.responsiblePersons || [])
     });
+    if (premisesChanged) {
+      logAdminChange({
+        user: CPIN_CURRENT_INSPECTOR,
+        area: 'CPIN',
+        action: premises ? 'Premises linked' : 'Premises cleared',
+        detail: cpin.ref + ' — ' + (oldPremises || 'None') + ' → ' + (premises || 'None'),
+        route: 'cpin:' + activeCpinId
+      });
+    }
     refreshCpinDetailPage();
   }
 
@@ -23412,6 +24463,15 @@
     const cpin = getCpinById(activeCpinId);
     if (!cpin) return;
     const severity = document.getElementById('cpin-severity-select')?.value || cpin.severity;
+    if (severity !== cpin.severity) {
+      logAdminChange({
+        user: CPIN_CURRENT_INSPECTOR,
+        area: 'CPIN',
+        action: 'Severity updated',
+        detail: cpin.ref + ' — ' + cpin.severity + ' → ' + severity,
+        route: 'cpin:' + activeCpinId
+      });
+    }
     persistCpinPatch(activeCpinId, { severity: severity });
     cpinSeverityEditing = false;
     refreshCpinDetailPage();
@@ -23438,6 +24498,7 @@
     const cpin = getCpinById(activeCpinId);
     if (!cpin) return;
     const assignee = document.getElementById('cpin-assignee')?.value || null;
+    const prevAssignee = cpin.assignee || null;
     if (assignee && !cpin.premises) {
       alert('Link premises before assigning an inspector.');
       return;
@@ -23452,6 +24513,15 @@
       workflow = cpin.premises ? 'unassigned' : cpin.workflow;
     }
     persistCpinPatch(activeCpinId, { assignee: assignee || null, workflow: workflow });
+    if ((assignee || null) !== prevAssignee) {
+      logAdminChange({
+        user: CPIN_CURRENT_INSPECTOR,
+        area: 'CPIN',
+        action: assignee ? 'Inspector assigned' : 'Inspector unassigned',
+        detail: cpin.ref + ' — ' + (prevAssignee || 'Unassigned') + ' → ' + (assignee || 'Unassigned'),
+        route: 'cpin:' + activeCpinId
+      });
+    }
     refreshCpinDetailPage();
   }
 
@@ -24618,11 +25688,22 @@
       ? (savedLetter.recipientName || 'Recipient')
       : (rp ? rp.name : 'Sir/Madam');
     const org = savedLetter
-      ? (savedLetter.recipientDh || '')
+      ? (savedLetter.recipientDh || savedLetter.dutyHolder || '')
       : (rp && rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : '');
-    return escHtml(name) +
+    let html = escHtml(name) +
       (org ? '<br>' + escHtml(org) : '') +
       '<br>' + escHtml(premises || '');
+    const ccList = savedLetter && savedLetter.ccList
+      ? savedLetter.ccList
+      : (letterComposerUsesAuditStage4() && rp ? getAuditStage4LetterCcList(rp.id) : []);
+    if (ccList.length) {
+      html += '<div style="margin-top:12px;font-size:13px;line-height:1.5;"><strong>Cc:</strong> ' +
+        ccList.map(function (c) {
+          return escHtml(c.name) + (c.role ? ' <span style="color:var(--ink-3);">(' + escHtml(c.role) + ')</span>' : '');
+        }).join('; ') +
+        '</div>';
+    }
+    return html;
   }
 
   function selectLetterPreviewRecipient(id) {
@@ -24746,8 +25827,8 @@
           : 'Confirm to ' + dh + ' that their action plan is adequate. Saving will attach the letter and close this thread.';
       } else if (letterComposerState.context === 'audit-stage4') {
         subEl.textContent = isView
-          ? 'Review each recipient\'s outcome letters grouped by Duty Holder.'
-          : 'Each recipient receives one letter per confirmed outcome. Preview any letter, then save all.';
+          ? 'Review outcome letters — one per Duty Holder per outcome, with setup contacts copied.'
+          : 'One letter per outcome per Duty Holder. Preview each letter, then save all. Other contacts from setup are copied.';
       } else if (letterComposerState.context === 'audit-setup') {
         subEl.textContent = 'Choose a template and recipients — letters are saved as editable Word documents (.docx) and sent when you start the audit.';
       } else if (letterComposerState.context === 'bizsupport') {
@@ -24775,8 +25856,8 @@
           : 'This letter will be sent to the Responsible Person linked to ' + (letterComposerState.stage5Dh || 'this Duty Holder') + '.';
       } else if (isStage4) {
         recHelp.textContent = isView
-          ? 'Letters are grouped by recipient. Each letter matches one outcome template.'
-          : 'Tick recipients to include. Expand each person to see which outcome letters they will receive.';
+          ? 'Letters grouped by Duty Holder — one per confirmed outcome.'
+          : 'Select a letter to preview. Each is addressed to the primary contact; others from setup are copied.';
       } else {
         recHelp.textContent = isView
           ? 'Use View to read each saved letter in the preview panel.'
@@ -24790,10 +25871,7 @@
         const toFiles = letterComposerState.saveTo === 'activity-files' || letterComposerState.saveTo === 'audit-activity-files';
         const toStage4 = letterComposerState.saveTo === 'audit-stage4-letters';
         if (toStage4) {
-          const pkgs = getAuditStage4RecipientPackages().filter(function (p) {
-            return (letterComposerState.recipientIds || []).indexOf(p.recipientId) >= 0;
-          });
-          const n = pkgs.reduce(function (c, p) { return c + p.letters.length; }, 0);
+          const n = getAuditStage4RequiredLetters().length;
           saveBtn.textContent = 'Save ' + n + ' letter' + (n === 1 ? '' : 's');
         } else if (isStage5) {
           saveBtn.textContent = 'Save letter';
@@ -24849,21 +25927,9 @@
     if (recEl) {
       if (isStage4) {
         if (!isView) {
-          const activeTask = getAuditStage4RequiredLetters().find(function (t) {
-            return t.id === letterComposerState.outcomeLetterId;
-          });
-          if (activeTask && (letterComposerState.recipientIds || []).indexOf(activeTask.recipientId) < 0) {
-            const firstIncluded = getAuditStage4RecipientPackages().find(function (p) {
-              return (letterComposerState.recipientIds || []).indexOf(p.recipientId) >= 0;
-            });
-            if (firstIncluded && firstIncluded.letters[0]) {
-              loadAuditStage4LetterSlot(firstIncluded.letters[0].id);
-            }
-          } else if (!letterComposerState.outcomeLetterId) {
-            const firstPkg = getAuditStage4RecipientPackages()[0];
-            if (firstPkg && firstPkg.letters[0]) {
-              loadAuditStage4LetterSlot(firstPkg.letters[0].id);
-            }
+          if (!letterComposerState.outcomeLetterId) {
+            const first = getAuditStage4RequiredLetters()[0];
+            if (first) loadAuditStage4LetterSlot(first.id);
           }
         } else if (!letterComposerState.viewLetterId && saved.length) {
           letterComposerState.viewLetterId = saved[0].id;
@@ -25069,13 +26135,6 @@
 
   function saveAuditStage4LettersBulk() {
     if (!letterComposerState || !auditStage4State) return;
-    const recipients = getAuditStage4LetterRecipients();
-    const recipientIds = letterComposerState.recipientIds || [];
-    const selected = recipients.filter(function (rp) { return recipientIds.indexOf(rp.id) >= 0; });
-    if (!selected.length) {
-      window.alert('Select at least one Responsible Person to send letters to.');
-      return;
-    }
     const bodyEl = document.getElementById('letter-composer-body');
     if (letterComposerState.editing && bodyEl) {
       letterComposerState.customBody = bodyEl.innerHTML;
@@ -25083,55 +26142,57 @@
     }
     if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
 
-    const slots = getAuditStage4RequiredLetters();
+    const requiredLetters = getAuditStage4RequiredLetters();
     const stamp = cpinLogTimestamp();
     const dateStr = new Date().toISOString().slice(0, 10);
     const newLetters = [];
     let idx = 0;
 
-    selected.forEach(function (rp) {
-      const dhName = getDhNameForRecipient(rp);
-      const o = auditStage4State.outcomes[dhName];
+    requiredLetters.forEach(function (task) {
+      if (!task.recipientId) return;
+      const rp = getSetupLetterRecipients().find(function (r) { return r.id === task.recipientId; });
+      if (!rp) return;
+      const o = auditStage4State.outcomes[task.dh];
       if (!o) return;
-      (o.selected || []).forEach(function (key) {
-        const taskId = getAuditStage4LetterTaskId(dhName, key, rp.id);
-        const slotDraft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[taskId];
-        const templateId = (slotDraft && slotDraft.templateId) || getAuditOutcomeTemplateId(key);
-        const tmpl = LETTER_TEMPLATES.find(function (t) { return t.id === templateId; });
-        if (!tmpl) return;
-        const ctx = buildAuditStage4LetterContext(dhName, key, o.failingKeys || []);
-        ctx.addressee = rp;
-        let bodyHtml;
-        if (letterComposerState.outcomeLetterId === taskId && letterComposerState.customBody) {
-          bodyHtml = letterComposerState.customBody;
-        } else if (slotDraft && slotDraft.customBody) {
-          bodyHtml = slotDraft.customBody;
-        } else {
-          bodyHtml = tmpl.buildBody(ctx);
-        }
-        newLetters.push({
-          id: 'ltr-s4-' + taskId + '-' + (stamp.ts + idx),
-          letterTaskId: taskId,
-          outcomeLetterId: taskId,
-          outcomeSlotId: getAuditStage4LetterId(dhName, key),
-          dutyHolder: dhName,
-          outcomeKey: key,
-          templateId: templateId,
-          templateLabel: tmpl.label,
-          recipientId: rp.id,
-          recipientName: rp.name,
-          recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || dhName,
-          fileName: ensureLetterDocxFileName('Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.docx'),
-          body: bodyHtml,
-          at: stamp.at,
-          ts: stamp.ts + idx
-        });
-        idx++;
+      const taskId = task.id;
+      const slotDraft = letterComposerState.slotDrafts && letterComposerState.slotDrafts[taskId];
+      const templateId = (slotDraft && slotDraft.templateId) || getAuditOutcomeTemplateId(task.key);
+      const tmpl = LETTER_TEMPLATES.find(function (t) { return t.id === templateId; });
+      if (!tmpl) return;
+      const ctx = buildAuditStage4LetterContext(task.dh, task.key, o.failingKeys || []);
+      ctx.addressee = rp;
+      ctx.ccList = task.ccList || getAuditStage4LetterCcList(rp.id);
+      let bodyHtml;
+      if (letterComposerState.outcomeLetterId === taskId && letterComposerState.customBody) {
+        bodyHtml = letterComposerState.customBody;
+      } else if (slotDraft && slotDraft.customBody) {
+        bodyHtml = slotDraft.customBody;
+      } else {
+        bodyHtml = tmpl.buildBody(ctx);
+      }
+      newLetters.push({
+        id: 'ltr-s4-' + taskId + '-' + (stamp.ts + idx),
+        letterTaskId: taskId,
+        outcomeLetterId: taskId,
+        outcomeSlotId: taskId,
+        dutyHolder: task.dh,
+        outcomeKey: task.key,
+        templateId: templateId,
+        templateLabel: tmpl.label,
+        recipientId: rp.id,
+        recipientName: rp.name,
+        recipientDh: getDutyHolderLabelForKey(rp.linkedDh) || task.dh,
+        ccList: ctx.ccList.slice(),
+        fileName: ensureLetterDocxFileName('Letter-' + letterFileSlug(rp.name) + '-' + letterFileSlug(tmpl.label) + '-' + dateStr + '.docx'),
+        body: bodyHtml,
+        at: stamp.at,
+        ts: stamp.ts + idx
       });
+      idx++;
     });
 
     if (!newLetters.length) {
-      window.alert('No outcome letters to save for the selected recipients. Ensure each ticked recipient is linked to a Duty Holder with a confirmed outcome.');
+      window.alert('No outcome letters to save. Ensure each Duty Holder has an approved primary contact in setup.');
       return;
     }
 
@@ -25853,6 +26914,11 @@
     const rp = auditSetup.responsiblePersons.find(function (r) { return r.id === id; });
     if (!rp || rp.status !== 'suggested') return;
     rp.status = 'accepted';
+    if (rp.linkedDh && !auditSetup.responsiblePersons.some(function (r) {
+      return r.status === 'accepted' && r.linkedDh === rp.linkedDh && r.isPrimary;
+    })) {
+      rp.isPrimary = true;
+    }
     renderSetupResponsiblePersons();
   }
 
