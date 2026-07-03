@@ -19283,7 +19283,7 @@
     'PRM-0001601': ['hmcts', 'propdir']
   };
 
-  const ADMIN_DUTY_HOLDERS = [
+  let ADMIN_DUTY_HOLDERS = [
     {
       id: 'dh-hmcts', key: 'hmcts', ref: 'DH-0001042', name: 'HMCTS', type: 'Government department',
       role: 'Government department  ·  Property responsibility', email: 'firesafety@hmcts.gov.uk',
@@ -19379,7 +19379,7 @@
     }
   ];
 
-  const ADMIN_RESPONSIBLE_PERSONS = [
+  let ADMIN_RESPONSIBLE_PERSONS = [
     {
       id: 'rp-mstevens', key: 'mstevens', ref: 'RP-0005521', name: 'Mark Stevens',
       jobTitle: 'Property Director', role: 'Property Director', linkedDhKey: 'hmcts', linkedDhKeys: ['hmcts'], linkedDhName: 'HMCTS',
@@ -19568,6 +19568,216 @@
 
   function getAdminDutyHolderById(id) {
     return ADMIN_DUTY_HOLDERS.find(function (d) { return d.id === id; });
+  }
+
+  function adminEntitySlug(name) {
+    return String(name || 'entry').replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/^-|-$/g, '').slice(0, 24);
+  }
+
+  function adminNextEntityRef(prefix, list) {
+    let max = 0;
+    list.forEach(function (item) {
+      const m = (item.ref || '').match(new RegExp('^' + prefix + '-(\\d+)$'));
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return prefix + '-' + String(max + 1).padStart(7, '0');
+  }
+
+  function adminUniqueKey(base, list) {
+    let key = base || 'entry';
+    if (!list.some(function (x) { return x.key === key; })) return key;
+    let n = 2;
+    while (list.some(function (x) { return x.key === key + '-' + n; })) n++;
+    return key + '-' + n;
+  }
+
+  function adminDhTypeRole(type) {
+    const map = {
+      'Government department': 'Government department',
+      'FM company': 'FM company',
+      'Internal': 'Internal',
+      'Contracting authority': 'Contracting authority'
+    };
+    const label = map[type] || type;
+    return label + '  ·  Registered via admin';
+  }
+
+  function syncAdminDutyHolderToLookupCatalog(dh) {
+    if (!dh || !dh.key) return;
+    const catalog = SETUP_LOOKUP_CATALOG.dutyHolder;
+    const entry = {
+      key: dh.key,
+      ref: dh.ref,
+      usageRank: 99,
+      name: dh.name,
+      role: dh.role,
+      initials: setupInitials(dh.name)
+    };
+    const idx = catalog.findIndex(function (e) { return e.key === dh.key; });
+    if (idx >= 0) catalog[idx] = entry;
+    else catalog.push(entry);
+    SETUP_DH_KEY_BY_NAME[dh.name] = dh.key;
+  }
+
+  function syncAdminRpToLookupCatalog(rp) {
+    if (!rp || !rp.key) return;
+    const catalog = SETUP_LOOKUP_CATALOG.responsiblePerson;
+    const primaryDh = getAdminDutyHolderByKey(getAdminRpDhKeys(rp)[0]);
+    const roleLabel = primaryDh ? (primaryDh.name + '  ·  ' + (rp.jobTitle || rp.role)) : (rp.jobTitle || rp.role);
+    const entry = {
+      key: rp.key,
+      ref: rp.ref,
+      usageRank: 99,
+      name: rp.name,
+      role: roleLabel,
+      initials: setupInitials(rp.name)
+    };
+    const idx = catalog.findIndex(function (e) { return e.key === rp.key; });
+    if (idx >= 0) catalog[idx] = entry;
+    else catalog.push(entry);
+    getAdminRpDhKeys(rp).forEach(function (dhKey) {
+      if (!SETUP_DH_TO_RP_KEYS[dhKey]) SETUP_DH_TO_RP_KEYS[dhKey] = [];
+      if (SETUP_DH_TO_RP_KEYS[dhKey].indexOf(rp.key) < 0) SETUP_DH_TO_RP_KEYS[dhKey].push(rp.key);
+    });
+  }
+
+  function getSelectedAdminDhKeys(selectId) {
+    const el = document.getElementById(selectId);
+    if (!el) return [];
+    return Array.from(el.selectedOptions || []).map(function (opt) { return opt.value; }).filter(Boolean);
+  }
+
+  function addAdminDutyHolderFromForm() {
+    const name = document.getElementById('admin-add-dh-name')?.value?.trim();
+    if (!name) {
+      window.alert('Enter an organisation name.');
+      return null;
+    }
+    const type = document.getElementById('admin-add-dh-type')?.value || 'FM company';
+    const email = document.getElementById('admin-add-dh-email')?.value?.trim() || '';
+    const phone = document.getElementById('admin-add-dh-phone')?.value?.trim() || '';
+    const patch = document.getElementById('admin-add-dh-patch')?.value || 'Kent, Surrey, Sussex';
+    const notes = document.getElementById('admin-add-dh-notes')?.value?.trim() || '';
+    const key = adminUniqueKey(adminEntitySlug(name), ADMIN_DUTY_HOLDERS);
+    const dh = {
+      id: 'dh-' + key,
+      key: key,
+      ref: adminNextEntityRef('DH', ADMIN_DUTY_HOLDERS),
+      name: name,
+      type: type,
+      role: adminDhTypeRole(type),
+      email: email,
+      phone: phone,
+      address: '',
+      patch: patch,
+      status: 'active',
+      processes: [],
+      notes: notes
+    };
+    ADMIN_DUTY_HOLDERS.push(dh);
+    syncAdminDutyHolderToLookupCatalog(dh);
+    return dh;
+  }
+
+  function addAdminResponsiblePersonFromForm() {
+    const name = document.getElementById('admin-add-rp-name')?.value?.trim();
+    if (!name) {
+      window.alert('Enter a full name.');
+      return null;
+    }
+    const jobTitle = document.getElementById('admin-add-rp-role')?.value?.trim() || 'Responsible Person';
+    const dhKeys = getSelectedAdminDhKeys('admin-add-rp-dh');
+    if (!dhKeys.length) {
+      window.alert('Select at least one Duty Holder.');
+      return null;
+    }
+    const email = document.getElementById('admin-add-rp-email')?.value?.trim() || '';
+    const phone = document.getElementById('admin-add-rp-phone')?.value?.trim() || '';
+    const notes = document.getElementById('admin-add-rp-notes')?.value?.trim() || '';
+    const primaryDh = getAdminDutyHolderByKey(dhKeys[0]);
+    const key = adminUniqueKey(adminEntitySlug(name), ADMIN_RESPONSIBLE_PERSONS);
+    const rp = {
+      id: 'rp-' + key,
+      key: key,
+      ref: adminNextEntityRef('RP', ADMIN_RESPONSIBLE_PERSONS),
+      name: name,
+      jobTitle: jobTitle,
+      role: jobTitle,
+      linkedDhKey: dhKeys[0],
+      linkedDhKeys: dhKeys.slice(),
+      linkedDhName: primaryDh ? primaryDh.name : '',
+      email: email,
+      phone: phone,
+      patch: primaryDh ? primaryDh.patch : '',
+      status: 'active',
+      premisesCount: 0,
+      lastContact: '',
+      premises: [],
+      letters: [],
+      notes: notes
+    };
+    ADMIN_RESPONSIBLE_PERSONS.push(rp);
+    syncAdminRpToLookupCatalog(rp);
+    return rp;
+  }
+
+  function resyncAdminRpDhLinks(rp, prevDhKeys) {
+    const newKeys = getAdminRpDhKeys(rp);
+    (prevDhKeys || []).forEach(function (dhKey) {
+      if (newKeys.indexOf(dhKey) >= 0 || !SETUP_DH_TO_RP_KEYS[dhKey]) return;
+      SETUP_DH_TO_RP_KEYS[dhKey] = SETUP_DH_TO_RP_KEYS[dhKey].filter(function (k) { return k !== rp.key; });
+    });
+    syncAdminRpToLookupCatalog(rp);
+  }
+
+  function updateAdminDutyHolderFromForm(id) {
+    const d = getAdminDutyHolderById(id);
+    if (!d) return null;
+    const name = document.getElementById('admin-edit-dh-name')?.value?.trim();
+    if (!name) {
+      window.alert('Enter an organisation name.');
+      return null;
+    }
+    d.name = name;
+    d.type = document.getElementById('admin-edit-dh-type')?.value?.trim() || d.type;
+    d.role = adminDhTypeRole(d.type);
+    d.email = document.getElementById('admin-edit-dh-email')?.value?.trim() || '';
+    d.phone = document.getElementById('admin-edit-dh-phone')?.value?.trim() || '';
+    d.patch = document.getElementById('admin-edit-dh-patch')?.value || d.patch;
+    d.status = document.getElementById('admin-edit-dh-status')?.value || d.status;
+    d.notes = document.getElementById('admin-edit-dh-notes')?.value?.trim() || '';
+    syncAdminDutyHolderToLookupCatalog(d);
+    return d;
+  }
+
+  function updateAdminResponsiblePersonFromForm(id) {
+    const r = getAdminResponsiblePersonById(id);
+    if (!r) return null;
+    const name = document.getElementById('admin-edit-rp-name')?.value?.trim();
+    if (!name) {
+      window.alert('Enter a full name.');
+      return null;
+    }
+    const prevDhKeys = getAdminRpDhKeys(r).slice();
+    const dhKeys = getSelectedAdminDhKeys('admin-edit-rp-dh');
+    if (!dhKeys.length) {
+      window.alert('Select at least one Duty Holder.');
+      return null;
+    }
+    r.name = name;
+    r.jobTitle = document.getElementById('admin-edit-rp-role')?.value?.trim() || r.jobTitle;
+    r.role = r.jobTitle;
+    r.linkedDhKey = dhKeys[0];
+    r.linkedDhKeys = dhKeys.slice();
+    const primaryDh = getAdminDutyHolderByKey(dhKeys[0]);
+    r.linkedDhName = primaryDh ? primaryDh.name : '';
+    r.patch = primaryDh ? primaryDh.patch : r.patch;
+    r.email = document.getElementById('admin-edit-rp-email')?.value?.trim() || '';
+    r.phone = document.getElementById('admin-edit-rp-phone')?.value?.trim() || '';
+    r.status = document.getElementById('admin-edit-rp-status')?.value || r.status;
+    r.notes = document.getElementById('admin-edit-rp-notes')?.value?.trim() || '';
+    resyncAdminRpDhLinks(r, prevDhKeys);
+    return r;
   }
 
   function getAdminDutyHolderByKey(key) {
@@ -20072,11 +20282,17 @@
           '<option>Government department</option><option>FM company</option><option>Internal</option><option>Contracting authority</option>' +
         '</select></div>' +
         '<div class="field-wrap"><label for="admin-add-dh-email">Contact email</label><input type="email" id="admin-add-dh-email" placeholder="contact@organisation.gov.uk" /></div>' +
-        '<div class="field-wrap"><label for="admin-add-dh-patch">Patch</label><select id="admin-add-dh-patch">' + adminPatchOptions('Kent, Surrey, Sussex') + '</select></div>',
+        '<div class="field-wrap"><label for="admin-add-dh-phone">Phone</label><input type="text" id="admin-add-dh-phone" placeholder="020 7946 0958" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-dh-patch">Patch</label><select id="admin-add-dh-patch">' + adminPatchOptions('Kent, Surrey, Sussex') + '</select></div>' +
+        '<div class="field-wrap"><label for="admin-add-dh-notes">Notes</label><textarea id="admin-add-dh-notes" placeholder="Optional internal notes…"></textarea></div>',
       primaryLabel: 'Add Duty Holder',
       onSubmit: function () {
+        const dh = addAdminDutyHolderFromForm();
+        if (!dh) return;
         closeAdminModal();
-        adminPrototypeToast('Duty Holder added (prototype).');
+        renderAdminDutyHolders();
+        openAdminDutyHolderDetail(dh.id);
+        adminPrototypeToast(dh.name + ' added to the Duty Holder register.');
       }
     });
   }
@@ -20100,31 +20316,43 @@
         '<div class="field-wrap"><label for="admin-edit-dh-notes">Notes</label><textarea id="admin-edit-dh-notes">' + escHtml(d.notes || '') + '</textarea></div>',
       primaryLabel: 'Save changes',
       onSubmit: function () {
+        const dh = updateAdminDutyHolderFromForm(id);
+        if (!dh) return;
         closeAdminModal();
+        renderAdminDutyHolders();
         if (adminDhDetailId === id) openAdminDutyHolderDetail(id);
-        adminPrototypeToast('Duty Holder record updated (prototype).');
+        adminPrototypeToast('Duty Holder record updated.');
       }
     });
   }
 
   function openAdminAddResponsiblePersonModal() {
-    const dhOptions = ADMIN_DUTY_HOLDERS.filter(function (d) { return d.status === 'active'; }).map(function (d) {
+    const activeDhs = ADMIN_DUTY_HOLDERS.filter(function (d) { return d.status === 'active'; });
+    const dhOptions = activeDhs.map(function (d) {
       return '<option value="' + escHtml(d.key) + '">' + escHtml(d.name) + '</option>';
     }).join('');
+    const dhField = activeDhs.length
+      ? '<div class="field-wrap"><label for="admin-add-rp-dh">Duty Holders</label><select id="admin-add-rp-dh" multiple size="5">' + dhOptions + '</select>' +
+        '<div class="help" style="margin-top:6px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple Duty Holders. The first selected is the primary link.</div></div>'
+      : '<div class="admin-empty">Add at least one active Duty Holder before registering a Responsible Person.</div>';
     openAdminModal({
       title: 'Add Responsible Person',
       sub: 'Register an individual and link them to one or more Duty Holders.',
       body:
         '<div class="field-wrap"><label for="admin-add-rp-name">Full name</label><input type="text" id="admin-add-rp-name" placeholder="e.g. Alex Morgan" /></div>' +
         '<div class="field-wrap"><label for="admin-add-rp-role">Job title</label><input type="text" id="admin-add-rp-role" placeholder="e.g. Facilities Manager" /></div>' +
-        '<div class="field-wrap"><label for="admin-add-rp-dh">Primary Duty Holder</label><select id="admin-add-rp-dh">' + dhOptions + '</select></div>' +
-        '<div class="field-wrap"><label for="admin-add-rp-dh-extra">Additional Duty Holders (optional)</label><input type="text" id="admin-add-rp-dh-extra" placeholder="Comma-separated organisation names" /></div>' +
+        dhField +
         '<div class="field-wrap"><label for="admin-add-rp-email">Email</label><input type="email" id="admin-add-rp-email" placeholder="name@organisation.gov.uk" /></div>' +
-        '<div class="field-wrap"><label for="admin-add-rp-phone">Phone</label><input type="text" id="admin-add-rp-phone" placeholder="07700 900 000" /></div>',
+        '<div class="field-wrap"><label for="admin-add-rp-phone">Phone</label><input type="text" id="admin-add-rp-phone" placeholder="07700 900 000" /></div>' +
+        '<div class="field-wrap"><label for="admin-add-rp-notes">Notes</label><textarea id="admin-add-rp-notes" placeholder="Optional internal notes…"></textarea></div>',
       primaryLabel: 'Add Responsible Person',
       onSubmit: function () {
+        const rp = addAdminResponsiblePersonFromForm();
+        if (!rp) return;
         closeAdminModal();
-        adminPrototypeToast('Responsible Person added (prototype).');
+        renderAdminResponsiblePersons();
+        openAdminResponsiblePersonDetail(rp.id);
+        adminPrototypeToast(rp.name + ' added to the Responsible Person register.');
       }
     });
   }
@@ -20154,9 +20382,12 @@
         '<div class="field-wrap"><label for="admin-edit-rp-notes">Notes</label><textarea id="admin-edit-rp-notes">' + escHtml(r.notes || '') + '</textarea></div>',
       primaryLabel: 'Save changes',
       onSubmit: function () {
+        const rp = updateAdminResponsiblePersonFromForm(id);
+        if (!rp) return;
         closeAdminModal();
+        renderAdminResponsiblePersons();
         if (adminRpDetailId === id) openAdminResponsiblePersonDetail(id);
-        adminPrototypeToast('Responsible Person record updated (prototype).');
+        adminPrototypeToast('Responsible Person record updated.');
       }
     });
   }
