@@ -70,7 +70,9 @@
 
   let scPins = new Set();
   let scOverrides = {};
-  let concernsActiveFilter = 'all';
+  let concernsRagFilter = 'all';
+  let concernsQueueFilter = 'all';
+  let concernsDeptFilter = 'all';
   let concernsActiveTab = 'all';
   let completedConcernsShown = 20;
   let activeConcernId = null;
@@ -227,16 +229,23 @@
     return '';
   }
 
+  function getConcernAdminReview(c) {
+    return c && c.adminReview ? c.adminReview : null;
+  }
+
   function concernMatchesFilter(item) {
     if (typeof matchesDateRangeFilter === 'function' && typeof parseCpinWhenDays === 'function') {
       if (!matchesDateRangeFilter(parseCpinWhenDays(item.when), concernsDateFilter)) return false;
     }
-    if (concernsActiveFilter === 'all') return true;
-    if (concernsActiveFilter === 'patch') return item.patch;
-    if (concernsActiveFilter === 'premises-needed') return concernNeedsPremises(item);
-    if (concernsActiveFilter === 'in-progress') return concernIsInProgress(item);
-    if (concernsActiveFilter === 'gov-dept') return typeof isGovernmentDeptPremises === 'function' && isGovernmentDeptPremises(item.premises);
-    return item.severity === concernsActiveFilter;
+    if (concernsRagFilter !== 'all' && item.severity !== concernsRagFilter) return false;
+    if (concernsQueueFilter === 'patch' && !item.patch) return false;
+    if (concernsQueueFilter === 'in-progress' && !concernIsInProgress(item)) return false;
+    if (concernsQueueFilter === 'flagged') {
+      const r = getConcernAdminReview(item);
+      if (!(r && (r.status === 'pending' || (r.status === 'approved' && r.action === 'flag')))) return false;
+    }
+    if (concernsDeptFilter === 'gov-dept' && !(typeof isGovernmentDeptPremises === 'function' && isGovernmentDeptPremises(item.premises))) return false;
+    return true;
   }
 
   function getConcernsForTab(tab) {
@@ -253,6 +262,9 @@
       return open.filter(function (c) {
         return c.assignee === SC_CURRENT_INSPECTOR && SC_IN_PROGRESS_WF.has(c.workflow);
       });
+    }
+    if (tab === 'premises-needed') {
+      return open.filter(concernNeedsPremises);
     }
     return open;
   }
@@ -329,8 +341,9 @@
   function renderConcernsLists() {
     const emptyMsgs = {
       all: 'No open safety concerns match this filter.',
-      unassigned: 'No unassigned safety concerns.',
-      mine: 'No safety concerns in your queue.',
+      unassigned: 'No unassigned safety concerns match this filter.',
+      'premises-needed': 'No safety concerns needing premises match this filter.',
+      mine: 'No safety concerns assigned to you match this filter.',
       closed: 'No closed safety concerns match this filter.'
     };
     const closedPanel = document.getElementById('concerns-panel-closed');
@@ -358,16 +371,57 @@
     });
   }
 
-  function setConcernFilter(filter) {
-    if (concernsActiveFilter === filter && filter !== 'all') concernsActiveFilter = 'all';
-    else concernsActiveFilter = filter;
-    document.querySelectorAll('.concern-filters .chip').forEach(function (chip) {
-      chip.classList.toggle('on', chip.dataset.concernFilter === concernsActiveFilter);
+  function syncConcernFilterChips() {
+    document.querySelectorAll('.concern-filters-rag [data-concern-filter]').forEach(function (item) {
+      item.classList.toggle('active', item.dataset.concernFilter === concernsRagFilter);
     });
+    syncConcernToggleFilterChips('.concern-filters-queue', 'concernFilter', concernsQueueFilter);
+    syncConcernToggleFilterChips('.concern-filters-dept', 'concernFilter', concernsDeptFilter);
+  }
+
+  function syncConcernToggleFilterChips(containerSelector, filterAttr, activeFilter) {
+    document.querySelectorAll(containerSelector + ' .chip').forEach(function (chip) {
+      const filter = chip.dataset[filterAttr];
+      const label = chip.dataset.chipLabel || chip.textContent.trim();
+      const isOn = filter === activeFilter && activeFilter !== 'all';
+      chip.classList.toggle('on', isOn);
+      if (isOn) {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>' +
+          '<span class="chip-dismiss" role="button" tabindex="0" aria-label="Clear ' + escHtml(label) + ' filter">×</span>';
+      } else {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>';
+      }
+    });
+  }
+
+  function setConcernRagFilter(filter) {
+    if (concernsRagFilter === filter && filter !== 'all') concernsRagFilter = 'all';
+    else concernsRagFilter = filter;
+    syncConcernFilterChips();
     renderConcernsLists();
   }
 
-  const CONCERN_VIEW_LABELS = { all: 'All', unassigned: 'Unassigned', mine: 'My concerns', closed: 'Closed' };
+  function setConcernQueueFilter(filter) {
+    if (concernsQueueFilter === filter && filter !== 'all') concernsQueueFilter = 'all';
+    else concernsQueueFilter = filter;
+    syncConcernFilterChips();
+    renderConcernsLists();
+  }
+
+  function setConcernDeptFilter(filter) {
+    if (concernsDeptFilter === filter && filter !== 'all') concernsDeptFilter = 'all';
+    else concernsDeptFilter = filter;
+    syncConcernFilterChips();
+    renderConcernsLists();
+  }
+
+  const CONCERN_VIEW_LABELS = {
+    all: 'All',
+    unassigned: 'Unassigned',
+    'premises-needed': 'Premises needed',
+    mine: 'My concerns',
+    closed: 'Closed'
+  };
 
   function closeConcernViewMenu() {
     const menu = document.getElementById('concern-view-menu');
@@ -377,15 +431,15 @@
   }
 
   function layoutConcernViews() {
-    const rail = document.getElementById('concern-views-rail');
+    const stack = document.getElementById('concern-sidebar-stack');
     const sidebar = document.getElementById('concern-views-sidebar');
     const menu = document.getElementById('concern-view-menu');
-    if (!rail || !sidebar || !menu) return;
+    if (!stack || !sidebar || !menu) return;
     if (typeof isMobileNavLayout === 'function' && isMobileNavLayout()) {
-      if (rail.parentElement !== menu) menu.appendChild(rail);
+      if (stack.parentElement !== menu) menu.appendChild(stack);
       sidebar.hidden = true;
     } else {
-      if (rail.parentElement !== sidebar) sidebar.appendChild(rail);
+      if (stack.parentElement !== sidebar) sidebar.appendChild(stack);
       sidebar.hidden = false;
       closeConcernViewMenu();
     }
@@ -425,6 +479,7 @@
   }
 
   function initConcernsPage() {
+    layoutConcernViews();
     loadScPins();
     loadScOverrides();
     if (!document.getElementById('concerns')?.dataset.viewsBound) {
@@ -435,16 +490,40 @@
           if (item) switchConcernsTab(item.dataset.concernView);
         });
       }
-      document.querySelectorAll('.concern-filters .chip').forEach(function (chip) {
-        chip.addEventListener('click', function () {
-          if (chip.dataset.concernFilter) setConcernFilter(chip.dataset.concernFilter);
+      const ragRail = document.getElementById('concern-rag-rail');
+      if (ragRail) {
+        ragRail.addEventListener('click', function (e) {
+          const item = e.target.closest('[data-concern-filter]');
+          if (item && item.closest('.concern-filters-rag')) setConcernRagFilter(item.dataset.concernFilter);
+        });
+      }
+      document.querySelectorAll('.concern-filters-queue .chip, .concern-filters-dept .chip').forEach(function (chip) {
+        chip.addEventListener('click', function (e) {
+          if (e.target.closest('.chip-dismiss')) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (chip.closest('.concern-filters-queue')) setConcernQueueFilter('all');
+            else if (chip.closest('.concern-filters-dept')) setConcernDeptFilter('all');
+            return;
+          }
+          const filter = chip.dataset.concernFilter;
+          if (!filter) return;
+          if (chip.closest('.concern-filters-queue')) setConcernQueueFilter(filter);
+          else if (chip.closest('.concern-filters-dept')) setConcernDeptFilter(filter);
         });
       });
+      if (!document.body.dataset.concernViewBound) {
+        document.body.dataset.concernViewBound = '1';
+        document.addEventListener('mousedown', function (e) {
+          if (typeof isMobileNavLayout !== 'function' || !isMobileNavLayout()) return;
+          const dropdown = document.querySelector('#concerns .process-view-dropdown');
+          if (dropdown && !dropdown.contains(e.target)) closeConcernViewMenu();
+        });
+      }
       document.getElementById('concerns').dataset.viewsBound = '1';
     }
-    layoutConcernViews();
     switchConcernsTab(concernsActiveTab);
-    setConcernFilter(concernsActiveFilter);
+    syncConcernFilterChips();
   }
 
   /* ---- Detail workflow ---- */

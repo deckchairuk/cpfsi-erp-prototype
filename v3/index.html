@@ -3051,11 +3051,16 @@
     cursor: pointer;
     border: 1px solid var(--line);
     background: var(--bg);
-    padding: 6px 12px;
+    height: 32px;
+    padding: 0 12px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 600;
+    line-height: 1;
     color: var(--ink-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .log-type-row .chip.active,
   .cpin-log-type-row .chip.active {
@@ -4485,20 +4490,27 @@
   .chip {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    min-height: 36px;
-    padding: 8px 14px;
+    height: 36px;
+    padding: 0 16px;
     border: 1px solid var(--line);
     background: var(--surface);
     border-radius: 999px;
     font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
     color: var(--ink-2);
     cursor: pointer;
+    white-space: nowrap;
+    vertical-align: middle;
   }
   .chip.on {
     background: var(--ink);
     color: white;
     border-color: var(--ink);
+  }
+  .chip.on:has(.chip-dismiss) {
     padding-right: 10px;
   }
   .chip-dismiss {
@@ -6026,56 +6038,20 @@
     margin-top: 0;
     margin-bottom: 0;
   }
-  /* CPINs — RAG + Queue on one row; Dept below; chips wrap within each group */
-  #cpins .process-filters-bar {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  #cpins .cpin-filters-primary-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 16px 24px;
-    width: 100%;
-    min-width: 0;
-  }
-  #cpins .process-filters-bar .filter-group,
-  #cpins .cpin-filters-primary-row .filter-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    margin-bottom: 0;
-    min-width: 0;
-  }
-  #cpins .cpin-filters-primary-row .filter-group {
-    flex: 1 1 200px;
-  }
-  #cpins .process-filters-bar > .filter-group {
-    width: 100%;
-  }
-  #cpins .process-filters-bar .filter-group + .filter-group {
-    margin-top: 0;
-  }
-  #cpins .process-filters-bar .filter-group-label {
-    margin-bottom: 0;
-  }
+  /* Sidebar list pages — stacked groups (label above chips), chips wrap */
   #cpins .process-filters-bar .filter-chips,
-  #cpins .process-filters-bar .filter-chips--scroll {
+  #cpins .process-filters-bar .filter-chips--scroll,
+  #processes .process-filters-bar .filter-chips,
+  #processes .process-filters-bar .filter-chips--scroll,
+  #concerns .process-filters-bar .filter-chips,
+  #concerns .process-filters-bar .filter-chips--scroll {
     flex-wrap: wrap;
     overflow-x: visible;
-    width: 100%;
     padding: 0;
-    margin: 0;
-  }
-  #cpins .process-filters-bar .filter-chips .chip {
-    flex-shrink: 0;
-    max-width: 100%;
   }
   @media (min-width: 841px) {
     #premises .process-filters-bar,
+    #cpins .process-filters-bar,
     #concerns .process-filters-bar {
       display: flex;
       flex-wrap: nowrap;
@@ -6083,6 +6059,7 @@
       gap: 16px 24px;
     }
     #premises .process-filters-bar .filter-group,
+    #cpins .process-filters-bar .filter-group,
     #concerns .process-filters-bar .filter-group {
       display: flex;
       align-items: center;
@@ -6091,21 +6068,48 @@
       flex-shrink: 0;
     }
     #premises .process-filters-bar .filter-group + .filter-group,
+    #cpins .process-filters-bar .filter-group + .filter-group,
     #concerns .process-filters-bar .filter-group + .filter-group {
       margin-top: 0;
     }
     #premises .process-filters-bar .filter-group-label,
+    #cpins .process-filters-bar .filter-group-label,
     #concerns .process-filters-bar .filter-group-label {
       margin-bottom: 0;
       white-space: nowrap;
     }
     #premises .process-filters-bar .filter-chips--scroll,
+    #cpins .process-filters-bar .filter-chips--scroll,
     #concerns .process-filters-bar .filter-chips--scroll {
       flex-wrap: nowrap;
       overflow-x: visible;
       padding: 0;
     }
   }
+  .cpin-sidebar-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cpin-rag-rail .cpin-rag-views {
+    display: block;
+    margin: 0;
+    padding: 0 4px 4px;
+  }
+  .cpin-rag-rail .rag-view-item .view-item-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cpin-rag-rail .rag-view-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cpin-rag-rail .rag-view-item .dot.red { background: var(--red); }
+  .cpin-rag-rail .rag-view-item .dot.amber { background: var(--amber); }
+  .cpin-rag-rail .rag-view-item .dot.green { background: var(--green); }
   .views-rail {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -6587,7 +6591,9 @@
       margin-bottom: 0;
       padding: 2px 0 8px;
     }
-    #cpins .process-filters-bar .filter-chips--scroll {
+    #cpins .process-filters-bar .filter-chips--scroll,
+    #processes .process-filters-bar .filter-chips--scroll,
+    #concerns .process-filters-bar .filter-chips--scroll {
       flex-wrap: wrap;
       overflow-x: visible;
       padding: 0;
@@ -7534,10 +7540,10 @@
         </div>
         <span style="font-size:11px;color:var(--ink-3);display:block;margin-top:4px;" id="dash-cpin-meta"></span>
 
-        <div class="cpin-hero" id="dash-cpin-hero" onclick="show('cpins')" style="cursor:pointer;margin-top:10px;"></div>
+        <div class="cpin-hero" id="dash-cpin-hero" onclick="openCpinsFromDashboard()" style="cursor:pointer;margin-top:10px;"></div>
 
         <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin:8px 0 4px;" id="dash-cpin-list-label">Action now</div>
-        <div id="dash-cpin-list" onclick="show('cpins')" style="cursor:pointer;"></div>
+        <div id="dash-cpin-list" onclick="openCpinsFromDashboard()" style="cursor:pointer;"></div>
       </div>
 
       <!-- TOP RIGHT: This week -->
@@ -8175,8 +8181,6 @@
       </div>
     </div>
 
-    <div class="cpin-counts" id="cpin-counts" style="margin-top:16px;"></div>
-
     <div class="cpins-layout">
       <div class="cpin-toolbar">
         <div class="process-view-dropdown">
@@ -8190,41 +8194,41 @@
       </div>
 
       <aside class="cpin-views-sidebar" id="cpin-views-sidebar">
+        <div class="cpin-sidebar-stack" id="cpin-sidebar-stack">
         <div class="views-rail" id="cpin-views-rail">
           <h4>Views</h4>
           <div class="view-item active" data-cpin-view="all" role="menuitem" tabindex="0"><span class="view-item-label">All</span><span class="pin" data-cpin-view-count="all"></span></div>
           <div class="view-item" data-cpin-view="unassigned" role="menuitem" tabindex="0"><span class="view-item-label">Unassigned</span><span class="pin" data-cpin-view-count="unassigned"></span></div>
+          <div class="view-item" data-cpin-view="premises-needed" role="menuitem" tabindex="0"><span class="view-item-label">Premises needed</span><span class="pin" data-cpin-view-count="premises-needed"></span></div>
           <div class="view-item" data-cpin-view="mine" role="menuitem" tabindex="0"><span class="view-item-label">My CPINs</span><span class="pin" data-cpin-view-count="mine"></span></div>
           <div class="view-item" data-cpin-view="closed" role="menuitem" tabindex="0"><span class="view-item-label">Closed</span><span class="pin" data-cpin-view-count="closed"></span></div>
+        </div>
+        <div class="views-rail cpin-rag-rail" id="cpin-rag-rail">
+          <h4>RAG</h4>
+          <div class="cpin-filters-rag cpin-rag-views" role="group" aria-label="RAG severity">
+            <div class="view-item rag-view-item active" data-cpin-filter="all" role="menuitem" tabindex="0"><span class="view-item-label">All</span></div>
+            <div class="view-item rag-view-item" data-cpin-filter="red" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot red" aria-hidden="true"></span>Red</span></div>
+            <div class="view-item rag-view-item" data-cpin-filter="amber" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot amber" aria-hidden="true"></span>Amber</span></div>
+            <div class="view-item rag-view-item" data-cpin-filter="green" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot green" aria-hidden="true"></span>Green</span></div>
+          </div>
+        </div>
         </div>
       </aside>
 
       <div class="cpin-results">
         <div class="process-filters-bar">
-          <div class="cpin-filters-primary-row">
-          <div class="filter-group">
-            <div class="filter-group-label">RAG</div>
-            <div class="filter-chips filter-chips--scroll cpin-filters cpin-filters-rag" role="group" aria-label="RAG severity">
-              <button class="chip on" data-cpin-filter="all">All</button>
-              <button class="chip" data-cpin-filter="red">Red</button>
-              <button class="chip" data-cpin-filter="amber">Amber</button>
-              <button class="chip" data-cpin-filter="green">Green</button>
-            </div>
-          </div>
           <div class="filter-group">
             <div class="filter-group-label">Queue</div>
             <div class="filter-chips filter-chips--scroll cpin-filters cpin-filters-queue" role="group" aria-label="Queue filters">
-              <button class="chip" data-cpin-filter="patch">My patch</button>
-              <button class="chip" data-cpin-filter="premises-needed">Premises needed</button>
-              <button class="chip" data-cpin-filter="in-progress">In progress</button>
-              <button class="chip" data-cpin-filter="flagged" type="button">Flagged / pending removal</button>
+              <button class="chip" type="button" data-cpin-filter="patch" data-chip-label="My patch">My patch</button>
+              <button class="chip" type="button" data-cpin-filter="in-progress" data-chip-label="In progress">In progress</button>
+              <button class="chip" type="button" data-cpin-filter="flagged" data-chip-label="Flagged / pending removal">Flagged / pending removal</button>
             </div>
-          </div>
           </div>
           <div class="filter-group">
             <div class="filter-group-label">Dept</div>
             <div class="filter-chips filter-chips--scroll cpin-filters cpin-filters-dept" role="group" aria-label="Government department">
-              <button class="chip" data-cpin-filter="gov-dept" type="button">Government Dept</button>
+              <button class="chip" type="button" data-cpin-filter="gov-dept" data-chip-label="Government Dept">Government Dept</button>
             </div>
           </div>
         </div>
@@ -8634,38 +8638,41 @@
       </div>
 
       <aside class="cpin-views-sidebar" id="concern-views-sidebar">
+        <div class="cpin-sidebar-stack" id="concern-sidebar-stack">
         <div class="views-rail" id="concern-views-rail">
           <h4>Views</h4>
           <div class="view-item active" data-concern-view="all" role="menuitem" tabindex="0"><span class="view-item-label">All</span><span class="pin" data-concern-view-count="all"></span></div>
           <div class="view-item" data-concern-view="unassigned" role="menuitem" tabindex="0"><span class="view-item-label">Unassigned</span><span class="pin" data-concern-view-count="unassigned"></span></div>
+          <div class="view-item" data-concern-view="premises-needed" role="menuitem" tabindex="0"><span class="view-item-label">Premises needed</span><span class="pin" data-concern-view-count="premises-needed"></span></div>
           <div class="view-item" data-concern-view="mine" role="menuitem" tabindex="0"><span class="view-item-label">My concerns</span><span class="pin" data-concern-view-count="mine"></span></div>
           <div class="view-item" data-concern-view="closed" role="menuitem" tabindex="0"><span class="view-item-label">Closed</span><span class="pin" data-concern-view-count="closed"></span></div>
+        </div>
+        <div class="views-rail cpin-rag-rail" id="concern-rag-rail">
+          <h4>RAG</h4>
+          <div class="concern-filters concern-filters-rag cpin-rag-views" role="group" aria-label="RAG severity">
+            <div class="view-item rag-view-item active" data-concern-filter="all" role="menuitem" tabindex="0"><span class="view-item-label">All</span></div>
+            <div class="view-item rag-view-item" data-concern-filter="red" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot red" aria-hidden="true"></span>Red</span></div>
+            <div class="view-item rag-view-item" data-concern-filter="amber" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot amber" aria-hidden="true"></span>Amber</span></div>
+            <div class="view-item rag-view-item" data-concern-filter="green" role="menuitem" tabindex="0"><span class="view-item-label"><span class="dot green" aria-hidden="true"></span>Green</span></div>
+          </div>
+        </div>
         </div>
       </aside>
 
       <div class="cpin-results">
         <div class="process-filters-bar">
           <div class="filter-group">
-            <div class="filter-group-label">RAG</div>
-            <div class="filter-chips filter-chips--scroll concern-filters concern-filters-rag" role="group" aria-label="RAG severity">
-              <button class="chip on" data-concern-filter="all" type="button">All</button>
-              <button class="chip" data-concern-filter="red" type="button">Red</button>
-              <button class="chip" data-concern-filter="amber" type="button">Amber</button>
-              <button class="chip" data-concern-filter="green" type="button">Green</button>
-            </div>
-          </div>
-          <div class="filter-group">
             <div class="filter-group-label">Queue</div>
             <div class="filter-chips filter-chips--scroll concern-filters concern-filters-queue" role="group" aria-label="Queue filters">
-              <button class="chip" data-concern-filter="patch" type="button">My patch</button>
-              <button class="chip" data-concern-filter="premises-needed" type="button">Premises needed</button>
-              <button class="chip" data-concern-filter="in-progress" type="button">In progress</button>
+              <button class="chip" type="button" data-concern-filter="patch" data-chip-label="My patch">My patch</button>
+              <button class="chip" type="button" data-concern-filter="in-progress" data-chip-label="In progress">In progress</button>
+              <button class="chip" type="button" data-concern-filter="flagged" data-chip-label="Flagged / pending removal">Flagged / pending removal</button>
             </div>
           </div>
           <div class="filter-group">
             <div class="filter-group-label">Dept</div>
             <div class="filter-chips filter-chips--scroll concern-filters concern-filters-dept" role="group" aria-label="Government department">
-              <button class="chip" data-concern-filter="gov-dept" type="button">Government Dept</button>
+              <button class="chip" type="button" data-concern-filter="gov-dept" data-chip-label="Government Dept">Government Dept</button>
             </div>
           </div>
         </div>
@@ -11138,7 +11145,8 @@
 
   function parseRoute() {
     const raw = (window.location.hash || '#login').slice(1);
-    const auditMatch = raw.match(/^audit\/([^/]+)(?:\/(setup|stage-([1-6])))?$/);
+    const path = raw.split('?')[0];
+    const auditMatch = path.match(/^audit\/([^/]+)(?:\/(setup|stage-([1-6])))?$/);
     if (auditMatch) {
       const auditId = auditMatch[1];
       if (auditMatch[2] === 'setup') {
@@ -11151,31 +11159,31 @@
       }
       return { screen: 'audit', stage: null, auditId: auditId, cpinId: null, concernId: null, bizsupportId: null, legacy: false };
     }
-    const legacyAuditMatch = raw.match(/^audit-stage-([1-6])$/);
+    const legacyAuditMatch = path.match(/^audit-stage-([1-6])$/);
     if (legacyAuditMatch) {
       let stage = parseInt(legacyAuditMatch[1], 10);
       if (stage > AUDIT_STAGE_COUNT) stage = AUDIT_STAGE_COUNT;
       return { screen: 'audit', stage: stage, auditId: null, cpinId: null, concernId: null, bizsupportId: null, legacy: true };
     }
-    const cpinMatch = raw.match(/^cpin(?:\/([^/]+))?$/);
+    const cpinMatch = path.match(/^cpin(?:\/([^/]+))?$/);
     if (cpinMatch) {
       return { screen: 'cpin', stage: null, cpinId: cpinMatch[1] || null, concernId: null, bizsupportId: null, legacy: false };
     }
-    const concernMatch = raw.match(/^concern(?:\/([^/]+))?$/);
+    const concernMatch = path.match(/^concern(?:\/([^/]+))?$/);
     if (concernMatch) {
       return { screen: 'concern', stage: null, cpinId: null, concernId: concernMatch[1] || null, bizsupportId: null };
     }
-    const bizsupportMatch = raw.match(/^bizsupport(?:\/([^/]+))?$/);
+    const bizsupportMatch = path.match(/^bizsupport(?:\/([^/]+))?$/);
     if (bizsupportMatch) {
       return { screen: 'bizsupport', stage: null, cpinId: null, concernId: null, bizsupportId: bizsupportMatch[1] || null };
     }
-    if (raw === 'cpins' || raw.startsWith('cpins-')) {
+    if (path === 'cpins' || path.startsWith('cpins-')) {
       return { screen: 'cpins', stage: null, cpinId: null, concernId: null, bizsupportId: null };
     }
-    if (raw === 'concerns') {
+    if (path === 'concerns') {
       return { screen: 'concerns', stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
     }
-    const adminMatch = raw.match(/^admin(?:\/([a-z-]+))?(?:\/(.+))?$/);
+    const adminMatch = path.match(/^admin(?:\/([a-z-]+))?(?:\/(.+))?$/);
     if (adminMatch) {
       const tab = adminMatch[1] || 'users';
       const adminTab = ADMIN_ROUTE_TABS.indexOf(tab) >= 0 ? tab : 'users';
@@ -11185,7 +11193,7 @@
         adminTab: adminTab, adminDetailId: adminDetailId, legacy: false
       };
     }
-    return { screen: raw, stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
+    return { screen: path, stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
   }
 
   function renderFromHash() {
@@ -14974,6 +14982,14 @@
     renderDashboardCpinPanel();
   }
 
+  function openCpinsFromDashboard() {
+    const target = dashboardCpinView === 'unassigned'
+      ? 'cpins?cpins-tab=unassigned'
+      : 'cpins?filter=patch';
+    if (window.location.hash === '#' + target) renderFromHash();
+    else window.location.hash = target;
+  }
+
   function renderDashboardCpinPanel() {
     const title = document.getElementById('dash-cpin-title');
     const meta = document.getElementById('dash-cpin-meta');
@@ -15001,7 +15017,7 @@
 
     if (listLabel) listLabel.textContent = dashboardCpinView === 'unassigned' ? 'Awaiting assignment' : 'Action now';
     list.innerHTML = items.slice(0, 3).map(function (c) {
-      return '<div class="cpin-mini ' + c.severity + '" onclick="event.stopPropagation();show(\'cpins\')">' +
+      return '<div class="cpin-mini ' + c.severity + '" onclick="event.stopPropagation();openCpinsFromDashboard()">' +
         '<div class="lead"><span class="dot"></span><strong>' + escHtml(c.premises || 'No premises') + '</strong>  ·  ' + escHtml(c.summary) + '</div>' +
         '<span class="when">' + escHtml(c.when) + '</span></div>';
     }).join('') || '<div style="font-size:13px;color:var(--ink-3);padding:8px 0;">No CPINs in this queue.</div>';
@@ -19086,11 +19102,14 @@
   const CPIN_IN_PROGRESS_WF = new Set(['assigned', 'triage', 'desk_eval', 'awaiting_info', 'audit_spawned', 'in_review', 'audit']);
   let cpinPins = new Set();
   let cpinOverrides = {};
-  let cpinsActiveFilter = 'all';
+  let cpinsRagFilter = 'all';
+  let cpinsQueueFilter = 'all';
+  let cpinsDeptFilter = 'all';
   const CPIN_CURRENT_INSPECTOR = 'Phil Gower';
   const CPIN_VIEW_LABELS = {
     all: 'All',
     unassigned: 'Unassigned',
+    'premises-needed': 'Premises needed',
     mine: 'My CPINs',
     closed: 'Closed'
   };
@@ -21268,6 +21287,9 @@
         return c.assignee === CPIN_CURRENT_INSPECTOR && CPIN_IN_PROGRESS_WF.has(c.workflow);
       });
     }
+    if (tab === 'premises-needed') {
+      return open.filter(cpinNeedsPremises);
+    }
     return open;
   }
 
@@ -22161,16 +22183,15 @@
 
   function cpinMatchesFilter(item) {
     if (!matchesDateRangeFilter(parseCpinWhenDays(item.when), cpinsDateFilter)) return false;
-    if (cpinsActiveFilter === 'all') return true;
-    if (cpinsActiveFilter === 'patch') return item.patch;
-    if (cpinsActiveFilter === 'premises-needed') return cpinNeedsPremises(item);
-    if (cpinsActiveFilter === 'in-progress') return cpinIsInProgress(item);
-    if (cpinsActiveFilter === 'flagged') {
+    if (cpinsRagFilter !== 'all' && item.severity !== cpinsRagFilter) return false;
+    if (cpinsQueueFilter === 'patch' && !item.patch) return false;
+    if (cpinsQueueFilter === 'in-progress' && !cpinIsInProgress(item)) return false;
+    if (cpinsQueueFilter === 'flagged') {
       const r = getCpinAdminReview(item);
-      return !!(r && (r.status === 'pending' || (r.status === 'approved' && r.action === 'flag')));
+      if (!(r && (r.status === 'pending' || (r.status === 'approved' && r.action === 'flag')))) return false;
     }
-    if (cpinsActiveFilter === 'gov-dept') return isGovernmentDeptPremises(item.premises);
-    return item.severity === cpinsActiveFilter;
+    if (cpinsDeptFilter === 'gov-dept' && !isGovernmentDeptPremises(item.premises)) return false;
+    return true;
   }
 
   function buildCpinCard(item) {
@@ -22311,15 +22332,15 @@
   }
 
   function layoutCpinViews() {
-    const rail = document.getElementById('cpin-views-rail');
+    const stack = document.getElementById('cpin-sidebar-stack');
     const sidebar = document.getElementById('cpin-views-sidebar');
     const menu = document.getElementById('cpin-view-menu');
-    if (!rail || !sidebar || !menu) return;
+    if (!stack || !sidebar || !menu) return;
     if (isMobileNavLayout()) {
-      if (rail.parentElement !== menu) menu.appendChild(rail);
+      if (stack.parentElement !== menu) menu.appendChild(stack);
       sidebar.hidden = true;
     } else {
-      if (rail.parentElement !== sidebar) sidebar.appendChild(rail);
+      if (stack.parentElement !== sidebar) sidebar.appendChild(stack);
       sidebar.hidden = false;
       closeCpinViewMenu();
     }
@@ -22347,9 +22368,16 @@
   function updateCpinQueueCounts() {
     const all = getCpinsForTab('all');
     const unassigned = getCpinsForTab('unassigned');
+    const premisesNeeded = getCpinsForTab('premises-needed');
     const mine = getCpinsForTab('mine');
     const closed = getCpinsForTab('closed');
-    const viewCounts = { all: all.length, unassigned: unassigned.length, mine: mine.length, closed: closed.length };
+    const viewCounts = {
+      all: all.length,
+      unassigned: unassigned.length,
+      'premises-needed': premisesNeeded.length,
+      mine: mine.length,
+      closed: closed.length
+    };
     document.querySelectorAll('[data-cpin-view-count]').forEach(function (el) {
       const key = el.dataset.cpinViewCount;
       const n = viewCounts[key];
@@ -22357,19 +22385,6 @@
     });
     const resultsCount = document.getElementById('cpin-results-count');
     if (resultsCount) resultsCount.textContent = String(getCpinFilteredCount(cpinsActiveTab));
-    const countsEl = document.getElementById('cpin-counts');
-    if (countsEl) {
-      const red = mine.filter(function (c) { return c.severity === 'red'; }).length;
-      const amber = mine.filter(function (c) { return c.severity === 'amber'; }).length;
-      const green = mine.filter(function (c) { return c.severity === 'green'; }).length;
-      const premisesNeeded = all.filter(cpinNeedsPremises).length;
-      countsEl.innerHTML =
-        '<div class="count"><div class="dot red"></div><strong>' + red + '</strong><span class="label">Red</span></div>' +
-        '<div class="count"><div class="dot amber"></div><strong>' + amber + '</strong><span class="label">Amber</span></div>' +
-        '<div class="count"><div class="dot green"></div><strong>' + green + '</strong><span class="label">Green</span></div>' +
-        '<div class="count count--spaced"><strong>' + unassigned.length + '</strong><span class="label">Unassigned</span></div>' +
-        (premisesNeeded ? '<div class="count count--spaced-sm"><strong>' + premisesNeeded + '</strong><span class="label">Premises needed</span></div>' : '');
-    }
   }
 
   function renderCpinsLists() {
@@ -22381,6 +22396,7 @@
       const emptyMsgs = {
         all: 'No open CPINs match this filter.',
         unassigned: 'No unassigned CPINs match this filter.',
+        'premises-needed': 'No CPINs needing premises match this filter.',
         mine: 'No CPINs assigned to you match this filter.'
       };
       renderCpinPanel('cpins-panel-list', getCpinsForTab(cpinsActiveTab), emptyMsgs[cpinsActiveTab] || 'No CPINs match this filter.');
@@ -22398,13 +22414,55 @@
     renderCpinsLists();
   }
 
-  function setCpinFilter(filter) {
-    if (cpinsActiveFilter === filter && filter !== 'all') cpinsActiveFilter = 'all';
-    else cpinsActiveFilter = filter;
-    document.querySelectorAll('.cpin-filters .chip').forEach(function (chip) {
-      chip.classList.toggle('on', chip.dataset.cpinFilter === cpinsActiveFilter);
+  function syncCpinFilterChips() {
+    document.querySelectorAll('.cpin-filters-rag [data-cpin-filter]').forEach(function (item) {
+      item.classList.toggle('active', item.dataset.cpinFilter === cpinsRagFilter);
     });
+    syncCpinToggleFilterChips('.cpin-filters-queue', 'cpinFilter', cpinsQueueFilter);
+    syncCpinToggleFilterChips('.cpin-filters-dept', 'cpinFilter', cpinsDeptFilter);
+  }
+
+  function syncCpinToggleFilterChips(containerSelector, filterAttr, activeFilter) {
+    document.querySelectorAll(containerSelector + ' .chip').forEach(function (chip) {
+      const filter = chip.dataset[filterAttr];
+      const label = chip.dataset.chipLabel || chip.textContent.trim();
+      const isOn = filter === activeFilter && activeFilter !== 'all';
+      chip.classList.toggle('on', isOn);
+      if (isOn) {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>' +
+          '<span class="chip-dismiss" role="button" tabindex="0" aria-label="Clear ' + escHtml(label) + ' filter">×</span>';
+      } else {
+        chip.innerHTML = '<span class="chip-label">' + escHtml(label) + '</span>';
+      }
+    });
+  }
+
+  function setCpinRagFilter(filter) {
+    if (cpinsRagFilter === filter && filter !== 'all') cpinsRagFilter = 'all';
+    else cpinsRagFilter = filter;
+    syncCpinFilterChips();
     renderCpinsLists();
+  }
+
+  function setCpinQueueFilter(filter) {
+    if (cpinsQueueFilter === filter && filter !== 'all') cpinsQueueFilter = 'all';
+    else cpinsQueueFilter = filter;
+    syncCpinFilterChips();
+    renderCpinsLists();
+  }
+
+  function setCpinDeptFilter(filter) {
+    if (cpinsDeptFilter === filter && filter !== 'all') cpinsDeptFilter = 'all';
+    else cpinsDeptFilter = filter;
+    syncCpinFilterChips();
+    renderCpinsLists();
+  }
+
+  function applyCpinLegacyFilter(filter) {
+    if (['red', 'amber', 'green', 'all'].indexOf(filter) >= 0) cpinsRagFilter = filter;
+    else if (['patch', 'in-progress', 'flagged'].indexOf(filter) >= 0) cpinsQueueFilter = filter;
+    else if (filter === 'gov-dept') cpinsDeptFilter = filter;
+    else if (filter === 'premises-needed') cpinsActiveTab = 'premises-needed';
   }
 
   function toggleCpinPin(id, e) {
@@ -22433,20 +22491,21 @@
     if (hashTab) {
       const t = hashTab[1];
       if (t === 'completed') cpinsActiveTab = 'closed';
-      else if (['all', 'unassigned', 'mine', 'closed'].indexOf(t) >= 0) cpinsActiveTab = t;
-      else if (t === 'incoming' || t === 'awaiting-premises') {
-        cpinsActiveTab = 'unassigned';
-        cpinsActiveFilter = t === 'awaiting-premises' ? 'premises-needed' : 'all';
-      }
+      else if (['all', 'unassigned', 'mine', 'closed', 'premises-needed'].indexOf(t) >= 0) cpinsActiveTab = t;
+      else if (t === 'incoming') cpinsActiveTab = 'unassigned';
+      else if (t === 'awaiting-premises') cpinsActiveTab = 'premises-needed';
     } else if (hash.indexOf('cpins-incoming') >= 0 || hash.indexOf('incoming') >= 0) {
       cpinsActiveTab = 'unassigned';
     } else if (hash.indexOf('cpins-awaiting-premises') >= 0) {
-      cpinsActiveTab = 'unassigned';
-      cpinsActiveFilter = 'premises-needed';
+      cpinsActiveTab = 'premises-needed';
     }
     const hashFilter = hash.match(/filter=([\w-]+)/);
-    if (hashFilter && ['all', 'red', 'amber', 'green', 'patch', 'premises-needed', 'in-progress', 'flagged'].indexOf(hashFilter[1]) >= 0) {
-      cpinsActiveFilter = hashFilter[1];
+    if (hashFilter) {
+      cpinsRagFilter = 'all';
+      cpinsQueueFilter = 'all';
+      cpinsDeptFilter = 'all';
+      if (!hashTab) cpinsActiveTab = 'all';
+      applyCpinLegacyFilter(hashFilter[1]);
     }
     if (!document.getElementById('cpins')?.dataset.viewsBound) {
       const cpinsEl = document.getElementById('cpins');
@@ -22457,9 +22516,26 @@
           if (item) switchCpinsTab(item.dataset.cpinView);
         });
       }
-      document.querySelectorAll('.cpin-filters .chip').forEach(function (chip) {
-        chip.addEventListener('click', function () {
-          if (chip.dataset.cpinFilter) setCpinFilter(chip.dataset.cpinFilter);
+      const ragRail = document.getElementById('cpin-rag-rail');
+      if (ragRail) {
+        ragRail.addEventListener('click', function (e) {
+          const item = e.target.closest('[data-cpin-filter]');
+          if (item && item.closest('.cpin-filters-rag')) setCpinRagFilter(item.dataset.cpinFilter);
+        });
+      }
+      document.querySelectorAll('.cpin-filters-queue .chip, .cpin-filters-dept .chip').forEach(function (chip) {
+        chip.addEventListener('click', function (e) {
+          if (e.target.closest('.chip-dismiss')) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (chip.closest('.cpin-filters-queue')) setCpinQueueFilter('all');
+            else if (chip.closest('.cpin-filters-dept')) setCpinDeptFilter('all');
+            return;
+          }
+          const filter = chip.dataset.cpinFilter;
+          if (!filter) return;
+          if (chip.closest('.cpin-filters-queue')) setCpinQueueFilter(filter);
+          else if (chip.closest('.cpin-filters-dept')) setCpinDeptFilter(filter);
         });
       });
       initListControlDropdown('cpin-sort-dropdown', setCpinSort);
@@ -22480,7 +22556,7 @@
       });
     }
     switchCpinsTab(cpinsActiveTab);
-    setCpinFilter(cpinsActiveFilter);
+    syncCpinFilterChips();
   }
 
   function renderCpinKeyFieldHighlights(cpin) {
