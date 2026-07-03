@@ -16,7 +16,7 @@
     --surface: #ffffff;
     --ink: #0b0c0c;             /* GOV.UK ink */
     --ink-2: #4a4a48;
-    --ink-3: #7a7a78;
+    --ink-3: #626a6e;
     --line: #d9d9d3;
     --line-2: #ebebe6;
     --accent: #1d70b8;          /* GOV.UK link blue */
@@ -27,12 +27,17 @@
     --gov-focus: #ffdd00;       /* GOV.UK focus yellow */
     --red: #d4351c;             /* GOV.UK error red */
     --red-soft: #fde2e2;
+    --red-text: #942514;        /* on soft backgrounds — WCAG AA */
     --amber: #b45309;
     --amber-soft: #fef0d4;
+    --amber-text: #805300;
     --green: #15803d;
     --green-soft: #dcefe2;
+    --green-text: #14532d;
     --purple: #6d28d9;
     --purple-soft: #ece1ff;
+    --purple-text: #5b21b6;
+    --accent-text: #1a5490;     /* on accent-soft — WCAG AA */
     --mono: 'SFMono-Regular', Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   }
@@ -49,9 +54,37 @@
     line-height: 1.45;
   }
 
-  a { color: var(--accent); text-decoration: none; cursor: pointer; }
-  a:hover { text-decoration: underline; }
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.1em; cursor: pointer; }
+  a:hover { text-decoration-thickness: max(3px, 0.12em); }
+  main a.btn,
+  main a.chip,
+  main a.pill,
+  .topbar a,
+  .nav-main a,
+  .skip-link {
+    text-decoration: none;
+  }
   button { font-family: inherit; font-size: inherit; cursor: pointer; }
+
+  /* Skip link — visible on keyboard focus (GOV.UK pattern) */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    padding: 12px 16px;
+    background: var(--gov-focus);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 16px;
+    z-index: 200;
+    text-decoration: none;
+    box-shadow: 0 4px 0 var(--ink);
+  }
+  .skip-link:focus {
+    top: 16px;
+    outline: 3px solid transparent;
+    box-shadow: 0 0 0 3px var(--ink), 0 4px 0 var(--ink);
+  }
 
   /* Top bar */
   .topbar {
@@ -406,12 +439,12 @@
     line-height: 1.6;
     letter-spacing: 0.02em;
   }
-  .pill.red { background: var(--red-soft); color: var(--red); }
-  .pill.amber { background: var(--amber-soft); color: var(--amber); }
-  .pill.green { background: var(--green-soft); color: var(--green); }
-  .pill.blue { background: var(--accent-soft); color: var(--accent); }
+  .pill.red { background: var(--red-soft); color: var(--red-text); }
+  .pill.amber { background: var(--amber-soft); color: var(--amber-text); }
+  .pill.green { background: var(--green-soft); color: var(--green-text); }
+  .pill.blue { background: var(--accent-soft); color: var(--accent-text); }
   .pill.grey { background: var(--line-2); color: var(--ink-2); }
-  .pill.purple { background: var(--purple-soft); color: var(--purple); }
+  .pill.purple { background: var(--purple-soft); color: var(--purple-text); }
 
   /* CPIN counts */
   .cpin-counts {
@@ -2898,12 +2931,13 @@
   #bizsupport select:hover {
     border-color: var(--ink-3);
   }
-  #cpin select:focus,
-  #concern select:focus,
-  #bizsupport select:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+  #cpin select:focus-visible,
+  #concern select:focus-visible,
+  #bizsupport select:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--ink);
   }
   .cpin-key-field.is-next-action label {
     color: var(--accent);
@@ -4452,7 +4486,8 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 12px;
+    min-height: 36px;
+    padding: 6px 12px;
     border: 1px solid var(--line);
     background: var(--surface);
     border-radius: 14px;
@@ -4470,8 +4505,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
     margin-left: 2px;
     border: none;
     border-radius: 50%;
@@ -4486,7 +4521,6 @@
   .chip-dismiss:hover,
   .chip-dismiss:focus-visible {
     background: rgba(255, 255, 255, 0.2);
-    outline: none;
   }
 
   /* Prompts panel content */
@@ -4500,7 +4534,7 @@
   .prompt-item .badge {
     display: inline-block;
     background: var(--purple-soft);
-    color: var(--purple);
+    color: var(--purple-text);
     font-size: 10px;
     font-weight: 600;
     padding: 1px 6px;
@@ -4535,9 +4569,9 @@
     align-items: center;
     gap: 6px;
   }
-  .cpin-tile.red .lbl { color: var(--red); }
-  .cpin-tile.amber .lbl { color: var(--amber); }
-  .cpin-tile.green .lbl { color: var(--green); }
+  .cpin-tile.red .lbl { color: var(--red-text); }
+  .cpin-tile.amber .lbl { color: var(--amber-text); }
+  .cpin-tile.green .lbl { color: var(--green-text); }
   .cpin-tile .lbl .dot {
     width: 8px; height: 8px; border-radius: 50%;
   }
@@ -4551,9 +4585,9 @@
     margin-top: 6px;
     letter-spacing: -0.02em;
   }
-  .cpin-tile.red .big { color: var(--red); }
-  .cpin-tile.amber .big { color: var(--amber); }
-  .cpin-tile.green .big { color: var(--green); }
+  .cpin-tile.red .big { color: var(--red-text); }
+  .cpin-tile.amber .big { color: var(--amber-text); }
+  .cpin-tile.green .big { color: var(--green-text); }
   .cpin-tile .sub {
     font-size: 11px;
     color: var(--ink-3);
@@ -4715,7 +4749,7 @@
   .modal-close {
     background: none;
     border: none;
-    color: var(--ink-3);
+    color: var(--ink-2);
     cursor: pointer;
     padding: 6px 10px;
     font-size: 18px;
@@ -6131,8 +6165,20 @@
     margin: -1px;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* GOV.UK-style form validation (error summary + field errors) */
@@ -7024,6 +7070,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#app-main">Skip to main content</a>
+
 <!-- =========================================================
      LOGIN SCREEN
 ========================================================= -->
@@ -7075,6 +7123,7 @@
     </div>
   </div>
   <div class="search" id="global-search">
+    <label class="visually-hidden" for="global-search-input">Search premises, processes and CPINs</label>
     <input
       type="search"
       id="global-search-input"
@@ -11236,7 +11285,10 @@
     }
 
     // Update active nav
-    document.querySelectorAll('.nav-main button, .nav-more-menu button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-main button, .nav-more-menu button').forEach(b => {
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
     const navMap = {
       dashboard: 'nav-dashboard',
       premises: 'nav-premises',
@@ -11255,13 +11307,111 @@
       admin: null
     };
     const navId = navMap[id];
-    if (navId) document.getElementById(navId)?.classList.add('active');
+    if (navId) {
+      const navBtn = document.getElementById(navId);
+      navBtn?.classList.add('active');
+      navBtn?.setAttribute('aria-current', 'page');
+    }
     updateNavMoreActive();
     requestAnimationFrame(layoutResponsiveNav);
 
     updateActivityBarForScreen(id);
 
+    document.querySelectorAll('[id="app-main"]').forEach(function (m) { m.removeAttribute('id'); });
+    if (id === 'login') {
+      const loginHeading = document.querySelector('#login .login-card h1');
+      if (loginHeading) loginHeading.id = 'app-main';
+    } else {
+      const activeMain = document.getElementById(id)?.querySelector('main');
+      if (activeMain) activeMain.id = 'app-main';
+    }
+
     window.scrollTo(0, 0);
+  }
+
+  function patchActionLink(link) {
+    if (link.dataset.a11yPatched) return;
+    if (!link.getAttribute('href')) link.setAttribute('href', '#');
+    link.dataset.a11yPatched = '1';
+  }
+
+  function initAccessibleActionLinks() {
+    document.querySelectorAll('a[onclick]').forEach(patchActionLink);
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.matches?.('a[onclick]')) patchActionLink(node);
+          node.querySelectorAll?.('a[onclick]').forEach(patchActionLink);
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('click', function (e) {
+      const link = e.target.closest('a[href="#"]');
+      if (link) e.preventDefault();
+    });
+  }
+
+  function initModalDialogs() {
+    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+      const dialog = backdrop.querySelector(':scope > .modal, :scope > .audit-assessment-modal, :scope > .premises-map-modal, :scope > .feedback-modal');
+      if (!dialog) return;
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      const title = dialog.querySelector('h1, h2');
+      if (title) {
+        if (!title.id) title.id = backdrop.id + '-title';
+        dialog.setAttribute('aria-labelledby', title.id);
+      }
+      if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
+      backdrop.querySelectorAll('.modal-close').forEach(function (btn) {
+        if (!btn.getAttribute('aria-label')) btn.setAttribute('aria-label', 'Close dialog');
+      });
+    });
+  }
+
+  function initModalFocusObserver() {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.attributeName !== 'class') return;
+        const backdrop = m.target;
+        if (!backdrop.classList?.contains('modal-backdrop') || !backdrop.classList.contains('open')) return;
+        const dialog = backdrop.querySelector('[role="dialog"]');
+        const focusTarget = dialog?.querySelector('.modal-close, button, [href], input, select, textarea, [tabindex="0"]') || dialog;
+        requestAnimationFrame(function () { focusTarget?.focus(); });
+      });
+    });
+    document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+      observer.observe(b, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+
+  function initAdminTabKeyboard() {
+    const tablist = document.getElementById('admin-tabs');
+    if (!tablist) return;
+    tablist.addEventListener('keydown', function (e) {
+      const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+      const current = tabs.indexOf(document.activeElement);
+      if (current < 0) return;
+      let next = current;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (current + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (current - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabs.length - 1;
+      else return;
+      e.preventDefault();
+      tabs[next].focus();
+      const tabId = tabs[next].dataset.adminTab;
+      if (tabId) setAdminTab(tabId);
+    });
+  }
+
+  function initAccessibility() {
+    initAccessibleActionLinks();
+    initModalDialogs();
+    initModalFocusObserver();
+    initAdminTabKeyboard();
   }
 
   // Listen for hash changes (covers browser back, forward, and
@@ -11272,6 +11422,7 @@
   window.addEventListener('load', () => {
     ensureAuditContextsInit();
     applyAuditContext(PROTOTYPE_AUDIT_ID);
+    initAccessibility();
     renderFromHash();
     initGlobalSearch();
     initResponsiveNav();
