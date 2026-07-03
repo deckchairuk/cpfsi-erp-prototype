@@ -30,29 +30,99 @@
     .page-header {
       background: var(--surface);
       border-bottom: 1px solid var(--line);
-      padding: 12px 24px;
+      padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-header::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gov-green) 0%, var(--gov-green-dk) 100%);
+      margin-top: 14px;
+      border-radius: 2px;
+    }
+    .page-header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: 100%;
+    }
+    .page-brand {
+      display: inline-flex;
+      align-items: center;
       gap: 12px;
+      text-decoration: none;
+      color: inherit;
     }
-    .page-header .org {
-      font-size: 14px;
+    .page-brand:hover { color: var(--accent); }
+    .page-brand-logo {
+      display: block;
+      height: 40px;
+      width: auto;
+      flex-shrink: 0;
+    }
+    .page-brand-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.25;
+    }
+    .page-brand-text span {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--ink-3);
+      letter-spacing: 0;
+      margin-top: 2px;
+    }
+    .page-header .helpline {
+      text-align: right;
+      font-size: 13px;
       color: var(--ink-2);
+      line-height: 1.45;
     }
-    .page-header .org strong { color: var(--ink); }
+    .page-header .helpline strong {
+      display: block;
+      font-size: 15px;
+      color: var(--gov-green);
+      letter-spacing: 0.02em;
+    }
     main {
       max-width: 720px;
       margin: 0 auto;
-      padding: 32px 20px 48px;
+      padding: 28px 20px 56px;
+    }
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px 24px 32px;
+      box-shadow: 0 1px 3px rgba(11, 12, 12, 0.06);
+    }
+    .form-intro {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
     }
     h1 {
       margin: 0 0 8px;
-      font-size: 1.75rem;
-      color: var(--gov-green);
-      text-decoration: underline;
-      text-underline-offset: 4px;
+      font-size: 1.625rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+    .form-tagline {
+      margin: 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      max-width: 36em;
     }
     .required-note {
       color: var(--red);
@@ -117,7 +187,7 @@
     }
     .submit-btn {
       width: 100%;
-      background: #3d3d3d;
+      background: var(--gov-green);
       color: #fff;
       border: none;
       padding: 14px 20px;
@@ -128,7 +198,7 @@
       cursor: pointer;
       border-radius: 4px;
     }
-    .submit-btn:hover { background: #1a1a1a; }
+    .submit-btn:hover { background: var(--gov-green-dk); }
     .clear-link {
       display: block;
       text-align: center;
@@ -146,6 +216,21 @@
     }
     .success-panel.show { display: block; }
     .success-panel h2 { margin-top: 0; color: var(--gov-green); }
+    .page-footer {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px 32px;
+      font-size: 12px;
+      color: var(--ink-3);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .page-footer a { color: var(--accent); font-weight: 600; }
+    @media (max-width: 540px) {
+      .page-header .helpline { text-align: left; width: 100%; }
+      .form-card { padding: 20px 16px 24px; }
+      .page-brand-logo { height: 34px; }
+    }
     .prototype-note {
       background: #e9f1f8;
       border: 1px solid var(--accent);
@@ -160,9 +245,18 @@
 <body>
 
 <header class="page-header">
-  <div class="org">
-    <strong>Crown Premises' Fire Safety Inspectorate</strong><br>
-    0300 1233 911
+  <div class="page-header-inner">
+    <a class="page-brand" href="index.html" title="CPFSI Fire Safety MIS">
+      <img src="assets/cpfsi-logo.png" alt="" class="page-brand-logo" width="40" height="40" aria-hidden="true">
+      <span class="page-brand-text">
+        CPFSI
+        <span>Crown Premises' Fire Safety Inspectorate</span>
+      </span>
+    </a>
+    <div class="helpline">
+      24-hour incident line
+      <strong>0300 1233 911</strong>
+    </div>
   </div>
 </header>
 
@@ -172,8 +266,12 @@
     <a href="index.html#cpins">Open CPFSI prototype</a>
   </p>
 
-  <h1>Crown Premises' Incident Notification (CPIN)</h1>
-  <p class="required-note">* denotes a required field</p>
+  <div class="form-card">
+    <div class="form-intro">
+      <h1>Crown Premises' Incident Notification (CPIN)</h1>
+      <p class="form-tagline">Report a fire-related incident at Crown premises to CPFSI. Fire and rescue services should complete this form at the earliest opportunity.</p>
+      <p class="required-note">* denotes a required field</p>
+    </div>
 
   <form id="cpin-report-form" novalidate>
     <div class="field">
@@ -272,7 +370,13 @@
     <p id="success-queue-hint"></p>
     <p><a href="index.html#cpins-incoming" id="success-queue-link">Go to CPINs queue</a> (sign in).</p>
   </div>
+  </div>
 </main>
+
+<footer class="page-footer">
+  Crown Premises' Fire Safety Inspectorate (CPFSI) · Ministry of Justice<br>
+  <a href="index.html">Return to CPFSI prototype</a>
+</footer>
 
 <script>
   const CPIN_INTAKE_KEY = 'cpfsi-cpin-intake-v1';

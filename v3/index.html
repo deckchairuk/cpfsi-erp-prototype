@@ -6065,6 +6065,77 @@
     color: #fff;
     font-weight: 600;
   }
+  .list-dept-trigger { cursor: pointer; }
+  .list-dept-trigger.is-filtered strong { color: var(--accent); }
+  .dept-picker-search {
+    width: 100%;
+    margin-bottom: 14px;
+  }
+  .dept-picker-quick { margin-bottom: 14px; }
+  .dept-picker-quick-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .dept-picker-quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dept-picker-quick-chips .chip { font-size: 12px; }
+  .dept-picker-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .dept-picker-row {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    padding: 10px 12px;
+    cursor: pointer;
+    border: none;
+    border-bottom: 1px solid var(--line-2);
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .dept-picker-row:last-child { border-bottom: none; }
+  .dept-picker-row:hover { background: var(--line-2); }
+  .dept-picker-row.is-active { background: var(--line-2); }
+  .dept-picker-row.is-active .dept-picker-code { color: var(--accent); }
+  .dept-picker-code {
+    font-weight: 600;
+    min-width: 4.5em;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .dept-picker-name { color: var(--ink-2); line-height: 1.35; }
+  .dept-picker-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-3);
+    flex-shrink: 0;
+  }
+  .dept-picker-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .dept-picker-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    gap: 10px;
+  }
   .date-range-custom {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -7798,6 +7869,10 @@
     <div class="list-results-bar">
       <div class="list-results-line">
         <span class="list-results-seg">Showing <strong id="premises-results-count">0</strong> premises</span>
+        <span class="list-results-seg">
+          <span class="list-results-label">Department</span>
+          <button type="button" class="list-control-trigger list-dept-trigger" id="premises-dept-trigger" aria-label="Filter by department" onclick="openPremisesDeptPicker()"><strong>All departments</strong></button>
+        </span>
         <span class="list-results-seg">
           <span class="list-results-label">Date range</span>
           <button type="button" class="list-control-trigger list-date-trigger" id="premises-date-trigger" aria-label="Change date range" onclick="openListDateRangeModal('premises')"><strong>All dates</strong></button>
@@ -10087,6 +10162,28 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
         <button type="button" class="btn" onclick="closeListDateRangeModal()">Cancel</button>
         <button type="button" class="btn primary" onclick="applyListDateRange()">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Premises list: department picker (full Crown register) -->
+<div id="premises-dept-modal" class="modal-backdrop" onclick="if(event.target===this) closePremisesDeptPicker()">
+  <div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="premises-dept-title">Department</h2>
+        <div class="sub" id="premises-dept-sub">Filter premises by responsible department. Search the full Crown register.</div>
+      </div>
+      <button type="button" class="modal-close" onclick="closePremisesDeptPicker()" title="Close (Esc)">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="search" class="dept-picker-search" id="premises-dept-search" placeholder="Search by code or name…" autocomplete="off" oninput="renderPremisesDeptPicker()" />
+      <div id="premises-dept-quick"></div>
+      <div id="premises-dept-list" class="dept-picker-list"></div>
+      <div class="dept-picker-footer">
+        <button type="button" class="btn" id="premises-dept-clear" onclick="clearPremisesDeptFilter()" hidden>Clear filter</button>
+        <button type="button" class="btn" onclick="closePremisesDeptPicker()">Close</button>
       </div>
     </div>
   </div>
@@ -14744,6 +14841,88 @@
     }
   };
 
+  const CROWN_DEPARTMENTS = [
+    { code: 'AAIB', name: 'Air Accidents Investigation Branch' },
+    { code: 'ACAS', name: 'The Advisory, Conciliation and Arbitration Service' },
+    { code: 'AGO', name: "Attorney General's Office" },
+    { code: 'APHA', name: 'Animal & Plant Health Agency' },
+    { code: 'BBSRC', name: 'Biotechnology and Biological Sciences Research Council' },
+    { code: 'BGS', name: 'British Geological Survey' },
+    { code: 'BSC', name: 'UK Border Security Command' },
+    { code: 'BSR', name: 'Building Safety Regulator' },
+    { code: 'CAFCASS', name: 'Children and Family Court Advisory and Support Service' },
+    { code: 'CITB', name: 'Construction Industry Training Board' },
+    { code: 'CMA', name: 'Competition and Markets Authority' },
+    { code: 'CO', name: 'Cabinet Office' },
+    { code: 'COI', name: 'Central Office of Information' },
+    { code: 'CPS', name: 'Crown Prosecution Service' },
+    { code: 'DBT', name: 'Dept for Business & Trade' },
+    { code: 'DCMS', name: 'Dept for Digital, Culture, Media & Sport' },
+    { code: 'DECC', name: 'Dept of Energy & Climate Change' },
+    { code: 'DEFRA', name: 'Dept for Environment, Food & Rural Affairs' },
+    { code: 'DESNZ', name: 'Dept for Energy Security & Net Zero' },
+    { code: 'DFE', name: 'Dept for Education' },
+    { code: 'DfT', name: 'Dept for Transport' },
+    { code: 'DHSC', name: 'Dept of Health and Social Care' },
+    { code: 'DofL', name: 'Duchy of Lancaster' },
+    { code: 'DSIT', name: 'Dept for Science, Innovation & Technology' },
+    { code: 'DVSA', name: 'Driver and Vehicle Standards Agency' },
+    { code: 'DWP', name: 'Dept for Work & Pensions' },
+    { code: 'FC', name: 'Forestry Commission' },
+    { code: 'FCDO', name: 'Foreign, Commonwealth & Development Office' },
+    { code: 'FSA', name: 'Food Standards Agency' },
+    { code: 'GAD', name: "Gov. Actuary's Department" },
+    { code: 'GDS', name: 'Government Digital Service' },
+    { code: 'GLD', name: 'Gov. Legal Department' },
+    { code: 'GPA', name: 'Gov. Property Agency' },
+    { code: 'HMCTS', name: 'HM Courts & Tribunals Service' },
+    { code: 'HMLR', name: 'HM Land Registry' },
+    { code: 'HMPO', name: 'HM Passport Office' },
+    { code: 'HMPPS', name: 'HM Prison Service' },
+    { code: 'HMRC', name: 'HM Revenue & Customs' },
+    { code: 'HMSO', name: "His Majesty's Stationery Office" },
+    { code: 'HMT', name: 'HM Treasury' },
+    { code: 'HO', name: 'Home Office' },
+    { code: 'HRP', name: 'Historic Royal Palaces' },
+    { code: 'HSE', name: 'Health and Safety Executive' },
+    { code: 'IRC', name: 'Immigration Removal Centre' },
+    { code: 'MAIB', name: 'Marine Accident Investigation Branch' },
+    { code: 'MCA', name: 'Maritime and Coastguard Agency' },
+    { code: 'MHCLG', name: 'Min. of Housing, Communities & Local Government' },
+    { code: 'MMO', name: 'Marine Management Organisation' },
+    { code: 'MoJ', name: 'Ministry of Justice' },
+    { code: 'MoJ PD', name: 'Ministry of Justice Property Directorate' },
+    { code: 'MRC', name: 'Medical Research Council' },
+    { code: 'NCA', name: 'National Crime Agency' },
+    { code: 'NDA', name: 'Nuclear Decommissioning Authority' },
+    { code: 'NERC', name: 'Natural Environment Research Council' },
+    { code: 'NH', name: 'National Highways' },
+    { code: 'NPS', name: 'Approved Premises' },
+    { code: 'NPS-IAP', name: 'Independent AP' },
+    { code: 'NPS-PS', name: 'Probation Service' },
+    { code: 'OFCOM', name: 'Office of Communications' },
+    { code: 'OFGEM', name: 'Office of Gas and Electricity Markets' },
+    { code: 'ONS', name: 'Office for National Statistics' },
+    { code: 'ORR', name: 'Office of Rail and Road' },
+    { code: 'PHE', name: 'Public Health England' },
+    { code: 'RH', name: 'Royal Household' },
+    { code: 'RPA', name: 'Rural Payments Agency' },
+    { code: 'STC', name: 'Secure Training Centre' },
+    { code: 'SFO', name: 'Serious Fraud Office' },
+    { code: 'STFC', name: 'Science and Technology Facilities Council' },
+    { code: 'TCE', name: 'The Crown Estate' },
+    { code: 'TIS', name: 'The Insolvency Service' },
+    { code: 'TNA', name: 'The National Archives' },
+    { code: 'TPE', name: 'UK Parliament' },
+    { code: 'UKAEA', name: 'UK Atomic Energy Authority' },
+    { code: 'UKBF', name: 'UK Border Force' },
+    { code: 'UKHSA', name: 'UK Health Security Agency' },
+    { code: 'UKRI', name: 'UK Research and Innovation' },
+    { code: 'UKVI', name: 'UK Visas & Immigration' },
+    { code: 'VCA', name: 'Vehicle Certification Agency' },
+    { code: 'VOA', name: 'Valuation Office Agency' }
+  ];
+
   const PREMISES_LIST = [
     { name: 'Temple Quay House', ref: 'PRM-0001847', address: 'Temple Back East, Bristol BS1 6BH', lat: 51.45224, lng: -2.58352, category: 'government-office', typeLabel: 'Government office', dept: 'HMCTS', score: 47, scoreTrend: 'up', scoreDelta: 3, scoreClass: 'score-high', lastAudit: 'Jan 2025', lastAuditSort: 202501, daysSinceAudit: 150, patch: true, route: 'premisesdetail', work: { pill: 'blue', label: 'Audit in progress' }, parentSite: { name: 'Temple Quay Estate', ref: 'PRM-0001840' } },
     { name: 'HMP Lewes', ref: 'PRM-0002103', address: 'Brighton Road, Lewes BN7 1FX', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 42, scoreTrend: 'down', scoreDelta: 5, scoreClass: 'score-high', lastAudit: 'Oct 2024', lastAuditSort: 202410, patch: true, work: { pill: 'purple', label: 'Follow-up due' }, parentSite: { name: 'Lewes Justice Campus', ref: 'PRM-0002100' } },
@@ -14781,7 +14960,145 @@
 
   let premisesScopeFilter = 'patch';
   let premisesTypeFilter = null;
+  let premisesDeptFilter = null;
   let premisesSortMode = 'worst';
+
+  function getPremisesDeptCodes(p) {
+    return (p.dept || '').split('/').map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  function getCrownDepartmentByCode(code) {
+    return CROWN_DEPARTMENTS.find(function (d) { return d.code === code; }) || null;
+  }
+
+  function getPremisesDeptFilterLabel() {
+    if (!premisesDeptFilter) return 'All departments';
+    const entry = getCrownDepartmentByCode(premisesDeptFilter);
+    return entry ? entry.code : premisesDeptFilter;
+  }
+
+  function syncPremisesDeptTrigger() {
+    const trigger = document.getElementById('premises-dept-trigger');
+    if (!trigger) return;
+    const strong = trigger.querySelector('strong');
+    if (strong) strong.textContent = getPremisesDeptFilterLabel();
+    trigger.classList.toggle('is-filtered', !!premisesDeptFilter);
+  }
+
+  function getPremisesDeptCountsForCurrentView() {
+    const counts = {};
+    PREMISES_LIST.filter(function (p) {
+      return premisesMatchesScope(p) && premisesMatchesType(p) && premisesMatchesDate(p);
+    }).forEach(function (p) {
+      getPremisesDeptCodes(p).forEach(function (code) {
+        counts[code] = (counts[code] || 0) + 1;
+      });
+    });
+    return counts;
+  }
+
+  function premisesMatchesDept(p) {
+    if (!premisesDeptFilter) return true;
+    return getPremisesDeptCodes(p).some(function (code) {
+      return code.toLowerCase() === premisesDeptFilter.toLowerCase();
+    });
+  }
+
+  function setPremisesDeptFilter(code) {
+    premisesDeptFilter = code || null;
+    syncPremisesDeptTrigger();
+    renderPremisesList();
+  }
+
+  function clearPremisesDeptFilter() {
+    setPremisesDeptFilter(null);
+    closePremisesDeptPicker();
+  }
+
+  function selectPremisesDept(code) {
+    setPremisesDeptFilter(code);
+    closePremisesDeptPicker();
+  }
+
+  function filterCrownDepartments(query) {
+    const q = (query || '').trim().toLowerCase();
+    if (!q) return CROWN_DEPARTMENTS.slice();
+    return CROWN_DEPARTMENTS.filter(function (d) {
+      return d.code.toLowerCase().indexOf(q) >= 0 || d.name.toLowerCase().indexOf(q) >= 0;
+    });
+  }
+
+  function renderPremisesDeptPicker() {
+    const quickEl = document.getElementById('premises-dept-quick');
+    const listEl = document.getElementById('premises-dept-list');
+    const clearBtn = document.getElementById('premises-dept-clear');
+    const searchEl = document.getElementById('premises-dept-search');
+    if (!listEl) return;
+    const query = searchEl ? searchEl.value : '';
+    const counts = getPremisesDeptCountsForCurrentView();
+    const quickCodes = Object.keys(counts).sort(function (a, b) {
+      return counts[b] - counts[a] || a.localeCompare(b);
+    });
+    const filtered = filterCrownDepartments(query);
+
+    if (clearBtn) clearBtn.hidden = !premisesDeptFilter;
+
+    if (quickEl) {
+      if (!query && quickCodes.length) {
+        let qh = '<div class="dept-picker-quick-label">In this list</div><div class="dept-picker-quick-chips">';
+        quickCodes.forEach(function (code) {
+          const entry = getCrownDepartmentByCode(code);
+          const label = entry ? entry.code : code;
+          const on = premisesDeptFilter === code;
+          qh += '<button type="button" class="chip' + (on ? ' on' : '') + '" onclick="selectPremisesDept(\'' + code.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+            escHtml(label) + ' <span style="opacity:0.7;">(' + counts[code] + ')</span></button>';
+        });
+        qh += '</div>';
+        quickEl.innerHTML = qh;
+        quickEl.hidden = false;
+      } else {
+        quickEl.innerHTML = '';
+        quickEl.hidden = true;
+      }
+    }
+
+    if (!filtered.length) {
+      listEl.innerHTML = '<div class="dept-picker-empty">No departments match your search.</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(function (d) {
+      const active = premisesDeptFilter === d.code;
+      const count = counts[d.code];
+      return '<button type="button" class="dept-picker-row' + (active ? ' is-active' : '') + '" onclick="selectPremisesDept(\'' + d.code.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' +
+        '<span class="dept-picker-code">' + escHtml(d.code) + '</span>' +
+        '<span class="dept-picker-name">' + escHtml(d.name) + '</span>' +
+        (count ? '<span class="dept-picker-count">' + count + '</span>' : '') +
+        '</button>';
+    }).join('');
+  }
+
+  function openPremisesDeptPicker() {
+    const modal = document.getElementById('premises-dept-modal');
+    if (!modal) return;
+    const searchEl = document.getElementById('premises-dept-search');
+    if (searchEl) searchEl.value = '';
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderPremisesDeptPicker();
+    if (searchEl) searchEl.focus();
+  }
+
+  function closePremisesDeptPicker() {
+    const modal = document.getElementById('premises-dept-modal');
+    if (modal) modal.classList.remove('open');
+    if (!document.getElementById('new-modal')?.classList.contains('open') &&
+        !document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
+        !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
+        !document.getElementById('list-date-range-modal')?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+  }
 
   function premisesMatchesScope(p) {
     return premisesScopeFilter === 'all' || p.patch;
@@ -14809,7 +15126,7 @@
 
   function getFilteredPremises() {
     const filtered = PREMISES_LIST.filter(function (p) {
-      return premisesMatchesScope(p) && premisesMatchesType(p) && premisesMatchesDate(p);
+      return premisesMatchesScope(p) && premisesMatchesType(p) && premisesMatchesDate(p) && premisesMatchesDept(p);
     });
     return sortPremises(filtered, premisesSortMode);
   }
@@ -14851,6 +15168,7 @@
     if (countEl) countEl.textContent = String(items.length);
     syncPremisesSortDropdown();
     syncDateRangeTrigger('premises');
+    syncPremisesDeptTrigger();
     if (!items.length) {
       body.innerHTML = '<div class="prem-row" style="cursor:default;padding:28px 16px;justify-content:center;color:var(--ink-3);font-size:13px;">No premises match your filters.</div>';
     } else {
@@ -19966,14 +20284,20 @@
   }
 
   function adminPremisesDeptOptions(selected) {
-    const depts = ['HMCTS', 'HMPPS', 'MoJ', 'DWP'];
+    const legacy = [];
     PREMISES_LIST.forEach(function (p) {
-      if (p.dept && depts.indexOf(p.dept) < 0) depts.push(p.dept);
+      getPremisesDeptCodes(p).forEach(function (code) {
+        if (!getCrownDepartmentByCode(code) && legacy.indexOf(code) < 0) legacy.push(code);
+      });
     });
-    depts.sort();
-    return depts.map(function (d) {
-      return '<option value="' + escHtml(d) + '"' + (selected === d ? ' selected' : '') + '>' + escHtml(d) + '</option>';
+    let html = CROWN_DEPARTMENTS.map(function (d) {
+      return '<option value="' + escHtml(d.code) + '"' + (selected === d.code ? ' selected' : '') + '>' +
+        escHtml(d.code + ' — ' + d.name) + '</option>';
     }).join('');
+    legacy.sort().forEach(function (code) {
+      html += '<option value="' + escHtml(code) + '"' + (selected === code ? ' selected' : '') + '>' + escHtml(code) + '</option>';
+    });
+    return html;
   }
 
   function readAdminPremisesFormFields() {
@@ -24952,6 +25276,8 @@
         closeScIntakeForm();
       } else if (document.getElementById('list-date-range-modal')?.classList.contains('open')) {
         closeListDateRangeModal();
+      } else if (document.getElementById('premises-dept-modal')?.classList.contains('open')) {
+        closePremisesDeptPicker();
       } else if (document.getElementById('setup-lookup-modal')?.classList.contains('open')) {
         closeSetupLookupModal();
       } else if (document.getElementById('premises-map-modal')?.classList.contains('open')) {
