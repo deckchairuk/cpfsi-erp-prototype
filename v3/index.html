@@ -303,6 +303,24 @@
     font-weight: 600;
     color: var(--ink);
   }
+  .search-results-footer {
+    padding: 10px 12px;
+    border-top: 1px solid var(--line-2);
+    text-align: center;
+  }
+  .search-page-row {
+    cursor: pointer;
+  }
+  .search-page-row .search-page-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .search-page-row .search-page-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
   .topbar-tools {
     display: flex;
     align-items: center;
@@ -2929,7 +2947,9 @@
   }
   .cpin-queue-hint a { font-weight: 500; }
   .cpin-single-workflow { margin-top: 16px; }
-  #cpin .setup-section.cpin-key-section {
+  #cpin .setup-section.cpin-key-section,
+  #concern .setup-section.cpin-key-section,
+  #consultation .setup-section.cpin-key-section {
     padding: 0;
     overflow: hidden;
   }
@@ -2958,10 +2978,6 @@
     color: #fff;
     border-bottom-color: rgba(0, 0, 0, 0.2);
   }
-  #concern .setup-section.cpin-key-section {
-    padding: 0;
-    overflow: hidden;
-  }
   #concern .cpin-rag-strip.red {
     background: #d4351c;
     color: #fff;
@@ -2974,6 +2990,26 @@
   }
   #concern .cpin-rag-strip.green {
     background: #00703c;
+    color: #fff;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+  }
+  #consultation .cpin-rag-strip.red {
+    background: #d4351c;
+    color: #fff;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+  }
+  #consultation .cpin-rag-strip.amber {
+    background: #f47738;
+    color: #0b0c0c;
+    border-bottom-color: rgba(0, 0, 0, 0.14);
+  }
+  #consultation .cpin-rag-strip.green {
+    background: #00703c;
+    color: #fff;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+  }
+  #consultation .cpin-rag-strip.grey {
+    background: #505a5f;
     color: #fff;
     border-bottom-color: rgba(0, 0, 0, 0.2);
   }
@@ -3080,6 +3116,7 @@
   .cpin-key-field .holder-card { width: 100%; }
   #cpin select,
   #concern select,
+  #consultation select,
   #bizsupport select {
     appearance: none;
     width: 100%;
@@ -3100,11 +3137,13 @@
   }
   #cpin select:hover,
   #concern select:hover,
+  #consultation select:hover,
   #bizsupport select:hover {
     border-color: var(--ink-3);
   }
   #cpin select:focus-visible,
   #concern select:focus-visible,
+  #consultation select:focus-visible,
   #bizsupport select:focus-visible,
   input:focus-visible,
   select:focus-visible,
@@ -3158,6 +3197,9 @@
     font-weight: 500;
     color: var(--ink-3);
   }
+  .cpin-key-display.is-readonly {
+    cursor: default;
+  }
   .cpin-key-change-btn {
     flex-shrink: 0;
     font-size: 12px;
@@ -3175,6 +3217,7 @@
   .cpin-workflow-section[hidden] { display: none !important; }
   #cpin .audit-note-form textarea,
   #concern .audit-note-form textarea,
+  #consultation .audit-note-form textarea,
   #bizsupport .audit-note-form textarea {
     max-width: none;
   }
@@ -3182,6 +3225,8 @@
   #cpin .field-row .field select,
   #concern .field-row .field input,
   #concern .field-row .field select,
+  #consultation .field-row .field input,
+  #consultation .field-row .field select,
   #bizsupport .field-row .field input,
   #bizsupport .field-row .field select {
     min-height: auto;
@@ -3192,6 +3237,7 @@
   }
   #cpin .field-row .field select,
   #concern .field-row .field select,
+  #consultation .field-row .field select,
   #bizsupport .field-row .field select {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23505a5f' d='M4.5 6.5 8 10l3.5-3.5'/%3E%3C/svg%3E");
@@ -3245,7 +3291,10 @@
   #cpin .setup-section .form-row textarea,
   #concern .setup-section .form-row select,
   #concern .setup-section .form-row input,
-  #concern .setup-section .form-row textarea {
+  #concern .setup-section .form-row textarea,
+  #consultation .setup-section .form-row select,
+  #consultation .setup-section .form-row input,
+  #consultation .setup-section .form-row textarea {
     width: 100%;
     max-width: none;
   }
@@ -3776,6 +3825,7 @@
   #audit-float-bar,
   #cpin-float-bar,
   #concern-float-bar,
+  #consultation-float-bar,
   #bs-float-bar,
   #global-float-bar {
     position: fixed;
@@ -3791,6 +3841,7 @@
   body.audit-activity-bar #audit-float-bar,
   body.cpin-activity-bar #cpin-float-bar,
   body.concern-activity-bar #concern-float-bar,
+  body.consultation-activity-bar #consultation-float-bar,
   body.bs-activity-bar #bs-float-bar,
   body.global-activity-bar #global-float-bar {
     display: flex;
@@ -4372,6 +4423,7 @@
   }
   /* Safety concern intake (fullscreen log form) */
   #sc-intake-modal.modal-backdrop,
+  #bcc-intake-modal.modal-backdrop,
   #cpin-intake-modal.modal-backdrop {
     padding: 0;
     align-items: stretch;
@@ -4379,6 +4431,7 @@
     z-index: 110;
   }
   #sc-intake-modal .sc-intake-modal,
+  #bcc-intake-modal .sc-intake-modal,
   #cpin-intake-modal .sc-intake-modal {
     max-width: none;
     width: 100%;
@@ -4449,7 +4502,8 @@
   }
   /* Override global .field label/input rules that break card layout */
   #sc-intake-modal .field label.sc-intake-rag-option,
-  #cpin-intake-modal .field label.sc-intake-rag-option {
+  #cpin-intake-modal .field label.sc-intake-rag-option,
+  #bcc-intake-modal .field label.sc-intake-rag-option {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -4461,7 +4515,8 @@
     margin-bottom: 0;
   }
   #sc-intake-modal .field .sc-intake-rag-option input[type="radio"],
-  #cpin-intake-modal .field .sc-intake-rag-option input[type="radio"] {
+  #cpin-intake-modal .field .sc-intake-rag-option input[type="radio"],
+  #bcc-intake-modal .field .sc-intake-rag-option input[type="radio"] {
     width: auto;
     margin: 3px 0 0;
     padding: 0;
@@ -4542,11 +4597,13 @@
 
   /* Intake modals — responsive labels & spacing (aligned with intake-form.css) */
   #sc-intake-modal .sc-intake-inner .field,
-  #cpin-intake-modal .sc-intake-inner .field {
+  #cpin-intake-modal .sc-intake-inner .field,
+  #bcc-intake-modal .sc-intake-inner .field {
     margin-bottom: 20px;
   }
   #sc-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option),
-  #cpin-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option) {
+  #cpin-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option),
+  #bcc-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option) {
     font-size: 1rem;
     font-weight: 700;
     text-transform: none;
@@ -4556,7 +4613,8 @@
     line-height: 1.35;
   }
   #sc-intake-modal .sc-intake-inner .field .help,
-  #cpin-intake-modal .sc-intake-inner .field .help {
+  #cpin-intake-modal .sc-intake-inner .field .help,
+  #bcc-intake-modal .sc-intake-inner .field .help {
     font-size: 14px;
     color: var(--ink-2);
     line-height: 1.45;
@@ -4567,20 +4625,25 @@
   #sc-intake-modal .sc-intake-inner .field textarea,
   #cpin-intake-modal .sc-intake-inner .field input,
   #cpin-intake-modal .sc-intake-inner .field select,
-  #cpin-intake-modal .sc-intake-inner .field textarea {
+  #cpin-intake-modal .sc-intake-inner .field textarea,
+  #bcc-intake-modal .sc-intake-inner .field input,
+  #bcc-intake-modal .sc-intake-inner .field select,
+  #bcc-intake-modal .sc-intake-inner .field textarea {
     min-height: 44px;
     padding: 10px 14px;
     font-size: 16px;
     border: 2px solid var(--line);
   }
   #sc-intake-modal .sc-intake-inner .field textarea,
-  #cpin-intake-modal .sc-intake-inner .field textarea {
+  #cpin-intake-modal .sc-intake-inner .field textarea,
+  #bcc-intake-modal .sc-intake-inner .field textarea {
     min-height: 120px;
     padding-top: 12px;
     padding-bottom: 12px;
   }
   #sc-intake-modal .field-row,
-  #cpin-intake-modal .field-row {
+  #cpin-intake-modal .field-row,
+  #bcc-intake-modal .field-row {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
@@ -4588,20 +4651,23 @@
   }
   @media (min-width: 640px) {
     #sc-intake-modal .field-row,
-    #cpin-intake-modal .field-row {
+    #cpin-intake-modal .field-row,
+    #bcc-intake-modal .field-row {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0 20px;
       margin-bottom: 4px;
     }
   }
   #sc-intake-modal .sc-intake-section,
-  #cpin-intake-modal .sc-intake-section {
+  #cpin-intake-modal .sc-intake-section,
+  #bcc-intake-modal .sc-intake-section {
     margin: 32px 0 8px;
     padding-top: 0;
     border-top: none;
   }
   #sc-intake-modal .sc-intake-section h3,
-  #cpin-intake-modal .sc-intake-section h3 {
+  #cpin-intake-modal .sc-intake-section h3,
+  #bcc-intake-modal .sc-intake-section h3 {
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--ink);
@@ -4611,24 +4677,36 @@
     text-transform: none;
     letter-spacing: normal;
   }
+  #sc-intake-modal .sc-intake-section-lead,
+  #cpin-intake-modal .sc-intake-section-lead,
+  #bcc-intake-modal .sc-intake-section-lead {
+    margin: -8px 0 16px;
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
   #sc-intake-modal .sc-intake-rag-group,
-  #cpin-intake-modal .sc-intake-rag-group {
+  #cpin-intake-modal .sc-intake-rag-group,
+  #bcc-intake-modal .sc-intake-rag-group {
     gap: 12px;
   }
   #sc-intake-modal .sc-intake-rag-option,
-  #cpin-intake-modal .sc-intake-rag-option {
+  #cpin-intake-modal .sc-intake-rag-option,
+  #bcc-intake-modal .sc-intake-rag-option {
     padding: 14px 16px;
     border: 2px solid var(--line);
     border-radius: 8px;
   }
   #sc-intake-modal .sc-intake-rag-option:has(input:checked),
-  #cpin-intake-modal .sc-intake-rag-option:has(input:checked) {
+  #cpin-intake-modal .sc-intake-rag-option:has(input:checked),
+  #bcc-intake-modal .sc-intake-rag-option:has(input:checked) {
     border-color: var(--gov-green);
     background: #eef6f0;
     box-shadow: 0 0 0 1px var(--gov-green);
   }
   #sc-intake-modal .sc-intake-urgent,
-  #cpin-intake-modal .sc-intake-urgent {
+  #cpin-intake-modal .sc-intake-urgent,
+  #bcc-intake-modal .sc-intake-urgent {
     padding: 12px 16px;
     background: #fef0f0;
     border-left: 4px solid var(--red);
@@ -4636,15 +4714,29 @@
     margin-top: 16px;
     line-height: 1.45;
   }
+  #sc-intake-modal .sc-intake-info,
+  #cpin-intake-modal .sc-intake-info,
+  #bcc-intake-modal .sc-intake-info {
+    padding: 12px 16px;
+    background: var(--accent-soft, #e9f1f8);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin: 0 0 16px;
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
   #sc-intake-modal .sc-intake-required,
-  #cpin-intake-modal .sc-intake-required {
+  #cpin-intake-modal .sc-intake-required,
+  #bcc-intake-modal .sc-intake-required {
     font-size: 14px;
     font-style: italic;
     margin-bottom: 24px;
   }
   @media (max-width: 639px) {
     #sc-intake-modal .sc-intake-header h2,
-    #cpin-intake-modal .sc-intake-header h2 {
+    #cpin-intake-modal .sc-intake-header h2,
+    #bcc-intake-modal .sc-intake-header h2 {
       font-size: 1.25rem;
     }
   }
@@ -4953,6 +5045,114 @@
     font-variant-numeric: tabular-nums;
   }
   .time-week .row .day-total.over { color: var(--green); }
+
+  .team-time-member-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin: 16px 0 20px;
+  }
+  .team-time-member-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .team-time-member-card:hover {
+    border-color: var(--line-strong);
+  }
+  .team-time-member-card.active,
+  .team-time-member-card:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+    outline: none;
+  }
+  .team-time-member-card .ttm-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .team-time-member-card .ttm-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .team-time-member-card .ttm-val {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .team-time-member-card .ttm-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .team-time-member-card .ttm-bar {
+    height: 4px;
+    background: var(--line-2);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .team-time-member-card .ttm-bar span {
+    display: block;
+    height: 100%;
+    background: var(--gov-green, #00703c);
+    border-radius: 2px;
+  }
+  .team-time-member-card.under .ttm-bar span { background: var(--amber); }
+  .team-time-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: auto;
+    margin-top: 16px;
+  }
+  .team-time-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .team-time-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    font-weight: 600;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    white-space: nowrap;
+  }
+  .team-time-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line-2);
+    vertical-align: top;
+  }
+  .team-time-table tr:last-child td { border-bottom: none; }
+  .team-time-table tr:hover td { background: #fafafa; }
+  .team-time-table .tt-person { font-weight: 600; white-space: nowrap; }
+  .team-time-table .tt-dur {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .team-time-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    font-weight: 600;
+    margin: 20px 0 8px;
+  }
 
   .quick-log {
     background: var(--surface);
@@ -7539,17 +7739,18 @@
     </div>
   </div>
   <div class="search" id="global-search">
-    <label class="visually-hidden" for="global-search-input">Search premises, processes and CPINs</label>
+    <label class="visually-hidden" for="global-search-input">Search premises, processes, CPINs and more</label>
     <input
       type="search"
       id="global-search-input"
-      placeholder="Search premises, processes, CPINs…"
+      placeholder="Search… press Enter for all results"
       autocomplete="off"
       aria-autocomplete="list"
       aria-controls="global-search-results"
       aria-expanded="false"
       oninput="renderGlobalSearchResults(this.value)"
       onfocus="onGlobalSearchFocus()"
+      onkeydown="onGlobalSearchKeydown(event)"
     />
     <div id="global-search-results" class="search-results" hidden role="listbox"></div>
   </div>
@@ -8002,6 +8203,42 @@
 </div>
 
 <!-- =========================================================
+     SEARCH RESULTS
+========================================================= -->
+<div id="search" class="screen">
+  <main>
+    <div class="screen-head">
+      <div class="screen-head-text">
+        <h1>Search results</h1>
+        <div class="meta" id="search-page-meta">Enter a search term in the header to find premises, processes, CPINs and more.</div>
+      </div>
+    </div>
+
+    <div class="process-filters-bar" style="margin-top:16px;">
+      <div class="filter-group">
+        <div class="filter-group-label">Show</div>
+        <div class="filter-chips filter-chips--scroll" id="search-tab-chips" role="tablist" aria-label="Result type">
+          <button class="chip on" type="button" data-search-tab="all" role="tab" aria-selected="true">All results</button>
+          <button class="chip" type="button" data-search-tab="premises" role="tab" aria-selected="false">Premises</button>
+          <button class="chip" type="button" data-search-tab="audit" role="tab" aria-selected="false">Audits</button>
+          <button class="chip" type="button" data-search-tab="cpin" role="tab" aria-selected="false">CPINs</button>
+          <button class="chip" type="button" data-search-tab="concern" role="tab" aria-selected="false">Safety Concerns</button>
+          <button class="chip" type="button" data-search-tab="other" role="tab" aria-selected="false">Other processes</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-results-bar">
+      <div class="list-results-line">
+        <span class="list-results-seg" id="search-results-summary">No search yet</span>
+      </div>
+    </div>
+
+    <div id="search-results-list" class="premises-list-body"></div>
+  </main>
+</div>
+
+<!-- =========================================================
      PREMISES LIST
 ========================================================= -->
 <div id="premises" class="screen">
@@ -8162,7 +8399,7 @@
           <button class="btn" onclick="startNewAuditFromPremises('Temple Quay House')">+ New audit</button>
           <button class="btn" onclick="startBizSupportFromPremises('Temple Quay House')">+ Log business support</button>
           <button class="btn" onclick="openScIntakeForm('Temple Quay House')">+ Log safety concern</button>
-          <button class="btn">+ New consultation</button>
+          <button class="btn" onclick="openBccIntakeForm('Temple Quay House')">+ New consultation</button>
         </div>
         <div style="margin-top:16px;font-size:11px;color:var(--ink-3);">
           Starting an audit from here pre-fills the Duty Holders this premises already knows.
@@ -9381,6 +9618,230 @@
 </div>
 
 <!-- =========================================================
+     BUILDING CONTROL CONSULTATION (detail workflow)
+========================================================= -->
+<div id="consultation" class="screen">
+  <main>
+    <div style="margin-bottom:8px;">
+      <a href="#" onclick="show('processes'); return false;">‹ Back to processes</a>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 id="consultation-detail-title" style="margin:0;">Building Control Consultation</h1>
+        <div class="meta" id="consultation-detail-meta"></div>
+        <div class="meta" id="consultation-detail-stage-hint" style="margin-top:4px;"></div>
+      </div>
+    </div>
+
+    <div class="cpin-single-workflow">
+      <div class="setup-section cpin-key-section">
+        <div id="consultation-sla-strip" class="cpin-rag-strip" role="status" aria-live="polite">
+          <span class="cpin-rag-strip-label" id="consultation-sla-strip-label">SLA</span>
+          <span class="cpin-rag-strip-detail" id="consultation-sla-strip-detail"></span>
+        </div>
+        <div class="cpin-key-section-body">
+          <h3>Premises and assignment</h3>
+          <div class="help">Match the submission to premises, assign the lead inspector and add team members. Building Control contacts are added in the next section.</div>
+          <div class="cpin-key-fields">
+            <div class="cpin-key-field" id="consultation-field-premises">
+              <label>Premises</label>
+              <p id="consultation-premises-status" class="cpin-key-field-hint"></p>
+              <div id="consultation-premises-display" class="cpin-key-display">
+                <div class="cpin-key-value" id="consultation-premises-value"></div>
+                <button type="button" class="btn cpin-key-change-btn" id="consultation-premises-change-btn" onclick="openConsultationPremisesEdit()">Change</button>
+              </div>
+            </div>
+            <div class="cpin-key-field" id="consultation-field-assignee">
+              <label for="consultation-assignee">Lead inspector</label>
+              <p id="consultation-assignee-hint" class="cpin-key-field-hint"></p>
+              <select id="consultation-assignee" onchange="saveConsultationAssignment()">
+                <option value="">Unassigned</option>
+                <option value="Phil Gower">Phil Gower</option>
+                <option value="Sarah Chen">Sarah Chen</option>
+                <option value="James Okonkwo">James Okonkwo</option>
+                <option value="Hannah Munro">Hannah Munro</option>
+              </select>
+            </div>
+            <div class="cpin-key-field">
+              <label>Team members</label>
+              <p class="cpin-key-field-hint">Additional inspectors on this consultation.</p>
+              <div class="cpin-key-display is-readonly">
+                <div class="cpin-key-value" id="consultation-team-value">None added</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section" id="consultation-intake-section">
+        <h3>Submission details (from intake)</h3>
+        <div class="help">Building Control submission received by email — reference, body and documents linked from the intake inbox.</div>
+        <div class="cpin-intake-grid" id="consultation-intake-grid"></div>
+        <div class="cpin-stop-message">
+          <h4 class="cpin-stop-message-heading">Project description</h4>
+          <div class="cpin-stop-message-panel">
+            <div class="cpin-stop-message-content">
+              <p class="cpin-stop-desc-readonly" id="consultation-intake-desc-value">—</p>
+            </div>
+          </div>
+        </div>
+        <div class="cpin-stop-message">
+          <h4 class="cpin-stop-message-heading">SharePoint documents</h4>
+          <div class="help" style="margin-top:0;margin-bottom:10px;">Architect plans, maps and consultation form — linked from the intake inbox folder.</div>
+          <div class="cpin-stop-message-panel">
+            <div class="cpin-stop-message-content">
+              <p class="cpin-stop-desc-readonly" id="consultation-sharepoint-link" style="margin:0;">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section cpin-workflow-section" id="consultation-section-contacts" hidden>
+        <h3>Duty Holders and Responsible Persons</h3>
+        <div class="help">Building Control body is the consultation submitter. Duty Holders are pre-suggested from this premises — approve both before review unlocks. No RBIP scoring applies.</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3);font-weight:600;margin:8px 0 6px;">Duty Holders</div>
+        <div id="consultation-dh-list"></div>
+        <div class="add-holder-btn" onclick="addConsultationDutyHolder()">+ Add a Duty Holder</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3);font-weight:600;margin:16px 0 6px;">Responsible Persons</div>
+        <div id="consultation-rp-list"></div>
+        <div class="add-holder-btn" onclick="addConsultationResponsiblePerson()">+ Add a contact</div>
+        <p id="consultation-rp-hint" style="margin:8px 0 0;font-size:13px;color:var(--ink-2);"></p>
+      </div>
+
+      <div id="consultation-review-blocked" class="inset" style="margin-bottom:16px;" hidden></div>
+
+      <div class="setup-section cpin-workflow-section" id="consultation-section-review" hidden>
+        <h3>Review documents (15-day SLA)</h3>
+        <div class="help">Review architect plans, fire strategy and consultation form. SLA reminders trigger as the deadline approaches. Use <strong>Log</strong> in the activity bar for interim activity and time.</div>
+        <div class="audit-note-form" style="margin-top:12px;margin-bottom:14px;">
+          <label for="consultation-review-notes">Review notes</label>
+          <textarea id="consultation-review-notes" placeholder="Document review findings, clarifications sought…" onchange="saveConsultationReviewNotes()"></textarea>
+        </div>
+        <div class="cpin-branch-panel">
+          <h3>Is there enough information to give a fire safety opinion?</h3>
+          <div class="cpin-decision-options">
+            <label class="cpin-decision-option">
+              <input type="radio" name="consultation-info-decision" value="yes" onchange="saveConsultationInfoDecision()" />
+              <div><strong>Yes — sufficient information</strong><span>Proceed to issue an outcome letter below.</span></div>
+            </label>
+            <label class="cpin-decision-option">
+              <input type="radio" name="consultation-info-decision" value="no" onchange="saveConsultationInfoDecision()" />
+              <div><strong>No — request missing information</strong><span>Issue insufficient information letter. SLA pauses until response received.</span></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section cpin-workflow-section" id="consultation-section-holding" hidden>
+        <h3>Awaiting information</h3>
+        <div class="inset">Insufficient information letter sent. The 15-day SLA is paused until building control responds. Log interim activity and set reminders as needed.</div>
+        <div style="margin-top:16px;">
+          <button class="btn primary" type="button" onclick="resumeConsultationFromInfoHold()">Information received — resume review</button>
+        </div>
+      </div>
+
+      <div class="setup-section cpin-workflow-section" id="consultation-section-outcome" hidden>
+        <h3>Issue outcome letter</h3>
+        <div class="cpin-decision-options" style="margin-top:0;">
+          <label class="cpin-decision-option">
+            <input type="radio" name="consultation-outcome-decision" value="no_comments" onchange="saveConsultationOutcomeDecision()" />
+            <div><strong>No comments</strong><span>Satisfied with plans — issue a no comments letter.</span></div>
+          </label>
+          <label class="cpin-decision-option">
+            <input type="radio" name="consultation-outcome-decision" value="comments" onchange="saveConsultationOutcomeDecision()" />
+            <div><strong>Comments</strong><span>Advisory points to consider — issue a comments letter.</span></div>
+          </label>
+        </div>
+        <div style="margin-top:20px;">
+          <h4 style="margin:0 0 8px;font-size:14px;">Outcome letters</h4>
+          <div class="help">Generate, review and send the outcome letter to Building Control.</div>
+          <div class="letter-attachment-list" id="consultation-outcome-letters-list"></div>
+          <div class="letter-composer-actions" style="margin-top:10px;">
+            <button class="btn primary" type="button" onclick="saveConsultationOutcomeLetter()">Write letter</button>
+            <button class="btn" type="button" onclick="skipConsultationOutcomeLetter()">Skip letter</button>
+            <span id="consultation-outcome-letter-status" style="font-size:12px;color:var(--ink-3);"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-section cpin-workflow-section" id="consultation-section-close" hidden>
+        <h3>Close consultation</h3>
+        <div id="consultation-close-open">
+          <div class="help">Close with a reason. Default time 0.5h logged to this consultation automatically.</div>
+          <div class="audit-note-form" style="margin-top:12px;margin-bottom:14px;">
+            <label for="consultation-close-reason">Reason for closing</label>
+            <textarea id="consultation-close-reason" placeholder="e.g. No comments letter sent — consultation complete…"></textarea>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn primary" type="button" id="consultation-close-btn" onclick="closeConsultationOneClick()">Close consultation</button>
+          </div>
+          <p id="consultation-close-blocked" style="margin:10px 0 0;font-size:13px;color:var(--ink-3);" hidden></p>
+        </div>
+        <div id="consultation-close-done" class="cpin-close-summary" hidden>
+          <strong>Closed.</strong> <span id="consultation-close-done-text"></span>
+        </div>
+      </div>
+    </div>
+
+    <section class="audit-recent-on-audit" id="consultation-recent-on-consultation" aria-label="Recently on this consultation">
+      <div class="audit-recent-hd">
+        <h3>Recently on this consultation</h3>
+        <div class="audit-recent-summary">
+          <span class="audit-recent-count-notes" id="consultation-recent-count-notes">0 notes</span>
+          <span class="audit-recent-count-time" id="consultation-recent-count-time">0m logged</span>
+        </div>
+      </div>
+      <div class="audit-activity-feed">
+        <div id="consultation-activity-feed-list"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Floating activity bar (Building Control Consultation) -->
+<div id="consultation-float-bar">
+  <div class="audit-float-panel" id="consultation-float-panel" aria-hidden="true">
+    <div class="audit-float-panel-hd">
+      <strong>Log on this consultation</strong>
+      <button type="button" class="btn" onclick="closeConsultationFloatPanel()">Close</button>
+    </div>
+    <div class="log-type-row" id="consultation-log-type-row" role="tablist">
+      <button type="button" class="chip active" data-consultation-log-type="time" onclick="setConsultationLogType('time')">Time</button>
+      <button type="button" class="chip" data-consultation-log-type="note" onclick="setConsultationLogType('note')">Note</button>
+      <button type="button" class="chip" data-consultation-log-type="interim" onclick="setConsultationLogType('interim')">Interim activity</button>
+    </div>
+    <div id="consultation-log-fields-time">
+      <div class="audit-quick-log audit-quick-log--compact">
+        <div><label for="consultation-time-date">Date</label><input type="date" id="consultation-time-date" /></div>
+        <div><label>Activity</label><select id="consultation-time-activity"><option>Document review</option><option>Phone call</option><option>Clarification letter</option><option>Meeting</option></select></div>
+        <div><label>Duration</label><select id="consultation-time-duration"><option value="30">30m</option><option value="60">1h</option><option value="90" selected>1h 30m</option></select></div>
+      </div>
+    </div>
+    <div id="consultation-log-fields-note" hidden>
+      <div class="audit-note-form"><label for="consultation-note-text">Note</label><textarea id="consultation-note-text" placeholder="Review findings, BC contact, clarifications…"></textarea></div>
+    </div>
+    <div id="consultation-log-fields-interim" hidden>
+      <div class="audit-note-form"><label for="consultation-interim-title">Interim activity</label><input type="text" id="consultation-interim-title" placeholder="e.g. Requested revised compartmentation drawing" /></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+      <button class="btn primary" type="button" onclick="submitConsultationLog()">Save log</button>
+    </div>
+  </div>
+  <div class="audit-float-bar-strip">
+    <strong class="audit-float-bar-title" style="font-size:13px;color:var(--ink);">Activity</strong>
+    <div class="counts">
+      <span id="consultation-count-notes">0 notes</span>
+      <span id="consultation-count-time">0m logged</span>
+    </div>
+    <div class="actions">
+      <div class="actions-primary">
+        <button class="btn" type="button" onclick="openConsultationFloatPanel()">+ Log</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
      BUSINESS SUPPORT (single-page process from premises)
 ========================================================= -->
 <div id="bizsupport" class="screen">
@@ -9662,7 +10123,7 @@
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn">Export this week</button>
-        <button class="btn">My team's time  ·  manager only</button>
+        <button class="btn" type="button" onclick="show('team-time')">My team's time  ·  manager only</button>
       </div>
     </div>
 
@@ -9848,6 +10309,53 @@
       </div>
     </div>
 
+  </main>
+</div>
+
+<!-- =========================================================
+     TEAM TIME (manager view)
+========================================================= -->
+<div id="team-time" class="screen">
+  <main>
+    <div style="margin-bottom:8px;">
+      <a href="#" onclick="show('time'); return false;">‹ Back to my time</a>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1>My team's time</h1>
+        <div class="meta" id="team-time-week-meta">Week 26  ·  15 to 21 June 2026  ·  <a href="#">‹ Prev week</a>  ·  <a href="#">Next week ›</a></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn primary" type="button" id="team-time-export-btn" onclick="exportTeamTimeCsv()">Download CSV</button>
+      </div>
+    </div>
+
+    <div class="inset" style="margin-top:16px;">
+      <strong>Manager view.</strong> Review time logged by inspectors in your team. Select a person to see their week in detail, or view the full team log and export everything to CSV for payroll or reporting.
+    </div>
+
+    <div class="week-summary" id="team-time-summary" style="margin-top:16px;"></div>
+
+    <div class="team-time-section-label">Team members — click to filter</div>
+    <div class="team-time-member-cards" id="team-time-member-cards" role="tablist" aria-label="Filter by team member"></div>
+
+    <div id="team-time-person-week" hidden></div>
+
+    <div class="team-time-section-label" id="team-time-table-label">Full team log</div>
+    <div class="team-time-table-wrap">
+      <table class="team-time-table" id="team-time-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Inspector</th>
+            <th>Type</th>
+            <th>Activity</th>
+            <th style="text-align:right;">Duration</th>
+          </tr>
+        </thead>
+        <tbody id="team-time-table-body"></tbody>
+      </table>
+    </div>
   </main>
 </div>
 
@@ -10608,6 +11116,120 @@
   </div>
 </div>
 
+<!-- Building Control Consultation intake -->
+<div id="bcc-intake-modal" class="modal-backdrop" onclick="if(event.target===this) closeBccIntakeForm()">
+  <div class="modal sc-intake-modal" onclick="event.stopPropagation()">
+    <div class="sc-intake-header">
+      <div>
+        <h2 id="bcc-intake-title">Log building control submission</h2>
+        <div class="sub" id="bcc-intake-sub">Record plans and consultation forms received by email. The 15-day consultation SLA starts when you log the submission.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeBccIntakeForm()" title="Close (Esc)">×</button>
+    </div>
+
+    <div class="sc-intake-body">
+      <div class="sc-intake-inner">
+        <form id="bcc-intake-form" novalidate>
+          <p class="sc-intake-required" id="bcc-intake-required-note">* denotes a required field</p>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="bcc-intake-submission-ref">Submission reference *</label>
+              <input type="text" id="bcc-intake-submission-ref" name="submissionRef" required placeholder="From email subject, e.g. BCC-2026-0094" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="bcc-intake-received-date">Date received *</label>
+              <input type="date" id="bcc-intake-received-date" name="receivedDate" required />
+            </div>
+          </div>
+
+          <section class="sc-intake-section" aria-labelledby="bcc-intake-bc-heading">
+            <h3 id="bcc-intake-bc-heading">Building Control and project</h3>
+
+            <div class="field">
+              <label for="bcc-intake-bc-body">Building Control body *</label>
+              <div class="help">Local authority building control or private approved inspector who submitted the consultation.</div>
+              <input type="text" id="bcc-intake-bc-body" name="buildingControlBody" required placeholder="e.g. Bristol City Council Building Control" autocomplete="organization" />
+            </div>
+
+            <div class="field">
+              <label>Project type *</label>
+              <div class="help">What kind of works do the submitted plans relate to?</div>
+              <div class="sc-intake-rag-group">
+                <label class="sc-intake-rag-option">
+                  <input type="radio" name="projectType" value="New build" required />
+                  <div class="sc-intake-rag-copy"><strong>New build</strong><span>New Crown premises or major new structure</span></div>
+                </label>
+                <label class="sc-intake-rag-option">
+                  <input type="radio" name="projectType" value="Refurbishment" />
+                  <div class="sc-intake-rag-copy"><strong>Refurbishment</strong><span>Internal or external works to existing premises</span></div>
+                </label>
+                <label class="sc-intake-rag-option">
+                  <input type="radio" name="projectType" value="Extension" />
+                  <div class="sc-intake-rag-copy"><strong>Extension</strong><span>Addition to an existing building footprint</span></div>
+                </label>
+                <label class="sc-intake-rag-option">
+                  <input type="radio" name="projectType" value="Change of use" />
+                  <div class="sc-intake-rag-copy"><strong>Change of use</strong><span>Altered occupancy or fire strategy for existing space</span></div>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="sc-intake-section" aria-labelledby="bcc-intake-premises-heading">
+            <h3 id="bcc-intake-premises-heading">Premises</h3>
+            <p class="sc-intake-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address or site description below — it will appear under <strong>Premises needed</strong> until an admin links it.</p>
+
+            <div class="field">
+              <label for="bcc-intake-premises">Address of premises</label>
+              <select id="bcc-intake-premises" name="premises">
+                <option value="">Please select</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="bcc-intake-premises-free">Premises not in system or not found</label>
+              <div class="help">If you cannot find the premises above, enter the full address or site description from the submission.</div>
+              <input type="text" id="bcc-intake-premises-free" name="premisesFree" placeholder="e.g. Bristol Crown Court extension, rear wing" autocomplete="street-address" />
+            </div>
+          </section>
+
+          <section class="sc-intake-section" aria-labelledby="bcc-intake-docs-heading">
+            <h3 id="bcc-intake-docs-heading">Documents</h3>
+            <p class="sc-intake-info">Save architect plans, maps and the consultation form to SharePoint before logging. Paste the folder link below so inspectors can open the submission from the process record.</p>
+
+            <div class="field">
+              <label for="bcc-intake-sharepoint">SharePoint folder URL</label>
+              <input type="url" id="bcc-intake-sharepoint" name="sharePointUrl" placeholder="https://…" inputmode="url" />
+            </div>
+          </section>
+
+          <section class="sc-intake-section" aria-labelledby="bcc-intake-summary-heading">
+            <h3 id="bcc-intake-summary-heading">Summary for the queue</h3>
+
+            <div class="field">
+              <label for="bcc-intake-summary">Short summary *</label>
+              <div class="help">One line for the processes list — what is being consulted on?</div>
+              <input type="text" id="bcc-intake-summary" name="summary" required placeholder="e.g. Fire strategy — court extension" />
+            </div>
+
+            <div class="field">
+              <label for="bcc-intake-description">Project description</label>
+              <div class="help">Scope of works and documents included — compartmentation, evacuation strategy, hot works, etc.</div>
+              <textarea id="bcc-intake-description" name="description" rows="5" placeholder="Scope of works, documents attached, any known programme dates…"></textarea>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+
+    <div class="sc-intake-footer">
+      <button class="btn" type="button" onclick="closeBccIntakeForm()">Cancel</button>
+      <button class="btn primary" type="button" onclick="submitBccIntakeForm()">Log submission</button>
+    </div>
+  </div>
+</div>
+
 <!-- CPIN intake — fullscreen log form (phone / email manual entry) -->
 <div id="cpin-intake-modal" class="modal-backdrop" onclick="if(event.target===this) closeCpinIntakeForm()">
   <div class="modal sc-intake-modal" onclick="event.stopPropagation()">
@@ -11018,7 +11640,7 @@
             </div>
           </button>
 
-          <button class="new-option" onclick="closeNewModal();">
+          <button class="new-option" onclick="closeNewModal();openBccIntakeForm();">
             <div class="icon">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 2.5H10.5L14.5 6.5V15.5H3.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.5 2.5V6.5H14.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 9.5H12M6 12H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
@@ -11190,6 +11812,7 @@
 </div>
 
 <script src="safety-concerns.js"></script>
+<script src="building-control-consultation.js"></script>
 <script src="business-support.js"></script>
 <script>
   // ---------------------------------------------------------
@@ -11577,6 +12200,9 @@
       } else if (screen === 'concern') {
         if (typeof setActiveConcernId === 'function') setActiveConcernId(rest);
         id = 'concern';
+      } else if (screen === 'consultation') {
+        if (typeof setActiveConsultationId === 'function') setActiveConsultationId(rest);
+        id = 'consultation';
       } else if (screen === 'bizsupport') {
         if (typeof setActiveBizSupportId === 'function') setActiveBizSupportId(rest);
         id = 'bizsupport';
@@ -11616,6 +12242,7 @@
       hash = buildAuditRouteHash(activeAuditId, auditStage);
     } else if (id === 'cpin' && activeCpinId) hash = 'cpin/' + activeCpinId;
     else if (id === 'concern' && typeof activeConcernId === 'function' && activeConcernId()) hash = 'concern/' + activeConcernId();
+    else if (id === 'consultation' && typeof activeConsultationId === 'function' && activeConsultationId()) hash = 'consultation/' + activeConsultationId();
     else if (id === 'bizsupport' && typeof activeBizSupportId === 'function' && activeBizSupportId()) hash = 'bizsupport/' + activeBizSupportId();
     else if (id === 'admin') {
       if (opts.adminTab) {
@@ -11660,17 +12287,25 @@
     }
     const concernMatch = path.match(/^concern(?:\/([^/]+))?$/);
     if (concernMatch) {
-      return { screen: 'concern', stage: null, cpinId: null, concernId: concernMatch[1] || null, bizsupportId: null };
+      return { screen: 'concern', stage: null, cpinId: null, concernId: concernMatch[1] || null, consultationId: null, bizsupportId: null };
+    }
+    const consultationMatch = path.match(/^consultation(?:\/([^/]+))?$/);
+    if (consultationMatch) {
+      return { screen: 'consultation', stage: null, cpinId: null, concernId: null, consultationId: consultationMatch[1] || null, bizsupportId: null };
     }
     const bizsupportMatch = path.match(/^bizsupport(?:\/([^/]+))?$/);
     if (bizsupportMatch) {
-      return { screen: 'bizsupport', stage: null, cpinId: null, concernId: null, bizsupportId: bizsupportMatch[1] || null };
+      return { screen: 'bizsupport', stage: null, cpinId: null, concernId: null, consultationId: null, bizsupportId: bizsupportMatch[1] || null };
     }
     if (path === 'cpins' || path.startsWith('cpins-')) {
-      return { screen: 'cpins', stage: null, cpinId: null, concernId: null, bizsupportId: null };
+      return { screen: 'cpins', stage: null, cpinId: null, concernId: null, consultationId: null, bizsupportId: null };
     }
     if (path === 'concerns') {
-      return { screen: 'concerns', stage: null, cpinId: null, concernId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
+      return { screen: 'concerns', stage: null, cpinId: null, concernId: null, consultationId: null, bizsupportId: null, adminTab: null, adminDetailId: null };
+    }
+    if (path === 'search' || path.startsWith('search')) {
+      const parsed = parseSearchParamsFromHash();
+      return { screen: 'search', stage: null, cpinId: null, concernId: null, consultationId: null, bizsupportId: null, searchQuery: parsed.query, searchTab: parsed.tab };
     }
     const adminMatch = path.match(/^admin(?:\/([a-z-]+))?(?:\/(.+))?$/);
     if (adminMatch) {
@@ -11686,7 +12321,7 @@
   }
 
   function renderFromHash() {
-    let { screen, stage, auditId, cpinId, concernId, bizsupportId, legacy, adminTab, adminDetailId } = parseRoute();
+    let { screen, stage, auditId, cpinId, concernId, consultationId, bizsupportId, legacy, adminTab, adminDetailId, searchQuery, searchTab } = parseRoute();
 
     if (screen !== 'login' && !isAuthenticated()) {
       screen = 'login';
@@ -11777,6 +12412,25 @@
       return;
     }
 
+    if (screen === 'consultation') {
+      if (!consultationId) {
+        show('processes');
+        return;
+      }
+      if (typeof setActiveConsultationId === 'function') setActiveConsultationId(consultationId);
+      render(screen);
+      initConsultationDetailPage();
+      return;
+    }
+
+    if (screen === 'search') {
+      searchPageQuery = searchQuery || '';
+      searchPageTab = searchTab || 'all';
+      render('search');
+      initSearchPage();
+      return;
+    }
+
     if (screen === 'bizsupport') {
       if (!bizsupportId) {
         show('processes');
@@ -11810,6 +12464,7 @@
     if (screen === 'premisesdetail-bristol') initPremisesBristolPage();
     if (screen === 'dashboard') initDashboardPage();
     if (screen === 'reminders') initRemindersPage();
+    if (screen === 'team-time') initTeamTimePage();
     if (screen === 'audit') {
       renderAuditFindings();
       updateAuditEditWarning();
@@ -11850,9 +12505,12 @@
       cpin: 'nav-cpins',
       concerns: 'nav-concerns',
       concern: 'nav-concerns',
+      consultation: 'nav-processes',
+      search: null,
       bizsupport: 'nav-processes',
       reports: 'nav-reports',
       time: 'nav-dashboard',
+      'team-time': 'nav-dashboard',
       reminders: 'nav-dashboard',
       admin: null
     };
@@ -13228,7 +13886,7 @@
     { id: 'F-2026-0398', type: 'follow-up', premises: 'Temple Quay House', score: 44, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 5 of 5  ·  Action plans', trigger: 'Follow-up from A-2026-0399', owner: 'Phil Gower', ownerInitials: 'PG', age: '2 days', mine: true, patch: true, route: 'audit' },
     { id: 'F-2026-0142', type: 'follow-up', premises: 'HMP Lewes', score: 42, scoreTrend: 'down', scoreClass: 'score-high', status: 'awaiting-action-plan', statusText: 'Awaiting action plan', owner: 'Phil Gower', ownerInitials: 'PG', age: '12 days', mine: true, patch: true, prison: true },
     { id: 'A-2026-0301', type: 'audit', premises: 'HMP Maidstone', score: 38, scoreClass: 'score-high', status: 'in-progress', statusText: 'Stage 4 of 5  ·  Outcomes', owner: 'Steve France', ownerInitials: 'SF', age: '23 days', mine: false, patch: true, prison: true },
-    { id: 'C-2026-0089', type: 'consultation', premises: 'Charing Cross House refurb', score: 36, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Reviewing  ·  <strong style="color:var(--amber);">SLA: 5 days</strong>', owner: 'Phil Gower', ownerInitials: 'PG', age: '10 days', mine: true, patch: true, hasSla: true },
+    { id: 'C-2026-0089', type: 'consultation', premises: 'Charing Cross House refurb', score: 36, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Reviewing  ·  <strong style="color:var(--amber);">SLA: 5 days</strong>', owner: 'Phil Gower', ownerInitials: 'PG', age: '10 days', mine: true, patch: true, hasSla: true, route: 'consultation/cons-0089' },
     { id: 'SC-2026-0073', type: 'concern', premises: 'Maidstone Magistrates Court', score: 34, scoreClass: 'score-mid', status: 'open', statusText: 'Awaiting contact', owner: 'Phil Gower', ownerInitials: 'PG', age: '4 days', mine: true, patch: true },
     { id: 'A-2026-0298', type: 'audit', premises: 'DWP Crawley', score: 31, scoreTrend: 'down', scoreClass: 'score-mid', status: 'awaiting-action-plan', statusText: 'Stage 5  ·  Action plan', owner: 'Hannah Munro', ownerInitials: 'HM', age: '2 months', mine: false, patch: false },
     { id: 'F-2026-0118', type: 'follow-up', premises: 'HMP Belmarsh', score: 29, scoreClass: 'score-mid', status: 'awaiting-follow-up', statusText: 'Awaiting follow-up visit', owner: 'Steve France', ownerInitials: 'SF', age: '4 months', mine: false, patch: false, prison: true },
@@ -13242,7 +13900,7 @@
     { id: 'A-2026-0320', type: 'audit', premises: 'HMP Bristol', score: 44, scoreTrend: 'up', scoreClass: 'score-high', status: 'open', statusText: 'Stage 1 of 5  ·  Planning', owner: 'Phil Gower', ownerInitials: 'PG', age: '1 day', mine: true, patch: true, prison: true },
     { id: 'F-2026-0155', type: 'follow-up', premises: 'HMP Isis', score: 33, scoreClass: 'score-mid', status: 'open', statusText: 'Opened  ·  Awaiting first visit', owner: 'Steve France', ownerInitials: 'SF', age: '2 days', mine: false, patch: true, prison: true },
     { id: 'SC-2026-0061', type: 'concern', premises: 'Lewes Crown Court', score: 30, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Investigating  ·  Site photos received', owner: 'Phil Gower', ownerInitials: 'PG', age: '7 days', mine: true, patch: true },
-    { id: 'C-2026-0075', type: 'consultation', premises: 'Bristol Crown Court', score: 27, scoreClass: 'score-mid', status: 'open', statusText: 'New submission  ·  <strong style="color:var(--amber);">SLA: 3 days</strong>', owner: 'Hannah Munro', ownerInitials: 'HM', age: '1 day', mine: false, patch: false, hasSla: true },
+    { id: 'C-2026-0075', type: 'consultation', premises: 'Bristol Crown Court', score: 27, scoreClass: 'score-mid', status: 'open', statusText: 'New submission  ·  <strong style="color:var(--amber);">SLA: 3 days</strong>', owner: 'Hannah Munro', ownerInitials: 'HM', age: '1 day', mine: false, patch: false, hasSla: true, route: 'consultation/cons-0075' },
     { id: 'B-2026-0039', type: 'support', premises: 'MoJ HQ London', score: 19, scoreClass: 'score-low', status: 'in-progress', statusText: 'Workshop prep  ·  12 Jul', owner: 'Phil Gower', ownerInitials: 'PG', age: '11 days', mine: true, patch: false, route: 'bizsupport/bs-0039' },
     { id: 'A-2026-0281', type: 'audit', premises: 'HMP Durham', score: 52, scoreTrend: 'down', scoreClass: 'score-high', status: 'closed', statusText: 'Closed  ·  14 May 2026', owner: 'Steve France', ownerInitials: 'SF', age: '6 weeks', mine: false, patch: false, prison: true },
     { id: 'F-2026-0102', type: 'follow-up', premises: 'HMP Pentonville', score: 26, scoreClass: 'score-mid', status: 'closed', statusText: 'Closed  ·  22 May 2026', owner: 'Phil Gower', ownerInitials: 'PG', age: '5 weeks', mine: true, patch: true, prison: true },
@@ -13438,7 +14096,9 @@
       : `<div class="proc-score ${p.scoreClass || ''}">${p.score}${trend}</div>`;
     const click = (p.type === 'audit' || p.type === 'follow-up')
       ? `onclick="continueAudit('${p.id}')"`
-      : (p.route ? `onclick="show('${p.route}')"` : '');
+      : (p.route ? `onclick="show('${p.route}')"`
+        : (p.type === 'consultation' && typeof consultationRouteForRef === 'function'
+          ? `onclick="show('${consultationRouteForRef(p.id)}')"` : ''));
     return `<div class="proc-row" ${click}>
       <div class="proc-line-primary">
         <div class="ptype"><span class="pill ${meta.pill}">${meta.label}</span></div>
@@ -15464,10 +16124,10 @@
   const DASHBOARD_REMINDERS_PREVIEW = 4;
   const REMINDERS_PROTOTYPE_TODAY = '2026-06-22';
   const REMINDERS_LIST = [
-    { id: 'rem-001', premises: 'Bristol Crown Court', task: 'Consultation response due', detail: 'Review fire strategy submission and respond within SLA.', dueDate: '2026-06-25', processId: 'C-2026-0075', processType: 'consultation', route: 'processes' },
+    { id: 'rem-001', premises: 'Bristol Crown Court', task: 'Consultation response due', detail: 'Review fire strategy submission and respond within SLA.', dueDate: '2026-06-25', processId: 'C-2026-0075', processType: 'consultation', route: 'consultation/cons-0075' },
     { id: 'rem-002', premises: 'Royal Courts of Justice', task: 'Business support meeting prep', detail: 'Prepare agenda and briefing notes ahead of the scheduled meeting.', dueDate: '2026-06-25', processId: 'B-2026-0044', processType: 'support', route: 'bizsupport/bs-0044' },
     { id: 'rem-003', premises: 'Maidstone Magistrates Court', task: 'Safety concern — initial contact', detail: 'Contact Duty Holder and confirm hazard details on record.', dueDate: '2026-06-26', processId: 'SC-2026-0073', processType: 'concern', route: 'concerns' },
-    { id: 'rem-004', premises: 'Charing Cross House refurb', task: 'Consultation response due', detail: 'MoJ refurbishment fire strategy — SLA response required.', dueDate: '2026-06-27', processId: 'C-2026-0089', processType: 'consultation', route: 'processes' },
+    { id: 'rem-004', premises: 'Charing Cross House refurb', task: 'Consultation response due', detail: 'MoJ refurbishment fire strategy — SLA response required.', dueDate: '2026-06-27', processId: 'C-2026-0089', processType: 'consultation', route: 'consultation/cons-0089' },
     { id: 'rem-005', premises: 'DWP Crawley', task: '28-DAP action plan review', detail: 'Duty holder action plan closes — confirm compliance or escalate.', dueDate: '2026-06-27', processId: 'A-2026-0298', processType: 'audit', route: 'audit:A-2026-0298' },
     { id: 'rem-006', premises: 'Temple Quay House', task: 'CPIN desk evaluation follow-up', detail: 'Complete desk evaluation and confirm whether an audit is required.', dueDate: '2026-06-28', processId: 'CPIN-2026-0418', processType: 'cpin', route: 'cpin/cpin-0418' },
     { id: 'rem-007', premises: 'Temple Quay House', task: 'Log time for site visit week', detail: 'Outstanding time entries from audit A-2026-0314 site visit.', dueDate: '2026-06-28', processId: 'A-2026-0314', processType: 'audit', route: 'time' },
@@ -15917,6 +16577,7 @@
     if (p.route) return p.route;
     if (p.type === 'audit') return 'audit';
     if (p.type === 'concern') return 'concerns';
+    if (p.type === 'consultation' && typeof consultationRouteForRef === 'function') return consultationRouteForRef(p.id);
     return 'processes';
   }
 
@@ -16195,12 +16856,14 @@
     closeAuditFloatPanel();
     closeCpinFloatPanel();
     if (typeof closeConcernFloatPanel === 'function') closeConcernFloatPanel();
+    if (typeof closeConsultationFloatPanel === 'function') closeConsultationFloatPanel();
     if (typeof closeBsFloatPanel === 'function') closeBsFloatPanel();
 
     if (screenId === 'login') {
       setAuditActivityBarVisible(false);
       setCpinActivityBarVisible(false);
       if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
+      if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
       if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
       setGlobalActivityBarVisible(false);
       return;
@@ -16209,6 +16872,7 @@
       setGlobalActivityBarVisible(false);
       setCpinActivityBarVisible(false);
       if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
+      if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
       if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
       setAuditActivityBarVisible(true);
       return;
@@ -16217,6 +16881,7 @@
       setGlobalActivityBarVisible(false);
       setAuditActivityBarVisible(false);
       if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
+      if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
       if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
       return;
     }
@@ -16224,6 +16889,15 @@
       setGlobalActivityBarVisible(false);
       setAuditActivityBarVisible(false);
       setCpinActivityBarVisible(false);
+      if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
+      if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
+      return;
+    }
+    if (screenId === 'consultation') {
+      setGlobalActivityBarVisible(false);
+      setAuditActivityBarVisible(false);
+      setCpinActivityBarVisible(false);
+      if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
       if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
       return;
     }
@@ -16232,11 +16906,13 @@
       setAuditActivityBarVisible(false);
       setCpinActivityBarVisible(false);
       if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
+      if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
       return;
     }
     setAuditActivityBarVisible(false);
     setCpinActivityBarVisible(false);
     if (typeof setConcernActivityBarVisible === 'function') setConcernActivityBarVisible(false);
+    if (typeof setConsultationActivityBarVisible === 'function') setConsultationActivityBarVisible(false);
     if (typeof setBsActivityBarVisible === 'function') setBsActivityBarVisible(false);
     setGlobalActivityBarVisible(true);
     loadGlobalTimeLog();
@@ -16399,6 +17075,347 @@
   function formatDurationLabel(minutes) {
     const presets = { 15: '15m', 30: '30m', 45: '45m', 60: '1h', 90: '1h 30m', 120: '2h', 180: '3h', 240: 'Half day (4h)' };
     return presets[minutes] || formatAuditMinutes(minutes);
+  }
+
+  // ---------------------------------------------------------
+  // Team time (manager view)
+  // ---------------------------------------------------------
+  const TEAM_TIME_WEEK_LABEL = 'Week 26  ·  15 to 21 June 2026';
+  const TEAM_TIME_TARGET_HOURS = 37;
+  const TEAM_TIME_TARGET_MINUTES = TEAM_TIME_TARGET_HOURS * 60;
+
+  const TEAM_TIME_MEMBERS = [
+    {
+      id: 'phil-gower',
+      name: 'Phil Gower',
+      initials: 'PG',
+      role: 'Lead Fire Safety Inspector',
+      days: [
+        { date: '2026-06-22', dayNum: 22, dayName: 'Mon  ·  Today', isToday: true, entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'Temple Quay House  ·  Site visit', minutes: 210 },
+          { pill: 'red', pillLabel: 'CPIN', what: 'HMP Lewes  ·  Initial enquiry call', minutes: 45 }
+        ]},
+        { date: '2026-06-19', dayNum: 19, dayName: 'Fri', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'Temple Quay House  ·  Letter drafting', minutes: 120 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Team meeting', minutes: 60 },
+          { pill: 'purple', pillLabel: 'Follow-up', what: 'HMP Lewes  ·  Action plan review', minutes: 90 }
+        ]},
+        { date: '2026-06-18', dayNum: 18, dayName: 'Thu', entries: [
+          { pill: 'grey', pillLabel: 'Consult', what: 'Charing Cross House refurb  ·  Plan review', minutes: 180 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Email and admin', minutes: 90 }
+        ]},
+        { date: '2026-06-17', dayNum: 17, dayName: 'Wed', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'Temple Quay House  ·  Travel + site visit', minutes: 315 }
+        ]},
+        { date: '2026-06-16', dayNum: 16, dayName: 'Tue', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'Temple Quay House  ·  Pre-audit prep', minutes: 120 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'RBIP planning', minutes: 60 }
+        ]},
+        { date: '2026-06-15', dayNum: 15, dayName: 'Mon', entries: [] }
+      ]
+    },
+    {
+      id: 'sarah-chen',
+      name: 'Sarah Chen',
+      initials: 'SC',
+      role: 'Fire Safety Inspector',
+      days: [
+        { date: '2026-06-22', dayNum: 22, dayName: 'Mon  ·  Today', isToday: true, entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMP Bristol  ·  Site visit', minutes: 240 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Travel', minutes: 60 }
+        ]},
+        { date: '2026-06-19', dayNum: 19, dayName: 'Fri', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMP Bristol  ·  Letter drafting', minutes: 150 }
+        ]},
+        { date: '2026-06-18', dayNum: 18, dayName: 'Thu', entries: [
+          { pill: 'grey', pillLabel: 'Concern', what: 'Maidstone Magistrates  ·  Desk investigation', minutes: 120 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Team planning', minutes: 60 }
+        ]},
+        { date: '2026-06-17', dayNum: 17, dayName: 'Wed', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMP Bristol  ·  Pre-audit prep', minutes: 180 }
+        ]},
+        { date: '2026-06-16', dayNum: 16, dayName: 'Tue', entries: [
+          { pill: 'grey', pillLabel: 'Consult', what: 'Bristol Crown Court  ·  Document review', minutes: 210 }
+        ]},
+        { date: '2026-06-15', dayNum: 15, dayName: 'Mon', entries: [
+          { pill: 'grey', pillLabel: 'Admin', what: 'Email and admin', minutes: 90 }
+        ]}
+      ]
+    },
+    {
+      id: 'james-okonkwo',
+      name: 'James Okonkwo',
+      initials: 'JO',
+      role: 'Fire Safety Inspector',
+      days: [
+        { date: '2026-06-22', dayNum: 22, dayName: 'Mon  ·  Today', isToday: true, entries: [
+          { pill: 'grey', pillLabel: 'Concern', what: 'DWP Canterbury  ·  Phone call', minutes: 45 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Case file updates', minutes: 90 }
+        ]},
+        { date: '2026-06-19', dayNum: 19, dayName: 'Fri', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'DWP Crawley  ·  Follow-up visit', minutes: 210 }
+        ]},
+        { date: '2026-06-18', dayNum: 18, dayName: 'Thu', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'DWP Crawley  ·  Outcomes meeting', minutes: 120 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Travel', minutes: 90 }
+        ]},
+        { date: '2026-06-17', dayNum: 17, dayName: 'Wed', entries: [
+          { pill: 'grey', pillLabel: 'CPIN', what: 'Reading Job Centre  ·  Desk evaluation', minutes: 150 }
+        ]},
+        { date: '2026-06-16', dayNum: 16, dayName: 'Tue', entries: [
+          { pill: 'grey', pillLabel: 'Admin', what: 'Training', minutes: 180 }
+        ]},
+        { date: '2026-06-15', dayNum: 15, dayName: 'Mon', entries: [
+          { pill: 'grey', pillLabel: 'Consult', what: 'MoJ HQ London  ·  Plan review', minutes: 120 }
+        ]}
+      ]
+    },
+    {
+      id: 'hannah-munro',
+      name: 'Hannah Munro',
+      initials: 'HM',
+      role: 'Fire Safety Inspector',
+      days: [
+        { date: '2026-06-22', dayNum: 22, dayName: 'Mon  ·  Today', isToday: true, entries: [
+          { pill: 'grey', pillLabel: 'Consult', what: 'Bristol Crown Court  ·  New submission review', minutes: 180 }
+        ]},
+        { date: '2026-06-19', dayNum: 19, dayName: 'Fri', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'DWP Crawley  ·  Action plan review', minutes: 120 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Email and admin', minutes: 60 }
+        ]},
+        { date: '2026-06-18', dayNum: 18, dayName: 'Thu', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMCTS Guildford  ·  Site visit', minutes: 300 }
+        ]},
+        { date: '2026-06-17', dayNum: 17, dayName: 'Wed', entries: [
+          { pill: 'grey', pillLabel: 'Concern', what: 'Lewes Crown Court  ·  Site photos review', minutes: 90 },
+          { pill: 'grey', pillLabel: 'Admin', what: 'Meeting', minutes: 60 }
+        ]},
+        { date: '2026-06-16', dayNum: 16, dayName: 'Tue', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMCTS Guildford  ·  Letter drafting', minutes: 150 }
+        ]},
+        { date: '2026-06-15', dayNum: 15, dayName: 'Mon', entries: [
+          { pill: 'grey', pillLabel: 'Admin', what: 'Weekly planning', minutes: 120 }
+        ]}
+      ]
+    },
+    {
+      id: 'steve-france',
+      name: 'Steve France',
+      initials: 'SF',
+      role: 'Fire Safety Inspector',
+      days: [
+        { date: '2026-06-22', dayNum: 22, dayName: 'Mon  ·  Today', isToday: true, entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMP Maidstone  ·  Outcomes', minutes: 180 }
+        ]},
+        { date: '2026-06-19', dayNum: 19, dayName: 'Fri', entries: [
+          { pill: 'purple', pillLabel: 'Follow-up', what: 'HMP Belmarsh  ·  Visit', minutes: 240 }
+        ]},
+        { date: '2026-06-18', dayNum: 18, dayName: 'Thu', entries: [
+          { pill: 'grey', pillLabel: 'Admin', what: 'Travel and admin', minutes: 120 }
+        ]},
+        { date: '2026-06-17', dayNum: 17, dayName: 'Wed', entries: [
+          { pill: 'blue', pillLabel: 'Audit', what: 'HMP Maidstone  ·  Site visit', minutes: 360 }
+        ]},
+        { date: '2026-06-16', dayNum: 16, dayName: 'Tue', entries: [] },
+        { date: '2026-06-15', dayNum: 15, dayName: 'Mon', entries: [
+          { pill: 'grey', pillLabel: 'CPIN', what: 'HMP Swaleside  ·  Triage call', minutes: 60 }
+        ]}
+      ]
+    }
+  ];
+
+  let teamTimeMemberFilter = 'all';
+
+  function teamTimeMemberTotalMinutes(member) {
+    return member.days.reduce(function (sum, day) {
+      return sum + day.entries.reduce(function (s, e) { return s + e.minutes; }, 0);
+    }, 0);
+  }
+
+  function teamTimeAllEntries(memberFilter) {
+    const rows = [];
+    TEAM_TIME_MEMBERS.forEach(function (member) {
+      if (memberFilter !== 'all' && member.id !== memberFilter) return;
+      member.days.forEach(function (day) {
+        day.entries.forEach(function (entry) {
+          rows.push({
+            date: day.date,
+            dayName: day.dayName,
+            member: member.name,
+            role: member.role,
+            pill: entry.pill,
+            pillLabel: entry.pillLabel,
+            what: entry.what,
+            minutes: entry.minutes
+          });
+        });
+      });
+    });
+    rows.sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return a.member.localeCompare(b.member);
+    });
+    return rows;
+  }
+
+  function teamTimeTeamTotals() {
+    let total = 0;
+    let onTarget = 0;
+    let premisesMins = 0;
+    TEAM_TIME_MEMBERS.forEach(function (m) {
+      const mins = teamTimeMemberTotalMinutes(m);
+      total += mins;
+      if (mins >= TEAM_TIME_TARGET_MINUTES) onTarget += 1;
+      m.days.forEach(function (day) {
+        day.entries.forEach(function (e) {
+          if (e.pillLabel !== 'Admin') premisesMins += e.minutes;
+        });
+      });
+    });
+    return { total: total, onTarget: onTarget, premisesMins: premisesMins, count: TEAM_TIME_MEMBERS.length };
+  }
+
+  function renderTeamTimeWeekHtml(member) {
+    let html = '<div class="time-week">';
+    member.days.forEach(function (day) {
+      const dayTotal = day.entries.reduce(function (s, e) { return s + e.minutes; }, 0);
+      html += '<div class="row' + (day.isToday ? ' today' : '') + '">';
+      html += '<div class="day"><div class="num">' + day.dayNum + '</div><div class="name">' + escHtml(day.dayName) + '</div></div>';
+      html += '<div class="entries">';
+      if (!day.entries.length) {
+        html += '<div class="entry" style="color:var(--ink-3);font-style:italic;"><span class="what">No time logged</span><span class="dur">0h</span></div>';
+      } else {
+        day.entries.forEach(function (entry) {
+          html += '<div class="entry"><span class="what"><span class="pill ' + escHtml(entry.pill) + '">' + escHtml(entry.pillLabel) + '</span>' + escHtml(entry.what) + '</span><span class="dur">' + formatAuditMinutes(entry.minutes) + '</span></div>';
+        });
+      }
+      html += '</div>';
+      html += '<div class="day-total' + (dayTotal >= 420 ? ' over' : '') + '"' + (!dayTotal ? ' style="color:var(--ink-3);"' : '') + '>' + (dayTotal ? formatAuditMinutes(dayTotal) : '0h') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function setTeamTimeMemberFilter(id) {
+    teamTimeMemberFilter = id || 'all';
+    renderTeamTimePage();
+  }
+
+  function renderTeamTimePage() {
+    const meta = document.getElementById('team-time-week-meta');
+    if (meta) meta.textContent = TEAM_TIME_WEEK_LABEL;
+
+    const totals = teamTimeTeamTotals();
+    const summary = document.getElementById('team-time-summary');
+    if (summary) {
+      const avgMins = Math.round(totals.total / totals.count);
+      const premisesPct = totals.total ? Math.round((totals.premisesMins / totals.total) * 100) : 0;
+      summary.innerHTML =
+        '<div class="stat"><div class="lbl">Team total</div><div class="val">' + formatAuditMinutes(totals.total) + '</div><div class="sub">' + totals.count + ' inspectors</div></div>' +
+        '<div class="stat"><div class="lbl">Average per person</div><div class="val">' + formatAuditMinutes(avgMins) + '</div><div class="sub">Target ' + TEAM_TIME_TARGET_HOURS + 'h each</div></div>' +
+        '<div class="stat"><div class="lbl">On target</div><div class="val">' + totals.onTarget + ' / ' + totals.count + '</div><div class="sub">At or above ' + TEAM_TIME_TARGET_HOURS + 'h</div></div>' +
+        '<div class="stat"><div class="lbl">Against premises</div><div class="val">' + premisesPct + '%</div><div class="sub">Excluding general admin</div></div>';
+    }
+
+    const cards = document.getElementById('team-time-member-cards');
+    if (cards) {
+      let cardsHtml = '<button type="button" class="team-time-member-card' + (teamTimeMemberFilter === 'all' ? ' active' : '') + '" data-member="all" role="tab" aria-selected="' + (teamTimeMemberFilter === 'all' ? 'true' : 'false') + '">' +
+        '<div class="ttm-head"><div class="avatar-sm" aria-hidden="true">All</div><div class="ttm-name">All team</div></div>' +
+        '<div class="ttm-val">' + formatAuditMinutes(totals.total) + '</div>' +
+        '<div class="ttm-sub">' + totals.count + ' inspectors</div></button>';
+      TEAM_TIME_MEMBERS.forEach(function (member) {
+        const mins = teamTimeMemberTotalMinutes(member);
+        const pct = Math.min(100, Math.round((mins / TEAM_TIME_TARGET_MINUTES) * 100));
+        const hours = (mins / 60).toFixed(1);
+        const under = mins < TEAM_TIME_TARGET_MINUTES;
+        cardsHtml += '<button type="button" class="team-time-member-card' + (under ? ' under' : '') + (teamTimeMemberFilter === member.id ? ' active' : '') + '" data-member="' + escHtml(member.id) + '" role="tab" aria-selected="' + (teamTimeMemberFilter === member.id ? 'true' : 'false') + '">' +
+          '<div class="ttm-head"><div class="avatar-sm">' + escHtml(member.initials) + '</div><div class="ttm-name">' + escHtml(member.name) + '</div></div>' +
+          '<div class="ttm-val">' + hours + ' <span style="font-weight:400;color:var(--ink-3);font-size:14px;">/ ' + TEAM_TIME_TARGET_HOURS + 'h</span></div>' +
+          '<div class="ttm-sub">' + pct + '% to target</div>' +
+          '<div class="ttm-bar"><span style="width:' + pct + '%;"></span></div></button>';
+      });
+      cards.innerHTML = cardsHtml;
+    }
+
+    const personWeek = document.getElementById('team-time-person-week');
+    const tableLabel = document.getElementById('team-time-table-label');
+    if (personWeek) {
+      if (teamTimeMemberFilter !== 'all') {
+        const member = TEAM_TIME_MEMBERS.find(function (m) { return m.id === teamTimeMemberFilter; });
+        personWeek.hidden = false;
+        personWeek.innerHTML = member
+          ? '<div class="team-time-section-label">' + escHtml(member.name) + ' — week detail</div>' + renderTeamTimeWeekHtml(member)
+          : '';
+        if (tableLabel) tableLabel.textContent = 'Log entries for ' + (member ? member.name : '');
+      } else {
+        personWeek.hidden = true;
+        personWeek.innerHTML = '';
+        if (tableLabel) tableLabel.textContent = 'Full team log';
+      }
+    }
+
+    const tbody = document.getElementById('team-time-table-body');
+    if (tbody) {
+      const rows = teamTimeAllEntries(teamTimeMemberFilter);
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:var(--ink-3);">No time logged for this filter.</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map(function (row) {
+          return '<tr>' +
+            '<td>' + escHtml(row.date.split('-').reverse().join('/')) + '<div style="font-size:11px;color:var(--ink-3);">' + escHtml(row.dayName) + '</div></td>' +
+            '<td class="tt-person">' + escHtml(row.member) + '</td>' +
+            '<td><span class="pill ' + escHtml(row.pill) + '">' + escHtml(row.pillLabel) + '</span></td>' +
+            '<td>' + escHtml(row.what) + '</td>' +
+            '<td class="tt-dur">' + formatAuditMinutes(row.minutes) + '</td></tr>';
+        }).join('');
+      }
+    }
+  }
+
+  function initTeamTimePage() {
+    if (!document.getElementById('team-time')?.dataset.bound) {
+      document.getElementById('team-time').dataset.bound = '1';
+      document.getElementById('team-time-member-cards')?.addEventListener('click', function (e) {
+        const card = e.target.closest('.team-time-member-card');
+        if (card) setTeamTimeMemberFilter(card.dataset.member);
+      });
+    }
+    renderTeamTimePage();
+  }
+
+  function exportTeamTimeCsv() {
+    const rows = teamTimeAllEntries(teamTimeMemberFilter);
+    const header = ['Week', 'Date', 'Day', 'Inspector', 'Role', 'Process type', 'Activity', 'Duration (hours)', 'Duration (minutes)'];
+    const lines = [header.join(',')];
+    rows.forEach(function (row) {
+      const hours = (row.minutes / 60).toFixed(2);
+      lines.push([
+        csvCell(TEAM_TIME_WEEK_LABEL),
+        csvCell(row.date),
+        csvCell(row.dayName),
+        csvCell(row.member),
+        csvCell(row.role),
+        csvCell(row.pillLabel),
+        csvCell(row.what),
+        csvCell(hours),
+        csvCell(String(row.minutes))
+      ].join(','));
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const suffix = teamTimeMemberFilter === 'all' ? 'all-team' : teamTimeMemberFilter;
+    a.href = url;
+    a.download = 'team-time-' + suffix + '-week-26.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function csvCell(val) {
+    const s = String(val == null ? '' : val);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
   }
 
   function syncAuditActivityForStage(stage) {
@@ -23720,31 +24737,55 @@
   }
 
   // ---------------------------------------------------------
-  // Global search (premises, processes, CPINs)
+  // Global search (premises, processes, CPINs, concerns)
   // ---------------------------------------------------------
   const GLOBAL_SEARCH_TYPE_LABELS = {
     premises: 'Premises',
-    process: 'Processes',
-    cpin: 'CPINs'
+    audit: 'Audits',
+    cpin: 'CPINs',
+    concern: 'Safety Concerns',
+    other: 'Other processes'
   };
+
+  const GLOBAL_SEARCH_TAB_ORDER = ['all', 'premises', 'audit', 'cpin', 'concern', 'other'];
+
+  let searchPageQuery = '';
+  let searchPageTab = 'all';
+
+  function processSearchCategory(type) {
+    if (type === 'audit' || type === 'follow-up') return 'audit';
+    if (type === 'cpin') return 'cpin';
+    if (type === 'concern') return 'concern';
+    return 'other';
+  }
 
   function getGlobalSearchPremises() {
     return PREMISES_LIST.map(p => ({
+      category: 'premises',
       title: p.name,
       subtitle: (p.address ? p.address + ' · ' : '') + p.dept + ' · ' + p.typeLabel + ' · RBIP ' + p.score,
       route: p.route || 'premises',
+      pill: 'grey',
+      pillLabel: 'Premises',
       keywords: (p.name + ' ' + (p.address || '') + ' ' + p.typeLabel + ' ' + p.dept + ' ' + p.category).toLowerCase()
     }));
   }
 
   function getGlobalSearchProcesses() {
-    return PROCESSES_LIST.map(p => {
+    return PROCESSES_LIST.filter(function (p) {
+      return p.type !== 'cpin' && p.type !== 'concern';
+    }).map(p => {
       const meta = PROCESS_TYPE_PILLS[p.type] || { label: p.type, pill: 'grey' };
       const plainStatus = p.statusText.replace(/<[^>]+>/g, '');
+      const category = processSearchCategory(p.type);
+      let route = p.route || 'processes';
+      if (p.type === 'audit' || p.type === 'follow-up') route = 'audit:' + p.id;
+      else if (p.type === 'consultation' && typeof consultationRouteForRef === 'function') route = consultationRouteForRef(p.id);
       return {
+        category: category,
         title: p.id,
         subtitle: meta.label + ' · ' + p.premises + ' · ' + plainStatus,
-        route: (p.type === 'audit' || p.type === 'follow-up') ? ('audit:' + p.id) : (p.route || 'processes'),
+        route: route,
         pill: meta.pill,
         pillLabel: meta.label,
         keywords: (p.id + ' ' + p.premises + ' ' + p.type + ' ' + plainStatus + ' ' + p.owner).toLowerCase()
@@ -23752,9 +24793,24 @@
     });
   }
 
+  function getGlobalSearchConcerns() {
+    if (typeof getAllConcernRecords !== 'function') return [];
+    return getAllConcernRecords().map(function (c) {
+      return {
+        category: 'concern',
+        title: c.ref,
+        subtitle: (c.premises ? c.premises + ' · ' : 'No premises · ') + (c.summary || ''),
+        route: 'concern/' + c.id,
+        pill: c.severity || 'grey',
+        pillLabel: { red: 'Red', amber: 'Amber', green: 'Green' }[c.severity] || 'Concern',
+        keywords: [c.ref, c.premises, c.summary, c.severity, c.when, 'concern', 'safety'].filter(Boolean).join(' ')
+      };
+    });
+  }
+
   function getGlobalSearchIndex() {
     const cpins = getAllCpinsForSearch().map(c => ({
-      type: 'cpin',
+      category: 'cpin',
       title: c.ref,
       subtitle: (c.premises ? c.premises + ' · ' : 'No premises · ') + c.summary,
       route: 'cpin/' + c.id,
@@ -23762,11 +24818,11 @@
       pillLabel: { red: 'Red', amber: 'Amber', green: 'Green' }[c.severity],
       keywords: [c.ref, c.premises, c.summary, c.severity, c.when, 'cpin'].filter(Boolean).join(' ')
     }));
-    return getGlobalSearchPremises().map(i => ({ type: 'premises', ...i }))
-      .concat(
-        getGlobalSearchProcesses().map(i => ({ type: 'process', ...i })),
-        cpins
-      );
+    return getGlobalSearchPremises().concat(
+      getGlobalSearchProcesses(),
+      cpins,
+      getGlobalSearchConcerns()
+    );
   }
 
   function globalSearchHaystack(item) {
@@ -23778,6 +24834,144 @@
     if (!tokens.length) return false;
     const hay = globalSearchHaystack(item);
     return tokens.every(t => hay.includes(t));
+  }
+
+  function getGlobalSearchMatches(q, tab) {
+    const matches = getGlobalSearchIndex().filter(item => globalSearchMatches(item, q));
+    if (!tab || tab === 'all') return matches;
+    return matches.filter(item => item.category === tab);
+  }
+
+  function buildSearchRouteHash(q, tab) {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (tab && tab !== 'all') params.set('tab', tab);
+    const qs = params.toString();
+    return qs ? 'search?' + qs : 'search';
+  }
+
+  function parseSearchParamsFromHash() {
+    const raw = (window.location.hash || '').slice(1);
+    const qIdx = raw.indexOf('?');
+    if (!raw.startsWith('search')) return { query: '', tab: 'all' };
+    const params = new URLSearchParams(qIdx >= 0 ? raw.slice(qIdx + 1) : '');
+    const tab = params.get('tab') || 'all';
+    return {
+      query: params.get('q') || '',
+      tab: GLOBAL_SEARCH_TAB_ORDER.indexOf(tab) >= 0 ? tab : 'all'
+    };
+  }
+
+  function openSearchResultsPage(q, tab) {
+    q = (q || '').trim();
+    if (!q) return;
+    closeGlobalSearch();
+    searchPageQuery = q;
+    searchPageTab = tab || 'all';
+    const input = document.getElementById('global-search-input');
+    if (input) input.value = q;
+    const hash = buildSearchRouteHash(q, searchPageTab);
+    if (window.location.hash === '#' + hash) {
+      renderFromHash();
+    } else {
+      window.location.hash = hash;
+    }
+  }
+
+  function setSearchPageTab(tab) {
+    searchPageTab = tab || 'all';
+    document.querySelectorAll('#search-tab-chips .chip').forEach(function (chip) {
+      const on = chip.dataset.searchTab === searchPageTab;
+      chip.classList.toggle('on', on);
+      chip.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    const hash = buildSearchRouteHash(searchPageQuery, searchPageTab);
+    if (window.location.hash !== '#' + hash) {
+      window.location.hash = hash;
+    } else {
+      renderSearchResultsPage();
+    }
+  }
+
+  function renderSearchResultRow(item) {
+    const pill = item.pill
+      ? '<span class="pill ' + escHtml(item.pill) + '">' + escHtml(item.pillLabel || '') + '</span>'
+      : '<span class="pill grey">' + escHtml(GLOBAL_SEARCH_TYPE_LABELS[item.category] || '') + '</span>';
+    const routeAttr = escHtml(item.route).replace(/'/g, '&#39;');
+    return '<div class="prem-row search-page-row" onclick="selectGlobalSearchResult(\'' + routeAttr + '\')">' +
+      '<div class="prem-line-primary">' +
+        '<div class="prem-name">' + pill + ' <strong class="search-page-title">' + escHtml(item.title) + '</strong></div>' +
+      '</div>' +
+      '<div class="prem-line-secondary"><div class="search-page-sub">' + escHtml(item.subtitle) + '</div></div>' +
+      '</div>';
+  }
+
+  function renderSearchResultsPage() {
+    const meta = document.getElementById('search-page-meta');
+    const summary = document.getElementById('search-results-summary');
+    const list = document.getElementById('search-results-list');
+    if (!list) return;
+
+    const q = searchPageQuery.trim();
+    if (meta) {
+      meta.textContent = q
+        ? 'Results for “' + q + '” across premises, processes, CPINs and safety concerns.'
+        : 'Enter a search term in the header to find premises, processes, CPINs and more.';
+    }
+
+    if (!q) {
+      if (summary) summary.textContent = 'No search term — use the search box above.';
+      list.innerHTML = '<div class="prem-row" style="cursor:default;padding:28px 16px;justify-content:center;color:var(--ink-3);font-size:13px;">Type in the header search and press Enter.</div>';
+      return;
+    }
+
+    const allMatches = getGlobalSearchMatches(q, 'all');
+    const filtered = getGlobalSearchMatches(q, searchPageTab);
+
+    document.querySelectorAll('#search-tab-chips .chip').forEach(function (chip) {
+      const tab = chip.dataset.searchTab;
+      const count = tab === 'all' ? allMatches.length : allMatches.filter(function (m) { return m.category === tab; }).length;
+      const base = chip.dataset.baseLabel || chip.textContent.replace(/\s*\(\d+\)$/, '');
+      chip.dataset.baseLabel = base;
+      chip.textContent = count ? base + ' (' + count + ')' : base;
+      const on = tab === searchPageTab;
+      chip.classList.toggle('on', on);
+      chip.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    if (summary) {
+      const tabLabel = searchPageTab === 'all' ? 'results' : (GLOBAL_SEARCH_TYPE_LABELS[searchPageTab] || searchPageTab).toLowerCase();
+      summary.innerHTML = 'Showing <strong>' + filtered.length + '</strong> ' + escHtml(tabLabel) + (searchPageTab === 'all' ? '' : ' matching “' + escHtml(q) + '”');
+    }
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="prem-row" style="cursor:default;padding:28px 16px;justify-content:center;color:var(--ink-3);font-size:13px;">No ' +
+        escHtml(searchPageTab === 'all' ? 'results' : (GLOBAL_SEARCH_TYPE_LABELS[searchPageTab] || 'results').toLowerCase()) +
+        ' for “' + escHtml(q) + '”.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(renderSearchResultRow).join('');
+  }
+
+  function initSearchPage() {
+    const parsed = parseSearchParamsFromHash();
+    searchPageQuery = parsed.query;
+    searchPageTab = parsed.tab;
+    const input = document.getElementById('global-search-input');
+    if (input && parsed.query) input.value = parsed.query;
+
+    if (!document.getElementById('search')?.dataset.tabsBound) {
+      document.querySelectorAll('#search-tab-chips .chip').forEach(function (chip) {
+        chip.dataset.baseLabel = chip.textContent.trim();
+        chip.addEventListener('click', function () {
+          setSearchPageTab(chip.dataset.searchTab);
+        });
+      });
+      document.getElementById('search').dataset.tabsBound = '1';
+    }
+
+    renderSearchResultsPage();
   }
 
   function closeGlobalSearch() {
@@ -23799,7 +24993,15 @@
   function onGlobalSearchFocus() {
     const q = document.getElementById('global-search-input')?.value.trim() || '';
     if (q) renderGlobalSearchResults(q);
-    else openGlobalSearchPanel('<div class="search-results-hint">Type to search premises, processes and CPINs…</div>');
+    else openGlobalSearchPanel('<div class="search-results-hint">Type to search — press Enter for full results page</div>');
+  }
+
+  function onGlobalSearchKeydown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const q = e.target.value.trim();
+      if (q) openSearchResultsPage(q);
+    }
   }
 
   function renderGlobalSearchResults(raw) {
@@ -23809,31 +25011,25 @@
       return;
     }
 
-    const matches = getGlobalSearchIndex().filter(item => globalSearchMatches(item, q)).slice(0, 24);
+    const matches = getGlobalSearchMatches(q, 'all').slice(0, 8);
     if (matches.length === 0) {
-      openGlobalSearchPanel('<div class="search-results-empty">No results for “' + escHtml(q) + '”</div>');
+      openGlobalSearchPanel('<div class="search-results-empty">No results for “' + escHtml(q) + '”</div>' +
+        '<div class="search-results-footer"><button type="button" class="btn" onclick="openSearchResultsPage(\'' + escHtml(q).replace(/'/g, '&#39;') + '\')">Search anyway</button></div>');
       return;
     }
 
-    const groups = { premises: [], process: [], cpin: [] };
-    matches.forEach(m => { groups[m.type].push(m); });
-
+    const total = getGlobalSearchMatches(q, 'all').length;
     let html = '';
-    ['premises', 'process', 'cpin'].forEach(type => {
-      const items = groups[type];
-      if (!items.length) return;
-      html += '<div class="search-results-group"><div class="search-results-label">' + GLOBAL_SEARCH_TYPE_LABELS[type] + '</div>';
-      items.forEach(item => {
-        const pill = item.pill
-          ? '<span class="pill ' + escHtml(item.pill) + '">' + escHtml(item.pillLabel || '') + '</span>'
-          : '<span class="pill grey">Premises</span>';
-        html += '<button type="button" class="search-result-item" role="option" onclick="selectGlobalSearchResult(\'' + escHtml(item.route).replace(/'/g, '&#39;') + '\')">' +
-          '<div>' + pill + '</div>' +
-          '<div><div class="title-line">' + escHtml(item.title) + '</div>' +
-          '<div class="meta-line">' + escHtml(item.subtitle) + '</div></div></button>';
-      });
-      html += '</div>';
+    matches.forEach(function (item) {
+      const pill = item.pill
+        ? '<span class="pill ' + escHtml(item.pill) + '">' + escHtml(item.pillLabel || '') + '</span>'
+        : '<span class="pill grey">' + escHtml(GLOBAL_SEARCH_TYPE_LABELS[item.category] || '') + '</span>';
+      html += '<button type="button" class="search-result-item" role="option" onclick="selectGlobalSearchResult(\'' + escHtml(item.route).replace(/'/g, '&#39;') + '\')">' +
+        '<div>' + pill + '</div>' +
+        '<div><div class="title-line">' + escHtml(item.title) + '</div>' +
+        '<div class="meta-line">' + escHtml(item.subtitle) + '</div></div></button>';
     });
+    html += '<div class="search-results-footer"><button type="button" class="btn" onclick="openSearchResultsPage(\'' + escHtml(q).replace(/'/g, '&#39;') + '\')">View all ' + total + ' results</button></div>';
 
     openGlobalSearchPanel(html);
   }
@@ -25562,7 +26758,8 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('new-modal')?.classList.contains('open') &&
-        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     resetScIntakeForm();
@@ -25579,6 +26776,72 @@
     closeScIntakeForm();
     show('concerns');
     if (typeof switchConcernsTab === 'function') switchConcernsTab('unassigned');
+  }
+
+  // ---------------------------------------------------------
+  // Building Control Consultation intake
+  // ---------------------------------------------------------
+  function populateBccIntakePremisesSelect() {
+    const sel = document.getElementById('bcc-intake-premises');
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Please select</option>';
+    getCpinPremisesCatalog().forEach(function (p) {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  }
+
+  function resetBccIntakeForm() {
+    const form = document.getElementById('bcc-intake-form');
+    if (form) {
+      form.reset();
+      const dateEl = document.getElementById('bcc-intake-received-date');
+      if (dateEl) dateEl.valueAsDate = new Date();
+    }
+  }
+
+  function openBccIntakeForm(premisesName) {
+    populateBccIntakePremisesSelect();
+    resetBccIntakeForm();
+    if (premisesName) {
+      const sel = document.getElementById('bcc-intake-premises');
+      if (sel) sel.value = premisesName;
+    }
+    document.getElementById('bcc-intake-modal')?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () {
+      document.getElementById('bcc-intake-submission-ref')?.focus();
+    });
+  }
+
+  function closeBccIntakeForm() {
+    document.getElementById('bcc-intake-modal')?.classList.remove('open');
+    if (!document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
+        !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
+        !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
+        !document.getElementById('new-modal')?.classList.contains('open') &&
+        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+    resetBccIntakeForm();
+  }
+
+  function submitBccIntakeForm() {
+    const form = document.getElementById('bcc-intake-form');
+    if (!form || typeof saveBccIntakeFromForm !== 'function') return;
+    if (!form.reportValidity()) return;
+
+    const record = saveBccIntakeFromForm(new FormData(form));
+    if (!record) return;
+
+    closeBccIntakeForm();
+    show('processes');
+    if (typeof setProcessTypeFilter === 'function') setProcessTypeFilter('consultation');
   }
 
   // ---------------------------------------------------------
@@ -25642,7 +26905,8 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('new-modal')?.classList.contains('open') &&
-        !document.getElementById('sc-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     resetCpinIntakeForm();
@@ -25742,7 +27006,8 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
   }
@@ -25770,6 +27035,8 @@
         closeAuditAssessmentModal();
       } else if (document.getElementById('letter-composer-modal')?.classList.contains('open')) {
         closeLetterComposer();
+      } else if (document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
+        closeBccIntakeForm();
       } else if (document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
         closeCpinIntakeForm();
       } else if (document.getElementById('sc-intake-modal')?.classList.contains('open')) {
@@ -28192,6 +29459,22 @@
         const concern = getConcernById(typeof activeConcernId === 'function' ? activeConcernId() : null);
         added = concern && concern.premises && concern.premises.toLowerCase() === entry.name.toLowerCase();
       }
+      if (setupLookupTarget === 'consultation' && setupLookupMode === 'dutyHolder' && typeof getConsultationById === 'function') {
+        const bcc = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+        added = bcc && (bcc.dutyHolders || []).some(function (d) {
+          return d.status !== 'rejected' && d.name.toLowerCase() === entry.name.toLowerCase();
+        });
+      }
+      if (setupLookupTarget === 'consultation' && setupLookupMode === 'responsiblePerson' && typeof getConsultationById === 'function') {
+        const bcc = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+        added = bcc && (bcc.responsiblePersons || []).some(function (r) {
+          return r.status !== 'rejected' && r.name.toLowerCase() === entry.name.toLowerCase();
+        });
+      }
+      if (setupLookupTarget === 'consultation' && setupLookupMode === 'premises' && typeof getConsultationById === 'function') {
+        const bcc = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+        added = bcc && bcc.premises && bcc.premises.toLowerCase() === entry.name.toLowerCase();
+      }
       if (setupLookupTarget === 'bizsupport' && setupLookupMode === 'dutyHolder' && typeof getBizSupportById === 'function') {
         const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
         added = bs && (bs.dutyHolders || []).some(function (d) {
@@ -28256,6 +29539,15 @@
           if (typeof initConcernDetailPage === 'function') initConcernDetailPage();
         }
         setupLookupTarget = 'audit';
+      } else if (setupLookupTarget === 'consultation' && typeof getConsultationById === 'function') {
+        const bcc = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+        if (bcc) {
+          const holders = (bcc.dutyHolders || []).filter(function (d) { return d.status !== 'rejected'; }).slice();
+          holders.push(dh);
+          persistConsultationPatch(bcc.id, { dutyHolders: holders });
+          if (typeof initConsultationDetailPage === 'function') initConsultationDetailPage();
+        }
+        setupLookupTarget = 'audit';
       } else if (setupLookupTarget === 'bizsupport' && typeof getBizSupportById === 'function') {
         const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
         if (bs) {
@@ -28305,6 +29597,17 @@
           if (typeof initConcernDetailPage === 'function') initConcernDetailPage();
         }
         setupLookupTarget = 'audit';
+      } else if (setupLookupTarget === 'consultation' && typeof getConsultationById === 'function') {
+        const bcc = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+        if (bcc) {
+          const accepted = (bcc.dutyHolders || []).filter(function (d) { return d.status === 'accepted'; });
+          rp.linkedDh = getDhKeyForRpKey(entry.key) || (accepted[0] && (accepted[0].key || SETUP_DH_KEY_BY_NAME[accepted[0].name])) || null;
+          const rps = (bcc.responsiblePersons || []).slice();
+          rps.push(rp);
+          persistConsultationPatch(bcc.id, { responsiblePersons: rps });
+          if (typeof initConsultationDetailPage === 'function') initConsultationDetailPage();
+        }
+        setupLookupTarget = 'audit';
       } else if (setupLookupTarget === 'bizsupport' && typeof getBizSupportById === 'function') {
         const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
         if (bs) {
@@ -28351,6 +29654,9 @@
       setupLookupTarget = 'audit';
     } else if (setupLookupMode === 'premises' && setupLookupTarget === 'concern') {
       if (typeof saveConcernPremises === 'function') saveConcernPremises(entry.name);
+      setupLookupTarget = 'audit';
+    } else if (setupLookupMode === 'premises' && setupLookupTarget === 'consultation') {
+      if (typeof saveConsultationPremises === 'function') saveConsultationPremises(entry.name);
       setupLookupTarget = 'audit';
     } else if (setupLookupMode === 'premises' && setupLookupTarget === 'bizsupport') {
       if (typeof addBsPremisesFromLookup === 'function') addBsPremisesFromLookup(entry.name);
