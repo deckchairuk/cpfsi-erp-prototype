@@ -10115,8 +10115,8 @@
 ========================================================= -->
 <div id="auditsetup" class="screen">
   <main>
-    <div class="crumbs">
-      <a onclick="show('premisesdetail')">Temple Quay House</a> /  Start audit
+    <div class="crumbs" id="audit-setup-crumbs">
+      <a onclick="show('premisesdetail')">Premises</a> /  Start audit
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -11471,10 +11471,13 @@
   function ensureAuditContextShell(auditId, setup) {
     ensureAuditContextsInit();
     setup = setup || auditSetup || defaultAuditSetup();
+    const fallbackPremises = auditId === PROTOTYPE_AUDIT_ID ? 'Temple Quay House' : '';
     if (!auditContexts[auditId]) {
       auditContexts[auditId] = {
         auditId: auditId,
-        premises: setup.premises || 'Temple Quay House',
+        premises: setup.premises || fallbackPremises,
+        sourceCpinId: setup.sourceCpinId || null,
+        sourceCpinRef: setup.sourceCpinRef || null,
         stage: 1,
         findings: [],
         siteVisitTypeLocked: false,
@@ -11488,13 +11491,55 @@
       };
     } else if (setup) {
       auditContexts[auditId].setup = setup;
+      if (setup.premises) auditContexts[auditId].premises = setup.premises;
+      if (setup.sourceCpinId) auditContexts[auditId].sourceCpinId = setup.sourceCpinId;
+      if (setup.sourceCpinRef) auditContexts[auditId].sourceCpinRef = setup.sourceCpinRef;
     }
+  }
+
+  function findCpinBySpawnedAuditId(auditId) {
+    if (!auditId) return null;
+    return getAllCpinRecords().find(function (c) { return c.spawnedAuditId === auditId; }) || null;
+  }
+
+  function auditSetupPremisesMismatch(setup, cpin) {
+    if (!cpin || !cpin.premises) return false;
+    const expected = resolveCpinPremisesName(cpin.premises);
+    if (!setup || !setup.premises) return true;
+    return setup.premises !== expected;
+  }
+
+  function hydrateAuditSetupFromSourceCpin(auditId, cpin) {
+    cpin = cpin || findCpinBySpawnedAuditId(auditId);
+    if (!cpin || !cpin.premises) return false;
+    seedAuditSetupFromCpin(cpin, auditId);
+    ensureAuditContextShell(auditId, auditSetup);
+    const ctx = auditContexts[auditId];
+    if (ctx) {
+      ctx.premises = auditSetup.premises;
+      ctx.sourceCpinId = cpin.id;
+      ctx.sourceCpinRef = cpin.ref;
+      ctx.stage = ctx.stage || 1;
+      ctx.setup = JSON.parse(JSON.stringify(auditSetup));
+    }
+    localStorage.setItem(setupDraftKey(auditId), JSON.stringify(auditSetup));
+    return true;
+  }
+
+  function syncAuditContextPremisesFromSetup(auditId) {
+    const ctx = auditContexts[auditId];
+    if (!ctx || !auditSetup) return;
+    if (auditSetup.premises) ctx.premises = auditSetup.premises;
+    if (auditSetup.sourceCpinId) ctx.sourceCpinId = auditSetup.sourceCpinId;
+    if (auditSetup.sourceCpinRef) ctx.sourceCpinRef = auditSetup.sourceCpinRef;
+    ctx.setup = auditSetup;
   }
 
   function openAuditSetup(auditId) {
     snapshotActiveAuditContext();
     auditId = auditId || activeAuditId || PROTOTYPE_AUDIT_ID;
     ensureAuditContextsInit();
+    const cpinSource = findCpinBySpawnedAuditId(auditId);
     const draftKey = setupDraftKey(auditId);
     const draft = localStorage.getItem(draftKey);
     let setup = null;
@@ -11504,9 +11549,15 @@
     if (!setup && auditContexts[auditId] && auditContexts[auditId].setup) {
       setup = JSON.parse(JSON.stringify(auditContexts[auditId].setup));
     }
-    if (!setup) setup = defaultAuditSetup();
+    if (cpinSource && auditSetupPremisesMismatch(setup, cpinSource)) {
+      hydrateAuditSetupFromSourceCpin(auditId, cpinSource);
+      setup = JSON.parse(JSON.stringify(auditSetup));
+    } else if (!setup) {
+      setup = defaultAuditSetup();
+    }
     setup.spawnedAuditId = auditId;
     ensureAuditContextShell(auditId, setup);
+    syncAuditContextPremisesFromSetup(auditId);
     applyAuditContext(auditId);
     auditStage = 1;
     auditContexts[auditId].stage = 1;
@@ -12905,7 +12956,7 @@
   function updateAuditContextLabels() {
     const ctx = auditContexts[activeAuditId];
     const id = (ctx && ctx.auditId) || activeAuditId || PROTOTYPE_AUDIT_ID;
-    const premises = (ctx && ctx.premises) || auditSetup.premises || 'Temple Quay House';
+    const premises = getAuditPremisesName() || (ctx && ctx.premises) || '';
     const followUp = isFollowUpAudit();
     const parentId = getFollowUpParentAuditId();
     const sourceCpinId = (ctx && ctx.sourceCpinId) || auditSetup.sourceCpinId;
@@ -12913,19 +12964,31 @@
     const processLabel = followUp ? 'Follow-up audit' : 'Audit';
     const titleEl = document.getElementById('audit-page-title');
     const crumbsEl = document.getElementById('audit-page-crumbs');
+    const setupCrumbsEl = document.getElementById('audit-setup-crumbs');
     const setupTitleEl = document.getElementById('audit-setup-title');
     const setupMetaEl = document.getElementById('audit-setup-meta');
+    const premLink = premises
+      ? '<a onclick="showPremisesByName(' + JSON.stringify(premises) + ')">' + escHtml(premises) + '</a>'
+      : '<span>Premises</span>';
     if (titleEl) titleEl.textContent = processLabel + '  ·  ' + id;
     if (crumbsEl) {
       let crumbs = '';
       if (sourceCpinId) {
         crumbs += '<a onclick="show(\'cpin/' + escHtml(sourceCpinId) + '\')">' + escHtml(sourceCpinRef || 'CPIN') + '</a> /  ';
       }
-      crumbs += '<a onclick="show(\'premisesdetail\')">' + escHtml(premises) + '</a> /  ' + escHtml(processLabel) + ' ' + escHtml(id);
+      crumbs += premLink + ' /  ' + escHtml(processLabel) + ' ' + escHtml(id);
       if (followUp && parentId) {
         crumbs += ' <span style="color:var(--ink-3);">· from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a></span>';
       }
       crumbsEl.innerHTML = crumbs;
+    }
+    if (setupCrumbsEl) {
+      let setupCrumbs = '';
+      if (sourceCpinId) {
+        setupCrumbs += '<a onclick="show(\'cpin/' + escHtml(sourceCpinId) + '\')">' + escHtml(sourceCpinRef || 'CPIN') + '</a> /  ';
+      }
+      setupCrumbs += premLink + ' /  Start audit';
+      setupCrumbsEl.innerHTML = setupCrumbs;
     }
     if (setupTitleEl) setupTitleEl.textContent = processLabel + '  ·  ' + id;
     if (setupMetaEl) {
@@ -13067,7 +13130,7 @@
     if (!auditContexts[activeAuditId]) {
       auditContexts[activeAuditId] = {
         auditId: activeAuditId,
-        premises: payload.premises || 'Temple Quay House',
+        premises: payload.premises || getAuditPremisesName() || (activeAuditId === PROTOTYPE_AUDIT_ID ? 'Temple Quay House' : ''),
         stage: 1,
         findings: [],
         siteVisitTypeLocked: false,
@@ -14049,6 +14112,12 @@
 
   function getPremisesByName(name) {
     return PREMISES_LIST.find(function (p) { return p.name === name; }) || null;
+  }
+
+  function showPremisesByName(name) {
+    const prem = getPremisesByName(name);
+    if (prem && prem.route) show(prem.route);
+    else show('premises');
   }
 
   function getOsMapsApiKey() {
@@ -25424,7 +25493,8 @@
     persistCpinPatch(activeCpinId, patch);
     renderCpinsLists();
     if (startAudit && spawnedAuditId) {
-      spawnAuditContextFromCpin(Object.assign({}, cpin, patch), spawnedAuditId);
+      const closedCpin = getCpinById(activeCpinId);
+      hydrateAuditSetupFromSourceCpin(spawnedAuditId, closedCpin);
       openAuditSetup(spawnedAuditId);
     } else {
       initCpinDetailPage();
@@ -27297,6 +27367,8 @@
     const ctx = activeAuditId && auditContexts[activeAuditId];
     if (ctx && ctx.premises) return ctx.premises;
     if (ctx && ctx.setup && ctx.setup.premises) return ctx.setup.premises;
+    const cpin = activeAuditId && findCpinBySpawnedAuditId(activeAuditId);
+    if (cpin && cpin.premises) return resolveCpinPremisesName(cpin.premises);
     return '';
   }
 
@@ -27318,6 +27390,10 @@
   }
 
   function reconcileAuditSetupWithPremises() {
+    const cpinSource = activeAuditId && findCpinBySpawnedAuditId(activeAuditId);
+    if (cpinSource && auditSetupPremisesMismatch(auditSetup, cpinSource)) {
+      hydrateAuditSetupFromSourceCpin(activeAuditId, cpinSource);
+    }
     if (!auditSetup || !auditSetup.premises) return;
     const prem = resolveCpinPremisesName(auditSetup.premises);
     if (prem !== auditSetup.premises) auditSetup.premises = prem;
@@ -27631,24 +27707,30 @@
 
   function initAuditSetupPage() {
     ensureAuditContextsInit();
-    const draftKey = setupDraftKey(activeAuditId);
+    const auditId = activeAuditId;
+    if (!auditId) return;
+    if (!auditContexts[auditId]) {
+      ensureAuditContextShell(auditId, null);
+    }
+    const draftKey = setupDraftKey(auditId);
     const draft = localStorage.getItem(draftKey);
     if (draft) {
       try {
         auditSetup = JSON.parse(draft);
         auditSetup.letterEditing = false;
-        auditContexts[activeAuditId].setup = auditSetup;
+        if (auditContexts[auditId]) auditContexts[auditId].setup = auditSetup;
       } catch (e) {
-        auditSetup = JSON.parse(JSON.stringify(auditContexts[activeAuditId].setup || defaultAuditSetup()));
+        auditSetup = JSON.parse(JSON.stringify(auditContexts[auditId].setup || defaultAuditSetup()));
       }
-    } else if (auditContexts[activeAuditId] && auditContexts[activeAuditId].setup) {
-      auditSetup = JSON.parse(JSON.stringify(auditContexts[activeAuditId].setup));
+    } else if (auditContexts[auditId] && auditContexts[auditId].setup) {
+      auditSetup = JSON.parse(JSON.stringify(auditContexts[auditId].setup));
     } else {
       auditSetup = defaultAuditSetup();
     }
+    reconcileAuditSetupWithPremises();
+    syncAuditContextPremisesFromSetup(auditId);
     // The lead inspector is always shown in the static card; strip any duplicate from the dynamic list
     auditSetup.inspectors = (auditSetup.inspectors || []).filter(function(i) { return i.name !== 'Phil Gower'; });
-    reconcileAuditSetupWithPremises();
     normalizeAuditSetupDutyHolders();
     renderSetupPremisesCard();
     renderSetupDutyHolders();
@@ -28380,7 +28462,7 @@
 
     p1.innerHTML =
       'Following an incident notification received on 12 June 2026, CPFSI will be conducting a ' +
-      '<span class="conditional">' + escHtml(typeLabel) + '</span> at Temple Quay House on ' +
+      '<span class="conditional">' + escHtml(typeLabel) + '</span> at ' + escHtml(getAuditPremisesName() || 'the premises') + ' on ' +
       '<span class="conditional">' + escHtml(appt.long) + '</span>. We anticipate the visit will take ' +
       escHtml(appt.duration) + '.';
 
