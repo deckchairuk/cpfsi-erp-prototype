@@ -8261,14 +8261,11 @@
 
       <!-- Context rail -->
       <div class="context-rail">
-        <div class="context-card">
+        <div class="context-card" id="audit-rail-premises">
           <h3>Premises</h3>
-          <div style="font-weight:600;">Temple Quay House</div>
-          <div class="prem-ref" style="margin:2px 0 6px;">PRM-0001847</div>
-          <div style="color:var(--ink-3);font-size:12px;margin-bottom:8px;">Government office  ·  HMCTS</div>
-          <div class="row"><span class="k">RBIP score</span><span style="color:var(--red);font-weight:600;">47</span></div>
-          <div class="row"><span class="k">Last audit</span><span>Jan 2025</span></div>
-          <div class="row"><span class="k">Sprinkler</span><span>Yes</span></div>
+          <div id="audit-rail-premises-body">
+            <div style="font-weight:600;">—</div>
+          </div>
         </div>
 
         <div class="context-card">
@@ -8277,17 +8274,13 @@
             <strong id="audit-context-progress-label">0 of 3 threads settled</strong>
             <div class="bar"><div id="audit-context-progress-bar"></div></div>
           </div>
-          <div class="dh-status-row"><span>Property Directorate</span><span class="pill green">GSS</span></div>
-          <div class="dh-status-row" id="audit-context-hmcts"><span>HMCTS</span><span class="pill red">EN · 28-DAP</span></div>
-          <div class="dh-status-row"><span>Equans</span><span class="pill amber">28-DAP</span></div>
+          <div id="audit-context-dh-progress"></div>
         </div>
 
-        <div class="context-card">
+        <div class="context-card" id="audit-rail-dh">
           <h3>Duty Holders here</h3>
           <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Pre-filled from this premises. Edit if needed.</div>
-          <div class="row"><span>HMCTS</span><span class="pill grey">Govt</span></div>
-          <div class="row"><span>Equans</span><span class="pill grey">FM</span></div>
-          <div class="row"><span>The Property Directorate</span><span class="pill grey">Internal</span></div>
+          <div id="audit-rail-dh-list"></div>
         </div>
 
         <div class="context-card">
@@ -10054,15 +10047,7 @@
         <div class="setup-section">
           <h3>1. Premises</h3>
           <div class="help">Locked from where this audit was started. Change at your own risk.</div>
-          <div class="holder-card" style="background:var(--accent-soft);border-color:var(--accent);">
-            <div class="avatar-sm" style="background:var(--accent);color:white;">TQ</div>
-            <div>
-              <div class="name">Temple Quay House</div>
-              <div class="role">Temple Back East, Bristol BS1  ·  Government office  ·  HMCTS</div>
-            </div>
-            <span class="pill blue">RBIP score 47</span>
-            <a style="font-size:12px;cursor:pointer;" onclick="changeSetupPremises();return false;">Change</a>
-          </div>
+          <div class="holder-card" style="background:var(--accent-soft);border-color:var(--accent);" id="setup-premises-card"></div>
         </div>
 
         <!-- Team -->
@@ -10150,8 +10135,8 @@
       <div>
         <div class="summary-card">
           <h3>Summary</h3>
-          <div class="row"><span class="k">Trigger</span><span class="v">Reactive (CPIN)</span></div>
-          <div class="row"><span class="k">Premises</span><span class="v">Temple Quay House</span></div>
+          <div class="row"><span class="k">Trigger</span><span class="v" id="setup-sum-trigger">Reactive (CPIN)</span></div>
+          <div class="row"><span class="k">Premises</span><span class="v" id="setup-sum-premises">—</span></div>
           <div class="row"><span class="k">Audit type</span><span class="v pending">At site visit (Stage 2)</span></div>
           <div class="row"><span class="k">Lead inspector</span><span class="v">Phil Gower</span></div>
           <div class="row"><span class="k">Other inspectors</span><span class="v pending" id="setup-sum-inspectors">none</span></div>
@@ -11598,6 +11583,7 @@
       renderAuditFindings();
       updateAuditEditWarning();
       updateAuditContextLabels();
+      renderAuditContextRail();
       return;
     }
 
@@ -12159,13 +12145,14 @@
 
   function seedAuditSetupFromPremises(premisesName, auditId) {
     const setup = defaultAuditSetup();
-    setup.premises = premisesName;
-    setup.premisesRef = 'PRM-0001847';
+    setup.premises = resolveCpinPremisesName(premisesName) || premisesName;
+    const prem = getPremisesByName(setup.premises);
+    setup.premisesRef = (prem && prem.ref) || '';
     setup.trigger = 'Started from premises';
     setup.spawnedAuditId = auditId;
     setup.fromPremises = true;
     setup.auditType = 'full';
-    setup.dutyHolders = defaultSetupDutyHolders();
+    setup.dutyHolders = buildSetupDutyHoldersFromPremises(setup.premises);
     setup.responsiblePersons = [];
     setup.inspectors = [];
     setup.appointmentDate = '';
@@ -12863,7 +12850,12 @@
     if (def && auditSetup.fromPremises && !auditSetup.fromCpinClose && !followUp) {
       def.innerHTML = '<strong>Started from premises.</strong> Duty Holders are suggested from what ' + escHtml(premises) + ' already knows. Review details, confirm the appointment, then start. No assessment data is pre-filled — you begin with a clean site visit.';
       def.hidden = false;
+    } else if (def && auditSetup.fromCpinClose && !followUp) {
+      def.innerHTML = '<strong>Pre-filled from CPIN ' + escHtml(auditSetup.sourceCpinRef || '') + '.</strong> Premises, Duty Holders and trigger are set from <strong>' + escHtml(premises) + '</strong>. Review them, confirm the appointment, then start. Audit type is chosen at Stage 2 (site visit).';
+      def.hidden = false;
     }
+    renderSetupPremisesCard();
+    renderAuditContextRail();
     renderFollowUpCarryBanner();
     updateAuditSetupFollowUpUi();
   }
@@ -16194,9 +16186,9 @@
         '</div>' +
         '<div class="audit-meta-row">' +
           '<span>Reactive</span>' +
-          '<span>Triggered by <a>CPIN-2026-0418</a></span>' +
+          '<span>Triggered by <a onclick="show(\'cpin/' + escHtml(auditSetup.sourceCpinId || '') + '\')">' + escHtml(auditSetup.sourceCpinRef || auditSetup.trigger || 'CPIN') + '</a></span>' +
         '</div>' +
-        '<div class="audit-meta-row">Lead inspector: <strong>Phil Gower</strong></div>';
+        '<div class="audit-meta-row">Lead inspector: <strong>Phil Gower</strong>  ·  ' + escHtml(getAuditPremisesName() || 'Premises') + '</div>';
     }
     syncAuditActivityForStage(n);
     updateAuditStagesToggleMeta(n);
@@ -16241,7 +16233,7 @@
       ).join('');
     }
     if (what) {
-      what.value = PROTOTYPE_AUDIT_ID + '  ·  Temple Quay House audit';
+      what.value = (activeAuditId || '') + '  ·  ' + (getAuditPremisesName() || 'Audit') + ' audit';
     }
     if (hint) {
       hint.textContent = 'Logged against Phil Gower on this audit process. Choose a date for time entries — defaults to today.';
@@ -27190,6 +27182,108 @@
     ];
   }
 
+  function getAuditPremisesName() {
+    if (auditSetup && auditSetup.premises) return auditSetup.premises;
+    const ctx = activeAuditId && auditContexts[activeAuditId];
+    if (ctx && ctx.premises) return ctx.premises;
+    if (ctx && ctx.setup && ctx.setup.premises) return ctx.setup.premises;
+    return '';
+  }
+
+  function buildSetupDutyHoldersFromPremises(premisesName) {
+    const names = getCpinDutyHoldersForPremises(premisesName);
+    if (!names.length) return defaultSetupDutyHolders();
+    return names.map(function (name) {
+      return {
+        id: 'dh-' + name.replace(/\W+/g, '-').toLowerCase(),
+        key: SETUP_DH_KEY_BY_NAME[name] || null,
+        ref: '',
+        name: name,
+        role: cpinDhRoleForName(name),
+        initials: setupInitials(name),
+        fromPremises: true,
+        status: 'suggested'
+      };
+    });
+  }
+
+  function reconcileAuditSetupWithPremises() {
+    if (!auditSetup || !auditSetup.premises) return;
+    const prem = resolveCpinPremisesName(auditSetup.premises);
+    if (prem !== auditSetup.premises) auditSetup.premises = prem;
+    const record = getPremisesByName(prem);
+    if (record && record.ref) auditSetup.premisesRef = record.ref;
+    const accepted = (auditSetup.dutyHolders || []).filter(function (d) { return d.status === 'accepted'; });
+    if (accepted.length) return;
+    const dhNames = new Set((auditSetup.dutyHolders || []).map(function (d) { return d.name; }));
+    const isDefaultTrio = dhNames.has('HMCTS') && dhNames.has('Equans') && dhNames.has('The Property Directorate') && dhNames.size === 3;
+    const isTempleQuay = prem === 'Temple Quay House' || prem.indexOf('Temple Quay') === 0;
+    if (isDefaultTrio && !isTempleQuay) {
+      auditSetup.dutyHolders = buildSetupDutyHoldersFromPremises(prem);
+      auditSetup.responsiblePersons = [];
+    } else if (!(auditSetup.dutyHolders || []).length && prem) {
+      auditSetup.dutyHolders = buildSetupDutyHoldersFromPremises(prem);
+    }
+  }
+
+  function renderSetupPremisesCard() {
+    const el = document.getElementById('setup-premises-card');
+    if (!el) return;
+    const premises = getAuditPremisesName() || 'Premises not set';
+    const prem = getPremisesByName(premises);
+    const initials = setupInitials(premises);
+    const meta = prem
+      ? [prem.address, prem.typeLabel, prem.dept].filter(Boolean).join('  ·  ')
+      : 'Link from CPIN or premises register';
+    let html = '<div class="avatar-sm" style="background:var(--accent);color:white;">' + escHtml(initials.slice(0, 2)) + '</div>';
+    html += '<div><div class="name">' + escHtml(premises) + '</div>';
+    html += '<div class="role">' + escHtml(meta) + '</div></div>';
+    if (prem && prem.score != null) {
+      html += '<span class="pill blue">RBIP score ' + prem.score + '</span>';
+    }
+    html += '<a style="font-size:12px;cursor:pointer;" onclick="changeSetupPremises();return false;">Change</a>';
+    el.innerHTML = html;
+  }
+
+  function renderAuditContextRail() {
+    const body = document.getElementById('audit-rail-premises-body');
+    const dhList = document.getElementById('audit-rail-dh-list');
+    const premises = getAuditPremisesName();
+    const prem = getPremisesByName(premises);
+    if (body) {
+      if (!premises) {
+        body.innerHTML = '<div style="font-weight:600;">—</div>';
+      } else {
+        let html = '<div style="font-weight:600;">' + escHtml(premises) + '</div>';
+        if (prem) {
+          html += '<div class="prem-ref" style="margin:2px 0 6px;">' + escHtml(prem.ref || '') + '</div>';
+          html += '<div style="color:var(--ink-3);font-size:12px;margin-bottom:8px;">' +
+            escHtml([prem.typeLabel, prem.dept].filter(Boolean).join('  ·  ')) + '</div>';
+          if (prem.score != null) {
+            html += '<div class="row"><span class="k">RBIP score</span><span style="font-weight:600;">' + prem.score + '</span></div>';
+          }
+          if (prem.lastAudit) {
+            html += '<div class="row"><span class="k">Last audit</span><span>' + escHtml(prem.lastAudit) + '</span></div>';
+          }
+        }
+        body.innerHTML = html;
+      }
+    }
+    if (dhList) {
+      const holders = (auditSetup && auditSetup.dutyHolders || []).filter(function (d) {
+        return d.status === 'accepted' || d.status === 'suggested';
+      });
+      if (!holders.length) {
+        dhList.innerHTML = '<div style="font-size:12px;color:var(--ink-3);">None linked yet.</div>';
+      } else {
+        dhList.innerHTML = holders.map(function (d) {
+          return '<div class="row"><span>' + escHtml(d.name) + '</span><span class="pill grey">' +
+            (d.status === 'accepted' ? 'Approved' : 'Suggested') + '</span></div>';
+        }).join('');
+      }
+    }
+  }
+
   let auditSetup = {
     auditType: 'full',
     dutyHolders: defaultSetupDutyHolders(),
@@ -27219,7 +27313,9 @@
   function seedAuditSetupFromCpin(cpin, auditId) {
     const o = getCpinOnsiteEval(cpin);
     const setup = defaultAuditSetup();
-    setup.premises = cpin.premises || '';
+    setup.premises = resolveCpinPremisesName(cpin.premises) || '';
+    const premRecord = getPremisesByName(setup.premises);
+    if (premRecord && premRecord.ref) setup.premisesRef = premRecord.ref;
     setup.trigger = 'Reactive CPIN — ' + (cpin.ref || '');
     setup.sourceCpinId = cpin.id;
     setup.sourceCpinRef = cpin.ref;
@@ -27253,6 +27349,8 @@
           };
         });
       }
+    } else if (setup.premises) {
+      setup.dutyHolders = buildSetupDutyHoldersFromPremises(setup.premises);
     }
     if (cpin.assignee) {
       setup.inspectors = [{
@@ -27275,7 +27373,7 @@
     seedAuditSetupFromCpin(cpin, auditId);
     ensureAuditContextShell(auditId, auditSetup);
     const ctx = auditContexts[auditId];
-    ctx.premises = cpin.premises || auditSetup.premises;
+    ctx.premises = resolveCpinPremisesName(cpin.premises) || auditSetup.premises;
     ctx.sourceCpinId = cpin.id;
     ctx.sourceCpinRef = cpin.ref;
     ctx.stage = 1;
@@ -27440,7 +27538,9 @@
     }
     // The lead inspector is always shown in the static card; strip any duplicate from the dynamic list
     auditSetup.inspectors = (auditSetup.inspectors || []).filter(function(i) { return i.name !== 'Phil Gower'; });
+    reconcileAuditSetupWithPremises();
     normalizeAuditSetupDutyHolders();
+    renderSetupPremisesCard();
     renderSetupDutyHolders();
     renderSetupResponsiblePersons();
     renderSetupInspectors();
@@ -27454,6 +27554,7 @@
     onSetupAppointmentChange();
     renderSetupAppointmentLetters();
     updateAuditContextLabels();
+    refreshSetupSummary();
     showSetupDraftNotice(!!draft);
   }
 
@@ -28204,6 +28305,11 @@
     const dhEl = document.getElementById('setup-sum-dh');
     const rpEl = document.getElementById('setup-sum-rp');
     const apptEl = document.getElementById('setup-sum-appt');
+    const premEl = document.getElementById('setup-sum-premises');
+    const triggerEl = document.getElementById('setup-sum-trigger');
+
+    if (premEl) premEl.textContent = getAuditPremisesName() || '—';
+    if (triggerEl) triggerEl.textContent = (auditSetup && auditSetup.trigger) || '—';
 
     if (insEl) {
       if (auditSetup.inspectors.length === 0) {
