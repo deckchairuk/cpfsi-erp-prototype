@@ -293,14 +293,6 @@
       <label for="premises">Address of Premises</label>
       <select id="premises" name="premises">
         <option value="">Please select</option>
-        <option>HMP Lewes</option>
-        <option>HMP Belmarsh</option>
-        <option>HMP Wandsworth</option>
-        <option>Temple Quay House</option>
-        <option>DWP Canterbury</option>
-        <option>DWP Brighton</option>
-        <option>HMCTS Maidstone</option>
-        <option>HMCTS Guildford</option>
       </select>
     </div>
 
@@ -380,6 +372,27 @@
 
 <script>
   const CPIN_INTAKE_KEY = 'cpfsi-cpin-intake-v1';
+  const CPIN_REPORT_PREMISES = [
+    'Bristol Crown Court', 'Charing Cross House refurb', 'Crawley Job Centre Plus',
+    'DWP Brighton', 'DWP Canterbury', 'DWP Crawley', 'Folkestone Tribunal Hearing Centre',
+    'HMP Belmarsh', 'HMP Bristol', 'HMP Durham', 'HMP Isis', 'HMP Lewes', 'HMP Maidstone',
+    'HMP Pentonville', 'HMP Rochester', 'HMP Swaleside', 'HMP Wandsworth',
+    'HMCTS Guildford', 'Jobcentre Plus Crawley', 'Lewes Crown Court',
+    'Maidstone Magistrates Court', 'MoJ HQ London', 'Reading Job Centre Plus',
+    'Royal Courts of Justice', 'Temple Quay Estate', 'Temple Quay House',
+    'Temple Quay Riverside Annexe'
+  ].sort(function (a, b) { return a.localeCompare(b); });
+
+  (function populatePremisesSelect() {
+    const sel = document.getElementById('premises');
+    if (!sel) return;
+    CPIN_REPORT_PREMISES.forEach(function (name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  })();
 
   function formatUkDate(iso) {
     if (!iso) return '';

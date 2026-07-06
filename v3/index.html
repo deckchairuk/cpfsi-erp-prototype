@@ -2993,6 +2993,64 @@
   .cpin-key-section-body {
     padding: 18px 22px;
   }
+  .cpin-process-trail {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .cpin-process-trail-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .cpin-trail-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cpin-trail-steps li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-2);
+  }
+  .cpin-trail-steps li.is-current { color: var(--ink); font-weight: 600; }
+  .cpin-trail-steps li.is-done { color: var(--ink-3); }
+  .cpin-trail-steps li.is-pending { color: var(--ink-3); font-style: italic; }
+  .cpin-trail-sep { color: var(--ink-3); font-size: 12px; user-select: none; }
+  .cpin-journey-guide {
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: #eef6f0;
+    border: 1px solid #b8dfc4;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .cpin-journey-guide strong { color: var(--gov-green-dk); }
+  .cpin-premises-suggestions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .cpin-premises-suggestions-label {
+    font-size: 12px;
+    color: var(--ink-3);
+    width: 100%;
+    margin-bottom: 2px;
+  }
   .cpin-key-fields {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.78fr);
@@ -8523,6 +8581,8 @@
       <div id="cpin-detail-actions" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
     </div>
     <div id="cpin-admin-review-banner" class="cpin-admin-review-banner" hidden></div>
+    <div id="cpin-process-trail" class="cpin-process-trail" hidden></div>
+    <div id="cpin-journey-guide" class="cpin-journey-guide" hidden></div>
 
     <div class="cpin-single-workflow">
       <div class="setup-section cpin-key-section">
@@ -8541,6 +8601,7 @@
               <div class="cpin-key-value" id="cpin-premises-value"></div>
               <button type="button" class="btn cpin-key-change-btn" id="cpin-premises-change-btn" onclick="openCpinPremisesEdit()">Change</button>
             </div>
+            <div id="cpin-premises-suggestions" class="cpin-premises-suggestions" hidden></div>
           </div>
           <div class="cpin-key-field" id="cpin-field-severity">
             <label for="cpin-severity-select">RAG severity</label>
@@ -12091,6 +12152,8 @@
     setup.appointmentDuration = 'half';
     setup.letterSent = true;
     setup.fromCpinClose = true;
+    setup.sourceCpinId = 'cpin-0418-tq';
+    setup.sourceCpinRef = 'CPIN-2026-0417';
     return setup;
   }
 
@@ -12640,6 +12703,8 @@
       auditContexts[PROTOTYPE_AUDIT_ID] = {
         auditId: PROTOTYPE_AUDIT_ID,
         premises: 'Temple Quay House',
+        sourceCpinId: 'cpin-0418-tq',
+        sourceCpinRef: 'CPIN-2026-0417',
         stage: 2,
         findings: JSON.parse(JSON.stringify(AUDIT_IN_PROGRESS_FINDINGS)),
         siteVisitTypeLocked: true,
@@ -12694,6 +12759,8 @@
     ctx.closed = auditClosed;
     ctx.closedAt = auditClosedAt;
     ctx.followUpAuditId = auditFollowUpId;
+    ctx.sourceCpinId = auditSetup.sourceCpinId || ctx.sourceCpinId;
+    ctx.sourceCpinRef = auditSetup.sourceCpinRef || ctx.sourceCpinRef;
     ctx.parentAuditId = getFollowUpParentAuditId();
     ctx.parentOutcomes = auditParentOutcomes;
     ctx.stage4State = auditStage4State;
@@ -12744,6 +12811,8 @@
     const premises = (ctx && ctx.premises) || auditSetup.premises || 'Temple Quay House';
     const followUp = isFollowUpAudit();
     const parentId = getFollowUpParentAuditId();
+    const sourceCpinId = (ctx && ctx.sourceCpinId) || auditSetup.sourceCpinId;
+    const sourceCpinRef = (ctx && ctx.sourceCpinRef) || auditSetup.sourceCpinRef;
     const processLabel = followUp ? 'Follow-up audit' : 'Audit';
     const titleEl = document.getElementById('audit-page-title');
     const crumbsEl = document.getElementById('audit-page-crumbs');
@@ -12751,7 +12820,11 @@
     const setupMetaEl = document.getElementById('audit-setup-meta');
     if (titleEl) titleEl.textContent = processLabel + '  ·  ' + id;
     if (crumbsEl) {
-      let crumbs = '<a onclick="show(\'premisesdetail\')">' + escHtml(premises) + '</a> /  ' + escHtml(processLabel) + ' ' + escHtml(id);
+      let crumbs = '';
+      if (sourceCpinId) {
+        crumbs += '<a onclick="show(\'cpin/' + escHtml(sourceCpinId) + '\')">' + escHtml(sourceCpinRef || 'CPIN') + '</a> /  ';
+      }
+      crumbs += '<a onclick="show(\'premisesdetail\')">' + escHtml(premises) + '</a> /  ' + escHtml(processLabel) + ' ' + escHtml(id);
       if (followUp && parentId) {
         crumbs += ' <span style="color:var(--ink-3);">· from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a></span>';
       }
@@ -12996,7 +13069,7 @@
     { id: 'F-2026-0118', type: 'follow-up', premises: 'HMP Belmarsh', score: 29, scoreClass: 'score-mid', status: 'awaiting-follow-up', statusText: 'Awaiting follow-up visit', owner: 'Steve France', ownerInitials: 'SF', age: '4 months', mine: false, patch: false, prison: true },
     { id: 'B-2026-0044', type: 'support', premises: 'Royal Courts of Justice', score: 22, scoreClass: 'score-low', status: 'open', statusText: 'Meeting scheduled  ·  25 Jun', owner: 'Phil Gower', ownerInitials: 'PG', age: '3 days', mine: true, patch: true, route: 'bizsupport/bs-0044' },
     { id: 'CPIN-2026-0418', type: 'cpin', premises: 'Temple Quay House', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Desk evaluation  ·  Triage', owner: 'Phil Gower', ownerInitials: 'PG', age: '2 days', mine: true, patch: true, route: 'cpin/cpin-0418' },
-    { id: 'CPIN-2026-0412', type: 'cpin', premises: 'Premises not yet linked', score: null, scoreClass: 'score-mid', status: 'open', statusText: 'Awaiting premises match', owner: 'Phil Gower', ownerInitials: 'PG', age: '5 days', mine: true, patch: true, route: 'cpin/cpin-0412' },
+    { id: 'CPIN-2026-0412', type: 'cpin', premises: 'HMP Belmarsh', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Triage  ·  Further action', owner: 'Phil Gower', ownerInitials: 'PG', age: '5 days', mine: true, patch: true, route: 'cpin/cpin-0412' },
     { id: 'CPIN-2026-0398', type: 'cpin', premises: 'HMP Swaleside', score: 41, scoreClass: 'score-high', status: 'in-progress', statusText: 'Remote evaluation  ·  Amber', owner: 'Steve France', ownerInitials: 'SF', age: '9 days', mine: false, patch: true, prison: true, route: 'cpin/cpin-0398' },
     { id: 'CPIN-2026-0401', type: 'cpin', premises: 'Reading Job Centre Plus', score: 28, scoreClass: 'score-mid', status: 'awaiting-action-plan', statusText: 'Duty holder response due', owner: 'Hannah Munro', ownerInitials: 'HM', age: '14 days', mine: false, patch: false },
     { id: 'AP-2026-0007', type: 'appeal', premises: 'HMP Wandsworth', score: 35, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Panel review  ·  Evidence pack', owner: 'Steve France', ownerInitials: 'SF', age: '18 days', mine: false, patch: false, prison: true },
@@ -15229,7 +15302,7 @@
     { id: 'rem-007', premises: 'Temple Quay House', task: 'Log time for site visit week', detail: 'Outstanding time entries from audit A-2026-0314 site visit.', dueDate: '2026-06-28', processId: 'A-2026-0314', processType: 'audit', route: 'time' },
     { id: 'rem-008', premises: 'HMP Bristol', task: 'Audit planning — scope sign-off', detail: 'Confirm audit scope with HMPPS regional lead before stage 2.', dueDate: '2026-06-29', processId: 'A-2026-0320', processType: 'audit', route: 'audit:A-2026-0320' },
     { id: 'rem-009', premises: 'Lewes Crown Court', task: 'Safety concern — review site photos', detail: 'Assess photos from Duty Holder and decide next steps.', dueDate: '2026-06-30', processId: 'SC-2026-0061', processType: 'concern', route: 'concerns' },
-    { id: 'rem-010', premises: 'Premises not yet linked', task: 'CPIN — match premises', detail: 'Link incoming CPIN to RBIP premises record.', dueDate: '2026-07-01', processId: 'CPIN-2026-0412', processType: 'cpin', route: 'cpin/cpin-0412' },
+    { id: 'rem-010', premises: 'HMP Belmarsh', task: 'CPIN triage — Belmarsh kitchen fire', detail: 'Complete triage, desk evaluation, and close to spawn reactive audit.', dueDate: '2026-07-01', processId: 'CPIN-2026-0412', processType: 'cpin', route: 'cpin/cpin-0412' },
     { id: 'rem-011', premises: 'Temple Quay House', task: 'Audit ready to close', detail: 'Stage 5 outcomes sent — close audit or spawn follow-up.', dueDate: '2026-07-02', processId: 'A-2026-0399', processType: 'audit', route: 'audit:A-2026-0399' },
     { id: 'rem-012', premises: 'HMP Lewes', task: 'Follow-up visit due', detail: 'Schedule and complete 28-DAP follow-up visit.', dueDate: '2026-07-04', processId: 'F-2026-0142', processType: 'follow-up', route: 'audit:F-2026-0142' },
     { id: 'rem-013', premises: 'Temple Quay House', task: 'Follow-up action plans', detail: 'Review duty holder action plans from audit A-2026-0399.', dueDate: '2026-07-05', processId: 'F-2026-0398', processType: 'follow-up', route: 'audit:F-2026-0398' },
@@ -19874,14 +19947,114 @@
     'HMP Lewes': ['HMPPS - South East', 'Serco FM'],
     'HMP Belmarsh': ['HMPPS - London', 'Serco FM'],
     'HMP Wandsworth': ['HMPPS - London', 'Serco FM'],
-    'Temple Quay House': ['HMCTS', 'Equans', 'Property Directorate'],
-    'DWP Canterbury': ['DWP Estates', 'Mitie'],
-    'HMCTS Maidstone': ['HMCTS', 'Equans'],
-    'Jobcentre Plus Crawley': ['DWP Estates'],
+    'HMP Bristol': ['HMPPS - South West', 'Serco FM'],
+    'HMP Maidstone': ['HMPPS - Kent', 'Serco FM'],
+    'HMP Swaleside': ['HMPPS - Kent', 'Serco FM'],
     'HMP Rochester': ['HMPPS - Kent', 'Serco FM'],
+    'HMP Pentonville': ['HMPPS - London', 'Serco FM'],
+    'HMP Isis': ['HMPPS - London', 'Serco FM'],
+    'HMP Durham': ['HMPPS - South East', 'Serco FM'],
+    'Temple Quay House': ['HMCTS', 'Equans', 'The Property Directorate'],
+    'Temple Quay Estate': ['HMCTS', 'Equans'],
+    'Temple Quay Riverside Annexe': ['HMCTS', 'Equans'],
+    'Charing Cross House refurb': ['MoJ', 'The Property Directorate'],
+    'MoJ HQ London': ['MoJ', 'The Property Directorate'],
+    'DWP Canterbury': ['DWP Estates', 'Mitie'],
+    'DWP Crawley': ['DWP Estates', 'Mitie'],
     'DWP Brighton': ['DWP Estates'],
-    'HMCTS Guildford': ['HMCTS', 'Equans']
+    'Reading Job Centre Plus': ['DWP Estates'],
+    'Crawley Job Centre Plus': ['DWP Estates', 'Mitie'],
+    'HMCTS Maidstone': ['HMCTS', 'Equans'],
+    'Maidstone Magistrates Court': ['HMCTS', 'Equans'],
+    'Jobcentre Plus Crawley': ['DWP Estates'],
+    'HMCTS Guildford': ['HMCTS', 'Equans'],
+    'Bristol Crown Court': ['HMCTS', 'Equans'],
+    'Lewes Crown Court': ['HMCTS', 'HMPPS - South East'],
+    'Royal Courts of Justice': ['HMCTS', 'Equans'],
+    'Folkestone Tribunal Hearing Centre': ['HMCTS', 'Equans']
   };
+  const CPIN_PREMISES_ALIASES = {
+    'Jobcentre Plus Crawley': 'DWP Crawley',
+    'HMCTS Maidstone': 'Maidstone Magistrates Court',
+    'MoJ Charing Cross House': 'Charing Cross House refurb',
+    'Property Directorate': 'The Property Directorate'
+  };
+  const CPIN_PREMISES_FREE_HINTS = [
+    { match: /charing cross/i, premises: 'Charing Cross House refurb' },
+    { match: /temple quay/i, premises: 'Temple Quay House' },
+    { match: /lewes/i, premises: 'HMP Lewes' },
+    { match: /belmarsh/i, premises: 'HMP Belmarsh' },
+    { match: /wandsworth/i, premises: 'HMP Wandsworth' },
+    { match: /bristol/i, premises: 'HMP Bristol' },
+    { match: /maidstone/i, premises: 'Maidstone Magistrates Court' },
+    { match: /crawley|jobcentre|job centre/i, premises: 'DWP Crawley' },
+    { match: /canterbury/i, premises: 'DWP Canterbury' },
+    { match: /guildford|hmcts guildford/i, premises: 'HMCTS Guildford' },
+    { match: /rochester/i, premises: 'HMP Rochester' },
+    { match: /swaleside/i, premises: 'HMP Swaleside' }
+  ];
+
+  function resolveCpinPremisesName(name) {
+    if (!name) return name;
+    return CPIN_PREMISES_ALIASES[name] || name;
+  }
+
+  function getCpinDutyHoldersForPremises(premisesName) {
+    premisesName = resolveCpinPremisesName(premisesName);
+    if (CPIN_DH_BY_PREMISES[premisesName]) {
+      return CPIN_DH_BY_PREMISES[premisesName].slice();
+    }
+    const prem = getPremisesByName(premisesName);
+    if (!prem) return [];
+    if (prem.category === 'prison') {
+      return ['HMPPS - South East', 'Serco FM'];
+    }
+    if (prem.category === 'court') {
+      return ['HMCTS', 'Equans'];
+    }
+    if (prem.dept === 'DWP') {
+      return ['DWP Estates', 'Mitie'];
+    }
+    if (prem.dept === 'MoJ') {
+      return ['MoJ', 'The Property Directorate'];
+    }
+    if (prem.dept && prem.dept.indexOf('HMCTS') >= 0) {
+      return ['HMCTS', 'Equans'];
+    }
+    if (prem.dept && prem.dept.indexOf('HMPPS') >= 0) {
+      return ['HMPPS - South East', 'Serco FM'];
+    }
+    return prem.dept ? [prem.dept.split('/')[0].trim()] : [];
+  }
+
+  function suggestCpinPremisesFromFreeText(cpin) {
+    const free = (cpin && cpin.intake && cpin.intake.premisesFree) || '';
+    if (!free.trim()) return [];
+    const suggestions = [];
+    const seen = new Set();
+    CPIN_PREMISES_FREE_HINTS.forEach(function (h) {
+      if (h.match.test(free) && !seen.has(h.premises)) {
+        seen.add(h.premises);
+        suggestions.push(h.premises);
+      }
+    });
+    const freeLower = free.toLowerCase();
+    PREMISES_LIST.forEach(function (p) {
+      const n = p.name.toLowerCase();
+      if (freeLower.indexOf(n) >= 0 || n.indexOf(freeLower.split(/[,\u2014\-–]/)[0].trim()) >= 0) {
+        if (!seen.has(p.name)) {
+          seen.add(p.name);
+          suggestions.push(p.name);
+        }
+      }
+    });
+    return suggestions.slice(0, 5);
+  }
+
+  function linkCpinPremisesSuggestion(name) {
+    saveCpinIntakePremises(resolveCpinPremisesName(name));
+  }
+
   const CPIN_IN_PROGRESS_WF = new Set(['assigned', 'triage', 'desk_eval', 'awaiting_info', 'audit_spawned', 'in_review', 'audit']);
   let cpinPins = new Set();
   let cpinOverrides = {};
@@ -24345,9 +24518,156 @@
     if (status) {
       status.textContent = cpin.premises ? 'Anchored to premises record.' : 'Link a premises record.';
     }
+    renderCpinPremisesSuggestions(cpin);
     if (cpinNeedsPremises(cpin) && cpin.workflow !== 'closed' && cpinDetailLastId !== activeCpinId) {
       requestAnimationFrame(function () { openCpinPremisesEdit(); });
     }
+  }
+
+  function renderCpinPremisesSuggestions(cpin) {
+    const el = document.getElementById('cpin-premises-suggestions');
+    if (!el) return;
+    if (cpin.premises || cpin.workflow === 'closed') {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    const suggestions = suggestCpinPremisesFromFreeText(cpin);
+    if (!suggestions.length) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    const free = (cpin.intake && cpin.intake.premisesFree) || '';
+    let html = '<span class="cpin-premises-suggestions-label">Suggested from intake' +
+      (free ? ' (“' + escHtml(free.length > 48 ? free.slice(0, 45) + '…' : free) + '”)' : '') +
+      ':</span>';
+    suggestions.forEach(function (name) {
+      html += '<button type="button" class="btn" onclick="linkCpinPremisesSuggestion(' + JSON.stringify(name) + ')">' + escHtml(name) + '</button>';
+    });
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function renderCpinProcessTrail(cpin) {
+    const el = document.getElementById('cpin-process-trail');
+    if (!el || !cpin) return;
+    if (!cpin.premises && cpin.workflow !== 'closed') {
+      el.hidden = true;
+      return;
+    }
+    ensureAuditContextsInit();
+    const hasAudit = !!cpin.spawnedAuditId;
+    const cpinClosed = cpin.workflow === 'closed';
+    let html = '<div class="cpin-process-trail-label">Process trail</div><ol class="cpin-trail-steps">';
+    html += '<li class="' + (cpinClosed ? 'is-done' : 'is-current') + '">' + escHtml(cpin.ref) + '</li>';
+    if (hasAudit) {
+      const auditCtx = auditContexts[cpin.spawnedAuditId] || {};
+      const auditClosed = !!auditCtx.closed;
+      html += '<li class="cpin-trail-sep" aria-hidden="true">→</li>';
+      html += '<li class="' + (auditClosed ? 'is-done' : (cpinClosed ? 'is-current' : 'is-pending')) + '">';
+      html += '<a onclick="continueAudit(\'' + escHtml(cpin.spawnedAuditId) + '\')">Audit ' + escHtml(cpin.spawnedAuditId) + '</a>';
+      html += '</li>';
+      let followUpId = auditCtx.followUpAuditId;
+      while (followUpId) {
+        const fuCtx = auditContexts[followUpId] || {};
+        html += '<li class="cpin-trail-sep" aria-hidden="true">→</li>';
+        html += '<li class="' + (fuCtx.closed ? 'is-done' : 'is-current') + '">';
+        html += '<a onclick="continueAudit(\'' + escHtml(followUpId) + '\')">Follow-up ' + escHtml(followUpId) + '</a>';
+        html += '</li>';
+        followUpId = fuCtx.followUpAuditId;
+      }
+    } else if (!cpinClosed) {
+      html += '<li class="cpin-trail-sep" aria-hidden="true">→</li>';
+      html += '<li class="is-pending">Audit (after close)</li>';
+      html += '<li class="cpin-trail-sep" aria-hidden="true">→</li>';
+      html += '<li class="is-pending">Follow-up audit</li>';
+    }
+    html += '</ol>';
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function getCpinJourneyNextStep(cpin) {
+    if (!cpin || cpin.workflow === 'closed' || cpinIsDelegatedAway(cpin)) return null;
+    if (!cpin.premises || cpin.workflow === 'awaiting_premises') {
+      return {
+        text: 'Link this CPIN to a premises record from the register — Duty Holders are suggested once linked.',
+        label: 'Link premises',
+        action: 'openCpinPremisesEdit()'
+      };
+    }
+    if (!cpin.assignee) {
+      return {
+        text: 'Assign an inspector. Duty Holder notification is sent automatically on assignment.',
+        label: 'Assign below',
+        focus: 'cpin-assignee'
+      };
+    }
+    if (!cpin.furtherAction) {
+      return {
+        text: 'Complete triage — decide whether further action is needed for this incident.',
+        label: 'Triage section',
+        focus: 'cpin-section-triage'
+      };
+    }
+    if (cpin.furtherAction === 'yes' && cpinNeedsDeskEval(cpin)) {
+      if (cpinRequiresDutyHolders(cpin) && !cpinHasAcceptedDutyHolders(cpin)) {
+        return {
+          text: 'Approve at least one Duty Holder suggested from the premises record.',
+          label: 'Duty Holders',
+          focus: 'cpin-section-dh'
+        };
+      }
+      if (cpinRequiresResponsiblePersons(cpin) && !cpinHasAcceptedResponsiblePersons(cpin)) {
+        return {
+          text: 'Approve at least one Responsible Person for the accepted Duty Holders.',
+          label: 'Duty Holders & RPs',
+          focus: 'cpin-section-dh'
+        };
+      }
+      if (!cpin.deskOutcome) {
+        return {
+          text: 'Complete remote evaluation — choose on-site evaluation, audit, or no further action.',
+          label: 'Remote evaluation',
+          focus: 'cpin-section-remote'
+        };
+      }
+      if (cpin.deskOutcome === 'onsite_eval' && !cpinStage4Ready(cpin)) {
+        return {
+          text: cpinOnsiteAuditBlockedHint(cpin) || 'Complete on-site evaluation before deciding whether an audit is required.',
+          label: 'On-site evaluation',
+          focus: 'cpin-section-onsite'
+        };
+      }
+    }
+    if (cpinCanClose(cpin)) {
+      return {
+        text: 'All required steps are complete. Close the CPIN to spawn a reactive audit (if required) and continue in the audit workflow.',
+        label: 'Close CPIN',
+        focus: 'cpin-section-close'
+      };
+    }
+    return null;
+  }
+
+  function renderCpinJourneyGuide(cpin) {
+    const el = document.getElementById('cpin-journey-guide');
+    if (!el) return;
+    const step = getCpinJourneyNextStep(cpin);
+    if (!step) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    let html = '<strong>Next step:</strong> ' + escHtml(step.text);
+    if (step.action) {
+      html += ' <button type="button" class="btn primary" style="margin-left:8px;" onclick="' + step.action + '">' + escHtml(step.label) + '</button>';
+    } else if (step.focus) {
+      html += ' <button type="button" class="btn" style="margin-left:8px;" onclick="document.getElementById(\'' + escHtml(step.focus) + '\')?.scrollIntoView({behavior:\'smooth\',block:\'start\'})">' + escHtml(step.label) + '</button>';
+    }
+    el.innerHTML = html;
+    el.hidden = false;
   }
 
   function renderCpinSeverityField(cpin) {
@@ -24394,7 +24714,7 @@
   function ensureCpinDutyHolderSuggestions() {
     const cpin = getCpinById(activeCpinId);
     if (!cpin || !cpin.premises || !cpinShowsDutyHolders(cpin)) return false;
-    const fromMap = CPIN_DH_BY_PREMISES[cpin.premises] || [];
+    const fromMap = getCpinDutyHoldersForPremises(cpin.premises);
     const rejected = new Set(cpin.rejectedDutyHolders || []);
     const holders = getCpinDutyHolderRecords(cpin).slice();
     const onList = new Set(holders.map(function (d) { return d.name; }));
@@ -24712,12 +25032,20 @@
     if (actions) {
       let btn = '';
       if (cpin.spawnedAuditId) {
+        ensureAuditContextsInit();
         btn = '<button class="btn primary" type="button" onclick="openAuditSetup(\'' + escHtml(cpin.spawnedAuditId) + '\')">Open audit ' + escHtml(cpin.spawnedAuditId) + '</button>';
+        const auditCtx = auditContexts[cpin.spawnedAuditId];
+        let followUpId = auditCtx && auditCtx.followUpAuditId;
+        if (followUpId) {
+          btn += ' <button class="btn" type="button" onclick="continueAudit(\'' + escHtml(followUpId) + '\')">Open follow-up ' + escHtml(followUpId) + '</button>';
+        }
       }
       actions.innerHTML = btn;
     }
     renderCpinRagBanner(cpin);
     renderCpinAdminReviewBanner(cpin);
+    renderCpinProcessTrail(cpin);
+    renderCpinJourneyGuide(cpin);
     renderCpinFrsSubmission(cpin);
     if (cpinDetailLastId !== activeCpinId) {
       cpinSeverityEditing = false;
@@ -24752,7 +25080,7 @@
   function saveCpinIntakePremises(premisesName) {
     const cpin = getCpinById(activeCpinId);
     if (!cpin) return;
-    const premises = premisesName || null;
+    const premises = resolveCpinPremisesName(premisesName || '') || null;
     const oldPremises = cpin.premises || null;
     let workflow = cpin.workflow;
     if (premises) {
@@ -24994,7 +25322,7 @@
     persistCpinPatch(activeCpinId, patch);
     renderCpinsLists();
     if (startAudit && spawnedAuditId) {
-      seedAuditSetupFromCpin(Object.assign({}, cpin, patch), spawnedAuditId);
+      spawnAuditContextFromCpin(Object.assign({}, cpin, patch), spawnedAuditId);
       openAuditSetup(spawnedAuditId);
     } else {
       initCpinDetailPage();
@@ -26941,6 +27269,26 @@
     setup.fromCpinClose = true;
     auditSetup = setup;
     localStorage.setItem(setupDraftKey(auditId || activeAuditId), JSON.stringify(setup));
+  }
+
+  function spawnAuditContextFromCpin(cpin, auditId) {
+    seedAuditSetupFromCpin(cpin, auditId);
+    ensureAuditContextShell(auditId, auditSetup);
+    const ctx = auditContexts[auditId];
+    ctx.premises = cpin.premises || auditSetup.premises;
+    ctx.sourceCpinId = cpin.id;
+    ctx.sourceCpinRef = cpin.ref;
+    ctx.stage = 1;
+    ctx.setup = JSON.parse(JSON.stringify(auditSetup));
+    const stamp = cpinLogTimestamp();
+    ctx.activityLog = ctx.activityLog || createEmptyActivityLog();
+    ctx.activityLog.notes.unshift({
+      id: 'n-audit-from-cpin-' + stamp.ts,
+      text: 'Reactive audit created from CPIN ' + cpin.ref + '. Setup pre-filled from desk evaluation and accepted Duty Holders.',
+      stage: 1,
+      at: stamp.at,
+      ts: stamp.ts
+    });
   }
 
   function seedAuditSetupFromBizSupport(rec, auditId) {
