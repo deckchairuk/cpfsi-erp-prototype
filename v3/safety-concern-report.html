@@ -4,167 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fire Incident Service — Safety Concern Report</title>
-  <style>
-    :root {
-      --bg: #f4f4f1;
-      --surface: #ffffff;
-      --ink: #0b0c0c;
-      --ink-2: #505a5f;
-      --ink-3: #7a7a78;
-      --line: #d9d9d3;
-      --gov-green: #00703c;
-      --gov-green-dk: #005a30;
-      --red: #d4351c;
-      --amber: #f47738;
-      --accent: #1d70b8;
-      --sans: Arial, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--ink);
-      font-size: 16px;
-      line-height: 1.5;
-    }
-    .page-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--line);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .page-header .org {
-      font-size: 14px;
-      color: var(--ink-2);
-    }
-    .page-header .org strong { color: var(--ink); }
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 32px 20px 48px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 1.75rem;
-      color: var(--gov-green);
-      text-decoration: underline;
-      text-underline-offset: 4px;
-    }
-    .required-note {
-      color: var(--red);
-      font-style: italic;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .field {
-      margin-bottom: 20px;
-    }
-    .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .field .hint {
-      font-size: 13px;
-      color: var(--ink-2);
-      margin: -2px 0 6px;
-    }
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      padding: 10px 12px;
-      font-size: 16px;
-      font-family: inherit;
-    }
-    .field textarea { min-height: 120px; resize: vertical; }
-    .rag-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .rag-option {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      font-weight: 400;
-    }
-    .rag-option input { width: auto; margin-top: 4px; flex-shrink: 0; }
-    .rag-option strong { display: block; }
-    .rag-option span { font-size: 13px; color: var(--ink-2); }
-    .hazard-section {
-      margin: 28px 0 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--line);
-    }
-    .hazard-section h2 {
-      margin: 0 0 20px;
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--ink);
-    }
-    .urgent {
-      color: var(--red);
-      font-weight: 700;
-      font-size: 14px;
-      margin: 12px 0 0;
-    }
-    .submit-btn {
-      width: 100%;
-      background: #3d3d3d;
-      color: #fff;
-      border: none;
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .submit-btn:hover { background: #1a1a1a; }
-    .clear-link {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      color: var(--accent);
-      font-size: 14px;
-    }
-    .success-panel {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 24px;
-      margin-top: 24px;
-    }
-    .success-panel.show { display: block; }
-    .success-panel h2 { margin-top: 0; color: var(--gov-green); }
-    .prototype-note {
-      background: #e9f1f8;
-      border: 1px solid var(--accent);
-      padding: 12px 14px;
-      font-size: 13px;
-      margin-bottom: 24px;
-      border-radius: 6px;
-    }
-    .prototype-note a { font-weight: 600; }
-  </style>
+  <link rel="stylesheet" href="intake-form.css">
 </head>
 <body>
 
 <header class="page-header">
-  <div class="org">
-    <strong>Crown Premises' Fire Safety Inspectorate</strong><br>
-    Fire Incident Service (FIS) — Safety Concern intake
+  <div class="page-header-inner">
+    <a class="page-brand" href="index.html" title="CPFSI Fire Safety MIS">
+      <img src="assets/cpfsi-logo.png" alt="" class="page-brand-logo" width="40" height="40" aria-hidden="true">
+      <span class="page-brand-text">
+        CPFSI
+        <span>Crown Premises' Fire Safety Inspectorate</span>
+      </span>
+    </a>
+    <div class="helpline">
+      Fire Incident Service
+      <strong>0300 1233911</strong>
+    </div>
   </div>
 </header>
 
@@ -175,135 +31,184 @@
     <a href="index.html#concerns">Open CPFSI prototype</a>
   </p>
 
-  <h1>Report a safety concern</h1>
-  <p class="required-note">* denotes a required field</p>
-
-  <form id="sc-report-form" novalidate>
-    <div class="field">
-      <label for="report-ref">Report reference *</label>
-      <input type="text" id="report-ref" name="reportRef" required placeholder="e.g. FIS-3305" />
+  <div class="form-card">
+    <div class="form-intro" id="form-intro">
+      <h1 id="form-title">Report a safety concern</h1>
+      <p class="form-tagline">Log a potential fire hazard at Crown premises for inspector triage. The Duty Holder is notified automatically on submission.</p>
+      <p class="required-note" id="required-note">* denotes a required field</p>
     </div>
 
-    <div class="field">
-      <label for="report-date">Date reported *</label>
-      <input type="date" id="report-date" name="reportDate" required />
-    </div>
-
-    <div class="field">
-      <label for="report-time">Time reported</label>
-      <input type="time" id="report-time" name="reportTime" />
-    </div>
-
-    <div class="field">
-      <label for="reporter">Reporter name *</label>
-      <input type="text" id="reporter" name="reporter" required placeholder="Name and role, if known" />
-    </div>
-
-    <div class="field">
-      <label for="reporter-email">Reporter email</label>
-      <input type="email" id="reporter-email" name="reporterEmail" placeholder="Optional contact email" />
-    </div>
-
-    <div class="field">
-      <label for="source">Source *</label>
-      <select id="source" name="source" required>
-        <option value="">Please select</option>
-        <option>FIS direct report</option>
-        <option>Duty Holder portal</option>
-        <option>Union safety rep</option>
-        <option>FIS web form</option>
-        <option>FM company</option>
-        <option>Site manager</option>
-        <option>FIS escalation</option>
-        <option>Staff member</option>
-        <option>Anonymous</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="premises">Address of premises</label>
-      <select id="premises" name="premises">
-        <option value="">Please select</option>
-        <option>MoJ HQ London</option>
-        <option>Temple Quay House</option>
-        <option>Reading Job Centre Plus</option>
-        <option>Charing Cross House refurb</option>
-        <option>HMP Bristol</option>
-        <option>DWP Canterbury</option>
-        <option>Royal Courts of Justice</option>
-        <option>HMP Lewes</option>
-        <option>HMCTS Maidstone</option>
-        <option>HMCTS Guildford</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="premises-free">Premises not in system or not found</label>
-      <p class="hint">If unable to find premises in the list above, enter the address here.</p>
-      <input type="text" id="premises-free" name="premisesFree" />
-    </div>
-
-    <section class="hazard-section" aria-labelledby="hazard-heading">
-      <h2 id="hazard-heading">Hazard details</h2>
-
-      <div class="field">
-        <label for="hazard-type">Hazard type *</label>
-        <select id="hazard-type" name="hazardType" required>
-          <option value="">Please select</option>
-          <option>Combustible materials</option>
-          <option>Fire door defect</option>
-          <option>Blocked escape route</option>
-          <option>Hot works</option>
-          <option>Emergency lighting</option>
-          <option>Fire compartmentation</option>
-          <option>Ignition source</option>
-          <option>Automatic alarm / false activation</option>
-          <option>Other hazard</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>RAG severity *</label>
-        <p class="hint">How urgent is this hazard? Inspectors may override after review.</p>
-        <div class="rag-group">
-          <label class="rag-option">
-            <input type="radio" name="severity" value="green" required />
-            <div><strong>Green</strong><span>Low risk — no immediate injury concern; typical monitoring or DH self-fix</span></div>
-          </label>
-          <label class="rag-option">
-            <input type="radio" name="severity" value="amber" />
-            <div><strong>Amber</strong><span>Moderate risk — action may be required; inspector triage expected</span></div>
-          </label>
-          <label class="rag-option">
-            <input type="radio" name="severity" value="red" />
-            <div><strong>Red</strong><span>Serious hazard — urgent attention required</span></div>
-          </label>
+    <form id="sc-report-form" novalidate>
+      <section class="form-section" aria-labelledby="report-details-heading">
+        <h2 class="form-section-title" id="report-details-heading">Report details</h2>
+        <div class="form-grid form-grid--3">
+          <div class="field">
+            <label class="field-label" for="report-ref">Report reference <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="report-ref" name="reportRef" required placeholder="e.g. FIS-3305" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="report-date">Date reported <span class="req" aria-hidden="true">*</span></label>
+            <input type="date" id="report-date" name="reportDate" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="report-time">Time reported</label>
+            <input type="time" id="report-time" name="reportTime" />
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="source">Source <span class="req" aria-hidden="true">*</span></label>
+            <select id="source" name="source" required>
+              <option value="">Please select</option>
+              <option>FIS direct report</option>
+              <option>Duty Holder portal</option>
+              <option>Union safety rep</option>
+              <option>FIS web form</option>
+              <option>FM company</option>
+              <option>Site manager</option>
+              <option>FIS escalation</option>
+              <option>Staff member</option>
+              <option>Anonymous</option>
+            </select>
+          </div>
         </div>
-        <p class="urgent">Call 0300 1233911 immediately if there is an active fire or immediate danger to life (24hr line).</p>
+      </section>
+
+      <section class="form-section" aria-labelledby="reporter-heading">
+        <h2 class="form-section-title" id="reporter-heading">Reporter</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label class="field-label" for="reporter">Reporter name <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="reporter" name="reporter" required placeholder="Name and role, if known" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="reporter-email">Reporter email</label>
+            <input type="email" id="reporter-email" name="reporterEmail" placeholder="Optional contact email" autocomplete="email" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="premises-heading">
+        <h2 class="form-section-title" id="premises-heading">Premises</h2>
+        <p class="form-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address below.</p>
+        <div class="form-grid">
+          <div class="field field--full">
+            <label class="field-label" for="premises">Address of premises</label>
+            <select id="premises" name="premises">
+              <option value="">Please select</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="premises-free">Premises not in system or not found</label>
+            <p class="field-hint">If you cannot find the premises above, enter the full address or site description here.</p>
+            <input type="text" id="premises-free" name="premisesFree" placeholder="e.g. Plot 7, industrial estate" autocomplete="street-address" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="hazard-heading">
+        <h2 class="form-section-title" id="hazard-heading">Hazard details</h2>
+
+        <div class="field">
+          <label class="field-label" for="hazard-type">Hazard type <span class="req" aria-hidden="true">*</span></label>
+          <select id="hazard-type" name="hazardType" required>
+            <option value="">Please select</option>
+            <option>Combustible materials</option>
+            <option>Fire door defect</option>
+            <option>Blocked escape route</option>
+            <option>Hot works</option>
+            <option>Emergency lighting</option>
+            <option>Fire compartmentation</option>
+            <option>Ignition source</option>
+            <option>Automatic alarm / false activation</option>
+            <option>Other hazard</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <span class="field-label" id="severity-label">RAG severity <span class="req" aria-hidden="true">*</span></span>
+          <p class="field-hint">How urgent is this hazard? Inspectors may override after review.</p>
+          <ul class="choice-list" role="radiogroup" aria-labelledby="severity-label">
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="green" required />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Green</span>
+                  <span class="choice-card-desc">Low risk — no immediate injury concern; typical monitoring or Duty Holder self-fix</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="amber" />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Amber</span>
+                  <span class="choice-card-desc">Moderate risk — action may be required; inspector triage expected</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="red" />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Red</span>
+                  <span class="choice-card-desc">Serious hazard — urgent attention required</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+          <p class="urgent-notice">Call <strong>0300 1233911</strong> immediately if there is an active fire or immediate danger to life (24-hour line).</p>
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <label class="field-label" for="description">Hazard description <span class="req" aria-hidden="true">*</span></label>
+          <p class="field-hint">What was observed? Where on site? Who reported it? Use plain language.</p>
+          <textarea id="description" name="description" required placeholder="Describe the hazard, location, and any immediate actions taken…"></textarea>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="clear-form">Clear form</button>
+        <button type="submit" class="submit-btn">Submit safety concern</button>
       </div>
+    </form>
 
-      <div class="field" style="margin-top:20px;">
-        <label for="description">Hazard description *</label>
-        <p class="hint">What was observed? Where on site? Who reported it? Use plain language.</p>
-        <textarea id="description" name="description" required></textarea>
-      </div>
-    </section>
-
-    <button type="submit" class="submit-btn">Submit safety concern</button>
-    <a href="#" class="clear-link" id="clear-form">Clear form</a>
-  </form>
-
-  <div class="success-panel" id="success-panel" role="status">
-    <h2>Report received</h2>
-    <p id="success-ref"></p>
-    <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app. The Duty Holder is notified automatically on submission.</p>
-    <p id="success-queue-hint"></p>
-    <p><a href="index.html#concerns" id="success-queue-link">Go to Safety Concerns queue</a> (sign in).</p>
+    <div class="success-panel" id="success-panel" role="status">
+      <h2>Report received</h2>
+      <p id="success-ref"></p>
+      <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app. The Duty Holder is notified automatically on submission.</p>
+      <p id="success-queue-hint"></p>
+      <p><a href="index.html#concerns" id="success-queue-link">Go to Safety Concerns queue</a> (sign in).</p>
+    </div>
   </div>
 </main>
 
+<footer class="page-footer">
+  Crown Premises' Fire Safety Inspectorate (CPFSI) · Ministry of Justice<br>
+  <a href="index.html">Return to CPFSI prototype</a>
+</footer>
+
 <script>
   const SC_INTAKE_KEY = 'cpfsi-sc-intake-v1';
+  const SC_REPORT_PREMISES = [
+    'Bristol Crown Court', 'Charing Cross House refurb', 'Crawley Job Centre Plus',
+    'DWP Brighton', 'DWP Canterbury', 'DWP Crawley', 'Folkestone Tribunal Hearing Centre',
+    'HMP Belmarsh', 'HMP Bristol', 'HMP Durham', 'HMP Isis', 'HMP Lewes', 'HMP Maidstone',
+    'HMP Pentonville', 'HMP Rochester', 'HMP Swaleside', 'HMP Wandsworth',
+    'HMCTS Guildford', 'Jobcentre Plus Crawley', 'Lewes Crown Court',
+    'Maidstone Magistrates Court', 'MoJ HQ London', 'Reading Job Centre Plus',
+    'Royal Courts of Justice', 'Temple Quay Estate', 'Temple Quay House',
+    'Temple Quay Riverside Annexe'
+  ].sort(function (a, b) { return a.localeCompare(b); });
+
+  (function populatePremisesSelect() {
+    const sel = document.getElementById('premises');
+    if (!sel) return;
+    SC_REPORT_PREMISES.forEach(function (name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  })();
 
   function formatUkDate(iso) {
     if (!iso) return '';
@@ -382,9 +287,10 @@
     localStorage.setItem(SC_INTAKE_KEY, JSON.stringify(list));
 
     document.getElementById('sc-report-form').hidden = true;
-    document.querySelector('.required-note').hidden = true;
-    document.querySelector('h1').hidden = true;
+    document.getElementById('required-note').hidden = true;
+    document.getElementById('form-title').hidden = true;
     document.querySelector('.prototype-note').hidden = true;
+    document.querySelector('.form-tagline').hidden = true;
     const panel = document.getElementById('success-panel');
     document.getElementById('success-ref').textContent = 'Reference: ' + record.ref;
     const hint = document.getElementById('success-queue-hint');
@@ -405,9 +311,9 @@
     panel.classList.add('show');
   });
 
-  document.getElementById('clear-form').addEventListener('click', function (e) {
-    e.preventDefault();
+  document.getElementById('clear-form').addEventListener('click', function () {
     document.getElementById('sc-report-form').reset();
+    document.getElementById('report-date').valueAsDate = new Date();
   });
 
   document.getElementById('report-date').valueAsDate = new Date();

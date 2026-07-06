@@ -4,243 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Crown Premises' Incident Notification (CPIN)</title>
-  <style>
-    :root {
-      --bg: #f4f4f1;
-      --surface: #ffffff;
-      --ink: #0b0c0c;
-      --ink-2: #505a5f;
-      --ink-3: #7a7a78;
-      --line: #d9d9d3;
-      --gov-green: #00703c;
-      --gov-green-dk: #005a30;
-      --red: #d4351c;
-      --accent: #1d70b8;
-      --sans: Arial, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--ink);
-      font-size: 16px;
-      line-height: 1.5;
-    }
-    .page-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--line);
-      padding: 14px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .page-header::after {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--gov-green) 0%, var(--gov-green-dk) 100%);
-      margin-top: 14px;
-      border-radius: 2px;
-    }
-    .page-header-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      width: 100%;
-    }
-    .page-brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-    }
-    .page-brand:hover { color: var(--accent); }
-    .page-brand-logo {
-      display: block;
-      height: 40px;
-      width: auto;
-      flex-shrink: 0;
-    }
-    .page-brand-text {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.25;
-    }
-    .page-brand-text span {
-      display: block;
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--ink-3);
-      letter-spacing: 0;
-      margin-top: 2px;
-    }
-    .page-header .helpline {
-      text-align: right;
-      font-size: 13px;
-      color: var(--ink-2);
-      line-height: 1.45;
-    }
-    .page-header .helpline strong {
-      display: block;
-      font-size: 15px;
-      color: var(--gov-green);
-      letter-spacing: 0.02em;
-    }
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 28px 20px 56px;
-    }
-    .form-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 28px 24px 32px;
-      box-shadow: 0 1px 3px rgba(11, 12, 12, 0.06);
-    }
-    .form-intro {
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 1.625rem;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1.25;
-    }
-    .form-tagline {
-      margin: 0;
-      font-size: 14px;
-      color: var(--ink-2);
-      max-width: 36em;
-    }
-    .required-note {
-      color: var(--red);
-      font-style: italic;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .field {
-      margin-bottom: 20px;
-    }
-    .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .field .hint {
-      font-size: 13px;
-      color: var(--ink-2);
-      margin: -2px 0 6px;
-    }
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      padding: 10px 12px;
-      font-size: 16px;
-      font-family: inherit;
-    }
-    .field textarea { min-height: 120px; resize: vertical; }
-    .status-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .status-option {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      font-weight: 400;
-    }
-    .status-option input { width: auto; margin-top: 4px; }
-    .stop-message-section {
-      margin: 28px 0 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--line);
-    }
-    .stop-message-section h2 {
-      margin: 0 0 20px;
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--ink);
-      text-decoration: none;
-    }
-    .urgent {
-      color: var(--red);
-      font-weight: 700;
-      font-size: 14px;
-      margin: 12px 0 0;
-    }
-    .submit-btn {
-      width: 100%;
-      background: var(--gov-green);
-      color: #fff;
-      border: none;
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .submit-btn:hover { background: var(--gov-green-dk); }
-    .clear-link {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      color: var(--accent);
-      font-size: 14px;
-    }
-    .success-panel {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 24px;
-      margin-top: 24px;
-    }
-    .success-panel.show { display: block; }
-    .success-panel h2 { margin-top: 0; color: var(--gov-green); }
-    .page-footer {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 0 20px 32px;
-      font-size: 12px;
-      color: var(--ink-3);
-      text-align: center;
-      line-height: 1.5;
-    }
-    .page-footer a { color: var(--accent); font-weight: 600; }
-    @media (max-width: 540px) {
-      .page-header .helpline { text-align: left; width: 100%; }
-      .form-card { padding: 20px 16px 24px; }
-      .page-brand-logo { height: 34px; }
-    }
-    .prototype-note {
-      background: #e9f1f8;
-      border: 1px solid var(--accent);
-      padding: 12px 14px;
-      font-size: 13px;
-      margin-bottom: 24px;
-      border-radius: 6px;
-    }
-    .prototype-note a { font-weight: 600; }
-  </style>
+  <link rel="stylesheet" href="intake-form.css">
 </head>
 <body>
 
@@ -267,101 +31,138 @@
   </p>
 
   <div class="form-card">
-    <div class="form-intro">
-      <h1>Crown Premises' Incident Notification (CPIN)</h1>
+    <div class="form-intro" id="form-intro">
+      <h1 id="form-title">Crown Premises' Incident Notification (CPIN)</h1>
       <p class="form-tagline">Report a fire-related incident at Crown premises to CPFSI. Fire and rescue services should complete this form at the earliest opportunity.</p>
-      <p class="required-note">* denotes a required field</p>
+      <p class="required-note" id="required-note">* denotes a required field</p>
     </div>
 
-  <form id="cpin-report-form" novalidate>
-    <div class="field">
-      <label for="incident-number">Incident Number *</label>
-      <input type="text" id="incident-number" name="incidentNumber" required placeholder="Please enter your reference number" />
-    </div>
-
-    <div class="field">
-      <label for="incident-date">Date of Incident *</label>
-      <input type="date" id="incident-date" name="incidentDate" required />
-    </div>
-
-    <div class="field">
-      <label for="incident-time">Time of Incident</label>
-      <input type="time" id="incident-time" name="incidentTime" />
-    </div>
-
-    <div class="field">
-      <label for="premises">Address of Premises</label>
-      <select id="premises" name="premises">
-        <option value="">Please select</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="premises-free">Premises Not in System or Not Found</label>
-      <p class="hint">If unable to find Premises in 'Address of Premises' field, please enter here.</p>
-      <input type="text" id="premises-free" name="premisesFree" />
-    </div>
-
-    <div class="field">
-      <label for="frs">Fire and Rescue Service</label>
-      <select id="frs" name="frs">
-        <option>Not Given</option>
-        <option>London Fire Brigade</option>
-        <option>Kent FRS</option>
-        <option>East Sussex FRS</option>
-        <option>West Sussex FRS</option>
-        <option>Surrey FRS</option>
-        <option>Avon FRS</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="contact">Point of Contact *</label>
-      <input type="text" id="contact" name="contact" required />
-    </div>
-
-    <div class="field">
-      <label for="email">Fire Service Contact Email *</label>
-      <input type="email" id="email" name="email" required />
-    </div>
-
-    <section class="stop-message-section" aria-labelledby="stop-message-heading">
-      <h2 id="stop-message-heading">Stop Message</h2>
-
-      <div class="field">
-        <label>Incident Status *</label>
-        <div class="status-group">
-          <label class="status-option"><input type="radio" name="incidentStatus" value="Incident Dealt with by Staff - No Known Injuries" required /> Incident Dealt with by Staff - No Known Injuries</label>
-          <label class="status-option"><input type="radio" name="incidentStatus" value="Fire Service Fought Fire or Carried Out Rescues" /> Fire Service Fought Fire or Carried Out Rescues</label>
-          <label class="status-option"><input type="radio" name="incidentStatus" value="Injuries as a Result of Fire" /> Injuries as a Result of Fire</label>
-          <label class="status-option"><input type="radio" name="incidentStatus" value="Serious or Fatal Injuries Suspected as Result of Fire" /> Serious or Fatal Injuries Suspected as Result of Fire</label>
+    <form id="cpin-report-form" novalidate>
+      <section class="form-section" aria-labelledby="incident-details-heading">
+        <h2 class="form-section-title" id="incident-details-heading">Incident details</h2>
+        <div class="form-grid form-grid--3">
+          <div class="field">
+            <label class="field-label" for="incident-number">Incident number <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="incident-number" name="incidentNumber" required placeholder="Your reference number" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="incident-date">Date of incident <span class="req" aria-hidden="true">*</span></label>
+            <input type="date" id="incident-date" name="incidentDate" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="incident-time">Time of incident</label>
+            <input type="time" id="incident-time" name="incidentTime" />
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="frs">Fire and Rescue Service</label>
+            <select id="frs" name="frs">
+              <option>Not Given</option>
+              <option>London Fire Brigade</option>
+              <option>Kent FRS</option>
+              <option>East Sussex FRS</option>
+              <option>West Sussex FRS</option>
+              <option>Surrey FRS</option>
+              <option>Avon FRS</option>
+            </select>
+          </div>
         </div>
-        <p class="urgent">Please immediately call 0300 1233911 if you select 'Serious or Fatal Injuries Suspected as Result of Fire' (24hr phone line)</p>
-      </div>
+      </section>
 
-      <div class="field" style="margin-top:20px;">
-        <label for="description">Description of Incident *</label>
-        <p class="hint">Message here... Please replace any codes with plain language</p>
-        <textarea id="description" name="description" required></textarea>
-      </div>
-    </section>
+      <section class="form-section" aria-labelledby="premises-heading">
+        <h2 class="form-section-title" id="premises-heading">Premises</h2>
+        <p class="form-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address below.</p>
+        <div class="form-grid">
+          <div class="field field--full">
+            <label class="field-label" for="premises">Address of premises</label>
+            <select id="premises" name="premises">
+              <option value="">Please select</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="premises-free">Premises not in system or not found</label>
+            <p class="field-hint">If you cannot find the premises above, enter the full address or site description here.</p>
+            <input type="text" id="premises-free" name="premisesFree" placeholder="e.g. Unit 14, industrial estate" autocomplete="street-address" />
+          </div>
+        </div>
+      </section>
 
-    <div class="field">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" autocomplete="off" />
+      <section class="form-section" aria-labelledby="contact-heading">
+        <h2 class="form-section-title" id="contact-heading">Contact</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label class="field-label" for="contact">Point of contact <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="contact" name="contact" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="email">Fire service contact email <span class="req" aria-hidden="true">*</span></label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="stop-message-heading">
+        <h2 class="form-section-title" id="stop-message-heading">Stop message</h2>
+
+        <div class="field">
+          <span class="field-label" id="incident-status-label">Incident status <span class="req" aria-hidden="true">*</span></span>
+          <ul class="choice-list" role="radiogroup" aria-labelledby="incident-status-label">
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="incidentStatus" value="Incident Dealt with by Staff - No Known Injuries" required />
+                <span class="choice-card-body">Incident dealt with by staff — no known injuries</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="incidentStatus" value="Fire Service Fought Fire or Carried Out Rescues" />
+                <span class="choice-card-body">Fire service fought fire or carried out rescues</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="incidentStatus" value="Injuries as a Result of Fire" />
+                <span class="choice-card-body">Injuries as a result of fire</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="incidentStatus" value="Serious or Fatal Injuries Suspected as Result of Fire" />
+                <span class="choice-card-body">Serious or fatal injuries suspected as result of fire</span>
+              </label>
+            </li>
+          </ul>
+          <p class="urgent-notice">Please immediately call <strong>0300 1233911</strong> if you select serious or fatal injuries suspected (24-hour phone line).</p>
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <label class="field-label" for="description">Description of incident <span class="req" aria-hidden="true">*</span></label>
+          <p class="field-hint">Use plain language. Replace any codes with a clear description of what happened, where, and any actions taken.</p>
+          <textarea id="description" name="description" required placeholder="What happened, where on site, casualties, FRS attendance…"></textarea>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="security-heading">
+        <h2 class="form-section-title" id="security-heading">Security</h2>
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <p class="field-hint">Optional in this prototype — would authenticate FRS submitters in the live system.</p>
+          <input type="password" id="password" name="password" autocomplete="off" />
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="clear-form">Clear form</button>
+        <button type="submit" class="submit-btn">Report incident</button>
+      </div>
+    </form>
+
+    <div class="success-panel" id="success-panel" role="status">
+      <h2>Report received</h2>
+      <p id="success-ref"></p>
+      <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app.</p>
+      <p id="success-queue-hint"></p>
+      <p><a href="index.html#cpins-incoming" id="success-queue-link">Go to CPINs queue</a> (sign in).</p>
     </div>
-
-    <button type="submit" class="submit-btn">Report incident</button>
-    <a href="#" class="clear-link" id="clear-form">Clear Form</a>
-  </form>
-
-  <div class="success-panel" id="success-panel" role="status">
-    <h2>Report received</h2>
-    <p id="success-ref"></p>
-    <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app.</p>
-    <p id="success-queue-hint"></p>
-    <p><a href="index.html#cpins-incoming" id="success-queue-link">Go to CPINs queue</a> (sign in).</p>
-  </div>
   </div>
 </main>
 
@@ -463,9 +264,10 @@
     localStorage.setItem(CPIN_INTAKE_KEY, JSON.stringify(list));
 
     document.getElementById('cpin-report-form').hidden = true;
-    document.querySelector('.required-note').hidden = true;
-    document.querySelector('h1').hidden = true;
+    document.getElementById('required-note').hidden = true;
+    document.getElementById('form-title').hidden = true;
     document.querySelector('.prototype-note').hidden = true;
+    document.querySelector('.form-tagline').hidden = true;
     const panel = document.getElementById('success-panel');
     document.getElementById('success-ref').textContent = 'Reference: ' + record.ref;
     const hint = document.getElementById('success-queue-hint');
@@ -486,9 +288,9 @@
     panel.classList.add('show');
   });
 
-  document.getElementById('clear-form').addEventListener('click', function (e) {
-    e.preventDefault();
+  document.getElementById('clear-form').addEventListener('click', function () {
     document.getElementById('cpin-report-form').reset();
+    document.getElementById('incident-date').valueAsDate = new Date();
   });
 
   document.getElementById('incident-date').valueAsDate = new Date();

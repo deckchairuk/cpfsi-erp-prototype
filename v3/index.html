@@ -4536,6 +4536,116 @@
     }
     .sc-intake-footer .btn {
       width: 100%;
+      min-height: 44px;
+    }
+  }
+
+  /* Intake modals — responsive labels & spacing (aligned with intake-form.css) */
+  #sc-intake-modal .sc-intake-inner .field,
+  #cpin-intake-modal .sc-intake-inner .field {
+    margin-bottom: 20px;
+  }
+  #sc-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option),
+  #cpin-intake-modal .sc-intake-inner .field label:not(.sc-intake-rag-option) {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+  #sc-intake-modal .sc-intake-inner .field .help,
+  #cpin-intake-modal .sc-intake-inner .field .help {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.45;
+    margin: 0 0 10px;
+  }
+  #sc-intake-modal .sc-intake-inner .field input,
+  #sc-intake-modal .sc-intake-inner .field select,
+  #sc-intake-modal .sc-intake-inner .field textarea,
+  #cpin-intake-modal .sc-intake-inner .field input,
+  #cpin-intake-modal .sc-intake-inner .field select,
+  #cpin-intake-modal .sc-intake-inner .field textarea {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 16px;
+    border: 2px solid var(--line);
+  }
+  #sc-intake-modal .sc-intake-inner .field textarea,
+  #cpin-intake-modal .sc-intake-inner .field textarea {
+    min-height: 120px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  #sc-intake-modal .field-row,
+  #cpin-intake-modal .field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-bottom: 0;
+  }
+  @media (min-width: 640px) {
+    #sc-intake-modal .field-row,
+    #cpin-intake-modal .field-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 20px;
+      margin-bottom: 4px;
+    }
+  }
+  #sc-intake-modal .sc-intake-section,
+  #cpin-intake-modal .sc-intake-section {
+    margin: 32px 0 8px;
+    padding-top: 0;
+    border-top: none;
+  }
+  #sc-intake-modal .sc-intake-section h3,
+  #cpin-intake-modal .sc-intake-section h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  #sc-intake-modal .sc-intake-rag-group,
+  #cpin-intake-modal .sc-intake-rag-group {
+    gap: 12px;
+  }
+  #sc-intake-modal .sc-intake-rag-option,
+  #cpin-intake-modal .sc-intake-rag-option {
+    padding: 14px 16px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+  }
+  #sc-intake-modal .sc-intake-rag-option:has(input:checked),
+  #cpin-intake-modal .sc-intake-rag-option:has(input:checked) {
+    border-color: var(--gov-green);
+    background: #eef6f0;
+    box-shadow: 0 0 0 1px var(--gov-green);
+  }
+  #sc-intake-modal .sc-intake-urgent,
+  #cpin-intake-modal .sc-intake-urgent {
+    padding: 12px 16px;
+    background: #fef0f0;
+    border-left: 4px solid var(--red);
+    border-radius: 0 6px 6px 0;
+    margin-top: 16px;
+    line-height: 1.45;
+  }
+  #sc-intake-modal .sc-intake-required,
+  #cpin-intake-modal .sc-intake-required {
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 639px) {
+    #sc-intake-modal .sc-intake-header h2,
+    #cpin-intake-modal .sc-intake-header h2 {
+      font-size: 1.25rem;
     }
   }
 
