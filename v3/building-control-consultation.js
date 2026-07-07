@@ -12,6 +12,7 @@
 
   const BCC_WORKFLOW_LABELS = {
     incoming: 'Incoming',
+    creating: 'Creating',
     awaiting_premises: 'Awaiting premises',
     unassigned: 'Unassigned',
     assigned: 'Assigned',
@@ -35,18 +36,17 @@
       ref: 'C-2026-0093',
       when: '2 hr ago',
       premises: null,
-      summary: 'Fire strategy — premises not auto-matched',
+      summary: 'Fire strategy — premises not yet linked',
       patch: false,
-      workflow: 'awaiting_premises',
+      workflow: 'creating',
       assignee: null,
       slaDaysRemaining: 15,
       intake: {
         submissionRef: 'BCC-EMAIL-8841',
         receivedDate: '06/07/2026',
-        buildingControlBody: 'Private building control (LABC member)',
-        projectType: 'Refurbishment',
-        sharePointUrl: 'https://sharepoint.example/sites/bcc/inbox/8841',
-        premisesFree: 'Government office, Victoria Street, London SW1'
+        buildingControlBody: 'LABC Registered Approver — South East',
+        buildingControlContact: 'Priya Kaur',
+        sharePointUrl: 'https://sharepoint.example/sites/bcc/inbox/8841'
       }
     }
   ];
@@ -61,24 +61,15 @@
       patch: true,
       workflow: 'review',
       assignee: 'Phil Gower',
-      teamMembers: ['Sarah Chen'],
       slaDaysRemaining: 5,
       reviewNotes: 'Plans received via email. Compartmentation drawings on levels 3–5 under review.',
       infoDecision: 'yes',
-      dutyHolders: [
-        { id: 'dh-moj', key: 'propdir', name: 'MoJ', role: 'Government department  ·  Project authority', initials: 'MJ', fromPremises: true, status: 'accepted' },
-        { id: 'dh-bc', name: 'Westminster Building Control', role: 'Building Control body  ·  Consultation submitter', initials: 'BC', fromPremises: true, status: 'accepted' }
-      ],
-      responsiblePersons: [
-        { id: 'rp-moj-1', key: 'moj-fm', name: 'Capita FM — Charing Cross', role: 'Facilities manager', initials: 'CF', fromPremises: true, status: 'accepted', linkedDh: 'propdir' }
-      ],
       intake: {
         submissionRef: 'BCC-2026-0089',
         receivedDate: '26/06/2026',
         buildingControlBody: 'Westminster City Council Building Control',
-        projectType: 'Refurbishment',
-        sharePointUrl: 'https://sharepoint.example/sites/bcc/C-2026-0089',
-        description: 'Full fire strategy, compartmentation drawings and evacuation strategy for MoJ refurbishment.'
+        buildingControlContact: 'Jane Morrison',
+        sharePointUrl: 'https://sharepoint.example/sites/bcc/C-2026-0089'
       }
     }
   ];
@@ -98,9 +89,8 @@
         submissionRef: 'BCC-2026-0075',
         receivedDate: '05/07/2026',
         buildingControlBody: 'Bristol City Council Building Control',
-        projectType: 'New build',
-        sharePointUrl: 'https://sharepoint.example/sites/bcc/C-2026-0075',
-        description: 'Proposed extension to rear court building — fire strategy, plans and site map attached to SharePoint folder.'
+        buildingControlContact: 'Robert Shaw',
+        sharePointUrl: 'https://sharepoint.example/sites/bcc/C-2026-0075'
       }
     }
   ];
@@ -117,7 +107,10 @@
       assignee: 'Phil Gower',
       closeReason: 'No comments — plans satisfactory. No comments letter sent 16 May.',
       outcomeDecision: 'no_comments',
-      intake: { buildingControlBody: 'Private approved inspector', projectType: 'Refurbishment' }
+      intake: {
+        buildingControlBody: 'Approved Inspectors Ltd',
+        buildingControlContact: 'David Hughes'
+      }
     }
   ];
 
@@ -172,6 +165,7 @@
   }
 
   function getAllConsultationRecords() {
+    loadBccOverrides();
     const seen = new Set();
     const out = [];
     loadBccIntake().concat(BCC_INCOMING, BCC_MINE, BCC_UNASSIGNED, BCC_COMPLETED).forEach(function (c) {
@@ -195,9 +189,26 @@
     return part ? 'consultation/cons-' + part : 'consultations';
   }
 
+  function syncConsultationIntakeRecord(id, patch) {
+    const intake = loadBccIntake();
+    const idx = intake.findIndex(function (c) { return c.id === id; });
+    if (idx < 0) return;
+    const merged = Object.assign({}, intake[idx], patch);
+    if (patch.intake) {
+      merged.intake = Object.assign({}, intake[idx].intake || {}, patch.intake);
+    }
+    intake[idx] = merged;
+    saveBccIntake(intake);
+  }
+
   function persistConsultationPatch(id, patch) {
-    bccOverrides[id] = Object.assign({}, bccOverrides[id] || {}, patch);
+    const prev = bccOverrides[id] || {};
+    bccOverrides[id] = Object.assign({}, prev, patch);
+    if (patch.intake) {
+      bccOverrides[id].intake = Object.assign({}, prev.intake || {}, patch.intake);
+    }
     saveBccOverrides();
+    syncConsultationIntakeRecord(id, patch);
   }
 
   function bccNeedsPremises(c) {
@@ -242,6 +253,59 @@
     if (!item.assignee) return 'Unassigned';
     if (bccIsInProgress(item)) return 'In progress';
     return '';
+  }
+
+  function consultationProcessStatusText(c) {
+    if (c.workflow === 'creating') return 'Creating';
+    if (c.workflow === 'awaiting_premises') return 'Premises needed';
+    if (!c.assignee && (c.workflow === 'unassigned' || c.workflow === 'incoming')) {
+      return bccIsStage1Complete(c) ? 'Unassigned' : 'Creating';
+    }
+    const wfLabels = {
+      review: 'Reviewing',
+      awaiting_info: 'Awaiting information',
+      outcome: 'Issue outcome',
+      assigned: 'Assigned'
+    };
+    let text = wfLabels[c.workflow] || BCC_WORKFLOW_LABELS[c.workflow] || c.workflow;
+    if (bccIsStage1Complete(c) && !bccSlaPaused(c) && c.slaDaysRemaining != null) {
+      const days = c.slaDaysRemaining;
+      const color = days <= BCC_SLA_ALERT_DAYS ? 'var(--amber)' : 'var(--ink-2)';
+      text += '  ·  <strong style="color:' + color + ';">SLA: ' + days + ' day' + (days === 1 ? '' : 's') + '</strong>';
+    }
+    return text;
+  }
+
+  function consultationProcessStatus(c) {
+    if (c.workflow === 'closed') return 'closed';
+    if (c.workflow === 'creating' || c.workflow === 'incoming' || c.workflow === 'awaiting_premises' || c.workflow === 'unassigned') return 'open';
+    return 'in-progress';
+  }
+
+  function consultationOwnerInitials(name) {
+    if (!name || name === 'Unassigned') return '—';
+    return name.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+  }
+
+  function buildConsultationProcessEntry(c) {
+    if (!c || c.workflow === 'closed' || !bccIsStage1Complete(c)) return null;
+    const slaScore = c.slaDaysRemaining == null ? 24 : Math.max(12, 48 - c.slaDaysRemaining * 2);
+    return {
+      id: c.ref,
+      type: 'consultation',
+      premises: c.premises || 'Premises not linked',
+      score: slaScore,
+      scoreClass: bccSlaClass(c) === 'red' || bccSlaClass(c) === 'amber' ? 'score-mid' : 'score-low',
+      status: consultationProcessStatus(c),
+      statusText: consultationProcessStatusText(c),
+      owner: c.assignee || 'Unassigned',
+      ownerInitials: consultationOwnerInitials(c.assignee),
+      age: c.when || 'Just now',
+      mine: c.assignee ? c.assignee === BCC_CURRENT_INSPECTOR : true,
+      patch: !!c.patch,
+      hasSla: bccIsStage1Complete(c),
+      route: 'consultation/' + c.id
+    };
   }
 
   function consultationMatchesFilter(item) {
@@ -544,7 +608,7 @@
   }
 
   function bccCanReview(c) {
-    return c && c.assignee && c.premises && !bccNeedsPremises(c) && bccPeopleGateOk(c);
+    return c && c.assignee && c.premises && !bccNeedsPremises(c);
   }
 
   function bccCanOutcome(c) {
@@ -562,12 +626,131 @@
     return bccOutcomeLettersComplete(c);
   }
 
+  function bccIsStage1Complete(c) {
+    if (!c || !c.intake) return false;
+    const i = c.intake;
+    return !!(i.submissionRef && i.receivedDate && i.buildingControlBody && i.buildingControlContact && c.premises && c.summary);
+  }
+
+  function bccUkDateToIso(uk) {
+    if (!uk) return '';
+    const p = String(uk).split('/');
+    if (p.length !== 3) return uk;
+    return p[2] + '-' + p[1] + '-' + p[0];
+  }
+
+  const CONSULTATION_STAGE1_LOOKUP = {
+    buildingControlBody: { hidden: 'consultation-bc-body', display: 'consultation-bc-display', empty: 'Search for Building Control account…' },
+    buildingControlContact: { hidden: 'consultation-contact', display: 'consultation-contact-display', empty: 'Search for contact…' },
+    premises: { hidden: 'consultation-premises-hidden', display: 'consultation-premises-display', empty: 'Search premises register…' }
+  };
+
+  function setConsultationStage1LookupValue(mode, value) {
+    const cfg = CONSULTATION_STAGE1_LOOKUP[mode];
+    if (!cfg) return;
+    const hidden = document.getElementById(cfg.hidden);
+    const display = document.getElementById(cfg.display);
+    if (hidden) hidden.value = value || '';
+    if (display) {
+      display.textContent = value || cfg.empty;
+      display.classList.toggle('is-empty', !value);
+    }
+  }
+
+  function openConsultationStage1Lookup(mode) {
+    if (typeof setupLookupTarget !== 'undefined') setupLookupTarget = 'consultation-stage1';
+    if (typeof openSetupLookupModal === 'function') openSetupLookupModal(mode, 'consultation-stage1');
+  }
+
+  function renderConsultationStage1Form(c) {
+    const i = c.intake || {};
+    const refEl = document.getElementById('consultation-submission-ref');
+    const dateEl = document.getElementById('consultation-received-date');
+    const summaryEl = document.getElementById('consultation-summary');
+    const shareEl = document.getElementById('consultation-sharepoint');
+    if (refEl) refEl.value = i.submissionRef || '';
+    if (dateEl) dateEl.value = bccUkDateToIso(i.receivedDate) || '';
+    if (summaryEl) summaryEl.value = c.summary || '';
+    if (shareEl) shareEl.value = i.sharePointUrl || '';
+    setConsultationStage1LookupValue('buildingControlBody', i.buildingControlBody || '');
+    setConsultationStage1LookupValue('buildingControlContact', i.buildingControlContact || '');
+    setConsultationStage1LookupValue('premises', c.premises || '');
+    const status = document.getElementById('consultation-stage1-status');
+    if (status) {
+      status.textContent = bccIsStage1Complete(c) ? 'Submission saved — assignment unlocked below.' : '';
+    }
+  }
+
+  function saveConsultationStage1() {
+    const c = getConsultationById(activeConsultationId);
+    if (!c) return;
+    const submissionRef = document.getElementById('consultation-submission-ref')?.value?.trim() || '';
+    const receivedRaw = document.getElementById('consultation-received-date')?.value || '';
+    const buildingControlBody = document.getElementById('consultation-bc-body')?.value || '';
+    const buildingControlContact = document.getElementById('consultation-contact')?.value || '';
+    const premises = document.getElementById('consultation-premises-hidden')?.value || '';
+    const summary = document.getElementById('consultation-summary')?.value?.trim() || '';
+    const sharePointUrl = document.getElementById('consultation-sharepoint')?.value?.trim() || '';
+    if (!submissionRef || !receivedRaw || !buildingControlBody || !buildingControlContact || !premises || !summary) {
+      window.alert('Please complete all required fields — reference, date, Building Control body, contact, premises and summary.');
+      return;
+    }
+    const intake = Object.assign({}, c.intake || {}, {
+      submissionRef: submissionRef,
+      receivedDate: formatBccUkDate(receivedRaw),
+      buildingControlBody: buildingControlBody,
+      buildingControlContact: buildingControlContact,
+      sharePointUrl: sharePointUrl
+    });
+    let workflow = c.workflow;
+    if (workflow === 'creating' || workflow === 'awaiting_premises' || workflow === 'incoming') workflow = 'unassigned';
+    persistConsultationPatch(activeConsultationId, { intake: intake, summary: summary, premises: premises, workflow: workflow });
+    refreshConsultationDetailPage();
+    if (typeof renderConsultationsLists === 'function') renderConsultationsLists();
+    if (typeof renderProcessesList === 'function') renderProcessesList();
+    if (typeof renderDashboardProcessesPanel === 'function') renderDashboardProcessesPanel();
+  }
+
+  function createNewConsultation(premisesName) {
+    const ref = nextBccRef();
+    const id = 'cons-' + ref.replace('C-2026-', '');
+    const todayIso = new Date().toISOString().split('T')[0];
+    const record = {
+      id: id,
+      ref: ref,
+      when: 'Just now',
+      premises: premisesName || null,
+      summary: '',
+      patch: false,
+      workflow: 'creating',
+      assignee: null,
+      slaDaysRemaining: BCC_SLA_DAYS,
+      intake: {
+        submissionRef: '',
+        receivedDate: formatBccUkDate(todayIso),
+        buildingControlBody: '',
+        buildingControlContact: '',
+        sharePointUrl: ''
+      }
+    };
+    const intake = loadBccIntake();
+    intake.unshift(record);
+    saveBccIntake(intake);
+    if (typeof setActiveConsultationId === 'function') setActiveConsultationId(id);
+    show('consultation/' + id);
+  }
+
   function bccWorkflowStage(c) {
     if (!c) return 1;
-    if (c.workflow === 'closed') return 4;
-    if (c.outcomeDecision || c.workflow === 'outcome') return 3;
-    if (c.infoDecision || c.workflow === 'review' || c.workflow === 'awaiting_info') return 2;
-    return 1;
+    if (c.workflow === 'closed') return 3;
+    if (!bccIsStage1Complete(c)) return 1;
+    if (!c.assignee) return 2;
+    return 3;
+  }
+
+  function bccWorkflowStageLabel(c) {
+    const stages = { 1: 'Creating', 2: 'Assignment', 3: 'Review documents' };
+    return stages[bccWorkflowStage(c)] || 'Creating';
   }
 
   function renderConsultationSlaBanner(c) {
@@ -576,6 +759,12 @@
     const detail = document.getElementById('consultation-sla-strip-detail');
     const screen = document.getElementById('consultation');
     if (!banner || !c) return;
+    if (!bccIsStage1Complete(c)) {
+      banner.hidden = true;
+      if (screen) delete screen.dataset.sla;
+      return;
+    }
+    banner.hidden = false;
     const cls = bccSlaClass(c);
     banner.className = 'cpin-rag-strip ' + cls;
     if (screen) screen.dataset.sla = cls;
@@ -596,14 +785,13 @@
       ['Submission reference', i.submissionRef],
       ['Received', i.receivedDate],
       ['Building Control body', i.buildingControlBody],
-      ['Project type', i.projectType],
-      ['Premises', c.premises || i.premisesFree || '—']
+      ['Contact', i.buildingControlContact],
+      ['Premises', c.premises || '—'],
+      ['Summary', c.summary || '—']
     ];
     grid.innerHTML = rows.map(function (row) {
-      return '<div><div class="k">' + escHtml(row[0]) + '</div><div class="v">' + escHtml(row[1] || '—') + '</div></div>';
+      return '<div' + (row[0] === 'Summary' ? ' class="full"' : '') + '><div class="k">' + escHtml(row[0]) + '</div><div class="v">' + escHtml(row[1] || '—') + '</div></div>';
     }).join('');
-    const desc = document.getElementById('consultation-intake-desc-value');
-    if (desc) desc.textContent = i.description || '—';
     const docs = document.getElementById('consultation-sharepoint-link');
     if (docs) {
       if (i.sharePointUrl) {
@@ -634,21 +822,15 @@
   function renderConsultationAssigneeHint(c) {
     const el = document.getElementById('consultation-assignee-hint');
     if (!el) return;
-    if (c.assignee) el.textContent = 'Lead inspector for this consultation.';
-    else el.textContent = 'Assign lead inspector — team members can be added below.';
+    if (c.assignee) el.textContent = 'Lead inspector assigned — review stage unlocked below.';
+    else el.textContent = 'Administrator assigns the lead inspector for this consultation.';
   }
 
   function renderConsultationKeyFieldHighlights(c) {
-    const premisesEl = document.getElementById('consultation-field-premises');
     const assigneeEl = document.getElementById('consultation-field-assignee');
-    if (premisesEl) premisesEl.classList.remove('is-next-action');
     if (assigneeEl) assigneeEl.classList.remove('is-next-action');
-    if (!c || c.workflow === 'closed') return;
-    if (bccNeedsPremises(c)) {
-      if (premisesEl) premisesEl.classList.add('is-next-action');
-    } else if (!c.assignee) {
-      if (assigneeEl) assigneeEl.classList.add('is-next-action');
-    }
+    if (!c || c.workflow === 'closed' || !bccIsStage1Complete(c)) return;
+    if (!c.assignee && assigneeEl) assigneeEl.classList.add('is-next-action');
   }
 
   function ensureConsultationDutyHolderSuggestions(c) {
@@ -730,42 +912,48 @@
     const status = document.getElementById('consultation-outcome-letter-status');
     if (!list) return;
     const letters = c.outcomeLetters || [];
+    const icon = typeof letterAttachmentIconHtml === 'function' ? letterAttachmentIconHtml() : '';
     if (!letters.length) {
-      list.innerHTML = '<p class="help" style="margin:0;">No outcome letters saved yet.</p>';
+      list.innerHTML = '<div class="letter-attachment-empty">No letters saved yet. Use Write letter to create a templated outcome letter for Building Control.</div>';
     } else {
-      list.innerHTML = letters.map(function (l) {
-        return '<div class="letter-attachment"><strong>' + escHtml(l.title) + '</strong><span>' + escHtml(l.sentAt || '') + '</span></div>';
+      list.innerHTML = letters.map(function (ltr) {
+        const label = ltr.templateLabel || ltr.title || 'Outcome letter';
+        const meta = label + ' · ' + (ltr.recipientName || 'Building Control') + (ltr.at ? ' · ' + ltr.at : (ltr.sentAt ? ' · ' + ltr.sentAt : ''));
+        const fileName = typeof ensureLetterDocxFileName === 'function'
+          ? ensureLetterDocxFileName(ltr.fileName || 'Letter.docx')
+          : (ltr.fileName || 'Letter.docx');
+        const viewBtn = ltr.id && typeof viewConsultationOutcomeLetter === 'function'
+          ? '<button class="btn" type="button" onclick="viewConsultationOutcomeLetter(\'' + escHtml(ltr.id) + '\')">View</button>'
+          : '';
+        return '<div class="letter-attachment-item">' +
+          icon +
+          '<div class="letter-attachment-info"><strong>' + escHtml(fileName) + '</strong>' +
+          '<span>' + escHtml(meta) + '</span></div>' +
+          viewBtn +
+          '</div>';
       }).join('');
     }
     if (status) {
-      if (c.outcomeLetterSkipped) status.textContent = 'Letter step skipped.';
-      else if (letters.length) status.textContent = letters.length + ' letter(s) saved.';
+      if (c.outcomeLetterSkipped) status.textContent = 'Skipped — confirmed by telephone';
+      else if (letters.length) status.textContent = '✓ ' + letters.length + (letters.length === 1 ? ' letter saved' : ' letters saved');
       else status.textContent = '';
     }
   }
 
   function renderConsultationWorkflowSections(c) {
-    const contacts = document.getElementById('consultation-section-contacts');
+    const assignment = document.getElementById('consultation-section-assignment');
     const review = document.getElementById('consultation-section-review');
     const holding = document.getElementById('consultation-section-holding');
     const outcome = document.getElementById('consultation-section-outcome');
     const closeSec = document.getElementById('consultation-section-close');
 
-    const showContacts = bccShowsContacts(c);
-    const showReview = showContacts && bccCanReview(c) && c.workflow !== 'awaiting_info' && c.workflow !== 'outcome' && !c.outcomeDecision;
+    const stage1Complete = bccIsStage1Complete(c);
+    const showReview = bccCanReview(c) && c.workflow !== 'awaiting_info' && c.workflow !== 'outcome' && !c.outcomeDecision;
     const showHolding = c.workflow === 'awaiting_info';
     const showOutcome = bccCanOutcome(c) || c.workflow === 'outcome' || !!c.outcomeDecision;
     const showClose = c.workflow === 'closed' || (bccCanClose(c) || (showOutcome && c.outcomeDecision));
 
-    if (contacts) {
-      contacts.hidden = !showContacts;
-      if (showContacts) {
-        ensureConsultationDutyHolderSuggestions(c);
-        c = getConsultationById(c.id) || c;
-        renderConsultationDutyHolders(c);
-        renderConsultationResponsiblePersons(c);
-      }
-    }
+    if (assignment) assignment.hidden = !stage1Complete || c.workflow === 'closed';
     if (review) review.hidden = !showReview;
     if (holding) holding.hidden = !showHolding;
     if (outcome) {
@@ -779,10 +967,14 @@
 
     const reviewBlocked = document.getElementById('consultation-review-blocked');
     if (reviewBlocked) {
-      reviewBlocked.hidden = bccCanReview(c) || c.workflow === 'closed' || bccNeedsPremises(c);
-      reviewBlocked.textContent = c.assignee && !bccPeopleGateOk(c)
-        ? 'Approve contacts above before reviewing documents.'
-        : 'Link premises and assign lead inspector first.';
+      reviewBlocked.hidden = bccCanReview(c) || c.workflow === 'closed' || !stage1Complete;
+      if (!stage1Complete) {
+        reviewBlocked.textContent = 'Complete and save the submission above before assignment and review.';
+      } else if (!c.assignee) {
+        reviewBlocked.textContent = 'Administrator must assign a lead inspector before document review can begin.';
+      } else {
+        reviewBlocked.textContent = '';
+      }
     }
   }
 
@@ -929,15 +1121,19 @@
     if (!c) { show('processes'); return; }
 
     const title = document.getElementById('consultation-detail-title');
+    const refEl = document.getElementById('consultation-detail-ref');
     const meta = document.getElementById('consultation-detail-meta');
     const stageHint = document.getElementById('consultation-detail-stage-hint');
-    if (title) title.textContent = c.ref;
+    if (title) title.textContent = 'Building Control Consultation';
+    if (refEl) refEl.textContent = c.ref || '';
     if (meta) {
       const slaCls = bccSlaClass(c);
       const slaPills = { red: 'SLA overdue', amber: 'SLA alert', green: 'On track', grey: 'SLA paused' };
       if (c.workflow === 'closed') {
         meta.innerHTML = escHtml(BCC_WORKFLOW_LABELS[c.workflow] || c.workflow) + '  ·  ' + escHtml(c.when) +
           (c.assignee ? '  ·  ' + escHtml(c.assignee) : '');
+      } else if (!bccIsStage1Complete(c)) {
+        meta.innerHTML = escHtml(BCC_WORKFLOW_LABELS[c.workflow] || c.workflow) + '  ·  ' + escHtml(c.when);
       } else {
         meta.innerHTML = '<span class="pill ' + slaCls + '">' + escHtml(slaPills[slaCls] || 'SLA') + '</span> ' +
           escHtml(BCC_WORKFLOW_LABELS[c.workflow] || c.workflow) + '  ·  ' + escHtml(c.when) +
@@ -948,17 +1144,14 @@
       if (c.workflow === 'closed') {
         stageHint.textContent = 'Closed — sections below show the record at close.';
       } else {
-        const stages = ['', 'Intake and setup', 'Review (15-day SLA)', 'Issue outcome letter', 'Close'];
-        stageHint.textContent = 'Stage ' + bccWorkflowStage(c) + ' of 4  ·  ' + stages[bccWorkflowStage(c)];
+        stageHint.textContent = 'Stage ' + bccWorkflowStage(c) + ' of 3  ·  ' + bccWorkflowStageLabel(c);
       }
     }
 
     renderConsultationSlaBanner(c);
-    renderConsultationIntakeGrid(c);
-    renderConsultationPremisesPanel(c);
+    renderConsultationStage1Form(c);
     renderConsultationAssigneeHint(c);
     renderConsultationKeyFieldHighlights(c);
-    renderConsultationTeamMembers(c);
 
     const assignee = document.getElementById('consultation-assignee');
     const review = document.getElementById('consultation-review-notes');
@@ -976,7 +1169,7 @@
     consultationDetailLastId = activeConsultationId;
     initConsultationActivity();
     renderConsultationWorkflowSections(c);
-    setConsultationActivityBarVisible(c.workflow !== 'closed');
+    setConsultationActivityBarVisible(c.workflow !== 'closed' && !!c.assignee);
   }
 
   function refreshConsultationDetailPage() {
@@ -986,10 +1179,14 @@
   function saveConsultationAssignment() {
     const c = getConsultationById(activeConsultationId);
     if (!c) return;
+    if (!bccIsStage1Complete(c)) {
+      window.alert('Save the submission (stage 1) before assigning an inspector.');
+      return;
+    }
     const assignee = document.getElementById('consultation-assignee')?.value || '';
     let workflow = c.workflow;
-    if (assignee && (workflow === 'unassigned' || workflow === 'incoming')) workflow = 'assigned';
-    if (!assignee && c.premises) workflow = 'unassigned';
+    if (assignee && (workflow === 'unassigned' || workflow === 'incoming' || workflow === 'creating')) workflow = 'assigned';
+    if (!assignee && bccIsStage1Complete(c)) workflow = 'unassigned';
     persistConsultationPatch(activeConsultationId, { assignee: assignee || null, workflow: workflow });
     refreshConsultationDetailPage();
     renderConsultationsLists();
@@ -1033,21 +1230,29 @@
     refreshConsultationDetailPage();
   }
 
-  function saveConsultationOutcomeLetter() {
-    const c = getConsultationById(activeConsultationId);
-    if (!c || !c.outcomeDecision) return;
-    const titles = {
-      no_comments: 'No comments letter',
-      comments: 'Comments letter — advisory points',
-      insufficient: 'Insufficient information letter'
-    };
-    const letters = (c.outcomeLetters || []).slice();
-    letters.push({
-      title: titles[c.outcomeDecision] || 'Outcome letter',
-      sentAt: typeof formatActivityTimestamp === 'function' ? formatActivityTimestamp(new Date()) : 'Just now'
+  function appendConsultationLettersToActivity(letters, stamp) {
+    if (!consultationActivityLog.files) consultationActivityLog.files = [];
+    letters.forEach(function (ltr, i) {
+      const entryTs = stamp.ts - i;
+      consultationActivityLog.files.unshift({
+        id: 'f-' + ltr.id,
+        name: ltr.fileName,
+        description: ltr.templateLabel + ' · ' + ltr.recipientName,
+        at: ltr.at,
+        ts: entryTs
+      });
     });
-    persistConsultationPatch(activeConsultationId, { outcomeLetters: letters, outcomeLetterSkipped: false });
-    refreshConsultationDetailPage();
+    if (letters.length) {
+      consultationActivityLog.notes.unshift({
+        id: 'n-ltr-' + stamp.ts,
+        text: letters.length === 1
+          ? 'Outcome letter saved for ' + letters[0].recipientName + '.'
+          : letters.length + ' outcome letters saved.',
+        at: stamp.at,
+        ts: stamp.ts
+      });
+    }
+    persistConsultationPatch(activeConsultationId, { activityLog: consultationActivityLog });
   }
 
   function skipConsultationOutcomeLetter() {
@@ -1130,37 +1335,6 @@
     return 'C-2026-' + String(max + 1).padStart(4, '0');
   }
 
-  function saveBccIntakeFromForm(formData) {
-    const premises = formData.get('premises') || '';
-    const premisesFree = formData.get('premisesFree') || '';
-    const ref = nextBccRef();
-    const id = 'cons-' + ref.replace('C-2026-', '');
-    const record = {
-      id: id,
-      ref: ref,
-      when: 'Just now',
-      premises: premises || null,
-      summary: (formData.get('summary') || 'Building control submission').trim(),
-      patch: false,
-      workflow: premises ? 'unassigned' : 'awaiting_premises',
-      assignee: null,
-      slaDaysRemaining: BCC_SLA_DAYS,
-      intake: {
-        submissionRef: formData.get('submissionRef') || '',
-        receivedDate: formatBccUkDate(formData.get('receivedDate') || ''),
-        buildingControlBody: formData.get('buildingControlBody') || '',
-        projectType: formData.get('projectType') || '',
-        sharePointUrl: formData.get('sharePointUrl') || '',
-        description: formData.get('description') || '',
-        premisesFree: premisesFree
-      }
-    };
-    const intake = loadBccIntake();
-    intake.unshift(record);
-    saveBccIntake(intake);
-    return record;
-  }
-
   function resumeConsultationFromInfoHold() {
     const c = getConsultationById(activeConsultationId);
     if (!c || c.workflow !== 'awaiting_info') return;
@@ -1172,6 +1346,10 @@
   window.switchConsultationsTab = switchConsultationsTab;
   window.layoutConsultationViews = layoutConsultationViews;
   window.toggleConsultationViewMenu = toggleConsultationViewMenu;
+  window.createNewConsultation = createNewConsultation;
+  window.saveConsultationStage1 = saveConsultationStage1;
+  window.openConsultationStage1Lookup = openConsultationStage1Lookup;
+  window.setConsultationStage1LookupValue = setConsultationStage1LookupValue;
   window.initConsultationDetailPage = initConsultationDetailPage;
   window.openConsultation = openConsultation;
   window.toggleConsultationPin = toggleConsultationPin;
@@ -1181,7 +1359,7 @@
   window.saveConsultationReviewNotes = saveConsultationReviewNotes;
   window.saveConsultationInfoDecision = saveConsultationInfoDecision;
   window.saveConsultationOutcomeDecision = saveConsultationOutcomeDecision;
-  window.saveConsultationOutcomeLetter = saveConsultationOutcomeLetter;
+  window.appendConsultationLettersToActivity = appendConsultationLettersToActivity;
   window.skipConsultationOutcomeLetter = skipConsultationOutcomeLetter;
   window.closeConsultationOneClick = closeConsultationOneClick;
   window.acceptConsultationDutyHolder = acceptConsultationDutyHolder;
@@ -1195,11 +1373,12 @@
   window.closeConsultationFloatPanel = closeConsultationFloatPanel;
   window.submitConsultationLog = submitConsultationLog;
   window.setConsultationLogType = setConsultationLogType;
+  window.buildConsultationProcessEntry = buildConsultationProcessEntry;
+  window.loadBccOverrides = loadBccOverrides;
   window.getConsultationById = getConsultationById;
   window.getConsultationByRef = getConsultationByRef;
   window.consultationRouteForRef = consultationRouteForRef;
   window.persistConsultationPatch = persistConsultationPatch;
-  window.saveBccIntakeFromForm = saveBccIntakeFromForm;
   window.renderConsultationsLists = renderConsultationsLists;
   window.resumeConsultationFromInfoHold = resumeConsultationFromInfoHold;
   window.activeConsultationId = function () { return activeConsultationId; };

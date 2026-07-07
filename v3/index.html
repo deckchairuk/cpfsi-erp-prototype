@@ -4421,6 +4421,84 @@
     height: 14px;
     flex-shrink: 0;
   }
+  .letter-composer-mobile-preview-hd {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+    background: #f8f8f6;
+  }
+  .letter-composer-mobile-preview-hd strong {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .letter-composer-mobile-preview-hd .btn {
+    min-width: 64px;
+  }
+  @media (max-width: 840px) {
+    .letter-composer-layout.is-mobile-compose {
+      grid-template-columns: 1fr;
+    }
+    .letter-composer-layout.is-mobile-compose .letter-composer-sidebar {
+      border-right: none;
+      padding-bottom: 96px;
+    }
+    .letter-composer-layout.is-mobile-compose:not(.is-mobile-preview-open) .letter-composer-main {
+      display: block;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: auto;
+      height: auto;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      z-index: 12;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    }
+    .letter-composer-layout.is-mobile-compose:not(.is-mobile-preview-open) .letter-composer-preview-section,
+    .letter-composer-layout.is-mobile-compose:not(.is-mobile-preview-open) .letter-composer-mobile-preview-hd {
+      display: none !important;
+    }
+    .letter-composer-layout.is-mobile-compose:not(.is-mobile-preview-open) .letter-composer-footer {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+    .letter-composer-layout.is-mobile-compose.is-mobile-preview-open .letter-composer-sidebar {
+      display: none;
+    }
+    .letter-composer-layout.is-mobile-compose.is-mobile-preview-open .letter-composer-main {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset: 0;
+      z-index: 125;
+      padding: 0;
+      background: var(--surface);
+      box-shadow: none;
+      border-top: none;
+    }
+    .letter-composer-layout.is-mobile-compose.is-mobile-preview-open .letter-composer-mobile-preview-hd {
+      display: flex;
+    }
+    .letter-composer-layout.is-mobile-compose.is-mobile-preview-open .letter-composer-preview-section {
+      flex: 1;
+      min-height: 0;
+      padding: 12px 16px 0;
+    }
+    .letter-composer-layout.is-mobile-compose.is-mobile-preview-open .letter-composer-footer {
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+      margin-top: 0;
+    }
+    .letter-composer-layout.is-mobile-compose .letter-template-list {
+      max-height: none;
+    }
+  }
   /* Safety concern intake (fullscreen log form) */
   #sc-intake-modal.modal-backdrop,
   #bcc-intake-modal.modal-backdrop,
@@ -4640,6 +4718,9 @@
     min-height: 120px;
     padding-top: 12px;
     padding-bottom: 12px;
+  }
+  #bcc-intake-modal .cpin-key-display {
+    max-width: none;
   }
   #sc-intake-modal .field-row,
   #cpin-intake-modal .field-row,
@@ -5485,6 +5566,26 @@
     color: var(--ink-3);
     margin-top: 2px;
     line-height: 1.4;
+  }
+  /* Stack above intake modals (z-index 110) when opened from within them */
+  #setup-lookup-modal.modal-backdrop {
+    z-index: 120;
+  }
+  #consultation .field-row .field input,
+  #consultation .field-row .field select,
+  #consultation .setup-section .field input,
+  #consultation .setup-section .field select {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+  #consultation .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 640px) {
+    #consultation .field-row { grid-template-columns: 1fr; }
   }
   .setup-lookup-search {
     width: 100%;
@@ -8399,7 +8500,7 @@
           <button class="btn" onclick="startNewAuditFromPremises('Temple Quay House')">+ New audit</button>
           <button class="btn" onclick="startBizSupportFromPremises('Temple Quay House')">+ Log business support</button>
           <button class="btn" onclick="openScIntakeForm('Temple Quay House')">+ Log safety concern</button>
-          <button class="btn" onclick="openBccIntakeForm('Temple Quay House')">+ New consultation</button>
+          <button class="btn" onclick="createNewConsultation('Temple Quay House')">+ New consultation</button>
         </div>
         <div style="margin-top:16px;font-size:11px;color:var(--ink-3);">
           Starting an audit from here pre-fills the Duty Holders this premises already knows.
@@ -9628,97 +9729,114 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
       <div>
         <h1 id="consultation-detail-title" style="margin:0;">Building Control Consultation</h1>
+        <div class="meta" id="consultation-detail-ref" style="font-size:17px;font-weight:600;color:var(--ink);margin-top:2px;"></div>
         <div class="meta" id="consultation-detail-meta"></div>
         <div class="meta" id="consultation-detail-stage-hint" style="margin-top:4px;"></div>
       </div>
     </div>
 
     <div class="cpin-single-workflow">
-      <div class="setup-section cpin-key-section">
-        <div id="consultation-sla-strip" class="cpin-rag-strip" role="status" aria-live="polite">
+      <!-- Stage 1 — Log submission -->
+      <div class="setup-section cpin-key-section" id="consultation-section-stage1">
+        <div id="consultation-sla-strip" class="cpin-rag-strip" role="status" aria-live="polite" hidden>
           <span class="cpin-rag-strip-label" id="consultation-sla-strip-label">SLA</span>
           <span class="cpin-rag-strip-detail" id="consultation-sla-strip-detail"></span>
         </div>
         <div class="cpin-key-section-body">
-          <h3>Premises and assignment</h3>
-          <div class="help">Match the submission to premises, assign the lead inspector and add team members. Building Control contacts are added in the next section.</div>
-          <div class="cpin-key-fields">
-            <div class="cpin-key-field" id="consultation-field-premises">
-              <label>Premises</label>
-              <p id="consultation-premises-status" class="cpin-key-field-hint"></p>
-              <div id="consultation-premises-display" class="cpin-key-display">
-                <div class="cpin-key-value" id="consultation-premises-value"></div>
-                <button type="button" class="btn cpin-key-change-btn" id="consultation-premises-change-btn" onclick="openConsultationPremisesEdit()">Change</button>
-              </div>
+          <h3>Log submission</h3>
+          <div class="help">Record the Building Control submission received by email. The 15-day consultation SLA starts when you save this stage.</div>
+
+          <div class="field-row" style="margin-top:12px;">
+            <div class="field">
+              <label for="consultation-submission-ref">Submission reference *</label>
+              <input type="text" id="consultation-submission-ref" placeholder="From email subject, e.g. BCC-2026-0094" autocomplete="off" />
             </div>
-            <div class="cpin-key-field" id="consultation-field-assignee">
-              <label for="consultation-assignee">Lead inspector</label>
-              <p id="consultation-assignee-hint" class="cpin-key-field-hint"></p>
-              <select id="consultation-assignee" onchange="saveConsultationAssignment()">
-                <option value="">Unassigned</option>
-                <option value="Phil Gower">Phil Gower</option>
-                <option value="Sarah Chen">Sarah Chen</option>
-                <option value="James Okonkwo">James Okonkwo</option>
-                <option value="Hannah Munro">Hannah Munro</option>
-              </select>
+            <div class="field">
+              <label for="consultation-received-date">Date received *</label>
+              <input type="date" id="consultation-received-date" />
             </div>
-            <div class="cpin-key-field">
-              <label>Team members</label>
-              <p class="cpin-key-field-hint">Additional inspectors on this consultation.</p>
-              <div class="cpin-key-display is-readonly">
-                <div class="cpin-key-value" id="consultation-team-value">None added</div>
-              </div>
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Building Control body *</label>
+            <div class="help">Local authority building control or Registered Building Control Approvers (RBCAs) who submitted the consultation.</div>
+            <div class="cpin-key-display" style="margin-top:8px;">
+              <div class="cpin-key-value is-empty" id="consultation-bc-display">Search for Building Control account…</div>
+              <button type="button" class="btn cpin-key-change-btn" onclick="openConsultationStage1Lookup('buildingControlBody')">Search</button>
             </div>
+            <input type="hidden" id="consultation-bc-body" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Contact *</label>
+            <div class="help">The person consulting with us — typically the building control officer handling this submission.</div>
+            <div class="cpin-key-display" style="margin-top:8px;">
+              <div class="cpin-key-value is-empty" id="consultation-contact-display">Search for contact…</div>
+              <button type="button" class="btn cpin-key-change-btn" onclick="openConsultationStage1Lookup('buildingControlContact')">Search</button>
+            </div>
+            <input type="hidden" id="consultation-contact" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Address of premises *</label>
+            <div class="help">Search the premises register. For a new build, create the address in the register first, or use <strong>Add new</strong> when searching.</div>
+            <div class="cpin-key-display" style="margin-top:8px;">
+              <div class="cpin-key-value is-empty" id="consultation-premises-display">Search premises register…</div>
+              <button type="button" class="btn cpin-key-change-btn" onclick="openConsultationStage1Lookup('premises')">Search</button>
+            </div>
+            <input type="hidden" id="consultation-premises-hidden" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label for="consultation-summary">Short summary *</label>
+            <div class="help">Description of this consultation based on the header of the letter received by the building control body.</div>
+            <input type="text" id="consultation-summary" placeholder="e.g. Fire strategy — Charing Cross House refurbishment" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label for="consultation-sharepoint">SharePoint folder URL</label>
+            <div class="help">Architect plans, maps and consultation form — linked from the intake inbox folder.</div>
+            <input type="url" id="consultation-sharepoint" placeholder="https://…" inputmode="url" />
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn primary" type="button" id="consultation-save-stage1-btn" onclick="saveConsultationStage1()">Save submission</button>
+            <span id="consultation-stage1-status" style="font-size:13px;color:var(--ink-3);"></span>
           </div>
         </div>
       </div>
 
-      <div class="setup-section" id="consultation-intake-section">
-        <h3>Submission details (from intake)</h3>
-        <div class="help">Building Control submission received by email — reference, body and documents linked from the intake inbox.</div>
-        <div class="cpin-intake-grid" id="consultation-intake-grid"></div>
-        <div class="cpin-stop-message">
-          <h4 class="cpin-stop-message-heading">Project description</h4>
-          <div class="cpin-stop-message-panel">
-            <div class="cpin-stop-message-content">
-              <p class="cpin-stop-desc-readonly" id="consultation-intake-desc-value">—</p>
-            </div>
+      <!-- Stage 2 — Assignment -->
+      <div class="setup-section cpin-workflow-section" id="consultation-section-assignment" hidden>
+        <h3>Assignment</h3>
+        <div class="help">Administrator assigns the lead inspector. The assigned inspector begins at document review once assignment is complete.</div>
+        <div class="cpin-key-fields" style="margin-top:12px;grid-template-columns:minmax(0,1fr);max-width:420px;">
+          <div class="cpin-key-field" id="consultation-field-assignee">
+            <label for="consultation-assignee">Lead inspector</label>
+            <p id="consultation-assignee-hint" class="cpin-key-field-hint"></p>
+            <select id="consultation-assignee" onchange="saveConsultationAssignment()">
+              <option value="">Unassigned</option>
+              <option value="Phil Gower">Phil Gower</option>
+              <option value="Sarah Chen">Sarah Chen</option>
+              <option value="James Okonkwo">James Okonkwo</option>
+              <option value="Hannah Munro">Hannah Munro</option>
+            </select>
           </div>
         </div>
-        <div class="cpin-stop-message">
-          <h4 class="cpin-stop-message-heading">SharePoint documents</h4>
-          <div class="help" style="margin-top:0;margin-bottom:10px;">Architect plans, maps and consultation form — linked from the intake inbox folder.</div>
-          <div class="cpin-stop-message-panel">
-            <div class="cpin-stop-message-content">
-              <p class="cpin-stop-desc-readonly" id="consultation-sharepoint-link" style="margin:0;">—</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="setup-section cpin-workflow-section" id="consultation-section-contacts" hidden>
-        <h3>Duty Holders and Responsible Persons</h3>
-        <div class="help">Building Control body is the consultation submitter. Duty Holders are pre-suggested from this premises — approve both before review unlocks. No RBIP scoring applies.</div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3);font-weight:600;margin:8px 0 6px;">Duty Holders</div>
-        <div id="consultation-dh-list"></div>
-        <div class="add-holder-btn" onclick="addConsultationDutyHolder()">+ Add a Duty Holder</div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3);font-weight:600;margin:16px 0 6px;">Responsible Persons</div>
-        <div id="consultation-rp-list"></div>
-        <div class="add-holder-btn" onclick="addConsultationResponsiblePerson()">+ Add a contact</div>
-        <p id="consultation-rp-hint" style="margin:8px 0 0;font-size:13px;color:var(--ink-2);"></p>
       </div>
 
       <div id="consultation-review-blocked" class="inset" style="margin-bottom:16px;" hidden></div>
 
+      <!-- Stage 3 — Review documents -->
       <div class="setup-section cpin-workflow-section" id="consultation-section-review" hidden>
         <h3>Review documents (15-day SLA)</h3>
-        <div class="help">Review architect plans, fire strategy and consultation form. SLA reminders trigger as the deadline approaches. Use <strong>Log</strong> in the activity bar for interim activity and time.</div>
+        <div class="help">Assigned inspector reviews architect plans, fire strategy and consultation form. SLA reminders trigger as the deadline approaches. Use <strong>Log</strong> in the activity bar for interim activity and time.</div>
         <div class="audit-note-form" style="margin-top:12px;margin-bottom:14px;">
           <label for="consultation-review-notes">Review notes</label>
           <textarea id="consultation-review-notes" placeholder="Document review findings, clarifications sought…" onchange="saveConsultationReviewNotes()"></textarea>
         </div>
         <div class="cpin-branch-panel">
-          <h3>Is there enough information to give a fire safety opinion?</h3>
+          <h3>Is there sufficient information to undertake consultation?</h3>
           <div class="cpin-decision-options">
             <label class="cpin-decision-option">
               <input type="radio" name="consultation-info-decision" value="yes" onchange="saveConsultationInfoDecision()" />
@@ -9726,7 +9844,7 @@
             </label>
             <label class="cpin-decision-option">
               <input type="radio" name="consultation-info-decision" value="no" onchange="saveConsultationInfoDecision()" />
-              <div><strong>No — request missing information</strong><span>Issue insufficient information letter. SLA pauses until response received.</span></div>
+              <div><strong>No — request missing information</strong><span>Issue an insufficient information letter. SLA pauses until response received.</span></div>
             </label>
           </div>
         </div>
@@ -9751,13 +9869,21 @@
             <input type="radio" name="consultation-outcome-decision" value="comments" onchange="saveConsultationOutcomeDecision()" />
             <div><strong>Comments</strong><span>Advisory points to consider — issue a comments letter.</span></div>
           </label>
+          <label class="cpin-decision-option">
+            <input type="radio" name="consultation-outcome-decision" value="insufficient" onchange="saveConsultationOutcomeDecision()" />
+            <div><strong>Insufficient information</strong><span>Request further information — launch an insufficient information letter.</span></div>
+          </label>
+          <label class="cpin-decision-option">
+            <input type="radio" name="consultation-outcome-decision" value="bsr_planning" onchange="saveConsultationOutcomeDecision()" />
+            <div><strong>BSR planning consultation response</strong><span>Issue a Building Safety Regulator planning consultation response letter.</span></div>
+          </label>
         </div>
         <div style="margin-top:20px;">
           <h4 style="margin:0 0 8px;font-size:14px;">Outcome letters</h4>
           <div class="help">Generate, review and send the outcome letter to Building Control.</div>
           <div class="letter-attachment-list" id="consultation-outcome-letters-list"></div>
           <div class="letter-composer-actions" style="margin-top:10px;">
-            <button class="btn primary" type="button" onclick="saveConsultationOutcomeLetter()">Write letter</button>
+            <button class="btn primary" type="button" onclick="openConsultationOutcomeLetterComposer()">Write letter</button>
             <button class="btn" type="button" onclick="skipConsultationOutcomeLetter()">Skip letter</button>
             <span id="consultation-outcome-letter-status" style="font-size:12px;color:var(--ink-3);"></span>
           </div>
@@ -9767,7 +9893,7 @@
       <div class="setup-section cpin-workflow-section" id="consultation-section-close" hidden>
         <h3>Close consultation</h3>
         <div id="consultation-close-open">
-          <div class="help">Close with a reason. Default time 0.5h logged to this consultation automatically.</div>
+          <div class="help">Close with a reason. Remember to log your time on this consultation using the activity bar before closing.</div>
           <div class="audit-note-form" style="margin-top:12px;margin-bottom:14px;">
             <label for="consultation-close-reason">Reason for closing</label>
             <textarea id="consultation-close-reason" placeholder="e.g. No comments letter sent — consultation complete…"></textarea>
@@ -10942,7 +11068,7 @@
       <button type="button" class="modal-close" onclick="closeLetterComposer()" title="Close (Esc)">×</button>
     </div>
     <div class="modal-body">
-      <div class="letter-composer-layout">
+      <div class="letter-composer-layout" id="letter-composer-layout">
         <aside class="letter-composer-sidebar" id="letter-composer-sidebar">
           <div class="modal-group" id="letter-composer-template-group">
             <div class="modal-group-label">Template</div>
@@ -10956,6 +11082,11 @@
           </div>
         </aside>
         <main class="letter-composer-main">
+          <div class="letter-composer-mobile-preview-hd" id="letter-composer-mobile-preview-hd" hidden>
+            <button type="button" class="btn" onclick="closeLetterComposerMobilePreview()">Back</button>
+            <strong>Letter preview</strong>
+            <span aria-hidden="true" style="min-width:64px;"></span>
+          </div>
           <div class="letter-composer-preview-section">
             <div class="modal-group-label">Letter preview</div>
             <div class="letter-composer-preview-context" id="letter-composer-preview-context" hidden></div>
@@ -11112,120 +11243,6 @@
     <div class="sc-intake-footer">
       <button class="btn" type="button" onclick="closeScIntakeForm()">Cancel</button>
       <button class="btn primary" type="button" onclick="submitScIntakeForm()">Log safety concern</button>
-    </div>
-  </div>
-</div>
-
-<!-- Building Control Consultation intake -->
-<div id="bcc-intake-modal" class="modal-backdrop" onclick="if(event.target===this) closeBccIntakeForm()">
-  <div class="modal sc-intake-modal" onclick="event.stopPropagation()">
-    <div class="sc-intake-header">
-      <div>
-        <h2 id="bcc-intake-title">Log building control submission</h2>
-        <div class="sub" id="bcc-intake-sub">Record plans and consultation forms received by email. The 15-day consultation SLA starts when you log the submission.</div>
-      </div>
-      <button class="modal-close" type="button" onclick="closeBccIntakeForm()" title="Close (Esc)">×</button>
-    </div>
-
-    <div class="sc-intake-body">
-      <div class="sc-intake-inner">
-        <form id="bcc-intake-form" novalidate>
-          <p class="sc-intake-required" id="bcc-intake-required-note">* denotes a required field</p>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="bcc-intake-submission-ref">Submission reference *</label>
-              <input type="text" id="bcc-intake-submission-ref" name="submissionRef" required placeholder="From email subject, e.g. BCC-2026-0094" autocomplete="off" />
-            </div>
-            <div class="field">
-              <label for="bcc-intake-received-date">Date received *</label>
-              <input type="date" id="bcc-intake-received-date" name="receivedDate" required />
-            </div>
-          </div>
-
-          <section class="sc-intake-section" aria-labelledby="bcc-intake-bc-heading">
-            <h3 id="bcc-intake-bc-heading">Building Control and project</h3>
-
-            <div class="field">
-              <label for="bcc-intake-bc-body">Building Control body *</label>
-              <div class="help">Local authority building control or private approved inspector who submitted the consultation.</div>
-              <input type="text" id="bcc-intake-bc-body" name="buildingControlBody" required placeholder="e.g. Bristol City Council Building Control" autocomplete="organization" />
-            </div>
-
-            <div class="field">
-              <label>Project type *</label>
-              <div class="help">What kind of works do the submitted plans relate to?</div>
-              <div class="sc-intake-rag-group">
-                <label class="sc-intake-rag-option">
-                  <input type="radio" name="projectType" value="New build" required />
-                  <div class="sc-intake-rag-copy"><strong>New build</strong><span>New Crown premises or major new structure</span></div>
-                </label>
-                <label class="sc-intake-rag-option">
-                  <input type="radio" name="projectType" value="Refurbishment" />
-                  <div class="sc-intake-rag-copy"><strong>Refurbishment</strong><span>Internal or external works to existing premises</span></div>
-                </label>
-                <label class="sc-intake-rag-option">
-                  <input type="radio" name="projectType" value="Extension" />
-                  <div class="sc-intake-rag-copy"><strong>Extension</strong><span>Addition to an existing building footprint</span></div>
-                </label>
-                <label class="sc-intake-rag-option">
-                  <input type="radio" name="projectType" value="Change of use" />
-                  <div class="sc-intake-rag-copy"><strong>Change of use</strong><span>Altered occupancy or fire strategy for existing space</span></div>
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section class="sc-intake-section" aria-labelledby="bcc-intake-premises-heading">
-            <h3 id="bcc-intake-premises-heading">Premises</h3>
-            <p class="sc-intake-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address or site description below — it will appear under <strong>Premises needed</strong> until an admin links it.</p>
-
-            <div class="field">
-              <label for="bcc-intake-premises">Address of premises</label>
-              <select id="bcc-intake-premises" name="premises">
-                <option value="">Please select</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="bcc-intake-premises-free">Premises not in system or not found</label>
-              <div class="help">If you cannot find the premises above, enter the full address or site description from the submission.</div>
-              <input type="text" id="bcc-intake-premises-free" name="premisesFree" placeholder="e.g. Bristol Crown Court extension, rear wing" autocomplete="street-address" />
-            </div>
-          </section>
-
-          <section class="sc-intake-section" aria-labelledby="bcc-intake-docs-heading">
-            <h3 id="bcc-intake-docs-heading">Documents</h3>
-            <p class="sc-intake-info">Save architect plans, maps and the consultation form to SharePoint before logging. Paste the folder link below so inspectors can open the submission from the process record.</p>
-
-            <div class="field">
-              <label for="bcc-intake-sharepoint">SharePoint folder URL</label>
-              <input type="url" id="bcc-intake-sharepoint" name="sharePointUrl" placeholder="https://…" inputmode="url" />
-            </div>
-          </section>
-
-          <section class="sc-intake-section" aria-labelledby="bcc-intake-summary-heading">
-            <h3 id="bcc-intake-summary-heading">Summary for the queue</h3>
-
-            <div class="field">
-              <label for="bcc-intake-summary">Short summary *</label>
-              <div class="help">One line for the processes list — what is being consulted on?</div>
-              <input type="text" id="bcc-intake-summary" name="summary" required placeholder="e.g. Fire strategy — court extension" />
-            </div>
-
-            <div class="field">
-              <label for="bcc-intake-description">Project description</label>
-              <div class="help">Scope of works and documents included — compartmentation, evacuation strategy, hot works, etc.</div>
-              <textarea id="bcc-intake-description" name="description" rows="5" placeholder="Scope of works, documents attached, any known programme dates…"></textarea>
-            </div>
-          </section>
-        </form>
-      </div>
-    </div>
-
-    <div class="sc-intake-footer">
-      <button class="btn" type="button" onclick="closeBccIntakeForm()">Cancel</button>
-      <button class="btn primary" type="button" onclick="submitBccIntakeForm()">Log submission</button>
     </div>
   </div>
 </div>
@@ -11640,7 +11657,7 @@
             </div>
           </button>
 
-          <button class="new-option" onclick="closeNewModal();openBccIntakeForm();">
+          <button class="new-option" onclick="closeNewModal();createNewConsultation();">
             <div class="icon">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 2.5H10.5L14.5 6.5V15.5H3.5V2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.5 2.5V6.5H14.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 9.5H12M6 12H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
@@ -12028,6 +12045,12 @@
       layoutProcessViews();
       layoutCpinViews();
       if (typeof layoutConcernViews === 'function') layoutConcernViews();
+      if (letterComposerState && document.getElementById('letter-composer-modal')?.classList.contains('open')) {
+        if (typeof letterComposerUsesMobilePreviewUi === 'function' && !letterComposerUsesMobilePreviewUi()) {
+          letterComposerState.mobilePreviewOpen = false;
+        }
+        if (typeof renderLetterComposer === 'function') renderLetterComposer();
+      }
     });
     document.addEventListener('mousedown', (e) => {
       const more = document.getElementById('nav-more');
@@ -14056,7 +14079,7 @@
   }
 
   function getFilteredProcesses() {
-    let items = PROCESSES_LIST.filter(function (p) {
+    let items = getAllProcessesList().filter(function (p) {
       return processMatchesType(p) && processMatchesStatus(p) && processMatchesView(p) && processMatchesDate(p);
     });
     if (processesSortMode === 'type') {
@@ -14074,7 +14097,20 @@
   }
 
   function countProcessesForView(view) {
-    return PROCESSES_LIST.filter(p => processMatchesView(p, view)).length;
+    return getAllProcessesList().filter(p => processMatchesView(p, view)).length;
+  }
+
+  function getAllProcessesList() {
+    const seen = new Set(PROCESSES_LIST.map(function (p) { return p.id; }));
+    const extra = [];
+    if (typeof getAllConsultationRecords === 'function' && typeof buildConsultationProcessEntry === 'function') {
+      getAllConsultationRecords().forEach(function (c) {
+        if (!c || c.workflow === 'closed' || seen.has(c.ref)) return;
+        const entry = buildConsultationProcessEntry(c);
+        if (entry) extra.push(entry);
+      });
+    }
+    return PROCESSES_LIST.concat(extra);
   }
 
   function updateProcessViewCounts() {
@@ -15344,6 +15380,7 @@
   }
 
   function initProcessesPage() {
+    if (typeof loadBccOverrides === 'function') loadBccOverrides();
     layoutProcessViews();
     const screen = document.getElementById('processes');
     if (!screen) return;
@@ -16553,7 +16590,7 @@
 
   function getDashboardOpenProcesses() {
     const dashboardTypes = ['audit', 'follow-up', 'consultation', 'concern'];
-    return PROCESSES_LIST.filter(function (p) {
+    return getAllProcessesList().filter(function (p) {
       if (!p.mine || p.status === 'closed') return false;
       if (dashboardTypes.indexOf(p.type) < 0) return false;
       if (dashboardProcessesTypeFilter !== 'all' && p.type !== dashboardProcessesTypeFilter) return false;
@@ -18131,6 +18168,7 @@
     }
     if (letterComposerState.outcomeLetterId) stashAuditStage4LetterComposerDraft();
     loadAuditStage4LetterSlot(taskId);
+    if (letterComposerUsesMobilePreviewUi()) openLetterComposerMobilePreview();
     renderLetterComposer();
   }
 
@@ -18146,6 +18184,7 @@
         letterComposerState.stage4OutcomeKey = entry.key;
       }
     }
+    if (letterComposerUsesMobilePreviewUi()) openLetterComposerMobilePreview();
     renderLetterComposer();
   }
 
@@ -26758,8 +26797,7 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('new-modal')?.classList.contains('open') &&
-        !document.getElementById('cpin-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     resetScIntakeForm();
@@ -26778,73 +26816,11 @@
     if (typeof switchConcernsTab === 'function') switchConcernsTab('unassigned');
   }
 
-  // ---------------------------------------------------------
-  // Building Control Consultation intake
-  // ---------------------------------------------------------
-  function populateBccIntakePremisesSelect() {
-    const sel = document.getElementById('bcc-intake-premises');
-    if (!sel) return;
-    const current = sel.value;
-    sel.innerHTML = '<option value="">Please select</option>';
-    getCpinPremisesCatalog().forEach(function (p) {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      opt.textContent = p.name;
-      sel.appendChild(opt);
-    });
-    if (current) sel.value = current;
+  // Building Control Consultation — new record opens on unified 3-stage detail page
+  function openNewConsultation(premisesName) {
+    if (typeof createNewConsultation === 'function') createNewConsultation(premisesName);
   }
 
-  function resetBccIntakeForm() {
-    const form = document.getElementById('bcc-intake-form');
-    if (form) {
-      form.reset();
-      const dateEl = document.getElementById('bcc-intake-received-date');
-      if (dateEl) dateEl.valueAsDate = new Date();
-    }
-  }
-
-  function openBccIntakeForm(premisesName) {
-    populateBccIntakePremisesSelect();
-    resetBccIntakeForm();
-    if (premisesName) {
-      const sel = document.getElementById('bcc-intake-premises');
-      if (sel) sel.value = premisesName;
-    }
-    document.getElementById('bcc-intake-modal')?.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    requestAnimationFrame(function () {
-      document.getElementById('bcc-intake-submission-ref')?.focus();
-    });
-  }
-
-  function closeBccIntakeForm() {
-    document.getElementById('bcc-intake-modal')?.classList.remove('open');
-    if (!document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
-        !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
-        !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
-        !document.getElementById('new-modal')?.classList.contains('open') &&
-        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
-      document.body.style.overflow = '';
-    }
-    resetBccIntakeForm();
-  }
-
-  function submitBccIntakeForm() {
-    const form = document.getElementById('bcc-intake-form');
-    if (!form || typeof saveBccIntakeFromForm !== 'function') return;
-    if (!form.reportValidity()) return;
-
-    const record = saveBccIntakeFromForm(new FormData(form));
-    if (!record) return;
-
-    closeBccIntakeForm();
-    show('processes');
-    if (typeof setProcessTypeFilter === 'function') setProcessTypeFilter('consultation');
-  }
-
-  // ---------------------------------------------------------
   // CPIN intake (fullscreen log form — phone / email)
   // ---------------------------------------------------------
   function buildCpinIntakeStatusRadios() {
@@ -26905,8 +26881,7 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('new-modal')?.classList.contains('open') &&
-        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('sc-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     resetCpinIntakeForm();
@@ -27006,8 +26981,7 @@
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
         !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('cpin-intake-modal')?.classList.contains('open') &&
-        !document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
   }
@@ -27034,9 +27008,11 @@
       } else if (document.getElementById('audit-assessment-modal')?.classList.contains('open')) {
         closeAuditAssessmentModal();
       } else if (document.getElementById('letter-composer-modal')?.classList.contains('open')) {
-        closeLetterComposer();
-      } else if (document.getElementById('bcc-intake-modal')?.classList.contains('open')) {
-        closeBccIntakeForm();
+        if (letterComposerState && letterComposerState.mobilePreviewOpen && typeof letterComposerUsesMobilePreviewUi === 'function' && letterComposerUsesMobilePreviewUi()) {
+          closeLetterComposerMobilePreview();
+        } else {
+          closeLetterComposer();
+        }
       } else if (document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
         closeCpinIntakeForm();
       } else if (document.getElementById('sc-intake-modal')?.classList.contains('open')) {
@@ -27435,6 +27411,57 @@
         return '<p>CPFSI requests a written witness statement regarding the incident at <span class="conditional">' + escHtml(ctx.premises) + '</span>. ' +
           'Please provide the account within ten working days, including times, locations and actions taken.</p>';
       }
+    },
+    {
+      id: 'bcc-no-comments',
+      label: 'No comments letter',
+      hint: 'Satisfied with plans — no comments on the consultation',
+      contexts: ['consultation-outcome'],
+      buildBody: function (ctx) {
+        return '<p>Following our review of the plans and documents submitted in respect of <span class="conditional">' + escHtml(ctx.premises) + '</span>' +
+          (ctx.submissionRef ? ' (reference <span class="conditional">' + escHtml(ctx.submissionRef) + '</span>)' : '') +
+          ', CPFSI has no comments to make on the fire safety aspects of this building control consultation.</p>' +
+          '<p>We are satisfied that the proposals appear to meet the relevant fire safety requirements for Crown premises.</p>';
+      }
+    },
+    {
+      id: 'bcc-comments',
+      label: 'Comments letter',
+      hint: 'Advisory points for building control to consider',
+      contexts: ['consultation-outcome'],
+      buildBody: function (ctx) {
+        return '<p>Following our review of the plans and documents submitted in respect of <span class="conditional">' + escHtml(ctx.premises) + '</span>' +
+          (ctx.submissionRef ? ' (reference <span class="conditional">' + escHtml(ctx.submissionRef) + '</span>)' : '') +
+          ', CPFSI has the following comments on the fire safety aspects of this consultation:</p>' +
+          '<p><span class="conditional">[Insert advisory comments here]</span></p>' +
+          '<p>These points are offered for your consideration and do not necessarily indicate non-compliance.</p>';
+      }
+    },
+    {
+      id: 'bcc-insufficient',
+      label: 'Insufficient information letter',
+      hint: 'Request further information before consultation can proceed',
+      contexts: ['consultation-outcome'],
+      buildBody: function (ctx) {
+        return '<p>Following our initial review of the plans and documents submitted in respect of <span class="conditional">' + escHtml(ctx.premises) + '</span>' +
+          (ctx.submissionRef ? ' (reference <span class="conditional">' + escHtml(ctx.submissionRef) + '</span>)' : '') +
+          ', CPFSI does not have sufficient information to complete this building control consultation.</p>' +
+          '<p>Please provide the following before we can issue our formal response:</p>' +
+          '<ul style="margin:8px 0 0 18px;padding:0;"><li><span class="conditional">[List missing documents or clarifications]</span></li></ul>' +
+          '<p style="margin-top:12px;">The 15-day consultation period will resume when the requested information is received.</p>';
+      }
+    },
+    {
+      id: 'bcc-bsr-planning',
+      label: 'BSR planning consultation response',
+      hint: 'Building Safety Regulator planning consultation response',
+      contexts: ['consultation-outcome'],
+      buildBody: function (ctx) {
+        return '<p>CPFSI\'s response to the Building Safety Regulator planning consultation in respect of <span class="conditional">' + escHtml(ctx.premises) + '</span>' +
+          (ctx.submissionRef ? ' (reference <span class="conditional">' + escHtml(ctx.submissionRef) + '</span>)' : '') +
+          ' is set out below.</p>' +
+          '<p><span class="conditional">[Insert BSR planning consultation response]</span></p>';
+      }
     }
   ];
 
@@ -27463,6 +27490,76 @@
   function letterComposerUsesConcern() {
     if (!letterComposerState) return false;
     return letterComposerState.saveTo === 'concern-onsite';
+  }
+
+  function letterComposerUsesMobilePreviewUi() {
+    return typeof isMobileNavLayout === 'function' && isMobileNavLayout();
+  }
+
+  function applyLetterComposerMobileLayout() {
+    const layout = document.getElementById('letter-composer-layout');
+    const mobileHd = document.getElementById('letter-composer-mobile-preview-hd');
+    const mobile = letterComposerUsesMobilePreviewUi();
+    if (layout && letterComposerState) {
+      layout.classList.toggle('is-mobile-compose', mobile);
+      layout.classList.toggle('is-mobile-preview-open', mobile && !!letterComposerState.mobilePreviewOpen);
+    }
+    if (mobileHd) mobileHd.hidden = !(mobile && letterComposerState && letterComposerState.mobilePreviewOpen);
+  }
+
+  function openLetterComposerMobilePreview() {
+    if (!letterComposerState) return;
+    letterComposerState.mobilePreviewOpen = true;
+  }
+
+  function closeLetterComposerMobilePreview() {
+    if (!letterComposerState) return;
+    if (letterComposerState.editing) {
+      const bodyEl = document.getElementById('letter-composer-body');
+      if (bodyEl) letterComposerState.customBody = bodyEl.innerHTML;
+      letterComposerState.editing = false;
+    }
+    if (letterComposerUsesAuditStage4() && letterComposerState.outcomeLetterId) {
+      stashAuditStage4LetterComposerDraft();
+    }
+    letterComposerState.mobilePreviewOpen = false;
+    renderLetterComposer();
+  }
+
+  function letterComposerUsesConsultation() {
+    if (!letterComposerState) return false;
+    return letterComposerState.saveTo === 'consultation-outcome';
+  }
+
+  function getActiveConsultationRecord() {
+    if (typeof getConsultationById !== 'function' || typeof activeConsultationId !== 'function') return null;
+    return getConsultationById(activeConsultationId());
+  }
+
+  function getConsultationOutcomeTemplateId(outcomeKey) {
+    const map = {
+      no_comments: 'bcc-no-comments',
+      comments: 'bcc-comments',
+      insufficient: 'bcc-insufficient',
+      bsr_planning: 'bcc-bsr-planning'
+    };
+    return map[outcomeKey] || 'bcc-no-comments';
+  }
+
+  function getConsultationLetterRecipients(c) {
+    if (!c || !c.intake) return [];
+    const contact = c.intake.buildingControlContact;
+    const body = c.intake.buildingControlBody;
+    if (!contact) return [];
+    return [{
+      id: 'bcc-contact',
+      name: contact,
+      role: body || 'Building Control'
+    }];
+  }
+
+  function getConsultationSavedLetters(c) {
+    return (c && c.outcomeLetters) ? c.outcomeLetters.slice() : [];
   }
 
   function getActiveConcernRecord() {
@@ -27552,6 +27649,10 @@
       const concern = getActiveConcernRecord();
       return concern ? getConcernLetterRecipients(concern) : [];
     }
+    if (letterComposerUsesConsultation()) {
+      const c = getActiveConsultationRecord();
+      return c ? getConsultationLetterRecipients(c) : [];
+    }
     const cpin = getCpinById(activeCpinId);
     return cpin ? getCpinLetterRecipients(cpin) : [];
   }
@@ -27573,6 +27674,10 @@
       const concern = getActiveConcernRecord();
       return concern ? getConcernSavedLetters(concern) : [];
     }
+    if (letterComposerUsesConsultation()) {
+      const c = getActiveConsultationRecord();
+      return c ? getConsultationSavedLetters(c) : [];
+    }
     const cpin = getCpinById(activeCpinId);
     return cpin ? getCpinSavedLetters(cpin) : [];
   }
@@ -27588,6 +27693,10 @@
     if (letterComposerUsesConcern()) {
       const concern = getActiveConcernRecord();
       return concern?.premises || '';
+    }
+    if (letterComposerUsesConsultation()) {
+      const c = getActiveConsultationRecord();
+      return c?.premises || '';
     }
     const cpin = getCpinById(activeCpinId);
     return cpin?.premises || '';
@@ -27615,6 +27724,9 @@
 
   function getDefaultLetterTemplateId(context) {
     if (context === 'bizsupport') return 'bizsupport-appointment';
+    if (context === 'consultation-outcome' && letterComposerState && letterComposerState.consultationOutcomeKey) {
+      return getConsultationOutcomeTemplateId(letterComposerState.consultationOutcomeKey);
+    }
     if (context === 'audit-stage4' && letterComposerState) {
       return getAuditOutcomeTemplateId(letterComposerState.stage4OutcomeKey);
     }
@@ -27635,13 +27747,20 @@
     }
     if (context === 'audit-stage4') resolvedContext = 'audit-outcome';
     if (context === 'audit-stage5') resolvedContext = 'audit-stage5';
+    if (context === 'consultation-outcome') resolvedContext = 'consultation-outcome';
     const q = (searchQuery || '').trim().toLowerCase();
-    return LETTER_TEMPLATES.filter(function (t) {
+    let templates = LETTER_TEMPLATES.filter(function (t) {
       if (t.contexts.indexOf(resolvedContext) < 0) return false;
       if (!q) return true;
       const hay = (t.label + ' ' + t.hint + ' ' + t.id).toLowerCase();
       return hay.indexOf(q) >= 0;
     });
+    if (context === 'consultation-outcome' && letterComposerState && letterComposerState.consultationOutcomeKey) {
+      const preferred = getConsultationOutcomeTemplateId(letterComposerState.consultationOutcomeKey);
+      const match = templates.filter(function (t) { return t.id === preferred; });
+      if (match.length) templates = match;
+    }
+    return templates;
   }
 
   function setLetterTemplateSearch(value) {
@@ -27767,6 +27886,18 @@
         assignee: concern?.assignee || 'Phil Gower'
       };
     }
+    if (context === 'consultation-outcome' || letterComposerUsesConsultation()) {
+      const c = getActiveConsultationRecord();
+      const i = (c && c.intake) || {};
+      return {
+        premises: c?.premises || '',
+        submissionRef: i.submissionRef || c?.ref || '',
+        summary: c?.summary || '',
+        buildingControlBody: i.buildingControlBody || '',
+        buildingControlContact: i.buildingControlContact || '',
+        assignee: c?.assignee || 'Phil Gower'
+      };
+    }
     const appt = formatCpinAppointment(cpin);
     return {
       premises: cpin?.premises || 'Premises',
@@ -27782,7 +27913,7 @@
       : (rp ? rp.name : 'Sir/Madam');
     const org = savedLetter
       ? (savedLetter.recipientDh || savedLetter.dutyHolder || '')
-      : (rp && rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : '');
+      : (rp && rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : (rp ? (rp.role || '') : ''));
     let html = escHtml(name) +
       (org ? '<br>' + escHtml(org) : '') +
       '<br>' + escHtml(premises || '');
@@ -27810,6 +27941,7 @@
     if (letterComposerUsesAuditStage4()) {
       syncAuditStage4FromRecipient(id);
     }
+    if (letterComposerUsesMobilePreviewUi()) openLetterComposerMobilePreview();
     renderLetterComposer();
   }
 
@@ -27827,6 +27959,7 @@
         }
       }
     }
+    if (letterComposerUsesMobilePreviewUi()) openLetterComposerMobilePreview();
     renderLetterComposer();
   }
 
@@ -27844,11 +27977,13 @@
       stage5ThreadId: opts.stage5ThreadId || null,
       stage5Dh: opts.stage5Dh || null,
       stage5LetterType: opts.stage5LetterType || null,
+      consultationOutcomeKey: opts.consultationOutcomeKey || null,
       templateId: opts.templateId || getDefaultLetterTemplateId(context),
       recipientIds: opts.recipientIds ? opts.recipientIds.slice() : null,
       customBody: opts.customBody || null,
       templateSearch: opts.templateSearch || '',
       previewRecipientId: opts.previewRecipientId || null,
+      mobilePreviewOpen: false,
       editing: false,
       slotDrafts: opts.slotDrafts || {}
     };
@@ -27864,6 +27999,10 @@
     const modal = document.getElementById('letter-composer-modal');
     if (modal) modal.classList.remove('open');
     letterComposerState = null;
+    const layout = document.getElementById('letter-composer-layout');
+    if (layout) layout.classList.remove('is-mobile-compose', 'is-mobile-preview-open');
+    const mobileHd = document.getElementById('letter-composer-mobile-preview-hd');
+    if (mobileHd) mobileHd.hidden = true;
     if (!document.getElementById('new-modal')?.classList.contains('open') &&
         !document.getElementById('setup-lookup-modal')?.classList.contains('open') &&
         !document.getElementById('list-date-range-modal')?.classList.contains('open')) {
@@ -27881,8 +28020,9 @@
     const isStage5 = letterComposerUsesAuditStage5();
     const isBs = letterComposerUsesBizSupport();
     const isConcern = letterComposerUsesConcern();
+    const isConsultation = letterComposerUsesConsultation();
     const isView = letterComposerState.mode === 'view';
-    const canPreview = isAudit || isStage4 || isStage5 || isBs || isConcern || !!getCpinById(activeCpinId);
+    const canPreview = isAudit || isStage4 || isStage5 || isBs || isConcern || isConsultation || !!getCpinById(activeCpinId);
     const allTemplates = getLetterTemplatesForContext(letterComposerState.context);
     const templates = getLetterTemplatesForContext(letterComposerState.context, letterComposerState.templateSearch);
     const recipients = getLetterComposerRecipients();
@@ -27926,6 +28066,10 @@
         subEl.textContent = 'Choose a template and recipients — letters are saved as editable Word documents (.docx) and sent when you start the audit.';
       } else if (letterComposerState.context === 'bizsupport') {
         subEl.textContent = 'Choose a template and recipients — letters are saved to this business support record and the activity log.';
+      } else if (isConsultation) {
+        subEl.textContent = isView
+          ? 'Read the saved outcome letter to Building Control in the preview panel.'
+          : 'Letter to Building Control — review the template, edit if needed, then save.';
       } else if (isConcern) {
         subEl.textContent = 'Choose a template and recipients — letters are saved to this safety concern and the activity log.';
       } else {
@@ -27953,11 +28097,15 @@
           : 'Select a letter to preview. Each is addressed to the primary contact; others from setup are copied.';
       } else {
         recHelp.textContent = isView
-          ? 'Use View to read each saved letter in the preview panel.'
-          : 'Tick recipients to include when saving. Use View to read each person\'s letter in the preview.';
+          ? (letterComposerUsesMobilePreviewUi()
+            ? 'Tap View on a saved letter to read it full screen.'
+            : 'Use View to read each saved letter in the preview panel.')
+          : (letterComposerUsesMobilePreviewUi()
+            ? 'Tick recipients to include when saving. Tap View to read each letter full screen.'
+            : 'Tick recipients to include when saving. Use View to read each person\'s letter in the preview.');
       }
     }
-    if (editBtn) editBtn.hidden = isView;
+    if (editBtn) editBtn.hidden = isView || (letterComposerUsesMobilePreviewUi() && !letterComposerState.mobilePreviewOpen);
     if (saveBtn) {
       saveBtn.hidden = isView;
       if (!isView) {
@@ -28033,7 +28181,9 @@
           recEl.innerHTML = '<div class="letter-attachment-empty">No saved letters' + (isStage4 ? ' for this outcome' : (isAudit ? ' for this audit setup' : (isBs ? ' on this business support' : (isConcern ? ' on this safety concern' : ' on this CPIN')))) + '.</div>';
         } else {
           recEl.innerHTML = saved.map(function (ltr) {
-            const previewing = ltr.id === letterComposerState.viewLetterId;
+            const previewing = letterComposerUsesMobilePreviewUi()
+              ? (letterComposerState.mobilePreviewOpen && ltr.id === letterComposerState.viewLetterId)
+              : (ltr.id === letterComposerState.viewLetterId);
             return '<div class="letter-recipient-row is-saved' + (previewing ? ' previewing' : '') + '">' +
               '<div><div class="name">' + escHtml(ltr.recipientName || 'Recipient') + '</div>' +
               (ltr.templateLabel ? '<div class="role">' + escHtml(ltr.templateLabel) + '</div>' : '') +
@@ -28046,12 +28196,17 @@
       } else if (!recipients.length) {
         recEl.innerHTML = '<div class="letter-attachment-empty">No approved Responsible Persons for your Duty Holders yet. Approve contacts in the Duty Holders section before writing letters.</div>';
       } else {
-        if (!letterComposerState.previewRecipientId || !recipients.some(function (rp) { return rp.id === letterComposerState.previewRecipientId; })) {
-          letterComposerState.previewRecipientId = recipients[0].id;
+        const mobilePreviewUi = letterComposerUsesMobilePreviewUi();
+        if (!mobilePreviewUi) {
+          if (!letterComposerState.previewRecipientId || !recipients.some(function (rp) { return rp.id === letterComposerState.previewRecipientId; })) {
+            letterComposerState.previewRecipientId = recipients[0].id;
+          }
         }
         recEl.innerHTML = recipients.map(function (rp) {
           const selected = letterComposerState.recipientIds.indexOf(rp.id) >= 0;
-          const previewing = rp.id === letterComposerState.previewRecipientId;
+          const previewing = mobilePreviewUi
+            ? (letterComposerState.mobilePreviewOpen && rp.id === letterComposerState.previewRecipientId)
+            : (rp.id === letterComposerState.previewRecipientId);
           const dhLabel = rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : '';
           return '<div class="letter-recipient-row' + (selected ? ' selected' : '') + (previewing ? ' previewing' : '') + '">' +
             '<input type="checkbox"' + (selected ? ' checked' : '') + ' onchange="toggleLetterRecipient(\'' + escHtml(rp.id) + '\', this.checked)" />' +
@@ -28099,6 +28254,8 @@
         if (bodyEl) bodyEl.innerHTML = activeViewLetter.body || '';
       }
       if (preview) preview.classList.remove('editing');
+      applyLetterComposerMobileLayout();
+      if (letterComposerUsesMobilePreviewUi() && !letterComposerState.mobilePreviewOpen) return;
       return;
     }
 
@@ -28122,6 +28279,8 @@
     if (bodyEl) bodyEl.contentEditable = letterComposerState.editing ? 'true' : 'false';
     const editLabel = document.getElementById('letter-composer-edit-label');
     if (editLabel) editLabel.textContent = letterComposerState.editing ? 'Done editing' : 'Edit';
+    applyLetterComposerMobileLayout();
+    if (letterComposerUsesMobilePreviewUi() && !letterComposerState.mobilePreviewOpen) return;
   }
 
   function selectLetterTemplate(id) {
@@ -28309,13 +28468,16 @@
     const isAudit = letterComposerUsesAuditSetup();
     const isBs = letterComposerUsesBizSupport();
     const isConcern = letterComposerUsesConcern();
+    const isConsultation = letterComposerUsesConsultation();
     const cpin = getCpinById(activeCpinId);
-    if (!isAudit && !isBs && !isConcern && !isStage4 && !isStage5 && !cpin) return;
+    if (!isAudit && !isBs && !isConcern && !isConsultation && !isStage4 && !isStage5 && !cpin) return;
     const recipients = getLetterComposerRecipients();
     const recipientIds = letterComposerState.recipientIds || [];
     const selected = recipients.filter(function (rp) { return recipientIds.indexOf(rp.id) >= 0; });
     if (!selected.length) {
-      window.alert('Select at least one Responsible Person to send letters to.');
+      window.alert(isConsultation
+        ? 'Add a Building Control contact on the submission stage before saving letters.'
+        : 'Select at least one Responsible Person to send letters to.');
       return;
     }
     const bodyEl = document.getElementById('letter-composer-body');
@@ -28357,7 +28519,7 @@
         templateLabel: template.label,
         recipientId: rp.id,
         recipientName: rp.name,
-        recipientDh: rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : '',
+        recipientDh: rp.linkedDh ? getDutyHolderLabelForKey(rp.linkedDh) : (rp.role || ''),
         fileName: fileName,
         body: bodyHtml,
         at: stamp.at,
@@ -28410,6 +28572,20 @@
       if (typeof appendBsLettersToActivity === 'function') appendBsLettersToActivity(newLetters, stamp);
       closeLetterComposer();
       if (typeof initBizSupportPage === 'function') initBizSupportPage();
+      return;
+    }
+
+    if (saveTo === 'consultation-outcome' && typeof getConsultationById === 'function' && typeof persistConsultationPatch === 'function') {
+      const c = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+      if (!c) return;
+      const stampedLetters = newLetters.map(function (ltr) {
+        if (ltr.recipientDh) return ltr;
+        return Object.assign({}, ltr, { recipientDh: (c.intake && c.intake.buildingControlBody) || '' });
+      });
+      persistConsultationPatch(c.id, { outcomeLetters: stampedLetters, outcomeLetterSkipped: false });
+      if (typeof appendConsultationLettersToActivity === 'function') appendConsultationLettersToActivity(stampedLetters, stamp);
+      closeLetterComposer();
+      if (typeof initConsultationDetailPage === 'function') initConsultationDetailPage();
       return;
     }
 
@@ -28593,6 +28769,38 @@
       return;
     }
     openLetterComposer({ context: 'bizsupport', saveTo: 'bizsupport' });
+  }
+
+  function openConsultationOutcomeLetterComposer() {
+    if (typeof getConsultationById !== 'function') return;
+    const c = getConsultationById(typeof activeConsultationId === 'function' ? activeConsultationId() : null);
+    if (!c) return;
+    if (!c.outcomeDecision) {
+      window.alert('Select an outcome before writing a letter.');
+      return;
+    }
+    const recipients = getConsultationLetterRecipients(c);
+    if (!recipients.length) {
+      window.alert('Add a Building Control contact on the submission stage before writing letters.');
+      return;
+    }
+    openLetterComposer({
+      context: 'consultation-outcome',
+      saveTo: 'consultation-outcome',
+      consultationOutcomeKey: c.outcomeDecision,
+      templateId: getConsultationOutcomeTemplateId(c.outcomeDecision),
+      recipientIds: [recipients[0].id],
+      previewRecipientId: recipients[0].id
+    });
+  }
+
+  function viewConsultationOutcomeLetter(letterId) {
+    openLetterComposer({
+      context: 'consultation-outcome',
+      saveTo: 'consultation-outcome',
+      mode: 'view',
+      viewLetterId: letterId
+    });
   }
 
   function viewBsLetter(letterId) {
@@ -29320,6 +29528,20 @@
       { key: 'ahayes', name: 'Amelia Hayes', role: 'Senior Fire Safety Inspector', initials: 'AH' },
       { key: 'mchen', name: 'Michael Chen', role: 'Fire Safety Inspector  ·  Surrey patch', initials: 'MC' },
       { key: 'pgower', name: 'Phil Gower', role: 'Lead Fire Safety Inspector  ·  Already lead on this audit', initials: 'PG' }
+    ],
+    buildingControlBody: [
+      { key: 'bcc-westminster', ref: 'BC-0000124', usageRank: 1, name: 'Westminster City Council Building Control', role: 'Local authority building control', initials: 'WC' },
+      { key: 'bcc-bristol', ref: 'BC-0000088', usageRank: 2, name: 'Bristol City Council Building Control', role: 'Local authority building control', initials: 'BC' },
+      { key: 'bcc-labc-se', ref: 'BC-0000201', usageRank: 3, name: 'LABC Registered Approver — South East', role: 'Registered Building Control Approver (RBCA)', initials: 'LA' },
+      { key: 'bcc-private-ai', ref: 'BC-0000315', usageRank: 4, name: 'Approved Inspectors Ltd', role: 'Registered Building Control Approver (RBCA)', initials: 'AI' },
+      { key: 'bcc-kent', ref: 'BC-0000042', usageRank: 5, name: 'Kent County Council Building Control', role: 'Local authority building control', initials: 'KC' }
+    ],
+    buildingControlContact: [
+      { key: 'jmorrison', ref: 'BCC-000441', usageRank: 1, name: 'Jane Morrison', role: 'Westminster BC  ·  Building control officer', initials: 'JM' },
+      { key: 'rshaw', ref: 'BCC-000442', usageRank: 2, name: 'Robert Shaw', role: 'Bristol BC  ·  Senior building control surveyor', initials: 'RS' },
+      { key: 'pkaur', ref: 'BCC-000443', usageRank: 3, name: 'Priya Kaur', role: 'LABC South East  ·  Fire safety consultant', initials: 'PK' },
+      { key: 'dhughes', ref: 'BCC-000444', usageRank: 4, name: 'David Hughes', role: 'Approved Inspectors Ltd  ·  Principal surveyor', initials: 'DH' },
+      { key: 'sclarke', ref: 'BCC-000445', usageRank: 5, name: 'Sarah Clarke', role: 'Kent BC  ·  Building control officer', initials: 'SC' }
     ]
   };
 
@@ -29347,6 +29569,18 @@
       sub: 'Search the premises register by name or reference. Select a record to anchor this CPIN.',
       placeholder: 'Search premises by name or ref…',
       isAdded: () => false
+    },
+    buildingControlBody: {
+      title: 'Building Control body',
+      sub: 'Search Building Control accounts in the directory. Use Add new if the organisation is not yet in the system.',
+      placeholder: 'Search Building Control organisations…',
+      isAdded: () => false
+    },
+    buildingControlContact: {
+      title: 'Building Control contact',
+      sub: 'Search for the building control officer or consultant handling this submission.',
+      placeholder: 'Search contacts by name or organisation…',
+      isAdded: () => false
     }
   };
 
@@ -29360,7 +29594,7 @@
 
   function openSetupLookupModal(mode, target) {
     if (target) setupLookupTarget = target;
-    else if (setupLookupTarget !== 'cpin' && setupLookupTarget !== 'concern' && setupLookupTarget !== 'bizsupport') setupLookupTarget = 'audit';
+    else if (setupLookupTarget !== 'cpin' && setupLookupTarget !== 'concern' && setupLookupTarget !== 'bizsupport' && setupLookupTarget !== 'consultation-stage1') setupLookupTarget = 'audit';
     setupLookupMode = mode;
     const modal = document.getElementById('setup-lookup-modal');
     const meta = SETUP_LOOKUP_META[mode];
@@ -29373,6 +29607,9 @@
       if (mode === 'dutyHolder' || mode === 'responsiblePerson') {
         addNewBtn.hidden = false;
         addNewBtn.textContent = mode === 'dutyHolder' ? 'Add new Duty Holder' : 'Add new Responsible Person';
+      } else if (setupLookupTarget === 'consultation-stage1' && (mode === 'buildingControlBody' || mode === 'premises')) {
+        addNewBtn.hidden = false;
+        addNewBtn.textContent = mode === 'buildingControlBody' ? 'Add new organisation' : 'Add new premises';
       } else {
         addNewBtn.hidden = true;
       }
@@ -29388,6 +29625,17 @@
   }
 
   function promptAddNewFromLookup() {
+    if (setupLookupTarget === 'consultation-stage1') {
+      if (setupLookupMode === 'buildingControlBody') {
+        const name = window.prompt('Enter Building Control organisation name:');
+        if (name && name.trim() && typeof setConsultationStage1LookupValue === 'function') setConsultationStage1LookupValue('buildingControlBody', name.trim());
+      } else if (setupLookupMode === 'premises') {
+        const name = window.prompt('Enter premises name or address for the register:');
+        if (name && name.trim() && typeof setConsultationStage1LookupValue === 'function') setConsultationStage1LookupValue('premises', name.trim());
+      }
+      closeSetupLookupModal();
+      return;
+    }
     const label = setupLookupMode === 'dutyHolder' ? 'Duty Holder' : 'Responsible Person';
     window.alert('Add new ' + label + ' — entry form coming soon. Inspectors can use Create in the header for site-wide entry today.');
   }
@@ -29397,11 +29645,13 @@
     if (modal) modal.classList.remove('open');
     if (!document.getElementById('new-modal')?.classList.contains('open') &&
         !document.getElementById('letter-composer-modal')?.classList.contains('open') &&
-        !document.getElementById('list-date-range-modal')?.classList.contains('open')) {
+        !document.getElementById('list-date-range-modal')?.classList.contains('open') &&
+        !document.getElementById('sc-intake-modal')?.classList.contains('open') &&
+        !document.getElementById('cpin-intake-modal')?.classList.contains('open')) {
       document.body.style.overflow = '';
     }
     setupLookupMode = null;
-    setupLookupTarget = 'audit';
+    if (setupLookupTarget !== 'consultation-stage1') setupLookupTarget = 'audit';
   }
 
   function filterSetupLookup() {
@@ -29491,6 +29741,18 @@
         const bs = getBizSupportById(typeof activeBizSupportId === 'function' ? activeBizSupportId() : null);
         const list = bs && typeof getBsPremisesList === 'function' ? getBsPremisesList(bs) : (bs.premisesList || []);
         added = list.some(function (p) { return p.name.toLowerCase() === entry.name.toLowerCase(); });
+      }
+      if (setupLookupTarget === 'consultation-stage1' && setupLookupMode === 'buildingControlBody') {
+        const val = document.getElementById('consultation-bc-body')?.value || '';
+        added = val && entry.name.toLowerCase() === val.toLowerCase();
+      }
+      if (setupLookupTarget === 'consultation-stage1' && setupLookupMode === 'buildingControlContact') {
+        const val = document.getElementById('consultation-contact')?.value || '';
+        added = val && entry.name.toLowerCase() === val.toLowerCase();
+      }
+      if (setupLookupTarget === 'consultation-stage1' && setupLookupMode === 'premises') {
+        const val = document.getElementById('consultation-premises-hidden')?.value || '';
+        added = val && entry.name.toLowerCase() === val.toLowerCase();
       }
       const tag = added
         ? '<span class="pill grey">' + (setupLookupMode === 'premises' ? 'Current' : 'Added') + '</span>'
@@ -29660,6 +29922,11 @@
       setupLookupTarget = 'audit';
     } else if (setupLookupMode === 'premises' && setupLookupTarget === 'bizsupport') {
       if (typeof addBsPremisesFromLookup === 'function') addBsPremisesFromLookup(entry.name);
+      setupLookupTarget = 'audit';
+    } else if (setupLookupTarget === 'consultation-stage1') {
+      if (setupLookupMode === 'buildingControlBody' || setupLookupMode === 'buildingControlContact' || setupLookupMode === 'premises') {
+        if (typeof setConsultationStage1LookupValue === 'function') setConsultationStage1LookupValue(setupLookupMode, entry.name);
+      }
       setupLookupTarget = 'audit';
     }
 
