@@ -1374,6 +1374,7 @@
   window.submitConsultationLog = submitConsultationLog;
   window.setConsultationLogType = setConsultationLogType;
   window.buildConsultationProcessEntry = buildConsultationProcessEntry;
+  window.getAllConsultationRecords = getAllConsultationRecords;
   window.loadBccOverrides = loadBccOverrides;
   window.getConsultationById = getConsultationById;
   window.getConsultationByRef = getConsultationByRef;
