@@ -314,6 +314,84 @@ main {
   cursor: not-allowed;
 }
 
+/* Choice cards — checkbox multi-select (CPIN incident status) */
+.choice-list--checkbox {
+  gap: var(--space-3);
+}
+
+.choice-card--checkbox {
+  position: relative;
+  align-items: center;
+  padding: 16px 18px;
+}
+
+.choice-card--checkbox input[type="checkbox"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.choice-check {
+  position: relative;
+  z-index: 0;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 2px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.choice-check-icon {
+  width: 16px;
+  height: 16px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.choice-card--checkbox:has(input:checked) .choice-check {
+  background: var(--gov-green);
+  border-color: var(--gov-green);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.choice-card--checkbox:has(input:checked) .choice-check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.choice-card--checkbox:has(input:focus-visible) .choice-check {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.choice-list.is-invalid .choice-card--checkbox {
+  border-color: #f499a0;
+}
+
+.choice-validation-msg {
+  margin: var(--space-3) 0 0;
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.choice-validation-msg[hidden] {
+  display: none;
+}
+
 /* Choice cards (radio groups) */
 .choice-list {
   display: flex;

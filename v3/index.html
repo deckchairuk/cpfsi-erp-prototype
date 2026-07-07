@@ -11135,54 +11135,54 @@
 
           <div class="field-row">
             <div class="field">
-              <label for="sc-intake-report-ref">Report reference *</label>
-              <input type="text" id="sc-intake-report-ref" name="reportRef" required placeholder="From email subject or reference, e.g. FIS-3305" />
-            </div>
-            <div class="field">
               <label for="sc-intake-report-date">Date reported *</label>
               <input type="date" id="sc-intake-report-date" name="reportDate" required />
             </div>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="sc-intake-report-time">Time reported</label>
-              <input type="time" id="sc-intake-report-time" name="reportTime" />
-            </div>
             <div class="field">
               <label for="sc-intake-source">Source *</label>
-              <select id="sc-intake-source" name="source" required>
+              <select id="sc-intake-source" name="source" required onchange="toggleScIntakeSourceOther()">
                 <option value="">Please select</option>
-                <option value="Email report">Email report</option>
-                <option value="FIS direct report">FIS direct report</option>
-                <option value="Duty Holder portal">Duty Holder portal</option>
-                <option value="Union safety rep">Union safety rep</option>
-                <option value="FIS web form">FIS web form</option>
-                <option value="FM company">FM company</option>
-                <option value="Site manager">Site manager</option>
-                <option value="FIS escalation">FIS escalation</option>
-                <option value="Staff member">Staff member</option>
-                <option value="Anonymous">Anonymous</option>
+                <option value="Email">Email</option>
+                <option value="Phone">Phone</option>
+                <option value="In person">In person</option>
+                <option value="Letter">Letter</option>
+                <option value="Other">Other – please state</option>
               </select>
             </div>
           </div>
 
+          <div class="field" id="sc-intake-source-other-wrap" hidden>
+            <label for="sc-intake-source-other">Source — please state *</label>
+            <input type="text" id="sc-intake-source-other" name="sourceOther" placeholder="How was this concern received?" />
+          </div>
+
           <div class="field-row">
             <div class="field">
-              <label for="sc-intake-reporter">Reporter name *</label>
-              <input type="text" id="sc-intake-reporter" name="reporter" required placeholder="Name and role, if known" />
+              <label for="sc-intake-complainant">Name of complainant</label>
+              <div class="help" style="margin:-2px 0 6px;">Leave blank if anonymous.</div>
+              <input type="text" id="sc-intake-complainant" name="complainant" placeholder="Name and role, if known" />
             </div>
             <div class="field">
-              <label for="sc-intake-reporter-email">Reporter email</label>
-              <input type="email" id="sc-intake-reporter-email" name="reporterEmail" placeholder="Optional contact email" />
+              <label for="sc-intake-complainant-email">Complainant e-mail</label>
+              <input type="email" id="sc-intake-complainant-email" name="complainantEmail" placeholder="Optional contact email" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="sc-intake-complainant-phone">Contact number</label>
+              <input type="tel" id="sc-intake-complainant-phone" name="complainantPhone" placeholder="Optional contact number" autocomplete="tel" />
             </div>
           </div>
 
           <div class="field">
-            <label for="sc-intake-premises">Address of premises</label>
-            <select id="sc-intake-premises" name="premises">
-              <option value="">Please select</option>
-            </select>
+            <label>Address of premises</label>
+            <div class="help" style="margin:-2px 0 6px;">Search the locations register.</div>
+            <div class="cpin-key-display" style="margin-top:8px;">
+              <div class="cpin-key-value is-empty" id="sc-intake-premises-display">Search locations register…</div>
+              <button type="button" class="btn cpin-key-change-btn" onclick="openScIntakePremisesLookup()">Search</button>
+            </div>
+            <input type="hidden" id="sc-intake-premises-hidden" name="premises" />
           </div>
 
           <div class="field">
@@ -11196,7 +11196,7 @@
 
             <div class="field">
               <label for="sc-intake-hazard-type">Hazard type *</label>
-              <select id="sc-intake-hazard-type" name="hazardType" required>
+              <select id="sc-intake-hazard-type" name="hazardType" required onchange="toggleScIntakeHazardOther()">
                 <option value="">Please select</option>
                 <option>Combustible materials</option>
                 <option>Fire door defect</option>
@@ -11206,8 +11206,13 @@
                 <option>Fire compartmentation</option>
                 <option>Ignition source</option>
                 <option>Automatic alarm / false activation</option>
-                <option>Other hazard</option>
+                <option value="Other hazard">Other – please state</option>
               </select>
+            </div>
+
+            <div class="field" id="sc-intake-hazard-type-other-wrap" hidden>
+              <label for="sc-intake-hazard-type-other">Hazard type — please state *</label>
+              <input type="text" id="sc-intake-hazard-type-other" name="hazardTypeOther" placeholder="Describe the hazard type" />
             </div>
 
             <div class="field">
@@ -11227,7 +11232,6 @@
                   <div class="sc-intake-rag-copy"><strong>Red</strong><span>Serious hazard — urgent attention required</span></div>
                 </label>
               </div>
-              <p class="sc-intake-urgent">Call 0300 1233911 immediately if there is an active fire or immediate danger to life (24hr line).</p>
             </div>
 
             <div class="field" style="margin-top:16px;">
@@ -25664,7 +25668,13 @@
     renderCpinKeyFieldHighlights(cpin);
   }
 
-  function normalizeIncidentStatus(status) {
+  function incidentStatusesList(status) {
+    if (Array.isArray(status)) return status.filter(Boolean);
+    if (!status) return [];
+    return [status];
+  }
+
+  function normalizeOneIncidentStatus(status) {
     if (!status) return '';
     const s = String(status).toLowerCase();
     if (s.indexOf('serious or fatal') >= 0) return CPIN_INCIDENT_STATUS_OPTIONS[3];
@@ -25676,11 +25686,18 @@
     }) || status;
   }
 
+  function normalizeIncidentStatus(status) {
+    return incidentStatusesList(status).map(normalizeOneIncidentStatus).filter(Boolean).join(' · ');
+  }
+
   function severityFromIncidentStatus(status) {
-    const normalized = normalizeIncidentStatus(status);
-    if (normalized === CPIN_INCIDENT_STATUS_OPTIONS[3] || normalized === CPIN_INCIDENT_STATUS_OPTIONS[2]) return 'red';
-    if (normalized === CPIN_INCIDENT_STATUS_OPTIONS[1]) return 'amber';
-    return 'green';
+    let worst = 'green';
+    incidentStatusesList(status).forEach(function (item) {
+      const normalized = normalizeOneIncidentStatus(item);
+      if (normalized === CPIN_INCIDENT_STATUS_OPTIONS[3] || normalized === CPIN_INCIDENT_STATUS_OPTIONS[2]) worst = 'red';
+      else if (normalized === CPIN_INCIDENT_STATUS_OPTIONS[1] && worst !== 'red') worst = 'amber';
+    });
+    return worst;
   }
 
   function parseCpinIntakeTimeForInput(time) {
@@ -25749,7 +25766,7 @@
     const premisesLinked = document.getElementById('cpin-intake-premises-linked');
     const desc = document.getElementById('cpin-intake-description');
     const group = document.getElementById('cpin-stop-status-group');
-    const current = normalizeIncidentStatus(i.incidentStatus);
+    const current = incidentStatusesList(i.incidentStatus).map(normalizeOneIncidentStatus)[0] || '';
     if (num) num.value = i.incidentNumber || '';
     if (date) date.value = i.incidentDate || '';
     if (time) time.value = parseCpinIntakeTimeForInput(i.incidentTime);
@@ -26759,18 +26776,49 @@
   // ---------------------------------------------------------
   // Safety concern intake (fullscreen log form)
   // ---------------------------------------------------------
-  function populateScIntakePremisesSelect() {
-    const sel = document.getElementById('sc-intake-premises');
-    if (!sel) return;
-    const current = sel.value;
-    sel.innerHTML = '<option value="">Please select</option>';
-    getCpinPremisesCatalog().forEach(function (p) {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      opt.textContent = p.name;
-      sel.appendChild(opt);
-    });
-    if (current) sel.value = current;
+  function setScIntakePremisesLookupValue(value) {
+    const hidden = document.getElementById('sc-intake-premises-hidden');
+    const display = document.getElementById('sc-intake-premises-display');
+    if (hidden) hidden.value = value || '';
+    if (display) {
+      display.textContent = value || 'Search locations register…';
+      display.classList.toggle('is-empty', !value);
+    }
+  }
+
+  function openScIntakePremisesLookup() {
+    setupLookupTarget = 'sc-intake';
+    openSetupLookupModal('premises', 'sc-intake');
+  }
+
+  function toggleScIntakeSourceOther() {
+    const sourceEl = document.getElementById('sc-intake-source');
+    const wrap = document.getElementById('sc-intake-source-other-wrap');
+    const otherEl = document.getElementById('sc-intake-source-other');
+    const show = sourceEl && sourceEl.value === 'Other';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
+  }
+
+  function toggleScIntakeHazardOther() {
+    const hazardEl = document.getElementById('sc-intake-hazard-type');
+    const wrap = document.getElementById('sc-intake-hazard-type-other-wrap');
+    const otherEl = document.getElementById('sc-intake-hazard-type-other');
+    const show = hazardEl && hazardEl.value === 'Other hazard';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
   }
 
   function resetScIntakeForm() {
@@ -26779,22 +26827,19 @@
       form.reset();
       const dateEl = document.getElementById('sc-intake-report-date');
       if (dateEl) dateEl.valueAsDate = new Date();
-      const sourceEl = document.getElementById('sc-intake-source');
-      if (sourceEl) sourceEl.value = 'Email report';
     }
+    setScIntakePremisesLookupValue('');
+    toggleScIntakeSourceOther();
+    toggleScIntakeHazardOther();
   }
 
   function openScIntakeForm(premisesName) {
-    populateScIntakePremisesSelect();
     resetScIntakeForm();
-    if (premisesName) {
-      const sel = document.getElementById('sc-intake-premises');
-      if (sel) sel.value = premisesName;
-    }
+    if (premisesName) setScIntakePremisesLookupValue(premisesName);
     document.getElementById('sc-intake-modal')?.classList.add('open');
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(function () {
-      document.getElementById('sc-intake-report-ref')?.focus();
+      document.getElementById('sc-intake-report-date')?.focus();
     });
   }
 
@@ -26813,6 +26858,8 @@
   function submitScIntakeForm() {
     const form = document.getElementById('sc-intake-form');
     if (!form || typeof saveScIntakeFromForm !== 'function') return;
+    toggleScIntakeSourceOther();
+    toggleScIntakeHazardOther();
     if (!form.reportValidity()) return;
 
     const record = saveScIntakeFromForm(new FormData(form));
@@ -29601,7 +29648,7 @@
 
   function openSetupLookupModal(mode, target) {
     if (target) setupLookupTarget = target;
-    else if (setupLookupTarget !== 'cpin' && setupLookupTarget !== 'concern' && setupLookupTarget !== 'bizsupport' && setupLookupTarget !== 'consultation-stage1') setupLookupTarget = 'audit';
+    else if (setupLookupTarget !== 'cpin' && setupLookupTarget !== 'concern' && setupLookupTarget !== 'bizsupport' && setupLookupTarget !== 'consultation-stage1' && setupLookupTarget !== 'sc-intake') setupLookupTarget = 'audit';
     setupLookupMode = mode;
     const modal = document.getElementById('setup-lookup-modal');
     const meta = SETUP_LOOKUP_META[mode];
@@ -29617,6 +29664,9 @@
       } else if (setupLookupTarget === 'consultation-stage1' && (mode === 'buildingControlBody' || mode === 'premises')) {
         addNewBtn.hidden = false;
         addNewBtn.textContent = mode === 'buildingControlBody' ? 'Add new organisation' : 'Add new premises';
+      } else if (setupLookupTarget === 'sc-intake' && mode === 'premises') {
+        addNewBtn.hidden = false;
+        addNewBtn.textContent = 'Add new premises';
       } else {
         addNewBtn.hidden = true;
       }
@@ -29643,6 +29693,12 @@
       closeSetupLookupModal();
       return;
     }
+    if (setupLookupTarget === 'sc-intake' && setupLookupMode === 'premises') {
+      const name = window.prompt('Enter premises name or address for the register:');
+      if (name && name.trim()) setScIntakePremisesLookupValue(name.trim());
+      closeSetupLookupModal();
+      return;
+    }
     const label = setupLookupMode === 'dutyHolder' ? 'Duty Holder' : 'Responsible Person';
     window.alert('Add new ' + label + ' — entry form coming soon. Inspectors can use Create in the header for site-wide entry today.');
   }
@@ -29658,7 +29714,7 @@
       document.body.style.overflow = '';
     }
     setupLookupMode = null;
-    if (setupLookupTarget !== 'consultation-stage1') setupLookupTarget = 'audit';
+    if (setupLookupTarget !== 'consultation-stage1' && setupLookupTarget !== 'sc-intake') setupLookupTarget = 'audit';
   }
 
   function filterSetupLookup() {
@@ -29759,6 +29815,10 @@
       }
       if (setupLookupTarget === 'consultation-stage1' && setupLookupMode === 'premises') {
         const val = document.getElementById('consultation-premises-hidden')?.value || '';
+        added = val && entry.name.toLowerCase() === val.toLowerCase();
+      }
+      if (setupLookupTarget === 'sc-intake' && setupLookupMode === 'premises') {
+        const val = document.getElementById('sc-intake-premises-hidden')?.value || '';
         added = val && entry.name.toLowerCase() === val.toLowerCase();
       }
       const tag = added
@@ -29934,6 +29994,9 @@
       if (setupLookupMode === 'buildingControlBody' || setupLookupMode === 'buildingControlContact' || setupLookupMode === 'premises') {
         if (typeof setConsultationStage1LookupValue === 'function') setConsultationStage1LookupValue(setupLookupMode, entry.name);
       }
+      setupLookupTarget = 'audit';
+    } else if (setupLookupMode === 'premises' && setupLookupTarget === 'sc-intake') {
+      setScIntakePremisesLookupValue(entry.name);
       setupLookupTarget = 'audit';
     }
 

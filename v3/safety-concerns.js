@@ -158,8 +158,17 @@
     const premisesFree = (formData.get('premisesFree') || '').trim();
     const description = (formData.get('description') || '').trim();
     const hazardType = (formData.get('hazardType') || '').trim();
+    const hazardTypeOther = (formData.get('hazardTypeOther') || '').trim();
+    const complainant = (formData.get('complainant') || '').trim();
+    const complainantEmail = (formData.get('complainantEmail') || '').trim();
+    const complainantPhone = (formData.get('complainantPhone') || '').trim();
+    const source = formData.get('source');
+    const sourceOther = (formData.get('sourceOther') || '').trim();
+    const hazardLabel = hazardType === 'Other hazard' && hazardTypeOther
+      ? 'Other — ' + hazardTypeOther
+      : hazardType;
     const matched = !!premises;
-    const summary = hazardType + (description ? ' — ' + (description.length > 48 ? description.slice(0, 48) + '…' : description) : '');
+    const summary = hazardLabel + (description ? ' — ' + (description.length > 48 ? description.slice(0, 48) + '…' : description) : '');
 
     const record = {
       id: 'sc-in-' + Date.now(),
@@ -173,13 +182,16 @@
       workflow: matched ? 'incoming' : (premisesFree ? 'awaiting_premises' : 'incoming'),
       assignee: null,
       intake: {
-        reportRef: (formData.get('reportRef') || '').trim() || nextScFisRef(),
         reportDate: formatScUkDate(formData.get('reportDate')),
-        reportTime: formatScTime(formData.get('reportTime')),
-        reporter: formData.get('reporter'),
-        reporterEmail: formData.get('reporterEmail') || '',
-        source: formData.get('source'),
+        complainant: complainant || 'Anonymous',
+        complainantEmail: complainantEmail,
+        complainantPhone: complainantPhone,
+        reporter: complainant || 'Anonymous',
+        reporterEmail: complainantEmail,
+        source: source,
+        sourceOther: sourceOther,
         hazardType: hazardType,
+        hazardTypeOther: hazardTypeOther,
         description: description,
         premisesFree: premisesFree
       }
@@ -692,6 +704,16 @@
     if (detail) detail.textContent = SC_SEVERITY_LONG[sev] || '';
   }
 
+  function formatScIntakeSource(i) {
+    if (i.source === 'Other' && i.sourceOther) return 'Other — ' + i.sourceOther;
+    return i.source || '—';
+  }
+
+  function formatScIntakeHazardType(i) {
+    if (i.hazardType === 'Other hazard' && i.hazardTypeOther) return 'Other — ' + i.hazardTypeOther;
+    return i.hazardType || '—';
+  }
+
   function renderConcernIntakeGrid(c) {
     const grid = document.getElementById('concern-intake-grid');
     const section = document.getElementById('concern-intake-section');
@@ -699,13 +721,15 @@
     if (section) section.hidden = false;
     const i = c.intake;
     const rows = [
-      ['Report reference', i.reportRef],
       ['Date reported', i.reportDate],
-      ['Reporter', i.reporter],
-      ['Source', i.source || '—'],
-      ['Hazard type', i.hazardType],
+      ['Name of complainant', i.complainant || i.reporter],
+      ['Complainant e-mail', i.complainantEmail || i.reporterEmail],
+      ['Contact number', i.complainantPhone],
+      ['Source', formatScIntakeSource(i)],
+      ['Hazard type', formatScIntakeHazardType(i)],
       ['Premises', c.premises || i.premisesFree || '—']
     ];
+    if (i.reportRef) rows.unshift(['Report reference', i.reportRef]);
     grid.innerHTML = rows.map(function (row) {
       return '<div><div class="k">' + escHtml(row[0]) + '</div><div class="v">' + escHtml(row[1] || '—') + '</div></div>';
     }).join('');

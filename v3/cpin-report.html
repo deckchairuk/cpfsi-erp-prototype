@@ -105,32 +105,46 @@
 
         <div class="field">
           <span class="field-label" id="incident-status-label">Incident status <span class="req" aria-hidden="true">*</span></span>
-          <ul class="choice-list" role="radiogroup" aria-labelledby="incident-status-label">
+          <p class="field-hint">Select all that apply — tick every statement that describes this incident.</p>
+          <ul class="choice-list choice-list--checkbox" id="incident-status-list" role="group" aria-labelledby="incident-status-label">
             <li>
-              <label class="choice-card">
-                <input type="radio" name="incidentStatus" value="Incident Dealt with by Staff - No Known Injuries" required />
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Incident Dealt with by Staff - No Known Injuries" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
                 <span class="choice-card-body">Incident dealt with by staff — no known injuries</span>
               </label>
             </li>
             <li>
-              <label class="choice-card">
-                <input type="radio" name="incidentStatus" value="Fire Service Fought Fire or Carried Out Rescues" />
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Fire Service Fought Fire or Carried Out Rescues" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
                 <span class="choice-card-body">Fire service fought fire or carried out rescues</span>
               </label>
             </li>
             <li>
-              <label class="choice-card">
-                <input type="radio" name="incidentStatus" value="Injuries as a Result of Fire" />
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Injuries as a Result of Fire" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
                 <span class="choice-card-body">Injuries as a result of fire</span>
               </label>
             </li>
             <li>
-              <label class="choice-card">
-                <input type="radio" name="incidentStatus" value="Serious or Fatal Injuries Suspected as Result of Fire" />
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Serious or Fatal Injuries Suspected as Result of Fire" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
                 <span class="choice-card-body">Serious or fatal injuries suspected as result of fire</span>
               </label>
             </li>
           </ul>
+          <p class="choice-validation-msg" id="incident-status-error" hidden>Select at least one incident status.</p>
           <p class="urgent-notice">Please immediately call <strong>0300 1233911</strong> if you select serious or fatal injuries suspected (24-hour phone line).</p>
         </div>
 
@@ -209,10 +223,29 @@
   }
 
   function severityFromStatus(status) {
-    if (status.indexOf('Serious or Fatal') >= 0 || status.indexOf('Injuries') >= 0) return 'red';
+    if (status.indexOf('Serious or Fatal') >= 0 || status.indexOf('Injuries as a Result') >= 0) return 'red';
     if (status.indexOf('Fought Fire') >= 0) return 'amber';
     return 'green';
   }
+
+  function severityFromStatuses(statuses) {
+    let worst = 'green';
+    statuses.forEach(function (status) {
+      const sev = severityFromStatus(status);
+      if (sev === 'red') worst = 'red';
+      else if (sev === 'amber' && worst !== 'red') worst = 'amber';
+    });
+    return worst;
+  }
+
+  function clearIncidentStatusValidation() {
+    document.getElementById('incident-status-error').hidden = true;
+    document.getElementById('incident-status-list')?.classList.remove('is-invalid');
+  }
+
+  document.querySelectorAll('#incident-status-list input[type="checkbox"]').forEach(function (el) {
+    el.addEventListener('change', clearIncidentStatusValidation);
+  });
 
   function nextRef(list) {
     const n = 4500 + list.length;
@@ -222,8 +255,14 @@
   document.getElementById('cpin-report-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const status = fd.get('incidentStatus');
-    if (!status) return;
+    const statuses = fd.getAll('incidentStatus');
+    if (!statuses.length) {
+      document.getElementById('incident-status-error').hidden = false;
+      document.getElementById('incident-status-list')?.classList.add('is-invalid');
+      document.getElementById('incident-status-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    clearIncidentStatusValidation();
 
     let list = [];
     try {
@@ -240,7 +279,7 @@
     const record = {
       id: id,
       ref: nextRef(list),
-      severity: severityFromStatus(status),
+      severity: severityFromStatuses(statuses),
       when: 'Just now',
       premises: premises || null,
       summary: description.length > 72 ? description.slice(0, 72) + '…' : description,
@@ -254,7 +293,7 @@
         frs: fd.get('frs'),
         contact: fd.get('contact'),
         email: fd.get('email'),
-        incidentStatus: status,
+        incidentStatus: statuses.length === 1 ? statuses[0] : statuses,
         description: description,
         premisesFree: premisesFree
       }
@@ -291,6 +330,7 @@
   document.getElementById('clear-form').addEventListener('click', function () {
     document.getElementById('cpin-report-form').reset();
     document.getElementById('incident-date').valueAsDate = new Date();
+    clearIncidentStatusValidation();
   });
 
   document.getElementById('incident-date').valueAsDate = new Date();
