@@ -106,10 +106,14 @@
       workflow: 'closed',
       assignee: 'Phil Gower',
       closeReason: 'No comments — plans satisfactory. No comments letter sent 16 May.',
+      closedAt: '16 May 2026',
       outcomeDecision: 'no_comments',
       intake: {
+        submissionRef: 'BCC-2026-0062',
+        receivedDate: '10/05/2026',
         buildingControlBody: 'Approved Inspectors Ltd',
-        buildingControlContact: 'David Hughes'
+        buildingControlContact: 'David Hughes',
+        sharePointUrl: ''
       }
     }
   ];
@@ -256,6 +260,10 @@
   }
 
   function consultationProcessStatusText(c) {
+    if (c.workflow === 'closed') {
+      const when = c.closedAt || c.when || 'Recently';
+      return 'Closed  ·  ' + when;
+    }
     if (c.workflow === 'creating') return 'Creating';
     if (c.workflow === 'awaiting_premises') return 'Premises needed';
     if (!c.assignee && (c.workflow === 'unassigned' || c.workflow === 'incoming')) {
@@ -287,8 +295,37 @@
     return name.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
   }
 
+  function consultationProcessAge(c) {
+    if (c.workflow === 'closed') {
+      if (c.closedAt) return c.closedAt;
+      return c.when || 'Recently';
+    }
+    return c.when || 'Just now';
+  }
+
   function buildConsultationProcessEntry(c) {
-    if (!c || c.workflow === 'closed' || !bccIsStage1Complete(c)) return null;
+    if (!c) return null;
+    if (!bccIsStage1Complete(c)) return null;
+
+    if (c.workflow === 'closed') {
+      return {
+        id: c.ref,
+        type: 'consultation',
+        premises: c.premises || 'Premises not linked',
+        score: null,
+        scoreClass: 'score-low',
+        status: 'closed',
+        statusText: consultationProcessStatusText(c),
+        owner: c.assignee || 'Unassigned',
+        ownerInitials: consultationOwnerInitials(c.assignee),
+        age: consultationProcessAge(c),
+        mine: c.assignee ? c.assignee === BCC_CURRENT_INSPECTOR : true,
+        patch: !!c.patch,
+        hasSla: false,
+        route: 'consultation/' + c.id
+      };
+    }
+
     const slaScore = c.slaDaysRemaining == null ? 24 : Math.max(12, 48 - c.slaDaysRemaining * 2);
     return {
       id: c.ref,
@@ -300,7 +337,7 @@
       statusText: consultationProcessStatusText(c),
       owner: c.assignee || 'Unassigned',
       ownerInitials: consultationOwnerInitials(c.assignee),
-      age: c.when || 'Just now',
+      age: consultationProcessAge(c),
       mine: c.assignee ? c.assignee === BCC_CURRENT_INSPECTOR : true,
       patch: !!c.patch,
       hasSla: bccIsStage1Complete(c),
@@ -1264,13 +1301,19 @@
     const c = getConsultationById(activeConsultationId);
     if (!c || !bccCanClose(c)) return;
     const reason = document.getElementById('consultation-close-reason')?.value || '';
+    const closedAt = typeof formatActivityTimestamp === 'function'
+      ? formatActivityTimestamp(new Date())
+      : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     persistConsultationPatch(activeConsultationId, {
       workflow: 'closed',
       closeReason: reason || 'Consultation closed.',
+      closedAt: closedAt,
       slaDaysRemaining: null
     });
     refreshConsultationDetailPage();
     renderConsultationsLists();
+    if (typeof renderProcessesList === 'function') renderProcessesList();
+    if (typeof renderDashboardProcessesPanel === 'function') renderDashboardProcessesPanel();
   }
 
   function acceptConsultationDutyHolder(id) {

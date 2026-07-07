@@ -14101,16 +14101,22 @@
   }
 
   function getAllProcessesList() {
-    const seen = new Set(PROCESSES_LIST.map(function (p) { return p.id; }));
-    const extra = [];
+    const staticIds = new Set(PROCESSES_LIST.map(function (p) { return p.id; }));
+    const dynamicByRef = {};
     if (typeof getAllConsultationRecords === 'function' && typeof buildConsultationProcessEntry === 'function') {
       getAllConsultationRecords().forEach(function (c) {
-        if (!c || c.workflow === 'closed' || seen.has(c.ref)) return;
         const entry = buildConsultationProcessEntry(c);
-        if (entry) extra.push(entry);
+        if (entry) dynamicByRef[c.ref] = entry;
       });
     }
-    return PROCESSES_LIST.concat(extra);
+    const merged = PROCESSES_LIST.map(function (p) {
+      if (p.type === 'consultation' && dynamicByRef[p.id]) return dynamicByRef[p.id];
+      return p;
+    });
+    Object.keys(dynamicByRef).forEach(function (ref) {
+      if (!staticIds.has(ref)) merged.push(dynamicByRef[ref]);
+    });
+    return merged;
   }
 
   function updateProcessViewCounts() {
@@ -16185,6 +16191,7 @@
 
   function parseDemoAgeDays(age) {
     if (!age) return 60;
+    if (/just now|today|recently/i.test(String(age))) return 0;
     if (age.includes('day')) return parseInt(age, 10) || 1;
     if (age.includes('month')) return 45;
     if (age.includes('week')) return 14;
