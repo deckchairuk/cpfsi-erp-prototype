@@ -2577,6 +2577,8 @@
     cursor: pointer;
   }
   .cpin-card-menu button:hover { background: var(--line-2); color: var(--ink); }
+  .cpin-card-menu button.pinned { color: var(--amber); font-weight: 600; }
+  .cpin-card-menu button.pinned:hover { color: var(--amber); background: #fffdf8; }
   .cpin-card-menu button.danger { color: var(--red); }
   .cpin-card-menu button.danger:hover { background: #fef2f2; }
   .cpin-card.is-flagged {
@@ -9114,7 +9116,7 @@
           </div>
         </div>
 
-        <p class="cpin-pin-hint">Pin priority CPINs with <span class="cpin-pin-demo" aria-hidden="true">☆</span> on any card — pinned items stay at the top for <strong>everyone</strong> on this team, across all views. Use <strong>⋯</strong> on a card to flag duplicates or request removal (admin approval required).</p>
+        <p class="cpin-pin-hint">Pin priority CPINs with <span class="cpin-pin-demo" aria-hidden="true">☆</span> on any card — pinned items stay at the top for you. Use <strong>⋯</strong> to pin for all users, flag duplicates, or request removal (admin approval required).</p>
 
         <div class="list-results-bar">
           <div class="list-results-line">
@@ -11995,7 +11997,8 @@
     'cpfsi-cpin-intake-v1',
     'cpfsi-sc-intake-v1',
     'cpfsi-cpin-overrides-v1',
-    'cpin-pins-v1',
+    'cpin-user-pins-v1',
+    'cpin-global-pins-v1',
     'audit-setup-draft-v1',
     'cpfsi-admin-change-log-v1',
     'cpfsi-premises-overrides-v1',
@@ -21301,7 +21304,8 @@
   // ---------------------------------------------------------
   // CPIN workflow (5 stages per process diagram)
   // ---------------------------------------------------------
-  const CPIN_PIN_KEY = 'cpin-pins-v1';
+  const CPIN_USER_PIN_KEY = 'cpin-user-pins-v1';
+  const CPIN_GLOBAL_PIN_KEY = 'cpin-global-pins-v1';
   const CPIN_INTAKE_KEY = 'cpfsi-cpin-intake-v1';
   const CPIN_OVERRIDE_KEY = 'cpfsi-cpin-overrides-v1';
   const CPIN_REVIEW_REASON_LABELS = {
@@ -21439,7 +21443,8 @@
   }
 
   const CPIN_IN_PROGRESS_WF = new Set(['assigned', 'triage', 'desk_eval', 'awaiting_info', 'audit_spawned', 'in_review', 'audit']);
-  let cpinPins = new Set();
+  let cpinUserPins = new Set();
+  let cpinGlobalPins = new Set();
   let cpinOverrides = {};
   let cpinsRagFilter = 'all';
   let cpinsQueueFilter = 'all';
@@ -25256,17 +25261,69 @@
     });
   }
 
-  function loadCpinPins() {
+  function migrateLegacyCpinPins() {
     try {
-      const raw = localStorage.getItem(CPIN_PIN_KEY);
-      if (raw) cpinPins = new Set(JSON.parse(raw));
+      const legacy = localStorage.getItem('cpin-pins-v1');
+      if (!legacy) return;
+      if (!localStorage.getItem(CPIN_GLOBAL_PIN_KEY)) {
+        localStorage.setItem(CPIN_GLOBAL_PIN_KEY, legacy);
+      }
+      localStorage.removeItem('cpin-pins-v1');
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadCpinUserPins() {
+    try {
+      const raw = localStorage.getItem(CPIN_USER_PIN_KEY);
+      if (raw) {
+        const map = JSON.parse(raw);
+        cpinUserPins = new Set(map[CPIN_CURRENT_INSPECTOR] || []);
+      } else {
+        cpinUserPins = new Set();
+      }
     } catch (e) {
-      cpinPins = new Set();
+      cpinUserPins = new Set();
     }
   }
 
-  function saveCpinPins() {
-    localStorage.setItem(CPIN_PIN_KEY, JSON.stringify([...cpinPins]));
+  function saveCpinUserPins() {
+    let map = {};
+    try {
+      const raw = localStorage.getItem(CPIN_USER_PIN_KEY);
+      if (raw) map = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+    map[CPIN_CURRENT_INSPECTOR] = [...cpinUserPins];
+    localStorage.setItem(CPIN_USER_PIN_KEY, JSON.stringify(map));
+  }
+
+  function loadCpinGlobalPins() {
+    try {
+      const raw = localStorage.getItem(CPIN_GLOBAL_PIN_KEY);
+      if (raw) cpinGlobalPins = new Set(JSON.parse(raw));
+      else cpinGlobalPins = new Set();
+    } catch (e) {
+      cpinGlobalPins = new Set();
+    }
+  }
+
+  function saveCpinGlobalPins() {
+    localStorage.setItem(CPIN_GLOBAL_PIN_KEY, JSON.stringify([...cpinGlobalPins]));
+  }
+
+  function loadCpinPins() {
+    migrateLegacyCpinPins();
+    loadCpinUserPins();
+    loadCpinGlobalPins();
+  }
+
+  function cpinIsPinnedInList(id) {
+    return cpinUserPins.has(id) || cpinGlobalPins.has(id);
+  }
+
+  function buildCpinGlobalPinMenuItem(id) {
+    const globalPinned = cpinGlobalPins.has(id);
+    return '<button type="button" role="menuitem" class="' + (globalPinned ? 'pinned' : '') + '" onclick="toggleCpinGlobalPin(\'' + id + '\', event)">' +
+      (globalPinned ? 'Pinned for all users' : 'Pin for all users') + '</button>';
   }
 
   function openCpin(id, e) {
@@ -25291,7 +25348,9 @@
   }
 
   function buildCpinCard(item) {
-    const pinned = cpinPins.has(item.id);
+    const userPinned = cpinUserPins.has(item.id);
+    const globalPinned = cpinGlobalPins.has(item.id);
+    const pinned = userPinned || globalPinned;
     const review = getCpinAdminReview(item);
     const pendingReview = cpinHasPendingReview(item);
     const flaggedApproved = cpinIsFlaggedApproved(item);
@@ -25313,16 +25372,16 @@
       : '<div class="cpin-workflow">Closed</div>';
     const reviewBadge = cpinReviewBadgeHtml(item);
 
-    let menuItems = '';
+    let menuItems = buildCpinGlobalPinMenuItem(item.id);
     if (pendingReview) {
-      menuItems =
+      menuItems +=
         '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'' + review.action + '\', event)">View review request</button>' +
         '<button type="button" role="menuitem" onclick="withdrawCpinReviewRequestFor(\'' + item.id + '\', event)">Withdraw request</button>';
     } else if (flaggedApproved) {
-      menuItems =
+      menuItems +=
         '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'flag\', event)">View flag details</button>';
     } else {
-      menuItems =
+      menuItems +=
         '<button type="button" role="menuitem" onclick="openCpinReviewModal(\'' + item.id + '\', \'flag\', event)">Flag as erroneous</button>' +
         '<button type="button" role="menuitem" class="danger" onclick="openCpinReviewModal(\'' + item.id + '\', \'remove\', event)">Request removal</button>';
     }
@@ -25342,7 +25401,7 @@
         reviewBadge +
       '</div>' +
       '<div class="cpin-meta">' + assigneeHtml +
-        '<button type="button" class="cpin-pin' + (pinned ? ' pinned' : '') + '" title="' + (pinned ? 'Unpin' : 'Pin') + '" aria-label="' + (pinned ? 'Unpin' : 'Pin') + '" onclick="toggleCpinPin(\'' + item.id + '\', event)">' + (pinned ? '★' : '☆') + '</button>' +
+        '<button type="button" class="cpin-pin' + (userPinned ? ' pinned' : '') + '" title="' + (userPinned ? 'Unpin' : 'Pin') + '" aria-label="' + (userPinned ? 'Unpin' : 'Pin') + '" onclick="toggleCpinPin(\'' + item.id + '\', event)">' + (userPinned ? '★' : '☆') + '</button>' +
         '<span class="cpin-card-menu-wrap">' +
           '<button type="button" class="cpin-card-menu-btn" data-cpin-menu-trigger aria-label="CPIN actions" aria-haspopup="menu" aria-expanded="false" onclick="toggleCpinCardMenu(\'' + item.id + '\', event)">⋯</button>' +
           '<div class="cpin-card-menu" role="menu" hidden data-cpin-menu onclick="event.stopPropagation()">' + menuItems + '</div>' +
@@ -25380,8 +25439,8 @@
   }
 
   function renderCpinCardsHtml(items) {
-    const pinned = sortCpinItems(items.filter(i => cpinPins.has(i.id)), cpinsSortMode);
-    const rest = sortCpinItems(items.filter(i => !cpinPins.has(i.id)), cpinsSortMode);
+    const pinned = sortCpinItems(items.filter(i => cpinIsPinnedInList(i.id)), cpinsSortMode);
+    const rest = sortCpinItems(items.filter(i => !cpinIsPinnedInList(i.id)), cpinsSortMode);
     let html = '';
 
     if (pinned.length) {
@@ -25577,9 +25636,21 @@
       e.preventDefault();
       e.stopPropagation();
     }
-    if (cpinPins.has(id)) cpinPins.delete(id);
-    else cpinPins.add(id);
-    saveCpinPins();
+    if (cpinUserPins.has(id)) cpinUserPins.delete(id);
+    else cpinUserPins.add(id);
+    saveCpinUserPins();
+    renderCpinsLists();
+  }
+
+  function toggleCpinGlobalPin(id, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    closeAllCpinCardMenus();
+    if (cpinGlobalPins.has(id)) cpinGlobalPins.delete(id);
+    else cpinGlobalPins.add(id);
+    saveCpinGlobalPins();
     renderCpinsLists();
   }
 
