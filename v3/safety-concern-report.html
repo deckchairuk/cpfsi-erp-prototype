@@ -41,60 +41,56 @@
     <form id="sc-report-form" novalidate>
       <section class="form-section" aria-labelledby="report-details-heading">
         <h2 class="form-section-title" id="report-details-heading">Report details</h2>
-        <div class="form-grid form-grid--3">
-          <div class="field">
-            <label class="field-label" for="report-ref">Report reference <span class="req" aria-hidden="true">*</span></label>
-            <input type="text" id="report-ref" name="reportRef" required placeholder="e.g. FIS-3305" autocomplete="off" />
-          </div>
+        <div class="form-grid form-grid--2">
           <div class="field">
             <label class="field-label" for="report-date">Date reported <span class="req" aria-hidden="true">*</span></label>
             <input type="date" id="report-date" name="reportDate" required />
           </div>
           <div class="field">
-            <label class="field-label" for="report-time">Time reported</label>
-            <input type="time" id="report-time" name="reportTime" />
-          </div>
-          <div class="field field--full">
             <label class="field-label" for="source">Source <span class="req" aria-hidden="true">*</span></label>
             <select id="source" name="source" required>
               <option value="">Please select</option>
-              <option>FIS direct report</option>
-              <option>Duty Holder portal</option>
-              <option>Union safety rep</option>
-              <option>FIS web form</option>
-              <option>FM company</option>
-              <option>Site manager</option>
-              <option>FIS escalation</option>
-              <option>Staff member</option>
-              <option>Anonymous</option>
+              <option value="Email">Email</option>
+              <option value="Phone">Phone</option>
+              <option value="In person">In person</option>
+              <option value="Letter">Letter</option>
+              <option value="Other">Other – please state</option>
             </select>
+          </div>
+          <div class="field field--full" id="source-other-wrap" hidden>
+            <label class="field-label" for="source-other">Source — please state <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="source-other" name="sourceOther" placeholder="How was this concern received?" autocomplete="off" />
           </div>
         </div>
       </section>
 
-      <section class="form-section" aria-labelledby="reporter-heading">
-        <h2 class="form-section-title" id="reporter-heading">Reporter</h2>
+      <section class="form-section" aria-labelledby="complainant-heading">
+        <h2 class="form-section-title" id="complainant-heading">Complainant</h2>
         <div class="form-grid form-grid--2">
           <div class="field">
-            <label class="field-label" for="reporter">Reporter name <span class="req" aria-hidden="true">*</span></label>
-            <input type="text" id="reporter" name="reporter" required placeholder="Name and role, if known" autocomplete="name" />
+            <label class="field-label" for="complainant">Name of complainant</label>
+            <p class="field-hint">Leave blank if anonymous.</p>
+            <input type="text" id="complainant" name="complainant" placeholder="Name and role, if known" autocomplete="name" />
           </div>
           <div class="field">
-            <label class="field-label" for="reporter-email">Reporter email</label>
-            <input type="email" id="reporter-email" name="reporterEmail" placeholder="Optional contact email" autocomplete="email" />
+            <label class="field-label" for="complainant-email">Complainant e-mail</label>
+            <input type="email" id="complainant-email" name="complainantEmail" placeholder="Optional contact email" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="complainant-phone">Contact number</label>
+            <input type="tel" id="complainant-phone" name="complainantPhone" placeholder="Optional contact number" autocomplete="tel" />
           </div>
         </div>
       </section>
 
       <section class="form-section" aria-labelledby="premises-heading">
         <h2 class="form-section-title" id="premises-heading">Premises</h2>
-        <p class="form-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address below.</p>
+        <p class="form-section-lead">Search the locations register. If not listed, leave blank and enter the address below.</p>
         <div class="form-grid">
           <div class="field field--full">
             <label class="field-label" for="premises">Address of premises</label>
-            <select id="premises" name="premises">
-              <option value="">Please select</option>
-            </select>
+            <input type="text" id="premises" name="premises" list="premises-list" placeholder="Start typing to search locations register…" autocomplete="off" />
+            <datalist id="premises-list"></datalist>
           </div>
           <div class="field field--full">
             <label class="field-label" for="premises-free">Premises not in system or not found</label>
@@ -119,8 +115,13 @@
             <option>Fire compartmentation</option>
             <option>Ignition source</option>
             <option>Automatic alarm / false activation</option>
-            <option>Other hazard</option>
+            <option value="Other hazard">Other – please state</option>
           </select>
+        </div>
+
+        <div class="field" id="hazard-type-other-wrap" hidden>
+          <label class="field-label" for="hazard-type-other">Hazard type — please state <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="hazard-type-other" name="hazardTypeOther" placeholder="Describe the hazard type" autocomplete="off" />
         </div>
 
         <div class="field" style="margin-top:24px;">
@@ -155,7 +156,6 @@
               </label>
             </li>
           </ul>
-          <p class="urgent-notice">Call <strong>0300 1233911</strong> immediately if there is an active fire or immediate danger to life (24-hour line).</p>
         </div>
 
         <div class="field" style="margin-top:24px;">
@@ -199,14 +199,13 @@
     'Temple Quay Riverside Annexe'
   ].sort(function (a, b) { return a.localeCompare(b); });
 
-  (function populatePremisesSelect() {
-    const sel = document.getElementById('premises');
-    if (!sel) return;
+  (function populatePremisesList() {
+    const list = document.getElementById('premises-list');
+    if (!list) return;
     SC_REPORT_PREMISES.forEach(function (name) {
       const opt = document.createElement('option');
       opt.value = name;
-      opt.textContent = name;
-      sel.appendChild(opt);
+      list.appendChild(opt);
     });
   })();
 
@@ -217,12 +216,6 @@
     return p[2] + '/' + p[1] + '/' + p[0];
   }
 
-  function formatTime(t) {
-    if (!t) return '';
-    const parts = t.split(':');
-    return parts[0] + ':' + (parts[1] || '00');
-  }
-
   function severityScore(sev) {
     if (sev === 'red') return 5;
     if (sev === 'amber') return 2;
@@ -230,16 +223,62 @@
   }
 
   function nextRef(list) {
-    const n = 160 + list.length;
-    return 'SC-2026-' + String(n).padStart(4, '0');
+    const nums = list.map(function (c) {
+      const part = (c.ref || '').split('-').pop();
+      return parseInt(part, 10);
+    }).filter(function (n) { return !isNaN(n); });
+    const max = nums.length ? Math.max.apply(null, nums) : 159;
+    return 'SC-2026-' + String(max + 1).padStart(4, '0');
   }
 
-  function nextFisRef() {
-    return 'FIS-' + String(3300 + Math.floor(Math.random() * 200));
+  function resolvePremisesName(value) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) return '';
+    const match = SC_REPORT_PREMISES.find(function (name) {
+      return name.toLowerCase() === trimmed.toLowerCase();
+    });
+    return match || trimmed;
   }
+
+  function toggleSourceOther() {
+    const sourceEl = document.getElementById('source');
+    const wrap = document.getElementById('source-other-wrap');
+    const otherEl = document.getElementById('source-other');
+    const show = sourceEl && sourceEl.value === 'Other';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
+  }
+
+  function toggleHazardOther() {
+    const hazardEl = document.getElementById('hazard-type');
+    const wrap = document.getElementById('hazard-type-other-wrap');
+    const otherEl = document.getElementById('hazard-type-other');
+    const show = hazardEl && hazardEl.value === 'Other hazard';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
+  }
+
+  document.getElementById('source').addEventListener('change', toggleSourceOther);
+  document.getElementById('hazard-type').addEventListener('change', toggleHazardOther);
 
   document.getElementById('sc-report-form').addEventListener('submit', function (e) {
     e.preventDefault();
+    toggleSourceOther();
+    toggleHazardOther();
+    if (!e.target.reportValidity()) return;
+
     const fd = new FormData(e.target);
     const severity = fd.get('severity');
     if (!severity) return;
@@ -251,13 +290,21 @@
       list = [];
     }
 
-    const premises = (fd.get('premises') || '').trim();
+    const premisesRaw = (fd.get('premises') || '').trim();
+    const premises = resolvePremisesName(premisesRaw);
+    const premisesMatched = !!premises && SC_REPORT_PREMISES.indexOf(premises) >= 0;
     const premisesFree = (fd.get('premisesFree') || '').trim();
     const description = (fd.get('description') || '').trim();
     const hazardType = (fd.get('hazardType') || '').trim();
+    const hazardTypeOther = (fd.get('hazardTypeOther') || '').trim();
+    const complainant = (fd.get('complainant') || '').trim();
+    const complainantEmail = (fd.get('complainantEmail') || '').trim();
+    const complainantPhone = (fd.get('complainantPhone') || '').trim();
+    const hazardLabel = hazardType === 'Other hazard' && hazardTypeOther
+      ? 'Other — ' + hazardTypeOther
+      : hazardType;
     const id = 'sc-in-' + Date.now();
-    const matched = !!premises;
-    const summary = hazardType + (description ? ' — ' + (description.length > 48 ? description.slice(0, 48) + '…' : description) : '');
+    const summary = hazardLabel + (description ? ' — ' + (description.length > 48 ? description.slice(0, 48) + '…' : description) : '');
 
     const record = {
       id: id,
@@ -265,21 +312,24 @@
       severity: severity,
       severityScore: severityScore(severity),
       when: 'Just now',
-      premises: premises || null,
+      premises: premisesMatched ? premises : null,
       summary: summary.length > 72 ? summary.slice(0, 72) + '…' : summary,
       patch: false,
-      workflow: matched ? 'incoming' : (premisesFree ? 'awaiting_premises' : 'incoming'),
+      workflow: premisesMatched ? 'incoming' : (premisesFree || premisesRaw ? 'awaiting_premises' : 'incoming'),
       assignee: null,
       intake: {
-        reportRef: (fd.get('reportRef') || '').trim() || nextFisRef(),
         reportDate: formatUkDate(fd.get('reportDate')),
-        reportTime: formatTime(fd.get('reportTime')),
-        reporter: fd.get('reporter'),
-        reporterEmail: fd.get('reporterEmail') || '',
+        complainant: complainant || 'Anonymous',
+        complainantEmail: complainantEmail,
+        complainantPhone: complainantPhone,
+        reporter: complainant || 'Anonymous',
+        reporterEmail: complainantEmail,
         source: fd.get('source'),
+        sourceOther: (fd.get('sourceOther') || '').trim(),
         hazardType: hazardType,
+        hazardTypeOther: hazardTypeOther,
         description: description,
-        premisesFree: premisesFree
+        premisesFree: premisesFree || (!premisesMatched && premisesRaw ? premisesRaw : '')
       }
     };
 
@@ -314,9 +364,13 @@
   document.getElementById('clear-form').addEventListener('click', function () {
     document.getElementById('sc-report-form').reset();
     document.getElementById('report-date').valueAsDate = new Date();
+    toggleSourceOther();
+    toggleHazardOther();
   });
 
   document.getElementById('report-date').valueAsDate = new Date();
+  toggleSourceOther();
+  toggleHazardOther();
 </script>
 </body>
 </html>

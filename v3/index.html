@@ -3396,6 +3396,98 @@
     margin-top: 3px;
     flex-shrink: 0;
   }
+  .cpin-status-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .cpin-status-check-list.is-invalid .cpin-status-check-card {
+    border-color: #f499a0;
+  }
+  .cpin-status-check-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+  .cpin-status-check-card:hover {
+    border-color: var(--line-strong);
+    background: #fafafa;
+  }
+  .cpin-status-check-card:has(input:checked) {
+    border-color: var(--green);
+    background: var(--green-soft);
+    box-shadow: 0 0 0 1px var(--green);
+  }
+  .cpin-status-check-card input[type="checkbox"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .cpin-status-check-box {
+    position: relative;
+    z-index: 0;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border: 2px solid var(--line-strong);
+    border-radius: 5px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .cpin-status-check-icon {
+    width: 15px;
+    height: 15px;
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .cpin-status-check-card:has(input:checked) .cpin-status-check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .cpin-status-check-card:has(input:focus-visible) .cpin-status-check-box {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .cpin-status-check-card:has(input:checked) .cpin-status-check-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .cpin-status-check-label {
+    flex: 1;
+    min-width: 0;
+  }
+  .cpin-status-validation-msg {
+    margin: 10px 0 0;
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cpin-status-validation-msg[hidden] {
+    display: none;
+  }
   .cpin-stop-message-panel {
     display: flex;
     align-items: flex-start;
@@ -4737,6 +4829,35 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0 20px;
       margin-bottom: 4px;
+    }
+    #sc-intake-modal .field-row .field,
+    #cpin-intake-modal .field-row .field,
+    #bcc-intake-modal .field-row .field {
+      display: grid;
+      grid-template-rows: auto minmax(calc(14px * 1.45 + 6px), auto) auto;
+      align-content: start;
+    }
+    #sc-intake-modal .field-row .field > label:not(.sc-intake-rag-option),
+    #cpin-intake-modal .field-row .field > label:not(.sc-intake-rag-option),
+    #bcc-intake-modal .field-row .field > label:not(.sc-intake-rag-option) {
+      grid-row: 1;
+    }
+    #sc-intake-modal .field-row .field > .help,
+    #cpin-intake-modal .field-row .field > .help,
+    #bcc-intake-modal .field-row .field > .help {
+      grid-row: 2;
+      margin: 0 0 6px;
+    }
+    #sc-intake-modal .field-row .field > input,
+    #sc-intake-modal .field-row .field > select,
+    #sc-intake-modal .field-row .field > textarea,
+    #cpin-intake-modal .field-row .field > input,
+    #cpin-intake-modal .field-row .field > select,
+    #cpin-intake-modal .field-row .field > textarea,
+    #bcc-intake-modal .field-row .field > input,
+    #bcc-intake-modal .field-row .field > select,
+    #bcc-intake-modal .field-row .field > textarea {
+      grid-row: 3;
     }
   }
   #sc-intake-modal .sc-intake-section,
@@ -9129,7 +9250,9 @@
             <textarea id="cpin-intake-description" placeholder="Description of incident…"></textarea>
           </div>
           <span class="cpin-stop-status-label">Incident status</span>
-          <div class="cpin-stop-status-group" id="cpin-stop-status-group" role="radiogroup" aria-label="Incident status"></div>
+          <p class="help" style="margin-top:0;margin-bottom:8px;">Select all that apply — tick every statement that describes this incident.</p>
+          <div class="cpin-status-check-list" id="cpin-stop-status-group" role="group" aria-label="Incident status"></div>
+          <p class="cpin-status-validation-msg" id="cpin-stop-status-error" hidden>Select at least one incident status.</p>
           <div class="cpin-stop-message-edit-actions">
             <button type="button" class="btn primary" onclick="saveCpinIntakeDetails()">Save</button>
             <button type="button" class="btn" onclick="cancelCpinIntakeDetailsEdit()">Cancel</button>
@@ -11159,7 +11282,7 @@
           <div class="field-row">
             <div class="field">
               <label for="sc-intake-complainant">Name of complainant</label>
-              <div class="help" style="margin:-2px 0 6px;">Leave blank if anonymous.</div>
+              <div class="help">Leave blank if anonymous.</div>
               <input type="text" id="sc-intake-complainant" name="complainant" placeholder="Name and role, if known" />
             </div>
             <div class="field">
@@ -11325,8 +11448,10 @@
             <h3 id="cpin-log-stop-heading">Stop message</h3>
 
             <div class="field">
-              <label>Incident status *</label>
-              <div class="sc-intake-rag-group" id="cpin-log-status-group"></div>
+              <span id="cpin-log-status-label">Incident status *</span>
+              <div class="help" style="margin:4px 0 8px;">Select all that apply — tick every statement that describes this incident.</div>
+              <div class="cpin-status-check-list" id="cpin-log-status-group" role="group" aria-labelledby="cpin-log-status-label"></div>
+              <p class="cpin-status-validation-msg" id="cpin-log-status-error" hidden>Select at least one incident status.</p>
               <p class="sc-intake-urgent">Please immediately call 0300 1233911 if you select &lsquo;Serious or Fatal Injuries Suspected as Result of Fire&rsquo; (24hr phone line).</p>
             </div>
 
@@ -11886,8 +12011,7 @@
 
   function openSafetyConcernReportFromMenu() {
     closeUserMenu();
-    show('concerns');
-    openScIntakeForm();
+    window.open('safety-concern-report.html', '_blank', 'noopener');
   }
 
   function resetPrototypeData() {
@@ -23888,6 +24012,13 @@
     'Injuries as a Result of Fire',
     'Serious or Fatal Injuries Suspected as Result of Fire'
   ];
+  const CPIN_INCIDENT_STATUS_CHOICES = [
+    { value: CPIN_INCIDENT_STATUS_OPTIONS[0], label: 'Incident dealt with by staff — no known injuries' },
+    { value: CPIN_INCIDENT_STATUS_OPTIONS[1], label: 'Fire service fought fire or carried out rescues' },
+    { value: CPIN_INCIDENT_STATUS_OPTIONS[2], label: 'Injuries as a result of fire' },
+    { value: CPIN_INCIDENT_STATUS_OPTIONS[3], label: 'Serious or fatal injuries suspected as result of fire' }
+  ];
+  const CPIN_STATUS_CHECK_ICON = '<svg class="cpin-status-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   const CPIN_SEVERITY_LONG = {
     green: 'Green — dealt with by staff, no known injuries',
@@ -25766,7 +25897,6 @@
     const premisesLinked = document.getElementById('cpin-intake-premises-linked');
     const desc = document.getElementById('cpin-intake-description');
     const group = document.getElementById('cpin-stop-status-group');
-    const current = incidentStatusesList(i.incidentStatus).map(normalizeOneIncidentStatus)[0] || '';
     if (num) num.value = i.incidentNumber || '';
     if (date) date.value = i.incidentDate || '';
     if (time) time.value = parseCpinIntakeTimeForInput(i.incidentTime);
@@ -25775,13 +25905,15 @@
     if (email) email.value = i.email || '';
     if (desc) desc.value = i.description || '';
     if (group) {
-      group.innerHTML = CPIN_INCIDENT_STATUS_OPTIONS.map(function (opt) {
-        const checked = current === opt;
-        return '<label class="cpin-stop-status-option">' +
-          '<input type="radio" name="cpin-incident-status" value="' + escHtml(opt) + '"' +
-          (checked ? ' checked' : '') + ' />' +
-          '<span>' + escHtml(opt) + '</span></label>';
-      }).join('');
+      renderCpinIncidentStatusCheckboxes('cpin-stop-status-group', 'cpin-incident-status', incidentStatusesList(i.incidentStatus).map(normalizeOneIncidentStatus));
+      document.getElementById('cpin-stop-status-error')?.setAttribute('hidden', '');
+      group.classList.remove('is-invalid');
+      group.querySelectorAll('input[type="checkbox"]').forEach(function (el) {
+        el.addEventListener('change', function () {
+          document.getElementById('cpin-stop-status-error')?.setAttribute('hidden', '');
+          group.classList.remove('is-invalid');
+        });
+      });
     }
     if (cpin.premises) {
       if (premisesLinked) {
@@ -25814,9 +25946,17 @@
   function saveCpinIntakeDetails() {
     const cpin = getCpinById(activeCpinId);
     if (!cpin) return;
-    const statusEl = document.querySelector('input[name="cpin-incident-status"]:checked');
+    const statuses = Array.from(document.querySelectorAll('input[name="cpin-incident-status"]:checked')).map(function (el) { return el.value; });
     const description = (document.getElementById('cpin-intake-description')?.value || '').trim();
-    const status = statusEl ? statusEl.value : normalizeIncidentStatus(cpin.intake?.incidentStatus);
+    if (!statuses.length) {
+      const err = document.getElementById('cpin-stop-status-error');
+      if (err) err.hidden = false;
+      document.getElementById('cpin-stop-status-group')?.classList.add('is-invalid');
+      return;
+    }
+    document.getElementById('cpin-stop-status-error')?.setAttribute('hidden', '');
+    document.getElementById('cpin-stop-status-group')?.classList.remove('is-invalid');
+    const incidentStatus = statuses.length === 1 ? statuses[0] : statuses;
     const intake = Object.assign({}, cpin.intake || {}, {
       incidentNumber: document.getElementById('cpin-intake-incident-number')?.value.trim() || '',
       incidentDate: document.getElementById('cpin-intake-incident-date')?.value.trim() || '',
@@ -25824,13 +25964,13 @@
       frs: document.getElementById('cpin-intake-frs')?.value || 'Not Given',
       contact: document.getElementById('cpin-intake-contact')?.value.trim() || '',
       email: document.getElementById('cpin-intake-email')?.value.trim() || '',
-      incidentStatus: status,
+      incidentStatus: incidentStatus,
       description: description
     });
     if (!cpin.premises) {
       intake.premisesFree = document.getElementById('cpin-intake-premises-free')?.value.trim() || '';
     }
-    const severity = severityFromIncidentStatus(status);
+    const severity = severityFromIncidentStatus(incidentStatus);
     const summary = description
       ? (description.length > 72 ? description.slice(0, 72) + '…' : description)
       : cpin.summary;
@@ -26877,16 +27017,33 @@
 
   // CPIN intake (fullscreen log form — phone / email)
   // ---------------------------------------------------------
-  function buildCpinIntakeStatusRadios() {
+  function renderCpinIncidentStatusCheckboxes(containerId, inputName, selectedValues) {
+    const group = document.getElementById(containerId);
+    if (!group) return;
+    const selected = (selectedValues || []).slice();
+    group.innerHTML = CPIN_INCIDENT_STATUS_CHOICES.map(function (choice) {
+      const checked = selected.indexOf(choice.value) >= 0;
+      return '<label class="cpin-status-check-card">' +
+        '<input type="checkbox" name="' + escHtml(inputName) + '" value="' + escHtml(choice.value) + '"' + (checked ? ' checked' : '') + ' />' +
+        '<span class="cpin-status-check-box" aria-hidden="true">' + CPIN_STATUS_CHECK_ICON + '</span>' +
+        '<span class="cpin-status-check-label">' + escHtml(choice.label) + '</span>' +
+        '</label>';
+    }).join('');
+  }
+
+  function clearCpinIntakeStatusValidation() {
+    document.getElementById('cpin-log-status-error')?.setAttribute('hidden', '');
+    document.getElementById('cpin-log-status-group')?.classList.remove('is-invalid');
+  }
+
+  function buildCpinIntakeStatusCheckboxes() {
     const group = document.getElementById('cpin-log-status-group');
     if (!group || group.dataset.built) return;
     group.dataset.built = '1';
-    group.innerHTML = CPIN_INCIDENT_STATUS_OPTIONS.map(function (status, i) {
-      return '<label class="sc-intake-rag-option">' +
-        '<input type="radio" name="incidentStatus" value="' + escHtml(status) + '"' + (i === 0 ? ' required' : '') + ' />' +
-        '<div class="sc-intake-rag-copy"><strong>' + escHtml(status) + '</strong></div>' +
-        '</label>';
-    }).join('');
+    renderCpinIncidentStatusCheckboxes('cpin-log-status-group', 'incidentStatus', []);
+    group.querySelectorAll('input[type="checkbox"]').forEach(function (el) {
+      el.addEventListener('change', clearCpinIntakeStatusValidation);
+    });
   }
 
   function populateCpinIntakePremisesSelect() {
@@ -26912,10 +27069,14 @@
       const frsEl = document.getElementById('cpin-log-frs');
       if (frsEl) frsEl.value = 'Not Given';
     }
+    clearCpinIntakeStatusValidation();
+    document.querySelectorAll('#cpin-log-status-group input[type="checkbox"]').forEach(function (el) {
+      el.checked = false;
+    });
   }
 
   function openCpinIntakeForm(premisesName) {
-    buildCpinIntakeStatusRadios();
+    buildCpinIntakeStatusCheckboxes();
     populateCpinIntakePremisesSelect();
     resetCpinIntakeForm();
     if (premisesName) {
@@ -26955,10 +27116,7 @@
   }
 
   function cpinSeverityFromIncidentStatus(status) {
-    if (!status) return 'green';
-    if (status.indexOf('Serious or Fatal') >= 0 || status.indexOf('Injuries') >= 0) return 'red';
-    if (status.indexOf('Fought Fire') >= 0) return 'amber';
-    return 'green';
+    return severityFromIncidentStatus(status);
   }
 
   function nextCpinIntakeRef() {
@@ -26971,18 +27129,19 @@
   }
 
   function saveCpinIntakeFromForm(formData) {
-    const status = formData.get('incidentStatus');
-    if (!status) return null;
+    const statuses = formData.getAll('incidentStatus');
+    if (!statuses.length) return null;
 
     const premises = (formData.get('premises') || '').trim();
     const premisesFree = (formData.get('premisesFree') || '').trim();
     const description = (formData.get('description') || '').trim();
     const prem = premises ? PREMISES_LIST.find(function (p) { return p.name === premises; }) : null;
     const list = loadCpinIntake();
+    const incidentStatus = statuses.length === 1 ? statuses[0] : statuses;
     const record = {
       id: 'cpin-in-' + Date.now(),
       ref: nextCpinIntakeRef(),
-      severity: cpinSeverityFromIncidentStatus(status),
+      severity: severityFromIncidentStatus(incidentStatus),
       when: 'Just now',
       premises: premises || null,
       summary: description.length > 72 ? description.slice(0, 72) + '…' : description,
@@ -26996,7 +27155,7 @@
         frs: formData.get('frs'),
         contact: formData.get('contact'),
         email: formData.get('email'),
-        incidentStatus: status,
+        incidentStatus: incidentStatus,
         description: description,
         premisesFree: premisesFree
       }
@@ -27010,6 +27169,14 @@
   function submitCpinIntakeForm() {
     const form = document.getElementById('cpin-log-form');
     if (!form) return;
+    const statuses = new FormData(form).getAll('incidentStatus');
+    if (!statuses.length) {
+      document.getElementById('cpin-log-status-error')?.removeAttribute('hidden');
+      document.getElementById('cpin-log-status-group')?.classList.add('is-invalid');
+      document.getElementById('cpin-log-status-group')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    clearCpinIntakeStatusValidation();
     if (!form.reportValidity()) return;
 
     const record = saveCpinIntakeFromForm(new FormData(form));

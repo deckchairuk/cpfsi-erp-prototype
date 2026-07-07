@@ -224,6 +224,23 @@ main {
 
 @media (min-width: 640px) {
   .form-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-grid--2 .field {
+    display: grid;
+    grid-template-rows: auto minmax(calc(14px * 1.45 + var(--space-3)), auto) auto;
+    align-content: start;
+  }
+  .form-grid--2 .field .field-label {
+    grid-row: 1;
+  }
+  .form-grid--2 .field .field-hint {
+    grid-row: 2;
+    margin-bottom: 0;
+  }
+  .form-grid--2 .field input,
+  .form-grid--2 .field select,
+  .form-grid--2 .field textarea {
+    grid-row: 3;
+  }
   .form-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
