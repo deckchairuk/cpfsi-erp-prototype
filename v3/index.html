@@ -6385,11 +6385,29 @@
     font-size: inherit;
     font-weight: 500;
   }
-  .premises-admin-actions {
+  .premises-score-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 4px 10px;
     margin-top: 10px;
+  }
+  .premises-score-link {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .premises-score-link:hover { color: var(--accent-dark); }
+  .premises-score-link:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
   }
   .prem-row--head {
     background: var(--bg);
@@ -7434,6 +7452,9 @@
     }
     .score-block {
       text-align: left;
+    }
+    .premises-score-actions {
+      justify-content: flex-start;
     }
     .premises-audit-banner {
       flex-direction: column;
@@ -8549,7 +8570,6 @@
         <h1>Temple Quay House</h1>
         <div class="meta" id="premises-detail-meta">Temple Back East, Bristol BS1  ·  <strong>HMCTS</strong>  ·  Government office</div>
         <div id="premises-detail-site" class="premises-site-banner" hidden></div>
-        <div id="premises-detail-admin-actions" class="premises-admin-actions" hidden></div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Sprinkler system</span>
           <span class="pill grey">Smoke ventilation</span>
@@ -8560,6 +8580,7 @@
         <div class="breakdown">Building 22 · Duty Holder 25 · <strong style="color:var(--ink);">Total 47</strong></div>
         <div class="lbl">RBIP score</div>
         <div class="trend">▲ Up 3 since previous score (44)</div>
+        <div id="premises-detail-admin-actions" class="premises-score-actions" hidden></div>
       </div>
     </div>
 
@@ -8669,7 +8690,6 @@
         <h1>HMP Bristol</h1>
         <div class="meta" id="premises-bristol-meta">Cambridge Grove, Bristol BS7  ·  <strong>HMPPS</strong>  ·  Prison · Cat B</div>
         <div id="premises-bristol-site" class="premises-site-banner" hidden></div>
-        <div id="premises-bristol-admin-actions" class="premises-admin-actions" hidden></div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="pill grey">Cell fire detection</span>
           <span class="pill grey">Compartmentation</span>
@@ -8683,6 +8703,7 @@
         <div class="trend">▲ 2 since Sep 2024</div>
         <div class="prev-score">42 RBIP score</div>
         <div style="font-size:11px;color:var(--ink-3);margin-top:8px;">Building 28 · Duty Holder 16 · <strong style="color:var(--ink);">Total 44</strong></div>
+        <div id="premises-bristol-admin-actions" class="premises-score-actions" hidden></div>
       </div>
     </div>
 
@@ -14834,8 +14855,8 @@
     if (!el || !prem) return;
     const refSafe = prem.ref.replace(/'/g, "\\'");
     el.innerHTML =
-      '<button type="button" class="btn" onclick="openPremisesInAdmin(\'' + refSafe + '\')">Manage in admin</button>' +
-      '<button type="button" class="btn" onclick="openPremisesEditInAdmin(\'' + refSafe + '\')">Edit premises</button>';
+      '<button type="button" class="premises-score-link" onclick="openPremisesInAdmin(\'' + refSafe + '\')">Manage in admin</button>' +
+      '<button type="button" class="premises-score-link" onclick="openPremisesEditInAdmin(\'' + refSafe + '\')">Edit premises</button>';
     el.hidden = false;
   }
 
