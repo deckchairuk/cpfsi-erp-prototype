@@ -6824,6 +6824,64 @@
     color: var(--amber);
     margin-bottom: 16px;
   }
+  .audit-edit-request-banner {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--ink-3);
+    border-radius: 6px;
+    background: var(--bg);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .audit-edit-request-banner strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .stage-actions .btn-audit-edit-outcomes {
+    margin-left: auto;
+    background: transparent;
+    border-color: transparent;
+    color: var(--ink-3);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 6px 8px;
+    box-shadow: none;
+  }
+  .stage-actions .btn-audit-edit-outcomes:hover {
+    background: var(--bg);
+    border-color: var(--line);
+    color: var(--ink-2);
+  }
+  #audit-edit-permission-modal .modal {
+    max-width: 480px;
+  }
+  #audit-edit-permission-modal .audit-edit-reason-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+  #audit-edit-permission-modal .audit-edit-reason-list label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  #audit-edit-permission-modal .audit-edit-reason-list input {
+    width: auto;
+    margin-top: 2px;
+  }
+  #audit-edit-permission-modal .feedback-field textarea {
+    min-height: 80px;
+  }
+  #audit-edit-permission-modal .feedback-actions {
+    margin-top: 16px;
+  }
   .holder-card.is-suggested { border-color: var(--amber); background: var(--amber-soft); }
   .holder-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
   .holder-actions .btn { padding: 4px 10px; font-size: 12px; }
@@ -8822,6 +8880,8 @@
         </div>
       </div>
     </div>
+
+    <div id="audit-edit-request-banner" class="audit-edit-request-banner" hidden></div>
 
     <div class="audit-mobile-toolbar">
       <div class="audit-stages-disclosure">
@@ -11495,6 +11555,35 @@
   </div>
 </div>
 
+<!-- Audit: request permission to edit confirmed outcomes / letters -->
+<div id="audit-edit-permission-modal" class="modal-backdrop" onclick="if(event.target===this) closeAuditEditPermissionModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>Edit the confirmed audit outcomes and letters?</h2>
+        <div class="sub">Permission is needed before scoring, outcomes or letters can be changed. Previous versions are kept.</div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeAuditEditPermissionModal()" title="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-group-label">Reason</div>
+      <div class="audit-edit-reason-list">
+        <label><input type="checkbox" name="audit-edit-reason" value="Made a mistake" /> Made a mistake</label>
+        <label><input type="checkbox" name="audit-edit-reason" value="Been made aware of an error by duty holder" /> Been made aware of an error by duty holder</label>
+        <label><input type="checkbox" name="audit-edit-reason" value="Other" /> Other</label>
+      </div>
+      <div class="feedback-field">
+        <label for="audit-edit-permission-notes">Notes</label>
+        <textarea id="audit-edit-permission-notes" placeholder="Add any further explanation…"></textarea>
+      </div>
+      <div class="feedback-actions">
+        <button type="button" class="btn" onclick="closeAuditEditPermissionModal()">Cancel</button>
+        <button type="button" class="btn primary" onclick="submitAuditEditPermissionRequest()">Request permission to edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Setup: lookup modal for Duty Holders, RPs, inspectors, premises -->
 <div id="setup-lookup-modal" class="modal-backdrop" onclick="if(event.target===this) closeSetupLookupModal()">
   <div class="modal" style="max-width:520px;" onclick="event.stopPropagation()">
@@ -12930,6 +13019,7 @@
   let auditStage5State = null;
   let auditEditPermission = false;
   let auditEditPermissionRequested = false;
+  let auditEditPermissionRequestMeta = null;
   let auditEditPermissionRequests = [];
   let auditFindingEditId = null;
   let auditActiveArticleKey = null;
@@ -17257,6 +17347,8 @@
     if (n === 5) {
       initAuditStage5();
     }
+    updateAuditEditRequestBanner();
+    updateAuditEditWarning();
     window.scrollTo(0, 0);
   }
 
@@ -17866,53 +17958,136 @@
     return auditLettersSent && auditStage >= 4 && !auditEditPermission;
   }
 
+  function auditOutcomesConfirmed() {
+    if (auditLettersSent) return true;
+    if (!auditStage4State || !auditStage4State.outcomes) return false;
+    if (auditStage4State.outcomesLocked) return true;
+    const holders = Object.keys(auditStage4State.outcomes);
+    return holders.length > 0 && holders.every(function (dh) {
+      return !!(auditStage4State.outcomes[dh] && auditStage4State.outcomes[dh].confirmed);
+    });
+  }
+
+  function shouldShowAuditEditOutcomesButton() {
+    if (auditEditPermission || auditEditPermissionRequested) return false;
+    if (!auditOutcomesConfirmed()) return false;
+    return auditStage === 4 || (auditStage === 5 && auditLettersSent);
+  }
+
+  function auditEditOutcomesButtonHtml() {
+    if (!shouldShowAuditEditOutcomesButton()) return '';
+    return '<button type="button" class="btn btn-audit-edit-outcomes" onclick="openAuditEditPermissionModal()">Edit</button>';
+  }
+
+  function updateAuditEditRequestBanner() {
+    const el = document.getElementById('audit-edit-request-banner');
+    if (!el) return;
+    if (!auditEditPermissionRequested || !auditEditPermissionRequestMeta) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    const meta = auditEditPermissionRequestMeta;
+    el.hidden = false;
+    el.innerHTML = '<strong>Error noticed</strong> — permission to edit outcomes and scoring has been requested by ' +
+      escHtml(meta.requestedBy || 'Phil Gower') + ' on ' + escHtml(meta.requestedAt || '') + '.';
+  }
+
   function updateAuditEditWarning() {
     const el = document.getElementById('audit-edit-warning');
     const action = document.getElementById('audit-edit-warning-action');
+    updateAuditEditRequestBanner();
     if (!el) return;
-    const show = auditLettersSent && auditStage <= 3;
+    // Top banner covers the pending-request state on all stages; keep this
+    // stage-2 notice only when letters are already sent and no request is open.
+    const show = auditLettersSent && auditStage <= 3 && !auditEditPermissionRequested;
     el.hidden = !show;
     if (!action || !show) return;
     if (auditEditPermission) {
       action.innerHTML = ' <strong>Permission granted</strong> — you may edit findings and reissue letters.';
-    } else if (auditEditPermissionRequested) {
-      action.innerHTML = ' Permission requested — awaiting admin approval. <a onclick="show(\'admin\')">Open admin</a>';
     } else {
-      action.innerHTML = ' <button type="button" class="btn" style="margin-left:8px;padding:4px 10px;font-size:12px;" onclick="requestAuditEditPermission()">Request permission</button>';
+      action.innerHTML = ' Use <em>Edit</em> on Outcomes and letters if you need to request a change.';
     }
   }
 
-  function requestAuditEditPermission() {
-    if (!window.confirm('Audit outcomes already sent. Are you sure you want to edit findings? Permission needs to be requested from an admin user.')) return;
+  function openAuditEditPermissionModal() {
+    if (!shouldShowAuditEditOutcomesButton()) return;
+    const modal = document.getElementById('audit-edit-permission-modal');
+    if (!modal) return;
+    modal.querySelectorAll('input[name="audit-edit-reason"]').forEach(function (cb) { cb.checked = false; });
+    const notes = document.getElementById('audit-edit-permission-notes');
+    if (notes) notes.value = '';
+    modal.classList.add('open');
+  }
+
+  function closeAuditEditPermissionModal() {
+    const modal = document.getElementById('audit-edit-permission-modal');
+    if (modal) modal.classList.remove('open');
+  }
+
+  function submitAuditEditPermissionRequest() {
+    const reasons = Array.prototype.slice.call(
+      document.querySelectorAll('#audit-edit-permission-modal input[name="audit-edit-reason"]:checked')
+    ).map(function (cb) { return cb.value; });
+    if (!reasons.length) {
+      window.alert('Select at least one reason.');
+      return;
+    }
+    const notesEl = document.getElementById('audit-edit-permission-notes');
+    const notes = notesEl ? String(notesEl.value || '').trim() : '';
+    closeAuditEditPermissionModal();
+    requestAuditEditPermission({
+      reasons: reasons,
+      notes: notes
+    });
+  }
+
+  function requestAuditEditPermission(opts) {
+    opts = opts || {};
+    if (auditEditPermissionRequested || auditEditPermission) return;
     auditEditPermissionRequested = true;
     const stamp = cpinLogTimestamp();
+    const requestedBy = 'Phil Gower';
+    const reasons = (opts.reasons && opts.reasons.length)
+      ? opts.reasons
+      : ['Amend findings after outcome letters sent'];
+    const reasonText = reasons.join('; ') + (opts.notes ? ' — ' + opts.notes : '');
+    auditEditPermissionRequestMeta = {
+      requestedBy: requestedBy,
+      requestedAt: stamp.at,
+      reasons: reasons,
+      notes: opts.notes || ''
+    };
     if (!auditEditPermissionRequests.some(function (r) { return r.auditId === activeAuditId; })) {
       auditEditPermissionRequests.push({
         id: 'aep-' + stamp.ts,
         auditId: activeAuditId || PROTOTYPE_AUDIT_ID,
         premises: (auditSetup && auditSetup.premises) || 'Temple Quay House',
-        requestedBy: 'Phil Gower',
+        requestedBy: requestedBy,
         requestedAt: stamp.at,
-        reason: 'Amend findings after outcome letters sent'
+        reason: reasonText
       });
       logAdminChange({
-        user: 'Phil Gower',
+        user: requestedBy,
         area: 'Audit',
         action: 'Edit permission requested',
-        detail: (activeAuditId || PROTOTYPE_AUDIT_ID) + ' — amend findings after outcome letters sent',
+        detail: (activeAuditId || PROTOTYPE_AUDIT_ID) + ' — ' + reasonText,
         route: 'audit:' + (activeAuditId || PROTOTYPE_AUDIT_ID) + '/setup'
       });
     }
     auditActivityLog.notes.unshift({
       id: 'n-perm-' + Date.now(),
-      text: 'Edit permission requested — findings amendment after outcome letters sent.',
+      text: 'Edit permission requested — ' + reasonText + '.',
       stage: auditStage,
       at: 'Today',
       ts: Date.now()
     });
     touchAuditActivity();
     updateAuditEditWarning();
+    updateAuditEditRequestBanner();
     renderAdminAuditPermissions();
+    if (auditStage === 4) renderAuditStage4();
+    if (auditStage === 5) renderAuditStage5();
   }
 
   function grantAuditEditPermission(auditId, opts) {
@@ -17921,6 +18096,7 @@
     const req = auditEditPermissionRequests.find(function (r) { return r.auditId === auditId; });
     auditEditPermission = true;
     auditEditPermissionRequested = false;
+    auditEditPermissionRequestMeta = null;
     auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
     if (activeAuditId === auditId || !activeAuditId) {
       auditActivityLog.notes.unshift({
@@ -17932,6 +18108,7 @@
       });
       touchAuditActivity();
       updateAuditEditWarning();
+      updateAuditEditRequestBanner();
     }
     renderAdminAuditPermissions();
     logAdminChange({
@@ -17952,7 +18129,11 @@
     auditEditPermissionRequests = auditEditPermissionRequests.filter(function (r) { return r.auditId !== auditId; });
     if (auditId === activeAuditId) {
       auditEditPermissionRequested = false;
+      auditEditPermissionRequestMeta = null;
       updateAuditEditWarning();
+      updateAuditEditRequestBanner();
+      if (auditStage === 4) renderAuditStage4();
+      if (auditStage === 5) renderAuditStage5();
     }
     renderAdminAuditPermissions();
     logAdminChange({
@@ -18103,6 +18284,7 @@
           actions += '<button class="btn primary" disabled title="Write all outcome letters before sending">Finalise and send all letters →</button>';
         }
       }
+      actions += auditEditOutcomesButtonHtml();
       act.innerHTML = actions;
     }
   }
@@ -19586,7 +19768,7 @@
       html += '<div style="margin-top:12px;"><button type="button" class="btn primary" onclick="setAuditStage(4)">Go to outcomes and letters</button></div></div>';
       el.innerHTML = html;
       if (act) {
-        act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
+        act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>' + auditEditOutcomesButtonHtml();
       }
       return;
     }
@@ -19664,7 +19846,7 @@
     el.innerHTML = html;
 
     if (act) {
-      act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>';
+      act.innerHTML = '<button class="btn" onclick="setAuditStage(4)">← Back to outcomes</button>' + auditEditOutcomesButtonHtml();
     }
 
     updateDutyHolderProgress();
