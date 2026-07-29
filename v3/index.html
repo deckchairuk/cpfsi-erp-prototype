@@ -1911,6 +1911,85 @@
     cursor: pointer;
     text-decoration: underline;
   }
+  .audit-article-section.is-reassess {
+    border-color: #c9b8e8;
+    box-shadow: inset 3px 0 0 #7c5cbf;
+  }
+  .audit-article-section.is-reassess .audit-article-head {
+    background: #faf7ff;
+  }
+  .audit-reassess-pill {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .audit-carried-issues-list {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .audit-carried-issues-list li {
+    margin-bottom: 4px;
+    padding-left: 12px;
+    position: relative;
+  }
+  .audit-carried-issues-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #7c5cbf;
+  }
+  .audit-assessment-article-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .audit-assessment-article-btn {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .audit-assessment-article-btn.is-active {
+    border-color: #7c5cbf;
+    background: #f6f2fc;
+  }
+  .audit-assessment-article-btn.is-reassess:not(.is-active) {
+    border-color: #d4c6ef;
+  }
+  .audit-assessment-article-btn .art-key {
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 18px;
+  }
+  .audit-assessment-article-btn .art-meta {
+    flex: 1;
+    color: var(--ink-3);
+  }
+  #audit-followup-add-wrap {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border: 1px dashed var(--line-2);
+    border-radius: 8px;
+    background: #fcfcfa;
+  }
   .audit-stage5-followup-intro {
     margin: 0 0 16px;
     padding: 12px 14px;
@@ -9014,6 +9093,12 @@
             <button type="button" class="btn" onclick="addAuditThemedArticle()">Add article</button>
           </div>
 
+          <div id="audit-followup-add-wrap" hidden>
+            <span style="font-size:13px;color:var(--ink-2);">Assess another article on this follow-up visit:</span>
+            <select id="audit-followup-article-pick"></select>
+            <button type="button" class="btn" onclick="openFollowUpArticleAssessment()">Open article</button>
+          </div>
+
           <div id="audit-edit-warning" class="audit-edit-warning" hidden>
             <strong>Audit outcomes already sent.</strong> Editing findings after letters have been issued requires admin permission.
             <span id="audit-edit-warning-action"></span>
@@ -10751,7 +10836,6 @@
               <button class="chip" data-process-type="concern" type="button">Concerns</button>
               <button class="chip" data-process-type="consultation" type="button">Consultations</button>
               <button class="chip" data-process-type="support" type="button">Business support</button>
-              <button class="chip" data-process-type="appeal" type="button">Appeals</button>
             </div>
           </div>
           <div class="filter-group">
@@ -11918,15 +12002,6 @@
             </div>
           </button>
 
-          <button class="new-option" onclick="closeNewModal();">
-            <div class="icon">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 14L7 5L11 10L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div>
-              <div class="ttl">Appeals</div>
-              <div class="desc">Manage an appeal against an enforcement decision or notice.</div>
-            </div>
-          </button>
         </div>
       </div>
 
@@ -13265,6 +13340,107 @@
       });
   }
 
+  function getParentDutyHolderOutcomes(parentCtx) {
+    const out = extractParentOutcomesFromCtx(parentCtx);
+    if (parentCtx && parentCtx.parentOutcomes) {
+      Object.keys(parentCtx.parentOutcomes).forEach(function (dh) {
+        if (!out[dh]) out[dh] = (parentCtx.parentOutcomes[dh] || []).slice();
+      });
+    }
+    return out;
+  }
+
+  function isParentDutyHolderClosedOut(parentCtx, dh) {
+    const outcomes = getParentDutyHolderOutcomes(parentCtx);
+    const selected = outcomes[dh] || [];
+    if (selected.length === 1 && selected[0] === 'gss') return true;
+    if (!parentCtx || !parentCtx.stage5State || !parentCtx.stage5State.threads) {
+      return selected.indexOf('gss') >= 0 && selected.length === 1;
+    }
+    const dhThreads = Object.values(parentCtx.stage5State.threads).filter(function (t) { return t.dh === dh; });
+    if (!dhThreads.length) {
+      return selected.indexOf('gss') >= 0;
+    }
+    return dhThreads.every(function (t) { return t.settled; });
+  }
+
+  function getDutyHoldersWithCarriedFindings(carriedFindings) {
+    const set = {};
+    (carriedFindings || []).forEach(function (f) {
+      if (f.dutyHolder) set[f.dutyHolder] = true;
+    });
+    return set;
+  }
+
+  function filterFollowUpDutyHolders(parentCtx, carriedFindings, dutyHolders) {
+    const withCarried = getDutyHoldersWithCarriedFindings(carriedFindings);
+    return (dutyHolders || []).filter(function (dh) {
+      const name = dh.name || dh;
+      if (withCarried[name]) return true;
+      return !isParentDutyHolderClosedOut(parentCtx, name);
+    });
+  }
+
+  function getAuditTrailChain(auditId) {
+    ensureAuditContextsInit();
+    const chain = [];
+    let current = auditId;
+    const seen = new Set();
+    while (current && !seen.has(current)) {
+      seen.add(current);
+      const ctx = auditContexts[current];
+      if (!ctx) break;
+      const setup = ctx.setup || {};
+      chain.unshift({
+        id: current,
+        isFollowUp: !!(setup.isFollowUp || ctx.parentAuditId)
+      });
+      current = ctx.parentAuditId || setup.parentAuditId || null;
+    }
+    return chain;
+  }
+
+  function getFollowUpPreviousScoreInfo() {
+    if (!isFollowUpAudit()) return null;
+    const parentId = getFollowUpParentAuditId();
+    if (!parentId) return null;
+    const prem = getPremisesByName(getAuditPremisesName());
+    return {
+      auditId: parentId,
+      score: prem && prem.score != null ? prem.score : 47
+    };
+  }
+
+  function getCarriedFindingsForArticle(articleKey) {
+    return auditFindings.filter(function (f) {
+      return f.carriedFromParent && f.articleKey === articleKey;
+    });
+  }
+
+  function getFollowUpReassessArticleKeys() {
+    if (!isFollowUpAudit()) return [];
+    const keys = {};
+    auditFindings.filter(function (f) { return f.carriedFromParent && f.articleKey; }).forEach(function (f) {
+      keys[f.articleKey] = true;
+    });
+    return Object.keys(keys).sort();
+  }
+
+  function isArticleNeedsReassessment(articleKey) {
+    return isFollowUpAudit() && getCarriedFindingsForArticle(articleKey).length > 0;
+  }
+
+  function renderCarriedIssuesListHtml(articleKey) {
+    const carried = getCarriedFindingsForArticle(articleKey);
+    if (!carried.length) return '';
+    const items = carried.map(function (f) {
+      const preview = auditFindingPreviewText(f);
+      const dh = f.dutyHolder ? escHtml(f.dutyHolder) + ' · ' : '';
+      return '<li>' + dh + escHtml(preview) + '</li>';
+    }).join('');
+    return '<ul class="audit-carried-issues-list">' + items + '</ul>';
+  }
+
   function copyParentSetupResponsiblePersons(parentSetup) {
     const parentRps = (parentSetup && parentSetup.responsiblePersons) || [];
     return parentRps
@@ -13284,9 +13460,6 @@
     const parentSetup = parentCtx.setup || defaultAuditSetup();
     const carriedFindings = collectUnresolvedFindingsFromParent(parentCtx);
     const expandedArticles = {};
-    carriedFindings.forEach(function (f) {
-      if (f.articleKey) expandedArticles[f.articleKey] = true;
-    });
     const parentOutcomes = extractParentOutcomesFromCtx(parentCtx);
 
     const setup = defaultAuditSetup();
@@ -13299,10 +13472,24 @@
     setup.fromPremises = false;
     setup.fromCpinClose = false;
     setup.auditType = parentSetup.auditType || 'full';
-    setup.dutyHolders = (parentSetup.dutyHolders || defaultSetupDutyHolders()).map(function (dh) {
+    const parentDutyHolders = (parentSetup.dutyHolders || defaultSetupDutyHolders()).map(function (dh) {
       return Object.assign({}, dh, { status: dh.status === 'rejected' ? 'rejected' : 'accepted' });
     });
-    setup.responsiblePersons = copyParentSetupResponsiblePersons(parentSetup);
+    const filteredDutyHolders = filterFollowUpDutyHolders(parentCtx, carriedFindings, parentDutyHolders);
+    const keptDhNames = {};
+    filteredDutyHolders.forEach(function (dh) { keptDhNames[dh.name] = true; });
+    setup.dutyHolders = filteredDutyHolders;
+    const filteredCarried = carriedFindings.filter(function (f) {
+      return !f.dutyHolder || keptDhNames[f.dutyHolder];
+    });
+    filteredCarried.forEach(function (f) {
+      if (f.articleKey) expandedArticles[f.articleKey] = true;
+    });
+    setup.responsiblePersons = copyParentSetupResponsiblePersons(parentSetup).filter(function (rp) {
+      if (!rp.linkedDh) return true;
+      const dhLabel = getDutyHolderLabelForKey(rp.linkedDh);
+      return keptDhNames[dhLabel];
+    });
     setup.inspectors = (parentSetup.inspectors || []).slice();
     setup.appointmentDate = '';
     setup.appointmentTime = '';
@@ -13315,8 +13502,8 @@
       auditId: followUpId,
       premises: setup.premises,
       stage: 1,
-      findings: carriedFindings,
-      siteVisitTypeLocked: carriedFindings.length > 0,
+      findings: filteredCarried,
+      siteVisitTypeLocked: filteredCarried.length > 0,
       themedArticles: (parentCtx.themedArticles || []).slice(),
       expandedArticles: expandedArticles,
       scoringDetailExpanded: {},
@@ -13685,8 +13872,12 @@
     setup.trigger = 'Follow-up from ' + DEMO_AUDIT_READY_ID;
     setup.spawnedAuditId = DEMO_FOLLOWUP_STAGE5_ID;
     setup.auditType = 'full';
-    setup.dutyHolders = JSON.parse(JSON.stringify(parentSetup.dutyHolders));
-    setup.responsiblePersons = JSON.parse(JSON.stringify(parentSetup.responsiblePersons));
+    setup.dutyHolders = JSON.parse(JSON.stringify(parentSetup.dutyHolders)).filter(function (dh) {
+      return dh.name !== 'The Property Directorate';
+    });
+    setup.responsiblePersons = JSON.parse(JSON.stringify(parentSetup.responsiblePersons)).filter(function (rp) {
+      return rp.linkedDh !== 'propdir';
+    });
     setup.inspectors = [];
     setup.letterSent = true;
     setup.letterSkipped = false;
@@ -13717,18 +13908,6 @@
         body: '',
         at: '1 Aug 2026',
         ts: 1722513601000
-      },
-      {
-        id: 'ltr-demo-fu-rp3',
-        templateId: 'audit-followup-notification',
-        templateLabel: 'Follow-up audit notification',
-        recipientId: 'rp3',
-        recipientName: 'Richard Byrne',
-        recipientDh: 'The Property Directorate',
-        fileName: 'Letter-Richard-Byrne-Follow-up-audit-notification-2026-08-01.docx',
-        body: '',
-        at: '1 Aug 2026',
-        ts: 1722513602000
       }
     ];
     const carried = collectUnresolvedFindingsFromParent(parentCtx);
@@ -13889,9 +14068,20 @@
       if (sourceCpinId) {
         crumbs += '<a onclick="show(\'cpin/' + escHtml(sourceCpinId) + '\')">' + escHtml(sourceCpinRef || 'CPIN') + '</a> /  ';
       }
-      crumbs += premLink + ' /  ' + escHtml(processLabel) + ' ' + escHtml(id);
-      if (followUp && parentId) {
-        crumbs += ' <span style="color:var(--ink-3);">· from <a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a></span>';
+      const trail = getAuditTrailChain(id);
+      if (trail.length > 1) {
+        crumbs += premLink;
+        trail.forEach(function (item) {
+          const label = (item.isFollowUp ? 'Follow-up ' : 'Audit ') + item.id;
+          crumbs += ' / ';
+          if (item.id === id) {
+            crumbs += escHtml(label);
+          } else {
+            crumbs += '<a onclick="continueAudit(\'' + escHtml(item.id) + '\')">' + escHtml(label) + '</a>';
+          }
+        });
+      } else {
+        crumbs += premLink + ' /  ' + escHtml(processLabel) + ' ' + escHtml(id);
       }
       crumbsEl.innerHTML = crumbs;
     }
@@ -13900,7 +14090,21 @@
       if (sourceCpinId) {
         setupCrumbs += '<a onclick="show(\'cpin/' + escHtml(sourceCpinId) + '\')">' + escHtml(sourceCpinRef || 'CPIN') + '</a> /  ';
       }
-      setupCrumbs += premLink + ' /  Start audit';
+      const trail = getAuditTrailChain(id);
+      if (trail.length > 1) {
+        setupCrumbs += premLink;
+        trail.forEach(function (item) {
+          const label = (item.isFollowUp ? 'Follow-up ' : 'Audit ') + item.id;
+          setupCrumbs += ' / ';
+          if (item.id === id) {
+            setupCrumbs += escHtml(label);
+          } else {
+            setupCrumbs += '<a onclick="continueAudit(\'' + escHtml(item.id) + '\')">' + escHtml(label) + '</a>';
+          }
+        });
+      } else {
+        setupCrumbs += premLink + ' /  Start audit';
+      }
       setupCrumbsEl.innerHTML = setupCrumbs;
     }
     if (setupTitleEl) setupTitleEl.textContent = processLabel + '  ·  ' + id;
@@ -13990,9 +14194,14 @@
     const articleSet = {};
     carried.forEach(function (f) { if (f.articleKey) articleSet[f.articleKey] = true; });
     const articles = Object.keys(articleSet).sort().join(', ');
+    const reassessKeys = Object.keys(articleSet);
+    const startBtn = reassessKeys.length
+      ? ' <button type="button" class="btn" style="margin-left:8px;" onclick="openFirstFollowUpReassessment()">Open reassessment →</button>'
+      : '';
     el.innerHTML = '<strong>' + carried.length + ' unresolved issue' + (carried.length === 1 ? '' : 's') + ' carried from ' +
       '<a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>.</strong> ' +
-      'Articles ' + escHtml(articles) + ' — verify each on site. Update scores if remedied, or add new findings as you explore.';
+      'Articles <strong>' + escHtml(articles) + '</strong> need reassessment — verify each on site. Update scores if remedied, or add new findings as you explore.' +
+      startBtn;
     el.hidden = false;
   }
 
@@ -14131,8 +14340,7 @@
     cpin: { label: 'CPIN', pill: 'amber' },
     concern: { label: 'Concern', pill: 'grey' },
     consultation: { label: 'Consult', pill: 'grey' },
-    support: { label: 'Support', pill: 'grey' },
-    appeal: { label: 'Appeal', pill: 'grey' }
+    support: { label: 'Support', pill: 'grey' }
   };
 
   const PROCESSES_LIST = [
@@ -14150,8 +14358,6 @@
     { id: 'CPIN-2026-0412', type: 'cpin', premises: 'HMP Belmarsh', score: 47, scoreClass: 'score-high', status: 'in-progress', statusText: 'Triage  ·  Further action', owner: 'Phil Gower', ownerInitials: 'PG', age: '5 days', mine: true, patch: true, route: 'cpin/cpin-0412' },
     { id: 'CPIN-2026-0398', type: 'cpin', premises: 'HMP Swaleside', score: 41, scoreClass: 'score-high', status: 'in-progress', statusText: 'Remote evaluation  ·  Amber', owner: 'Steve France', ownerInitials: 'SF', age: '9 days', mine: false, patch: true, prison: true, route: 'cpin/cpin-0398' },
     { id: 'CPIN-2026-0401', type: 'cpin', premises: 'Reading Job Centre Plus', score: 28, scoreClass: 'score-mid', status: 'awaiting-action-plan', statusText: 'Duty holder response due', owner: 'Hannah Munro', ownerInitials: 'HM', age: '14 days', mine: false, patch: false },
-    { id: 'AP-2026-0007', type: 'appeal', premises: 'HMP Wandsworth', score: 35, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Panel review  ·  Evidence pack', owner: 'Steve France', ownerInitials: 'SF', age: '18 days', mine: false, patch: false, prison: true },
-    { id: 'AP-2026-0011', type: 'appeal', premises: 'Folkestone Tribunal Hearing Centre', score: 22, scoreClass: 'score-low', status: 'open', statusText: 'Lodged  ·  Awaiting schedule', owner: 'Hannah Munro', ownerInitials: 'HM', age: '6 days', mine: false, patch: false },
     { id: 'A-2026-0320', type: 'audit', premises: 'HMP Bristol', score: 44, scoreTrend: 'up', scoreClass: 'score-high', status: 'open', statusText: 'Stage 1 of 5  ·  Planning', owner: 'Phil Gower', ownerInitials: 'PG', age: '1 day', mine: true, patch: true, prison: true },
     { id: 'F-2026-0155', type: 'follow-up', premises: 'HMP Isis', score: 33, scoreClass: 'score-mid', status: 'open', statusText: 'Opened  ·  Awaiting first visit', owner: 'Steve France', ownerInitials: 'SF', age: '2 days', mine: false, patch: true, prison: true },
     { id: 'SC-2026-0061', type: 'concern', premises: 'Lewes Crown Court', score: 30, scoreClass: 'score-mid', status: 'in-progress', statusText: 'Investigating  ·  Site photos received', owner: 'Phil Gower', ownerInitials: 'PG', age: '7 days', mine: true, patch: true },
@@ -16115,7 +16321,7 @@
     { name: 'Royal Courts of Justice', ref: 'PRM-0001601', address: 'Strand, London WC2A 2LL', category: 'court', typeLabel: 'Court · multi-building site', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Dec 2024', lastAuditSort: 202412, patch: true, work: { pill: 'grey', label: 'Support meeting' }, isParentSite: true, sitePremises: ['Royal Courts of Justice', 'RCJ — Thomas More Building', 'RCJ — Planning Court annexe'] },
     { name: 'HMP Bristol', ref: 'PRM-0002140', address: 'Cambridge Grove, Bristol BS7 8PS', lat: 51.47608, lng: -2.59648, category: 'prison', typeLabel: 'Prison · Cat B · site record', dept: 'HMPPS', score: 44, scoreClass: 'score-high', lastAudit: 'Sep 2024', lastAuditSort: 202409, patch: true, route: 'premisesdetail-bristol', work: { pill: 'amber', label: 'Alterations notice' }, isParentSite: true, sitePremises: ['HMP Bristol', 'HMP Bristol — Wing B refurbishment', 'HMP Bristol — Industries & workshops'] },
     { name: 'HMP Swaleside', ref: 'PRM-0002155', address: 'Brabazon Road, Eastchurch ME12 4AX', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 41, scoreClass: 'score-high', lastAudit: 'Nov 2024', lastAuditSort: 202411, patch: true, work: { pill: 'amber', label: 'CPIN open' } },
-    { name: 'HMP Wandsworth', ref: 'PRM-0002095', address: 'Heathfield Road, London SW18 3HU', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 35, scoreClass: 'score-mid', lastAudit: 'Jan 2024', lastAuditSort: 202401, patch: false, work: { pill: 'grey', label: 'Appeal lodged' } },
+    { name: 'HMP Wandsworth', ref: 'PRM-0002095', address: 'Heathfield Road, London SW18 3HU', category: 'prison', typeLabel: 'Prison · Cat B', dept: 'HMPPS', score: 35, scoreClass: 'score-mid', lastAudit: 'Jan 2024', lastAuditSort: 202401, patch: false, work: { pill: 'amber', label: 'Follow-up due' } },
     { name: 'HMP Isis', ref: 'PRM-0002162', address: 'Marsh Way, Thamesmead SE28 0NZ', category: 'prison', typeLabel: 'Prison · Cat C', dept: 'HMPPS', score: 33, scoreClass: 'score-mid', lastAudit: 'Oct 2023', lastAuditSort: 202310, patch: true, work: { pill: 'purple', label: 'Follow-up opened' } },
     { name: 'Bristol Crown Court', ref: 'PRM-0001910', address: 'Redcliffe Hill, Bristol BS1 6QS', category: 'court', typeLabel: 'Court', dept: 'HMCTS', score: 27, scoreClass: 'score-mid', lastAudit: 'May 2025', lastAuditSort: 202505, patch: false, work: { pill: 'grey', label: 'Consultation new' } },
     { name: 'Folkestone Tribunal Hearing Centre', ref: 'PRM-0001988', address: 'Folkestone CT20 2QY', category: 'court', typeLabel: 'Tribunal', dept: 'HMCTS', score: 22, scoreClass: 'score-low', lastAudit: 'Nov 2024', lastAuditSort: 202411, patch: false, work: null },
@@ -18802,9 +19008,17 @@
   function getAuditOutcomeDhSummary(dh) {
     const o = auditStage4State && auditStage4State.outcomes[dh];
     if (!o) return '—';
-    if (o.confirmed) return '✓';
     const labels = { en: 'EN', '28dap': '28-DAP', gss: 'GSS' };
-    return o.selected.map(function (k) { return labels[k] || k; }).join(' + ');
+    const summary = o.selected.map(function (k) { return labels[k] || k; }).join(' + ');
+    return o.confirmed ? summary + ' ✓' : summary;
+  }
+
+  function getAuditOutcomeSidebarPillClass(dh) {
+    const o = auditStage4State && auditStage4State.outcomes[dh];
+    if (!o || !o.selected.length) return 'score-mid';
+    if (o.selected.indexOf('en') >= 0) return 'score-high';
+    if (o.selected.indexOf('28dap') >= 0) return 'score-mid';
+    return 'score-low';
   }
 
   function renderAuditOutcomeSidebar() {
@@ -18816,7 +19030,7 @@
       const dhSafe = dh.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       const summary = getAuditOutcomeDhSummary(dh);
       const o = auditStage4State.outcomes[dh];
-      const pillCls = o.confirmed ? 'score-low' : 'score-mid';
+      const pillCls = getAuditOutcomeSidebarPillClass(dh);
       return '<button type="button" class="audit-assessment-dh-btn' + (active ? ' is-active' : '') +
         '" onclick="setAuditOutcomeDhFocus(\'' + dhSafe + '\')">' +
         '<span class="dh-name">' + escHtml(dh) + '</span>' +
@@ -20563,9 +20777,54 @@
 
   function renderAuditFindings() {
     renderFollowUpCarryBanner();
+    renderAuditFollowUpAddWrap();
     renderAuditArticleSections();
     renderAuditThemedAddWrap();
     if (auditStage === 3) renderAuditScoringSummary();
+  }
+
+  function renderAuditFollowUpAddWrap() {
+    const wrap = document.getElementById('audit-followup-add-wrap');
+    const pick = document.getElementById('audit-followup-article-pick');
+    if (!wrap || !pick) return;
+    const show = isFollowUpAudit() && auditStage === 2;
+    wrap.hidden = !show;
+    if (!show) return;
+    const sections = getAuditArticleSectionsForType();
+    pick.innerHTML = sections.map(function (s) {
+      const flagged = isArticleNeedsReassessment(s.key) ? ' — reassess' : '';
+      return '<option value="' + escHtml(s.key) + '">' + escHtml(s.key) + ' — ' + escHtml(s.label) + escHtml(flagged) + '</option>';
+    }).join('');
+  }
+
+  function openFollowUpArticleAssessment() {
+    const pick = document.getElementById('audit-followup-article-pick');
+    const key = pick && pick.value;
+    if (!key) return;
+    openAuditArticleAssessment(key);
+  }
+
+  function openFirstFollowUpReassessment() {
+    const keys = getFollowUpReassessArticleKeys();
+    if (!keys.length) return;
+    const next = keys.find(function (k) { return !isArticleAssessed(k); }) || keys[0];
+    openAuditArticleAssessment(next);
+  }
+
+  function setAuditAssessmentArticleFocus(articleKey) {
+    if (!articleKey || articleKey === auditActiveArticleKey) return;
+    auditActiveArticleKey = articleKey;
+    const holders = getAuditFindingDutyHolders();
+    const focusDh = auditAssessmentDhFocus && holders.indexOf(auditAssessmentDhFocus) >= 0
+      ? auditAssessmentDhFocus
+      : (holders[0] || '');
+    auditAssessmentDhFocus = focusDh;
+    auditNewFindingPresetDh = focusDh;
+    const failures = focusDh ? getDhFailureExamples(articleKey, focusDh) : [];
+    const noFailure = focusDh ? hasNoFailureRecorded(articleKey, focusDh) : false;
+    auditFindingEditId = noFailure ? 'no-failure' : (failures.length ? null : 'new');
+    auditExpandedArticles[articleKey] = true;
+    renderAuditAssessmentModal();
   }
 
   function renderAuditThemedAddWrap() {
@@ -20623,7 +20882,7 @@
     }
     const editBtn = locked ? '' :
       '<button type="button" class="btn' + (captureStage ? '' : ' primary') + ' audit-article-assess-btn" onclick="openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">' +
-      (captureStage ? 'Edit assessment' : 'Edit assessment') + '</button>';
+      (isFollowUpAudit() ? 'Update assessment' : (captureStage ? 'Edit assessment' : 'Edit assessment')) + '</button>';
     return '<div class="audit-article-abbrev">' + rows + '</div>' + editBtn;
   }
 
@@ -20645,27 +20904,45 @@
       }, 0);
       const failureCount = countArticleFailureExamples(section.key);
       const assessed = isArticleAssessed(section.key);
+      const needsReassess = isArticleNeedsReassessment(section.key);
+      const carriedCount = getCarriedFindingsForArticle(section.key).length;
+      const carriedIssues = needsReassess ? renderCarriedIssuesListHtml(section.key) : '';
+      const reassessPill = needsReassess
+        ? '<span class="pill purple audit-reassess-pill">Reassess</span>'
+        : '';
       const maxPill = assessed
         ? '<span class="pill ' + (articleMax >= 4 ? 'red' : (articleMax >= 2 ? 'amber' : 'green')) + '">Max RAG ' + articleMax + '</span>'
         : '<span class="pill grey">Not assessed</span>';
       const abbrev = renderAuditArticleAbbreviatedBody(section, findings, locked);
       const headAction = assessed
         ? '<span class="audit-article-toggle">' + (expanded ? '− Hide summary' : '+ Show summary') + '</span>'
-        : (locked ? '' : '<button type="button" class="audit-article-head-assess-btn" onclick="event.stopPropagation(); openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">Assess this article</button>');
+        : (locked ? '' : '<button type="button" class="audit-article-head-assess-btn" onclick="event.stopPropagation(); openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">' +
+          (needsReassess ? 'Reassess this article' : 'Assess this article') + '</button>');
       const headClass = 'audit-article-head' + (assessed ? '' : ' is-static');
       const headClick = assessed
         ? ' onclick="toggleAuditArticleSection(\'' + escHtml(section.key) + '\')"'
         : '';
       const bodyHtml = assessed
         ? '<div class="audit-article-body"' + (expanded ? '' : ' hidden') + '>' + abbrev + '</div>'
-        : '';
+        : (needsReassess
+          ? '<div class="audit-article-body">' + carriedIssues +
+            (locked ? '' : '<button type="button" class="btn primary audit-article-assess-btn" style="margin-top:12px;" onclick="openAuditArticleAssessment(\'' + escHtml(section.key) + '\')">Start reassessment →</button>') +
+            '</div>'
+          : '');
 
-      return '<section class="audit-article-section' + (expanded ? ' is-expanded' : '') + '" data-article-key="' + escHtml(section.key) + '">' +
+      return '<section class="audit-article-section' + (expanded ? ' is-expanded' : '') +
+        (needsReassess ? ' is-reassess' : '') + '" data-article-key="' + escHtml(section.key) + '">' +
         '<div class="' + headClass + '"' + headClick + '>' +
         '<div class="audit-article-letter">' + escHtml(section.key) + '</div>' +
         '<div><div class="audit-article-title">' + escHtml(section.label) + '</div>' +
-        '<div class="audit-article-meta">' + failureCount + ' failure example' +
-        (failureCount === 1 ? '' : 's') + ' recorded</div></div>' +
+        '<div class="audit-article-meta">' +
+        (needsReassess
+          ? carriedCount + ' unresolved issue' + (carriedCount === 1 ? '' : 's') + ' from parent audit'
+          : failureCount + ' failure example' + (failureCount === 1 ? '' : 's') + ' recorded') +
+        '</div>' +
+        (needsReassess && !assessed ? carriedIssues : '') +
+        '</div>' +
+        reassessPill +
         maxPill +
         headAction +
         '</div>' +
@@ -20696,7 +20973,13 @@
     const auditTypeLabel = auditTypeLabels[auditType] || 'Full';
     const auditTypeDesc = auditTypeDescs[auditType] || 'All articles, all categories';
 
-    const prev = 47;
+    const prevInfo = getFollowUpPreviousScoreInfo();
+    const prem = getPremisesByName(getAuditPremisesName());
+    const prev = prevInfo ? prevInfo.score : ((prem && prem.score != null) ? prem.score : 47);
+    const prevDisplay = prevInfo
+      ? '<a onclick="continueAudit(\'' + escHtml(prevInfo.auditId) + '\')" style="cursor:pointer;color:inherit;text-decoration:underline;" title="Open parent audit">' + prev + '</a>'
+      : String(prev);
+    const prevLabel = prevInfo ? 'Previous score' : 'RBIP before audit';
     const rolling = getAuditRollingScore();
     const current = prev + rolling;
     const delta = rolling;
@@ -20710,7 +20993,7 @@
       '<span style="font-size:12px;color:var(--ink-3);">' + escHtml(auditTypeDesc) + '  ·  Baseline: Government Office</span>' +
       '</div>' +
       '<div class="score-rollup">' +
-      '<div class="score-box"><div class="lbl">RBIP before audit</div><div class="val">' + prev + '</div></div>' +
+      '<div class="score-box"><div class="lbl">' + escHtml(prevLabel) + '</div><div class="val">' + prevDisplay + '</div></div>' +
       '<div class="score-box"><div class="lbl">Assessment added</div>' +
       '<div class="val" style="font-size:20px;color:' + deltaCol + ';">' + deltaSign + delta + '</div>' +
       '<div style="font-size:11px;color:var(--ink-3);margin-top:4px;">Highest RAG per DH per article</div>' +
@@ -20900,8 +21183,13 @@
     }
     if (subEl) {
       if (section) {
-        subEl.hidden = true;
-        subEl.textContent = '';
+        subEl.hidden = false;
+        if (isFollowUpAudit() && isArticleNeedsReassessment(auditActiveArticleKey)) {
+          subEl.textContent = 'Reassess carried issues from the parent audit, then record the current site visit outcome.';
+        } else {
+          subEl.hidden = true;
+          subEl.textContent = '';
+        }
       } else {
         subEl.hidden = false;
         subEl.textContent = 'Record findings for this article.';
@@ -20980,13 +21268,37 @@
         '<span>' + dhLabel + '</span>' +
         '<span class="score-pill ' + auditRagClass(sc) + '">RAG ' + sc + '</span></button>';
     }).join('');
-    const noFailure = hasNoFailureRecorded(auditActiveArticleKey, focusDh);
+
+    let articleNav = '';
+    if (isFollowUpAudit()) {
+      const sections = getAuditArticleSectionsForType();
+      const reassessKeys = getFollowUpReassessArticleKeys();
+      const articleBtns = sections.map(function (s) {
+        const active = s.key === auditActiveArticleKey;
+        const needs = reassessKeys.indexOf(s.key) >= 0;
+        const carriedN = getCarriedFindingsForArticle(s.key).length;
+        const assessed = isArticleAssessed(s.key);
+        let meta = assessed ? 'Assessed' : (needs ? carriedN + ' to verify' : 'Optional');
+        return '<button type="button" class="audit-assessment-article-btn' +
+          (active ? ' is-active' : '') + (needs ? ' is-reassess' : '') +
+          '" onclick="setAuditAssessmentArticleFocus(\'' + escHtml(s.key) + '\')">' +
+          '<span class="art-key">' + escHtml(s.key) + '</span>' +
+          '<span class="art-meta">' + escHtml(s.label) + '<br><span style="color:' +
+          (needs ? '#7c5cbf' : 'var(--ink-3)') + ';">' + escHtml(meta) + '</span></span>' +
+          (needs ? '<span class="pill purple audit-reassess-pill">Reassess</span>' : '') +
+          '</button>';
+      }).join('');
+      articleNav =
+        '<div class="modal-group"><div class="modal-group-label">Articles on this visit (' + sections.length + ')</div>' +
+        '<div class="audit-assessment-article-nav">' + articleBtns + '</div></div>';
+    }
 
     el.innerHTML =
       '<h3 class="audit-assessment-sidebar-title">Assessment</h3>' +
+      articleNav +
       '<div class="modal-group"><div class="modal-group-label">Duty Holders (' + holders.length + ')</div>' +
       '<div class="audit-assessment-dh-nav">' + dhNav + '</div>' +
-      '<button type="button" class="btn' + (noFailure ? ' hidden' : '') + '" style="margin-top:12px;width:100%;" data-article="' + escHtml(auditActiveArticleKey) + '" data-dh="' + escHtml(focusDh) + '" onclick="startNewAuditFinding(this.dataset.article, this.dataset.dh)">+ Add another example</button>' +
+      '<button type="button" class="btn' + (hasNoFailureRecorded(auditActiveArticleKey, focusDh) ? ' hidden' : '') + '" style="margin-top:12px;width:100%;" data-article="' + escHtml(auditActiveArticleKey) + '" data-dh="' + escHtml(focusDh) + '" onclick="startNewAuditFinding(this.dataset.article, this.dataset.dh)">+ Add another example</button>' +
       '</div>';
   }
 
@@ -21060,8 +21372,13 @@
     const showForm = auditFindingEditId === 'new' ||
       (auditFindingEditId && auditFindingEditId !== 'no-failure' && auditFindings.some(function (f) { return f.id === auditFindingEditId; }));
     const locked = auditFindingsLocked();
+    const carriedBanner = (isFollowUpAudit() && isArticleNeedsReassessment(auditActiveArticleKey))
+      ? '<div class="audit-followup-carry-banner" style="margin-bottom:16px;"><strong>Unresolved from parent audit</strong>' +
+        renderCarriedIssuesListHtml(auditActiveArticleKey) +
+        '<div style="margin-top:8px;font-size:12px;color:var(--ink-3);">Verify on site, then update the score or record no failure if remedied.</div></div>'
+      : '';
 
-    let html =
+    let html = carriedBanner +
       '<div class="audit-fs-dh-header">' +
       '<div class="audit-fs-dh-header-main">' +
       '<h3>' + escHtml(focusDh) + '</h3>' +
@@ -21164,7 +21481,7 @@
     return '<div class="audit-fs-finding-form">' +
       '<h3>' + (isNew ? 'Add example' : 'Edit example') + '</h3>' +
       '<div class="editor-sub">A GFP failure is usually recorded first, but you may start with Management or Maintenance and link a related GFP failure. Management and Maintenance are unlikely to relate to each other.</div>' +
-      '<div id="audit-fs-zero-note" class="audit-fs-zero-note" hidden>Score 0 — no failure for this Duty Holder. Use Record no failure, or raise RAG to enter details.</div>' +
+      '<div id="audit-fs-zero-note" class="audit-fs-zero-note" hidden>Score 0 — no failure for this Duty Holder. This saves automatically when you select 0.</div>' +
       '<div class="audit-fs-fields" id="audit-fs-detail-fields">' +
       '<div class="field span-2"><label for="audit-fs-dh">Duty Holder</label>' +
       '<select id="audit-fs-dh" onchange="onAuditFsDhChange()">' + dhOptions + '</select></div>' +
@@ -21190,6 +21507,15 @@
       if (val === n) btn.classList.add(auditRagClass(n));
     });
     syncAuditFsRagVisibility();
+    if (n === 0 && auditActiveArticleKey && !auditFindingsLocked()) {
+      const dutyHolder = auditAssessmentDhFocus ||
+        auditNewFindingPresetDh ||
+        document.getElementById('audit-fs-dh')?.value ||
+        '';
+      if (dutyHolder) {
+        recordAuditNoFailure(auditActiveArticleKey, dutyHolder);
+      }
+    }
   }
 
   function syncAuditFsRagVisibility() {
@@ -21288,8 +21614,14 @@
       window.alert('Select a Duty Holder for this finding.');
       return;
     }
-    if (ragScore <= 0) {
-      window.alert('Select a RAG score above 0 to record a failure, or use Record no failure.');
+    if (ragScore < 0) {
+      window.alert('Select a RAG score for this finding.');
+      return;
+    }
+    if (ragScore === 0) {
+      recordAuditNoFailure(auditActiveArticleKey, dutyHolder);
+      auditFsFormDraft = null;
+      auditFindingEditId = 'no-failure';
       return;
     }
     if (!primarySpecificFailure) {
