@@ -1979,17 +1979,6 @@
     flex: 1;
     color: var(--ink-3);
   }
-  #audit-followup-add-wrap {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0 0 16px;
-    padding: 10px 12px;
-    border: 1px dashed var(--line-2);
-    border-radius: 8px;
-    background: #fcfcfa;
-  }
   .audit-stage5-followup-intro {
     margin: 0 0 16px;
     padding: 12px 14px;
@@ -9085,18 +9074,10 @@
             Choose audit type, then assess each article in a full-screen workspace. Saved findings appear below as a brief summary — scoring and outcomes are on the next step.
           </div>
 
-          <div class="audit-followup-carry-banner" id="audit-followup-carry-banner" hidden></div>
-
           <div id="audit-themed-add-wrap" class="audit-themed-add" hidden>
             <span style="font-size:13px;color:var(--ink-2);">Themed audit — add articles to assess:</span>
             <select id="audit-themed-article-pick"></select>
             <button type="button" class="btn" onclick="addAuditThemedArticle()">Add article</button>
-          </div>
-
-          <div id="audit-followup-add-wrap" hidden>
-            <span style="font-size:13px;color:var(--ink-2);">Assess another article on this follow-up visit:</span>
-            <select id="audit-followup-article-pick"></select>
-            <button type="button" class="btn" onclick="openFollowUpArticleAssessment()">Open article</button>
           </div>
 
           <div id="audit-edit-warning" class="audit-edit-warning" hidden>
@@ -14146,7 +14127,6 @@
     }
     renderSetupPremisesCard();
     renderAuditContextRail();
-    renderFollowUpCarryBanner();
     updateAuditSetupFollowUpUi();
   }
 
@@ -14176,33 +14156,6 @@
         ? 'Start follow-up audit and send notification →'
         : 'Start audit and send appointment letter →';
     }
-  }
-
-  function renderFollowUpCarryBanner() {
-    const el = document.getElementById('audit-followup-carry-banner');
-    if (!el) return;
-    if (!isFollowUpAudit() || auditStage !== 2) {
-      el.hidden = true;
-      return;
-    }
-    const parentId = getFollowUpParentAuditId();
-    const carried = auditFindings.filter(function (f) { return f.carriedFromParent; });
-    if (!carried.length) {
-      el.hidden = true;
-      return;
-    }
-    const articleSet = {};
-    carried.forEach(function (f) { if (f.articleKey) articleSet[f.articleKey] = true; });
-    const articles = Object.keys(articleSet).sort().join(', ');
-    const reassessKeys = Object.keys(articleSet);
-    const startBtn = reassessKeys.length
-      ? ' <button type="button" class="btn" style="margin-left:8px;" onclick="openFirstFollowUpReassessment()">Open reassessment →</button>'
-      : '';
-    el.innerHTML = '<strong>' + carried.length + ' unresolved issue' + (carried.length === 1 ? '' : 's') + ' carried from ' +
-      '<a onclick="continueAudit(\'' + escHtml(parentId) + '\')">' + escHtml(parentId) + '</a>.</strong> ' +
-      'Articles <strong>' + escHtml(articles) + '</strong> need reassessment — verify each on site. Update scores if remedied, or add new findings as you explore.' +
-      startBtn;
-    el.hidden = false;
   }
 
   function startNewAuditFromPremises(premisesName) {
@@ -19917,7 +19870,7 @@
     if (thread.needsPlan && thread.status === 'monitoring') {
       h += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
       h += '<button class="btn" type="button" onclick="openAuditStage5LetterComposer(\'' + idSafe + '\', \'satisfactory\')">Write acceptance letter</button>';
-      h += '<button class="btn primary" type="button" onclick="markRevisitArranged(\'' + idSafe + '\')">Revisit arranged — close thread</button>';
+      h += '<button class="btn primary" type="button" onclick="markRevisitArranged(\'' + idSafe + '\')">Arrange follow-up close thread</button>';
       h += '<button class="btn btn-quiet" type="button" onclick="resetAuditPlanReview(\'' + idSafe + '\')">Change decision</button>';
       h += '</div>';
     }
@@ -20739,7 +20692,7 @@
   }
 
   function auditRagClass(score) {
-    if (score <= 0) return 'score-low';
+    if (score <= 0 || score === 1) return 'score-low';
     if (score <= 3) return 'score-mid';
     return 'score-high';
   }
@@ -20776,55 +20729,9 @@
   }
 
   function renderAuditFindings() {
-    renderFollowUpCarryBanner();
-    renderAuditFollowUpAddWrap();
     renderAuditArticleSections();
     renderAuditThemedAddWrap();
     if (auditStage === 3) renderAuditScoringSummary();
-  }
-
-  function renderAuditFollowUpAddWrap() {
-    const wrap = document.getElementById('audit-followup-add-wrap');
-    const pick = document.getElementById('audit-followup-article-pick');
-    if (!wrap || !pick) return;
-    const show = isFollowUpAudit() && auditStage === 2;
-    wrap.hidden = !show;
-    if (!show) return;
-    const sections = getAuditArticleSectionsForType();
-    pick.innerHTML = sections.map(function (s) {
-      const flagged = isArticleNeedsReassessment(s.key) ? ' — reassess' : '';
-      return '<option value="' + escHtml(s.key) + '">' + escHtml(s.key) + ' — ' + escHtml(s.label) + escHtml(flagged) + '</option>';
-    }).join('');
-  }
-
-  function openFollowUpArticleAssessment() {
-    const pick = document.getElementById('audit-followup-article-pick');
-    const key = pick && pick.value;
-    if (!key) return;
-    openAuditArticleAssessment(key);
-  }
-
-  function openFirstFollowUpReassessment() {
-    const keys = getFollowUpReassessArticleKeys();
-    if (!keys.length) return;
-    const next = keys.find(function (k) { return !isArticleAssessed(k); }) || keys[0];
-    openAuditArticleAssessment(next);
-  }
-
-  function setAuditAssessmentArticleFocus(articleKey) {
-    if (!articleKey || articleKey === auditActiveArticleKey) return;
-    auditActiveArticleKey = articleKey;
-    const holders = getAuditFindingDutyHolders();
-    const focusDh = auditAssessmentDhFocus && holders.indexOf(auditAssessmentDhFocus) >= 0
-      ? auditAssessmentDhFocus
-      : (holders[0] || '');
-    auditAssessmentDhFocus = focusDh;
-    auditNewFindingPresetDh = focusDh;
-    const failures = focusDh ? getDhFailureExamples(articleKey, focusDh) : [];
-    const noFailure = focusDh ? hasNoFailureRecorded(articleKey, focusDh) : false;
-    auditFindingEditId = noFailure ? 'no-failure' : (failures.length ? null : 'new');
-    auditExpandedArticles[articleKey] = true;
-    renderAuditAssessmentModal();
   }
 
   function renderAuditThemedAddWrap() {
@@ -21183,13 +21090,8 @@
     }
     if (subEl) {
       if (section) {
-        subEl.hidden = false;
-        if (isFollowUpAudit() && isArticleNeedsReassessment(auditActiveArticleKey)) {
-          subEl.textContent = 'Reassess carried issues from the parent audit, then record the current site visit outcome.';
-        } else {
-          subEl.hidden = true;
-          subEl.textContent = '';
-        }
+        subEl.hidden = true;
+        subEl.textContent = '';
       } else {
         subEl.hidden = false;
         subEl.textContent = 'Record findings for this article.';
@@ -21269,33 +21171,8 @@
         '<span class="score-pill ' + auditRagClass(sc) + '">RAG ' + sc + '</span></button>';
     }).join('');
 
-    let articleNav = '';
-    if (isFollowUpAudit()) {
-      const sections = getAuditArticleSectionsForType();
-      const reassessKeys = getFollowUpReassessArticleKeys();
-      const articleBtns = sections.map(function (s) {
-        const active = s.key === auditActiveArticleKey;
-        const needs = reassessKeys.indexOf(s.key) >= 0;
-        const carriedN = getCarriedFindingsForArticle(s.key).length;
-        const assessed = isArticleAssessed(s.key);
-        let meta = assessed ? 'Assessed' : (needs ? carriedN + ' to verify' : 'Optional');
-        return '<button type="button" class="audit-assessment-article-btn' +
-          (active ? ' is-active' : '') + (needs ? ' is-reassess' : '') +
-          '" onclick="setAuditAssessmentArticleFocus(\'' + escHtml(s.key) + '\')">' +
-          '<span class="art-key">' + escHtml(s.key) + '</span>' +
-          '<span class="art-meta">' + escHtml(s.label) + '<br><span style="color:' +
-          (needs ? '#7c5cbf' : 'var(--ink-3)') + ';">' + escHtml(meta) + '</span></span>' +
-          (needs ? '<span class="pill purple audit-reassess-pill">Reassess</span>' : '') +
-          '</button>';
-      }).join('');
-      articleNav =
-        '<div class="modal-group"><div class="modal-group-label">Articles on this visit (' + sections.length + ')</div>' +
-        '<div class="audit-assessment-article-nav">' + articleBtns + '</div></div>';
-    }
-
     el.innerHTML =
       '<h3 class="audit-assessment-sidebar-title">Assessment</h3>' +
-      articleNav +
       '<div class="modal-group"><div class="modal-group-label">Duty Holders (' + holders.length + ')</div>' +
       '<div class="audit-assessment-dh-nav">' + dhNav + '</div>' +
       '<button type="button" class="btn' + (hasNoFailureRecorded(auditActiveArticleKey, focusDh) ? ' hidden' : '') + '" style="margin-top:12px;width:100%;" data-article="' + escHtml(auditActiveArticleKey) + '" data-dh="' + escHtml(focusDh) + '" onclick="startNewAuditFinding(this.dataset.article, this.dataset.dh)">+ Add another example</button>' +
@@ -21372,13 +21249,8 @@
     const showForm = auditFindingEditId === 'new' ||
       (auditFindingEditId && auditFindingEditId !== 'no-failure' && auditFindings.some(function (f) { return f.id === auditFindingEditId; }));
     const locked = auditFindingsLocked();
-    const carriedBanner = (isFollowUpAudit() && isArticleNeedsReassessment(auditActiveArticleKey))
-      ? '<div class="audit-followup-carry-banner" style="margin-bottom:16px;"><strong>Unresolved from parent audit</strong>' +
-        renderCarriedIssuesListHtml(auditActiveArticleKey) +
-        '<div style="margin-top:8px;font-size:12px;color:var(--ink-3);">Verify on site, then update the score or record no failure if remedied.</div></div>'
-      : '';
 
-    let html = carriedBanner +
+    let html =
       '<div class="audit-fs-dh-header">' +
       '<div class="audit-fs-dh-header-main">' +
       '<h3>' + escHtml(focusDh) + '</h3>' +
@@ -21475,7 +21347,7 @@
       '</div>';
 
     const ragBlock =
-      '<div class="field span-2"><label>RAG score <span style="font-weight:400;color:var(--ink-3);">(0 = no issue · 1–3 amber · 4–6 red)</span></label>' +
+      '<div class="field span-2"><label>RAG score <span style="font-weight:400;color:var(--ink-3);">(0 = no issue · 1 green · 2–3 amber · 4–6 red)</span></label>' +
       '<div class="audit-rag-row" id="audit-fs-rag-row">' + ragBtns + '</div></div>';
 
     return '<div class="audit-fs-finding-form">' +
