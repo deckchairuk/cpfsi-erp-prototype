@@ -113,9 +113,17 @@
 
     <ul>
       <li>
-        <a class="prototype-card prototype-card--current" href="/v3/">
-          <span class="prototype-version">V3</span>
+        <a class="prototype-card prototype-card--current" href="/v4/">
+          <span class="prototype-version">V4</span>
           <span class="prototype-audience">Current version — active workstream.</span>
+          <span class="prototype-purpose">Everything in V3 plus Incident Summaries for prison fire data.</span>
+          <span class="prototype-updated" data-build="v4"></span>
+        </a>
+      </li>
+      <li>
+        <a class="prototype-card" href="/v3/">
+          <span class="prototype-version">V3</span>
+          <span class="prototype-audience">Previous version.</span>
           <span class="prototype-purpose">CPINs, audits, premises scoring and responsive layouts.</span>
           <span class="prototype-updated" data-build="v3"></span>
         </a>
@@ -123,16 +131,16 @@
       <li>
         <a class="prototype-card" href="/v2/">
           <span class="prototype-version">V2</span>
-          <span class="prototype-audience">Previous version.</span>
-          <span class="prototype-purpose">Archived snapshot for comparison.</span>
+          <span class="prototype-audience">Archived snapshot.</span>
+          <span class="prototype-purpose">Earlier iteration for comparison.</span>
           <span class="prototype-updated" data-build="v2"></span>
         </a>
       </li>
       <li>
         <a class="prototype-card" href="/v1/">
           <span class="prototype-version">V1</span>
-          <span class="prototype-audience">Earlier version.</span>
-          <span class="prototype-purpose">Archived snapshot for comparison.</span>
+          <span class="prototype-audience">Archived snapshot.</span>
+          <span class="prototype-purpose">Earliest iteration for comparison.</span>
           <span class="prototype-updated" data-build="v1"></span>
         </a>
       </li>
@@ -143,7 +151,8 @@
     const BUILD_STAMPS = {
       v1: '4 Jun 2026, 14:31',
       v2: '9 Jun 2026, 12:28',
-      v3: '3 Aug 2026, 16:09'
+      v3: '3 Aug 2026, 16:09',
+      v4: '5 Aug 2026, 10:29'
     };
 
     document.querySelectorAll('[data-build]').forEach(function (el) {

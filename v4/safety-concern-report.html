@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fire Incident Service — Safety Concern Report</title>
+  <link rel="stylesheet" href="intake-form.css">
+</head>
+<body>
+
+<header class="page-header">
+  <div class="page-header-inner">
+    <a class="page-brand" href="index.html" title="CPFSI Fire Safety MIS">
+      <img src="assets/cpfsi-logo.png" alt="" class="page-brand-logo" width="40" height="40" aria-hidden="true">
+      <span class="page-brand-text">
+        CPFSI
+        <span>Crown Premises' Fire Safety Inspectorate</span>
+      </span>
+    </a>
+    <div class="helpline">
+      Fire Incident Service
+      <strong>0300 1233911</strong>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="prototype-note">
+    Prototype intake form (separate from the signed-in MIS). Report potential fire hazards here — not fires (those are CPINs) or audit follow-up dialogue (use Business Support).
+    Submissions with a matched premises record appear under <strong>Unassigned</strong>; unmatched addresses under <strong>Premises needed</strong>.
+    <a href="index.html#concerns">Open CPFSI prototype</a>
+  </p>
+
+  <div class="form-card">
+    <div class="form-intro" id="form-intro">
+      <h1 id="form-title">Report a safety concern</h1>
+      <p class="form-tagline">Log a potential fire hazard at Crown premises for inspector triage. The Duty Holder is notified automatically on submission.</p>
+      <p class="required-note" id="required-note">* denotes a required field</p>
+    </div>
+
+    <form id="sc-report-form" novalidate>
+      <section class="form-section" aria-labelledby="report-details-heading">
+        <h2 class="form-section-title" id="report-details-heading">Report details</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label class="field-label" for="report-date">Date reported <span class="req" aria-hidden="true">*</span></label>
+            <input type="date" id="report-date" name="reportDate" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="source">Source <span class="req" aria-hidden="true">*</span></label>
+            <select id="source" name="source" required>
+              <option value="">Please select</option>
+              <option value="Email">Email</option>
+              <option value="Phone">Phone</option>
+              <option value="In person">In person</option>
+              <option value="Letter">Letter</option>
+              <option value="Other">Other – please state</option>
+            </select>
+          </div>
+          <div class="field field--full" id="source-other-wrap" hidden>
+            <label class="field-label" for="source-other">Source — please state <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="source-other" name="sourceOther" placeholder="How was this concern received?" autocomplete="off" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="complainant-heading">
+        <h2 class="form-section-title" id="complainant-heading">Complainant</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label class="field-label" for="complainant">Name of complainant</label>
+            <p class="field-hint">Leave blank if anonymous.</p>
+            <input type="text" id="complainant" name="complainant" placeholder="Name and role, if known" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="complainant-email">Complainant e-mail</label>
+            <input type="email" id="complainant-email" name="complainantEmail" placeholder="Optional contact email" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="complainant-phone">Contact number</label>
+            <input type="tel" id="complainant-phone" name="complainantPhone" placeholder="Optional contact number" autocomplete="tel" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="premises-heading">
+        <h2 class="form-section-title" id="premises-heading">Premises</h2>
+        <p class="form-section-lead">Search the locations register. If not listed, leave blank and enter the address below.</p>
+        <div class="form-grid">
+          <div class="field field--full">
+            <label class="field-label" for="premises">Address of premises</label>
+            <input type="text" id="premises" name="premises" list="premises-list" placeholder="Start typing to search locations register…" autocomplete="off" />
+            <datalist id="premises-list"></datalist>
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="premises-free">Premises not in system or not found</label>
+            <p class="field-hint">If you cannot find the premises above, enter the full address or site description here.</p>
+            <input type="text" id="premises-free" name="premisesFree" placeholder="e.g. Plot 7, industrial estate" autocomplete="street-address" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="hazard-heading">
+        <h2 class="form-section-title" id="hazard-heading">Hazard details</h2>
+
+        <div class="field">
+          <label class="field-label" for="hazard-type">Hazard type <span class="req" aria-hidden="true">*</span></label>
+          <select id="hazard-type" name="hazardType" required>
+            <option value="">Please select</option>
+            <option>Combustible materials</option>
+            <option>Fire door defect</option>
+            <option>Blocked escape route</option>
+            <option>Hot works</option>
+            <option>Emergency lighting</option>
+            <option>Fire compartmentation</option>
+            <option>Ignition source</option>
+            <option>Automatic alarm / false activation</option>
+            <option value="Other hazard">Other – please state</option>
+          </select>
+        </div>
+
+        <div class="field" id="hazard-type-other-wrap" hidden>
+          <label class="field-label" for="hazard-type-other">Hazard type — please state <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="hazard-type-other" name="hazardTypeOther" placeholder="Describe the hazard type" autocomplete="off" />
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <span class="field-label" id="severity-label">RAG severity <span class="req" aria-hidden="true">*</span></span>
+          <p class="field-hint">How urgent is this hazard? Inspectors may override after review.</p>
+          <ul class="choice-list" role="radiogroup" aria-labelledby="severity-label">
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="green" required />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Green</span>
+                  <span class="choice-card-desc">Low risk — no immediate injury concern; typical monitoring or Duty Holder self-fix</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="amber" />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Amber</span>
+                  <span class="choice-card-desc">Moderate risk — action may be required; inspector triage expected</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card">
+                <input type="radio" name="severity" value="red" />
+                <span class="choice-card-body">
+                  <span class="choice-card-title">Red</span>
+                  <span class="choice-card-desc">Serious hazard — urgent attention required</span>
+                </span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <label class="field-label" for="description">Hazard description <span class="req" aria-hidden="true">*</span></label>
+          <p class="field-hint">What was observed? Where on site? Who reported it? Use plain language.</p>
+          <textarea id="description" name="description" required placeholder="Describe the hazard, location, and any immediate actions taken…"></textarea>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="clear-form">Clear form</button>
+        <button type="submit" class="submit-btn">Submit safety concern</button>
+      </div>
+    </form>
+
+    <div class="success-panel" id="success-panel" role="status">
+      <h2>Report received</h2>
+      <p id="success-ref"></p>
+      <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app. The Duty Holder is notified automatically on submission.</p>
+      <p id="success-queue-hint"></p>
+      <p><a href="index.html#concerns" id="success-queue-link">Go to Safety Concerns queue</a> (sign in).</p>
+    </div>
+  </div>
+</main>
+
+<footer class="page-footer">
+  Crown Premises' Fire Safety Inspectorate (CPFSI) · Ministry of Justice<br>
+  <a href="index.html">Return to CPFSI prototype</a>
+</footer>
+
+<script>
+  const SC_INTAKE_KEY = 'cpfsi-sc-intake-v1';
+  const SC_REPORT_PREMISES = [
+    'Bristol Crown Court', 'Charing Cross House refurb', 'Crawley Job Centre Plus',
+    'DWP Brighton', 'DWP Canterbury', 'DWP Crawley', 'Folkestone Tribunal Hearing Centre',
+    'HMP Belmarsh', 'HMP Bristol', 'HMP Durham', 'HMP Isis', 'HMP Lewes', 'HMP Maidstone',
+    'HMP Pentonville', 'HMP Rochester', 'HMP Swaleside', 'HMP Wandsworth',
+    'HMCTS Guildford', 'Jobcentre Plus Crawley', 'Lewes Crown Court',
+    'Maidstone Magistrates Court', 'MoJ HQ London', 'Reading Job Centre Plus',
+    'Royal Courts of Justice', 'Temple Quay Estate', 'Temple Quay House',
+    'Temple Quay Riverside Annexe'
+  ].sort(function (a, b) { return a.localeCompare(b); });
+
+  (function populatePremisesList() {
+    const list = document.getElementById('premises-list');
+    if (!list) return;
+    SC_REPORT_PREMISES.forEach(function (name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      list.appendChild(opt);
+    });
+  })();
+
+  function formatUkDate(iso) {
+    if (!iso) return '';
+    const p = iso.split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function severityScore(sev) {
+    if (sev === 'red') return 5;
+    if (sev === 'amber') return 2;
+    return 0;
+  }
+
+  function nextRef(list) {
+    const nums = list.map(function (c) {
+      const part = (c.ref || '').split('-').pop();
+      return parseInt(part, 10);
+    }).filter(function (n) { return !isNaN(n); });
+    const max = nums.length ? Math.max.apply(null, nums) : 159;
+    return 'SC-2026-' + String(max + 1).padStart(4, '0');
+  }
+
+  function resolvePremisesName(value) {
+    const trimmed = (value || '').trim();
+    if (!trimmed) return '';
+    const match = SC_REPORT_PREMISES.find(function (name) {
+      return name.toLowerCase() === trimmed.toLowerCase();
+    });
+    return match || trimmed;
+  }
+
+  function toggleSourceOther() {
+    const sourceEl = document.getElementById('source');
+    const wrap = document.getElementById('source-other-wrap');
+    const otherEl = document.getElementById('source-other');
+    const show = sourceEl && sourceEl.value === 'Other';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
+  }
+
+  function toggleHazardOther() {
+    const hazardEl = document.getElementById('hazard-type');
+    const wrap = document.getElementById('hazard-type-other-wrap');
+    const otherEl = document.getElementById('hazard-type-other');
+    const show = hazardEl && hazardEl.value === 'Other hazard';
+    if (wrap) wrap.hidden = !show;
+    if (otherEl) {
+      if (show) otherEl.setAttribute('required', 'required');
+      else {
+        otherEl.removeAttribute('required');
+        otherEl.value = '';
+      }
+    }
+  }
+
+  document.getElementById('source').addEventListener('change', toggleSourceOther);
+  document.getElementById('hazard-type').addEventListener('change', toggleHazardOther);
+
+  document.getElementById('sc-report-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    toggleSourceOther();
+    toggleHazardOther();
+    if (!e.target.reportValidity()) return;
+
+    const fd = new FormData(e.target);
+    const severity = fd.get('severity');
+    if (!severity) return;
+
+    let list = [];
+    try {
+      list = JSON.parse(localStorage.getItem(SC_INTAKE_KEY) || '[]');
+    } catch (err) {
+      list = [];
+    }
+
+    const premisesRaw = (fd.get('premises') || '').trim();
+    const premises = resolvePremisesName(premisesRaw);
+    const premisesMatched = !!premises && SC_REPORT_PREMISES.indexOf(premises) >= 0;
+    const premisesFree = (fd.get('premisesFree') || '').trim();
+    const description = (fd.get('description') || '').trim();
+    const hazardType = (fd.get('hazardType') || '').trim();
+    const hazardTypeOther = (fd.get('hazardTypeOther') || '').trim();
+    const complainant = (fd.get('complainant') || '').trim();
+    const complainantEmail = (fd.get('complainantEmail') || '').trim();
+    const complainantPhone = (fd.get('complainantPhone') || '').trim();
+    const hazardLabel = hazardType === 'Other hazard' && hazardTypeOther
+      ? 'Other — ' + hazardTypeOther
+      : hazardType;
+    const id = 'sc-in-' + Date.now();
+    const summary = hazardLabel + (description ? ' — ' + (description.length > 48 ? description.slice(0, 48) + '…' : description) : '');
+
+    const record = {
+      id: id,
+      ref: nextRef(list),
+      severity: severity,
+      severityScore: severityScore(severity),
+      when: 'Just now',
+      premises: premisesMatched ? premises : null,
+      summary: summary.length > 72 ? summary.slice(0, 72) + '…' : summary,
+      patch: false,
+      workflow: premisesMatched ? 'incoming' : (premisesFree || premisesRaw ? 'awaiting_premises' : 'incoming'),
+      assignee: null,
+      intake: {
+        reportDate: formatUkDate(fd.get('reportDate')),
+        complainant: complainant || 'Anonymous',
+        complainantEmail: complainantEmail,
+        complainantPhone: complainantPhone,
+        reporter: complainant || 'Anonymous',
+        reporterEmail: complainantEmail,
+        source: fd.get('source'),
+        sourceOther: (fd.get('sourceOther') || '').trim(),
+        hazardType: hazardType,
+        hazardTypeOther: hazardTypeOther,
+        description: description,
+        premisesFree: premisesFree || (!premisesMatched && premisesRaw ? premisesRaw : '')
+      }
+    };
+
+    list.unshift(record);
+    localStorage.setItem(SC_INTAKE_KEY, JSON.stringify(list));
+
+    document.getElementById('sc-report-form').hidden = true;
+    document.getElementById('required-note').hidden = true;
+    document.getElementById('form-title').hidden = true;
+    document.querySelector('.prototype-note').hidden = true;
+    document.querySelector('.form-tagline').hidden = true;
+    const panel = document.getElementById('success-panel');
+    document.getElementById('success-ref').textContent = 'Reference: ' + record.ref;
+    const hint = document.getElementById('success-queue-hint');
+    const link = document.getElementById('success-queue-link');
+    if (record.premises && record.workflow === 'incoming') {
+      hint.textContent = 'Premises matched — appears under Unassigned for triage.';
+      link.href = 'index.html#concerns';
+      link.textContent = 'Go to Safety Concerns — Unassigned';
+    } else if (record.workflow === 'awaiting_premises') {
+      hint.textContent = 'Premises not matched — appears under Unassigned with Premises needed.';
+      link.href = 'index.html#concerns';
+      link.textContent = 'Go to Safety Concerns — Unassigned';
+    } else {
+      hint.textContent = 'New submission — appears under Unassigned; link premises in Stage 1.';
+      link.href = 'index.html#concerns';
+      link.textContent = 'Go to Safety Concerns — Unassigned';
+    }
+    panel.classList.add('show');
+  });
+
+  document.getElementById('clear-form').addEventListener('click', function () {
+    document.getElementById('sc-report-form').reset();
+    document.getElementById('report-date').valueAsDate = new Date();
+    toggleSourceOther();
+    toggleHazardOther();
+  });
+
+  document.getElementById('report-date').valueAsDate = new Date();
+  toggleSourceOther();
+  toggleHazardOther();
+</script>
+</body>
+</html>

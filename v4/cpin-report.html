@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crown Premises' Incident Notification (CPIN)</title>
+  <link rel="stylesheet" href="intake-form.css">
+</head>
+<body>
+
+<header class="page-header">
+  <div class="page-header-inner">
+    <a class="page-brand" href="index.html" title="CPFSI Fire Safety MIS">
+      <img src="assets/cpfsi-logo.png" alt="" class="page-brand-logo" width="40" height="40" aria-hidden="true">
+      <span class="page-brand-text">
+        CPFSI
+        <span>Crown Premises' Fire Safety Inspectorate</span>
+      </span>
+    </a>
+    <div class="helpline">
+      24-hour incident line
+      <strong>0300 1233 911</strong>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="prototype-note">
+    Prototype intake form (separate from the signed-in MIS). Submissions with a matched premises record appear under <strong>Incoming</strong>; unmatched addresses under <strong>Awaiting premises</strong>.
+    <a href="index.html#cpins">Open CPFSI prototype</a>
+  </p>
+
+  <div class="form-card">
+    <div class="form-intro" id="form-intro">
+      <h1 id="form-title">Crown Premises' Incident Notification (CPIN)</h1>
+      <p class="form-tagline">Report a fire-related incident at Crown premises to CPFSI. Fire and rescue services should complete this form at the earliest opportunity.</p>
+      <p class="required-note" id="required-note">* denotes a required field</p>
+    </div>
+
+    <form id="cpin-report-form" novalidate>
+      <section class="form-section" aria-labelledby="incident-details-heading">
+        <h2 class="form-section-title" id="incident-details-heading">Incident details</h2>
+        <div class="form-grid form-grid--3">
+          <div class="field">
+            <label class="field-label" for="incident-number">Incident number <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="incident-number" name="incidentNumber" required placeholder="Your reference number" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="incident-date">Date of incident <span class="req" aria-hidden="true">*</span></label>
+            <input type="date" id="incident-date" name="incidentDate" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="incident-time">Time of incident</label>
+            <input type="time" id="incident-time" name="incidentTime" />
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="frs">Fire and Rescue Service</label>
+            <select id="frs" name="frs">
+              <option>Not Given</option>
+              <option>London Fire Brigade</option>
+              <option>Kent FRS</option>
+              <option>East Sussex FRS</option>
+              <option>West Sussex FRS</option>
+              <option>Surrey FRS</option>
+              <option>Avon FRS</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="premises-heading">
+        <h2 class="form-section-title" id="premises-heading">Premises</h2>
+        <p class="form-section-lead">Select the Crown premises if it appears in the register. If not listed, leave blank and enter the address below.</p>
+        <div class="form-grid">
+          <div class="field field--full">
+            <label class="field-label" for="premises">Address of premises</label>
+            <select id="premises" name="premises">
+              <option value="">Please select</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label class="field-label" for="premises-free">Premises not in system or not found</label>
+            <p class="field-hint">If you cannot find the premises above, enter the full address or site description here.</p>
+            <input type="text" id="premises-free" name="premisesFree" placeholder="e.g. Unit 14, industrial estate" autocomplete="street-address" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="contact-heading">
+        <h2 class="form-section-title" id="contact-heading">Contact</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label class="field-label" for="contact">Point of contact <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="contact" name="contact" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="email">Fire service contact email <span class="req" aria-hidden="true">*</span></label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="stop-message-heading">
+        <h2 class="form-section-title" id="stop-message-heading">Stop message</h2>
+
+        <div class="field">
+          <span class="field-label" id="incident-status-label">Incident status <span class="req" aria-hidden="true">*</span></span>
+          <p class="field-hint">Select all that apply — tick every statement that describes this incident.</p>
+          <ul class="choice-list choice-list--checkbox" id="incident-status-list" role="group" aria-labelledby="incident-status-label">
+            <li>
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Incident Dealt with by Staff - No Known Injuries" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="choice-card-body">Incident dealt with by staff — no known injuries</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Fire Service Fought Fire or Carried Out Rescues" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="choice-card-body">Fire service fought fire or carried out rescues</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Injuries as a Result of Fire" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="choice-card-body">Injuries as a result of fire</span>
+              </label>
+            </li>
+            <li>
+              <label class="choice-card choice-card--checkbox">
+                <input type="checkbox" name="incidentStatus" value="Serious or Fatal Injuries Suspected as Result of Fire" />
+                <span class="choice-check" aria-hidden="true">
+                  <svg class="choice-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="choice-card-body">Serious or fatal injuries suspected as result of fire</span>
+              </label>
+            </li>
+          </ul>
+          <p class="choice-validation-msg" id="incident-status-error" hidden>Select at least one incident status.</p>
+          <p class="urgent-notice">Please immediately call <strong>0300 1233911</strong> if you select serious or fatal injuries suspected (24-hour phone line).</p>
+        </div>
+
+        <div class="field" style="margin-top:24px;">
+          <label class="field-label" for="description">Description of incident <span class="req" aria-hidden="true">*</span></label>
+          <p class="field-hint">Use plain language. Replace any codes with a clear description of what happened, where, and any actions taken.</p>
+          <textarea id="description" name="description" required placeholder="What happened, where on site, casualties, FRS attendance…"></textarea>
+        </div>
+      </section>
+
+      <section class="form-section" aria-labelledby="security-heading">
+        <h2 class="form-section-title" id="security-heading">Security</h2>
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <p class="field-hint">Optional in this prototype — would authenticate FRS submitters in the live system.</p>
+          <input type="password" id="password" name="password" autocomplete="off" />
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="clear-form">Clear form</button>
+        <button type="submit" class="submit-btn">Report incident</button>
+      </div>
+    </form>
+
+    <div class="success-panel" id="success-panel" role="status">
+      <h2>Report received</h2>
+      <p id="success-ref"></p>
+      <p>Your submission has been saved for prototype testing. Inspectors can triage it in the main app.</p>
+      <p id="success-queue-hint"></p>
+      <p><a href="index.html#cpins-incoming" id="success-queue-link">Go to CPINs queue</a> (sign in).</p>
+    </div>
+  </div>
+</main>
+
+<footer class="page-footer">
+  Crown Premises' Fire Safety Inspectorate (CPFSI) · Ministry of Justice<br>
+  <a href="index.html">Return to CPFSI prototype</a>
+</footer>
+
+<script>
+  const CPIN_INTAKE_KEY = 'cpfsi-cpin-intake-v1';
+  const CPIN_REPORT_PREMISES = [
+    'Bristol Crown Court', 'Charing Cross House refurb', 'Crawley Job Centre Plus',
+    'DWP Brighton', 'DWP Canterbury', 'DWP Crawley', 'Folkestone Tribunal Hearing Centre',
+    'HMP Belmarsh', 'HMP Bristol', 'HMP Durham', 'HMP Isis', 'HMP Lewes', 'HMP Maidstone',
+    'HMP Pentonville', 'HMP Rochester', 'HMP Swaleside', 'HMP Wandsworth',
+    'HMCTS Guildford', 'Jobcentre Plus Crawley', 'Lewes Crown Court',
+    'Maidstone Magistrates Court', 'MoJ HQ London', 'Reading Job Centre Plus',
+    'Royal Courts of Justice', 'Temple Quay Estate', 'Temple Quay House',
+    'Temple Quay Riverside Annexe'
+  ].sort(function (a, b) { return a.localeCompare(b); });
+
+  (function populatePremisesSelect() {
+    const sel = document.getElementById('premises');
+    if (!sel) return;
+    CPIN_REPORT_PREMISES.forEach(function (name) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  })();
+
+  function formatUkDate(iso) {
+    if (!iso) return '';
+    const p = iso.split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function formatTime(t) {
+    if (!t) return '';
+    const parts = t.split(':');
+    return parts[0] + ':' + (parts[1] || '00');
+  }
+
+  function severityFromStatus(status) {
+    if (status.indexOf('Serious or Fatal') >= 0 || status.indexOf('Injuries as a Result') >= 0) return 'red';
+    if (status.indexOf('Fought Fire') >= 0) return 'amber';
+    return 'green';
+  }
+
+  function severityFromStatuses(statuses) {
+    let worst = 'green';
+    statuses.forEach(function (status) {
+      const sev = severityFromStatus(status);
+      if (sev === 'red') worst = 'red';
+      else if (sev === 'amber' && worst !== 'red') worst = 'amber';
+    });
+    return worst;
+  }
+
+  function clearIncidentStatusValidation() {
+    document.getElementById('incident-status-error').hidden = true;
+    document.getElementById('incident-status-list')?.classList.remove('is-invalid');
+  }
+
+  document.querySelectorAll('#incident-status-list input[type="checkbox"]').forEach(function (el) {
+    el.addEventListener('change', clearIncidentStatusValidation);
+  });
+
+  function nextRef(list) {
+    const n = 4500 + list.length;
+    return 'CPIN-2026-' + String(n);
+  }
+
+  document.getElementById('cpin-report-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const statuses = fd.getAll('incidentStatus');
+    if (!statuses.length) {
+      document.getElementById('incident-status-error').hidden = false;
+      document.getElementById('incident-status-list')?.classList.add('is-invalid');
+      document.getElementById('incident-status-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    clearIncidentStatusValidation();
+
+    let list = [];
+    try {
+      list = JSON.parse(localStorage.getItem(CPIN_INTAKE_KEY) || '[]');
+    } catch (err) {
+      list = [];
+    }
+
+    const premises = (fd.get('premises') || '').trim();
+    const premisesFree = (fd.get('premisesFree') || '').trim();
+    const description = (fd.get('description') || '').trim();
+    const id = 'cpin-in-' + Date.now();
+    const matched = !!premises;
+    const record = {
+      id: id,
+      ref: nextRef(list),
+      severity: severityFromStatuses(statuses),
+      when: 'Just now',
+      premises: premises || null,
+      summary: description.length > 72 ? description.slice(0, 72) + '…' : description,
+      patch: false,
+      workflow: matched ? 'incoming' : (premisesFree ? 'awaiting_premises' : 'incoming'),
+      assignee: null,
+      intake: {
+        incidentNumber: fd.get('incidentNumber'),
+        incidentDate: formatUkDate(fd.get('incidentDate')),
+        incidentTime: formatTime(fd.get('incidentTime')),
+        frs: fd.get('frs'),
+        contact: fd.get('contact'),
+        email: fd.get('email'),
+        incidentStatus: statuses.length === 1 ? statuses[0] : statuses,
+        description: description,
+        premisesFree: premisesFree
+      }
+    };
+
+    list.unshift(record);
+    localStorage.setItem(CPIN_INTAKE_KEY, JSON.stringify(list));
+
+    document.getElementById('cpin-report-form').hidden = true;
+    document.getElementById('required-note').hidden = true;
+    document.getElementById('form-title').hidden = true;
+    document.querySelector('.prototype-note').hidden = true;
+    document.querySelector('.form-tagline').hidden = true;
+    const panel = document.getElementById('success-panel');
+    document.getElementById('success-ref').textContent = 'Reference: ' + record.ref;
+    const hint = document.getElementById('success-queue-hint');
+    const link = document.getElementById('success-queue-link');
+    if (record.premises && record.workflow === 'incoming') {
+      hint.textContent = 'Premises matched — appears under Unassigned for intake review.';
+      link.href = 'index.html#cpins-tab=unassigned';
+      link.textContent = 'Go to CPINs — Unassigned';
+    } else if (record.workflow === 'awaiting_premises') {
+      hint.textContent = 'Premises not matched — appears under Unassigned with Premises needed.';
+      link.href = 'index.html#cpins-tab=unassigned&filter=premises-needed';
+      link.textContent = 'Go to CPINs — Unassigned';
+    } else {
+      hint.textContent = 'New submission — appears under Unassigned; link premises in Stage 1.';
+      link.href = 'index.html#cpins-tab=unassigned';
+      link.textContent = 'Go to CPINs — Unassigned';
+    }
+    panel.classList.add('show');
+  });
+
+  document.getElementById('clear-form').addEventListener('click', function () {
+    document.getElementById('cpin-report-form').reset();
+    document.getElementById('incident-date').valueAsDate = new Date();
+    clearIncidentStatusValidation();
+  });
+
+  document.getElementById('incident-date').valueAsDate = new Date();
+</script>
+</body>
+</html>
