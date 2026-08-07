@@ -685,6 +685,7 @@
 
   function setIsDateFilter(filter) {
     isDateFilter = filter && filter.type ? filter : { type: 'all' };
+    reconcileActiveBatch();
     listShown = IS_LIST_PAGE;
     renderIncidentSummariesPage();
   }
@@ -693,33 +694,88 @@
     return isDateFilter;
   }
 
+  function getIsDateRangeLabel() {
+    if (typeof formatDateRangeLabel === 'function') {
+      return formatDateRangeLabel(isDateFilter, 'incident-summaries');
+    }
+    return 'All dates';
+  }
+
+  function getAvailableBatches() {
+    const byBatch = {};
+    getAllSummaries().forEach(function (s) {
+      if (!s.uploadBatch || !matchesIsDateFilter(s)) return;
+      byBatch[s.uploadBatch] = (byBatch[s.uploadBatch] || 0) + 1;
+    });
+    return IS_BATCHES
+      .map(function (b) { return { label: b.label, count: byBatch[b.label] || 0 }; })
+      .filter(function (b) { return b.count > 0; });
+  }
+
+  function reconcileActiveBatch() {
+    if (!activeBatch) return;
+    const available = getAvailableBatches();
+    if (!available.some(function (b) { return b.label === activeBatch; })) {
+      activeBatch = '';
+    }
+  }
+
   function syncIsBatchTrigger() {
     const trigger = document.getElementById('is-batch-trigger');
     if (!trigger) return;
     const strong = trigger.querySelector('strong');
-    if (strong) strong.textContent = activeBatch || 'All batches';
-  }
-
-  function getIsBatchOptions() {
-    const batches = [];
-    getAllSummaries().forEach(function (s) {
-      if (s.uploadBatch && batches.indexOf(s.uploadBatch) < 0) batches.push(s.uploadBatch);
-    });
-    batches.sort(function (a, b) { return b.localeCompare(a); });
-    return batches;
+    if (strong) {
+      if (!activeBatch) {
+        strong.textContent = 'All batches';
+      } else {
+        const match = getAvailableBatches().find(function (b) { return b.label === activeBatch; });
+        strong.textContent = match ? (activeBatch + ' · ' + match.count) : activeBatch;
+      }
+    }
   }
 
   function renderIsBatchModal() {
     const el = document.getElementById('is-batch-presets');
+    const subEl = document.getElementById('is-batch-modal-sub');
     if (!el) return;
+    const batches = getAvailableBatches();
+    const totalInRange = batches.reduce(function (n, b) { return n + b.count; }, 0);
+    if (subEl) {
+      subEl.textContent = batches.length
+        ? 'Upload batches with incidents in ' + getIsDateRangeLabel().toLowerCase() + '.'
+        : 'No upload batches match the current incident date range.';
+    }
+    if (isBatchDraft && !batches.some(function (b) { return b.label === isBatchDraft; })) {
+      isBatchDraft = '';
+    }
+    if (!batches.length) {
+      el.innerHTML = '<div class="help" style="margin:0;">Try widening the incident date range to see upload batches.</div>';
+      return;
+    }
     el.innerHTML =
-      '<button type="button" class="date-range-preset' + (isBatchDraft === '' ? ' active' : '') + '" onclick="selectIsBatchDraft(\'\')">All batches</button>' +
-      getIsBatchOptions().map(function (b) {
-        return '<button type="button" class="date-range-preset' + (isBatchDraft === b ? ' active' : '') + '" onclick="selectIsBatchDraft(' + JSON.stringify(b) + ')">' + esc(b) + '</button>';
+      '<button type="button" class="date-range-preset' + (isBatchDraft === '' ? ' active' : '') + '" data-is-batch-draft="">All batches · ' + totalInRange + '</button>' +
+      batches.map(function (b) {
+        return '<button type="button" class="date-range-preset' + (isBatchDraft === b.label ? ' active' : '') + '" data-is-batch-draft="' + esc(b.label) + '">' + esc(b.label) + ' · ' + b.count + '</button>';
       }).join('');
   }
 
+  let isBatchModalBound = false;
+
+  function bindIsBatchModal() {
+    if (isBatchModalBound) return;
+    const el = document.getElementById('is-batch-presets');
+    if (!el) return;
+    el.addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-is-batch-draft]');
+      if (!btn) return;
+      selectIsBatchDraft(btn.getAttribute('data-is-batch-draft') || '');
+    });
+    isBatchModalBound = true;
+  }
+
   function openIsBatchModal() {
+    bindIsBatchModal();
+    reconcileActiveBatch();
     isBatchDraft = activeBatch;
     renderIsBatchModal();
     const modal = document.getElementById('is-batch-modal');
@@ -804,6 +860,7 @@
   }
 
   function renderIncidentSummaryFilterControls() {
+    reconcileActiveBatch();
     syncIsBatchTrigger();
     syncIsPremisesSearchUi();
     if (typeof syncDateRangeTrigger === 'function') syncDateRangeTrigger('incident-summaries');
