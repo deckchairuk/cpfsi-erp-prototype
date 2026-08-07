@@ -854,7 +854,7 @@
     if (!el) return;
     const stats = computeIsStats(statsBaseItems());
     el.innerHTML =
-      '<div class="cpin-tile green"><div class="lbl"><span class="dot"></span>Incidents</div><div class="big">' + stats.total + '</div><div class="sub">In selected range</div></div>' +
+      '<div class="cpin-tile blue"><div class="lbl"><span class="dot"></span>Incidents</div><div class="big">' + stats.total + '</div><div class="sub">In selected range</div></div>' +
       '<div class="cpin-tile amber"><div class="lbl"><span class="dot"></span>Injury flagged</div><div class="big">' + stats.injuries + '</div><div class="sub">Review required</div></div>' +
       '<div class="cpin-tile red"><div class="lbl"><span class="dot"></span>Fatalities</div><div class="big">' + stats.fatalities + '</div><div class="sub">Escalate immediately</div></div>';
   }
