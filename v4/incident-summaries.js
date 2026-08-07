@@ -3,7 +3,7 @@
   'use strict';
 
   const IS_STORAGE_KEY = 'cpfsi-incident-summaries-v4';
-  const IS_SEED_VERSION = 8;
+  const IS_SEED_VERSION = 9;
 
   const IS_SCORE_POINTS = {
     nonInjury: 1,
@@ -14,10 +14,10 @@
   };
 
   const IS_INJURY_CATEGORIES = [
-    { id: 'precautionary', label: 'Precautionary check', prisonersKey: 'prisonersPrecautionary', staffKey: 'staffPrecautionary', points: 2 },
-    { id: 'minor', label: 'Minor injury', prisonersKey: 'prisonersMinor', staffKey: 'staffMinor', points: 5 },
-    { id: 'significant', label: 'Significant injury', prisonersKey: 'prisonersSignificant', staffKey: 'staffSignificant', points: 10 },
-    { id: 'fatality', label: 'Fatality', prisonersKey: 'prisonersFatality', staffKey: 'staffFatality', points: 25 }
+    { id: 'precautionary', label: 'Precautionary assessment (medical staff only)', prisonersKey: 'prisonersPrecautionary', staffKey: 'staffPrecautionary', othersKey: 'othersPrecautionary', points: 2 },
+    { id: 'minor', label: 'Minor treatment injury', prisonersKey: 'prisonersMinor', staffKey: 'staffMinor', othersKey: 'othersMinor', points: 5 },
+    { id: 'significant', label: 'Significant injury', prisonersKey: 'prisonersSignificant', staffKey: 'staffSignificant', othersKey: 'othersSignificant', points: 10 },
+    { id: 'fatality', label: 'Fatality', prisonersKey: 'prisonersFatality', staffKey: 'staffFatality', othersKey: 'othersFatality', points: 25 }
   ];
   const IS_OVERRIDE_KEY = 'cpfsi-incident-summary-overrides-v1';
   const IS_UPLOADS_KEY = 'cpfsi-incident-summary-uploads-v1';
@@ -56,75 +56,102 @@
     { name: 'HMP Cookham Wood', ref: 'PRM-0002171' }
   ];
 
-  const IS_FIRE_TYPES = [
-    'Fire in cell or dormitory',
-    'Fire in kitchen',
-    'Fire in industrial premises',
-    'Fire in other residential',
-    'Fire in store or stock',
-    'Smoking materials — cell',
-    'False alarm — no fire'
-  ];
-
   const IS_LOCATIONS = [
     'Cell', 'Kitchen', 'Workshop', 'Association room', 'Laundry', 'Store', 'Landing', 'Education block'
   ];
-
-  /* Common prison fire ignition types — aligned with HMPPS feed categories and CPFSI trend tracking. */
-  const IS_IGNITION_SOURCES = [
-    {
-      id: 'improvised',
-      label: 'Improvised ignition source',
-      detail: 'Makeshift device — batteries or electrical components modified to produce a spark or heat.'
-    },
-    {
-      id: 'vape',
-      label: 'Vape / e-cigarette misuse',
-      detail: 'Unauthorized modification or tampering with a vape heating element to ignite materials.'
-    },
-    {
-      id: 'electrical',
-      label: 'Electrical wiring and appliances',
-      detail: 'Tampering with in-cell circuits, overloaded sockets, or damaged kettle, TV, or appliance cords.'
-    },
-    {
-      id: 'battery',
-      label: 'Rechargeable batteries',
-      detail: 'Overheating or short-circuit from authorized or illicit personal electronic items.'
-    },
-    {
-      id: 'naked-flame',
-      label: 'Deliberate naked flame',
-      detail: 'Matches, lighters, or improvised elements used to ignite bedding, textiles, or paper.'
-    },
-    {
-      id: 'cooking',
-      label: 'Cooking appliance — unattended',
-      detail: 'Unattended cooking in kitchen or illicit kettle use in cell accommodation.'
-    },
-    {
-      id: 'hot-work',
-      label: 'Hot work — sparks to combustibles',
-      detail: 'Workshop or industrial activity generating sparks near combustible materials.'
-    },
-    {
-      id: 'unknown',
-      label: 'Unknown — under investigation',
-      detail: 'Ignition source not yet confirmed from the HMPPS feed.'
-    }
-  ];
-
-  const IS_IGNITION_LEGACY = {
-    'Smoking materials — prohibited': 'naked-flame',
-    'Battery — malfunction, mechanical failure': 'battery',
-    'Electrical distribution — faulty wiring': 'electrical',
-    'Linen — deliberate ignition': 'naked-flame',
-    'Portable heater — too close to combustibles': 'electrical'
+  const IS_FIR = {
+    fireTypes: [
+      'Fire IN cell or dormitory',
+      'Fire NOT in cell or dormitory',
+      'Unknown'
+    ],
+    fireProtection: [
+      'Automatic fire detection (AFD) : Aspirating Smoke Detection (ASD)',
+      'Automatic fire detection (AFD) : Point Detection',
+      'None',
+      'Unknown'
+    ],
+    alarmRaised: [
+      'Automatic detector external to cell',
+      'Automatic fire detection (AFD)',
+      'Automatic in-duct detection',
+      'Aspirating Smoke Detection (ASD)',
+      'Cell Call',
+      'Domestic smoke detection (DSD)',
+      'Domestic Smoke detector outside cell',
+      'Fire alarm call point',
+      'Handbell',
+      'Member of staff',
+      'Person',
+      'Prisoner/Detainee/Resident/Young Person',
+      'Radio',
+      'Staff',
+      'Telephone',
+      'Unknown',
+      'Verbal'
+    ],
+    fireDetected: [
+      'Fire detection device : Automatic fire detection (AFD)',
+      'Fire detection device : Domestic smoke detection (DSD)',
+      'Person',
+      'Unknown'
+    ],
+    extinguishedBy: [
+      'Automatic fire suppression',
+      'Detainee / Resident / Young Person',
+      'Fire and Rescue Service',
+      'Other',
+      'Other Person',
+      'Prisoner',
+      'Staff',
+      'Unknown'
+    ],
+    intent: [
+      'Started by person/s (Intentional)',
+      'Unintentional (Accidental)',
+      'Unknown'
+    ],
+    mainIgnitionSamples: [
+      'Smoking materials / lighter — prohibited item',
+      'Vape device — heating element tampered',
+      'Electrical appliance — kettle or TV modified',
+      'Battery — illicit personal electronics',
+      'Linen / bedding — deliberate ignition',
+      'Cooking appliance — unattended',
+      'Hot work — sparks to combustibles',
+      'Unknown'
+    ]
   };
 
-  const IS_GENERIC_IGNITION = {
-    'Various — see HMPPS feed': true,
-    '': true
+  const IS_FIR_LEGACY = {
+    fireTypes: {
+      'Fire in cell or dormitory': 'Fire IN cell or dormitory',
+      'Smoking materials — cell': 'Fire IN cell or dormitory',
+      'Fire in kitchen': 'Fire NOT in cell or dormitory',
+      'Fire in industrial premises': 'Fire NOT in cell or dormitory',
+      'Fire in other residential': 'Fire NOT in cell or dormitory',
+      'Fire in store or stock': 'Fire NOT in cell or dormitory',
+      'False alarm — no fire': 'Unknown'
+    },
+    intent: {
+      'Deliberate': 'Started by person/s (Intentional)',
+      'Unintentional / accidental': 'Unintentional (Accidental)',
+      'Unknown': 'Unknown'
+    },
+    alarmRaised: {
+      'Staff': 'Staff',
+      'Automatic fire alarm': 'Automatic fire detection (AFD)'
+    },
+    fireDetected: {
+      'Staff observation': 'Person',
+      'Fire detection device — domestic smoke detection (DSD)': 'Fire detection device : Domestic smoke detection (DSD)',
+      'Domestic smoke detection (DSD)': 'Fire detection device : Domestic smoke detection (DSD)',
+      'Automatic fire detection system': 'Fire detection device : Automatic fire detection (AFD)'
+    },
+    extinguishedBy: {
+      'Staff': 'Staff',
+      'Fire service': 'Fire and Rescue Service'
+    }
   };
 
   const IS_DEMO_CPINS = [
@@ -164,12 +191,13 @@
       premises: 'HMP Wandsworth',
       premisesRef: 'PRM-0002095',
       specificLocation: 'Cell 14, E wing',
-      typeOfFire: 'Fire in cell or dormitory',
-      alarmRaised: 'Staff',
-      ignitionSource: 'Deliberate naked flame',
-      intent: 'Deliberate',
-      howDetected: 'Staff observation',
-      fireExtinguishedBy: 'Fire service',
+      typeOfFire: 'Fire IN cell or dormitory',
+      typeOfFireProtection: 'Automatic fire detection (AFD) : Aspirating Smoke Detection (ASD)',
+      alarmRaised: 'Automatic detector external to cell',
+      mainIgnitionSource: 'Linen / bedding — deliberate ignition',
+      intent: 'Started by person/s (Intentional)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
+      fireExtinguishedBy: 'Fire and Rescue Service',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
       prisonersMinor: 0,
@@ -202,11 +230,11 @@
       premises: 'HMP Bristol',
       premisesRef: 'PRM-0002140',
       specificLocation: 'Cell 4, Wing B',
-      typeOfFire: 'Fire in cell or dormitory',
+      typeOfFire: 'Fire IN cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Rechargeable batteries',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Fire detection device — domestic smoke detection (DSD)',
+      mainIgnitionSource: 'Battery — illicit personal electronics',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -232,12 +260,12 @@
       premises: 'HMP Belmarsh',
       premisesRef: 'PRM-0002088',
       specificLocation: 'Kitchen store, B wing',
-      typeOfFire: 'Fire in kitchen',
-      alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Cooking appliance — unattended',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Automatic fire detection system',
-      fireExtinguishedBy: 'Fire service',
+      typeOfFire: 'Fire NOT in cell or dormitory',
+      alarmRaised: 'Automatic fire detection (AFD)',
+      mainIgnitionSource: 'Cooking appliance — unattended',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
+      fireExtinguishedBy: 'Fire and Rescue Service',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
       prisonersMinor: 0,
@@ -270,11 +298,11 @@
       premises: 'HMP Lewes',
       premisesRef: 'PRM-0002103',
       specificLocation: 'Cell 12, C wing',
-      typeOfFire: 'Fire in cell or dormitory',
+      typeOfFire: 'Fire IN cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Vape / e-cigarette misuse',
-      intent: 'Deliberate',
-      howDetected: 'Staff observation',
+      mainIgnitionSource: 'Vape device — heating element tampered',
+      intent: 'Started by person/s (Intentional)',
+      howDetected: 'Person',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -300,11 +328,11 @@
       premises: 'HMP Maidstone',
       premisesRef: 'PRM-0002118',
       specificLocation: 'Workshop store',
-      typeOfFire: 'Fire in industrial premises',
-      alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Electrical wiring and appliances',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Automatic fire detection system',
+      typeOfFire: 'Fire NOT in cell or dormitory',
+      alarmRaised: 'Automatic fire detection (AFD)',
+      mainIgnitionSource: 'Electrical appliance — kettle or TV modified',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -332,11 +360,11 @@
       premises: 'HMP Swaleside',
       premisesRef: 'PRM-0002131',
       specificLocation: 'Association room',
-      typeOfFire: 'Fire in other residential',
+      typeOfFire: 'Fire NOT in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Unknown — under investigation',
+      mainIgnitionSource: 'Unknown',
       intent: 'Unknown',
-      howDetected: 'Staff observation',
+      howDetected: 'Person',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -364,11 +392,11 @@
       premises: 'HMP Pentonville',
       premisesRef: 'PRM-0002099',
       specificLocation: 'Cell 8',
-      typeOfFire: 'Fire in cell or dormitory',
+      typeOfFire: 'Fire IN cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Deliberate naked flame',
-      intent: 'Deliberate',
-      howDetected: 'Domestic smoke detection (DSD)',
+      mainIgnitionSource: 'Smoking materials / lighter — prohibited item',
+      intent: 'Started by person/s (Intentional)',
+      howDetected: 'Fire detection device : Domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -396,12 +424,12 @@
       premises: 'HMP Isis',
       premisesRef: 'PRM-0002155',
       specificLocation: 'Education block store',
-      typeOfFire: 'Fire in industrial premises',
-      alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Electrical wiring and appliances',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Automatic fire detection system',
-      fireExtinguishedBy: 'Fire service',
+      typeOfFire: 'Fire NOT in cell or dormitory',
+      alarmRaised: 'Automatic fire detection (AFD)',
+      mainIgnitionSource: 'Electrical appliance — kettle or TV modified',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
+      fireExtinguishedBy: 'Fire and Rescue Service',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
       prisonersMinor: 0,
@@ -426,11 +454,11 @@
       premises: 'HMP Durham',
       premisesRef: 'PRM-0002122',
       specificLocation: 'Cell 22',
-      typeOfFire: 'Fire in cell or dormitory',
+      typeOfFire: 'Fire IN cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Deliberate naked flame',
-      intent: 'Deliberate',
-      howDetected: 'Staff observation',
+      mainIgnitionSource: 'Smoking materials / lighter — prohibited item',
+      intent: 'Started by person/s (Intentional)',
+      howDetected: 'Person',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -458,12 +486,12 @@
       premises: 'HMP Wandsworth',
       premisesRef: 'PRM-0002095',
       specificLocation: 'Landing, D wing',
-      typeOfFire: 'Fire in other residential',
-      alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Electrical wiring and appliances',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Automatic fire detection system',
-      fireExtinguishedBy: 'Fire service',
+      typeOfFire: 'Fire NOT in cell or dormitory',
+      alarmRaised: 'Automatic fire detection (AFD)',
+      mainIgnitionSource: 'Electrical appliance — kettle or TV modified',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
+      fireExtinguishedBy: 'Fire and Rescue Service',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
       prisonersMinor: 0,
@@ -494,11 +522,11 @@
       premises: 'HMP Bristol',
       premisesRef: 'PRM-0002140',
       specificLocation: 'Laundry',
-      typeOfFire: 'Fire in industrial premises',
-      alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Hot work — sparks to combustibles',
-      intent: 'Unintentional / accidental',
-      howDetected: 'Automatic fire detection system',
+      typeOfFire: 'Fire NOT in cell or dormitory',
+      alarmRaised: 'Automatic fire detection (AFD)',
+      mainIgnitionSource: 'Hot work — sparks to combustibles',
+      intent: 'Unintentional (Accidental)',
+      howDetected: 'Fire detection device : Automatic fire detection (AFD)',
       fireExtinguishedBy: 'Staff',
       prisonersPrecautionary: 0,
       staffPrecautionary: 0,
@@ -520,66 +548,52 @@
     }
   ];
 
-  function resolveIgnitionSource(raw, record) {
-    if (!raw && !record) return null;
-    if (raw && !IS_GENERIC_IGNITION[raw]) {
-      const exact = IS_IGNITION_SOURCES.find(function (s) { return s.label === raw; });
-      if (exact) return exact;
-      const legacyId = IS_IGNITION_LEGACY[raw];
-      if (legacyId) {
-        return IS_IGNITION_SOURCES.find(function (s) { return s.id === legacyId; }) || { label: raw, detail: null };
-      }
-      if (raw) return { label: raw, detail: null };
-    }
-    if (record && record.id !== 'is-17120') {
-      return pickIgnitionSource(ignitionSeedForRecord(record), record.typeOfFire || '');
-    }
-    if (raw) {
-      return IS_IGNITION_SOURCES.find(function (s) { return s.label === raw; }) || { label: raw, detail: null };
-    }
-    return null;
+  function mapLegacyField(map, value, list) {
+    if (!value) return '';
+    if (list && list.indexOf(value) >= 0) return value;
+    if (map && map[value]) return map[value];
+    return value;
   }
 
-  function ignitionSeedForRecord(record) {
+  function firSeedForRecord(record) {
     let seed = 0;
     const key = (record.ref || record.id || '') + (record.incidentDate || '');
     for (let i = 0; i < key.length; i++) seed += key.charCodeAt(i);
     return seed;
   }
 
-  function enrichSummaryIgnition(record) {
-    if (!record || record.id === 'is-17120') return record;
-    const raw = record.ignitionSource;
-    if (raw && !IS_GENERIC_IGNITION[raw]) {
-      const known = IS_IGNITION_SOURCES.some(function (s) { return s.label === raw; });
-      if (known || IS_IGNITION_LEGACY[raw]) return record;
+  function pickFromFirList(list, seed) {
+    return list[Math.floor(pseudoRand(seed) * list.length)];
+  }
+
+  function pickMainIgnition(seed, fireType) {
+    if (fireType === 'Unknown') return 'Unknown';
+    const pool = IS_FIR.mainIgnitionSamples.filter(function (s) { return s !== 'Unknown'; });
+    return pickFromFirList(pool, seed + 17);
+  }
+
+  function migrateRecordToFIR(record) {
+    if (!record) return record;
+    record.typeOfFire = mapLegacyField(IS_FIR_LEGACY.fireTypes, record.typeOfFire, IS_FIR.fireTypes);
+    record.intent = mapLegacyField(IS_FIR_LEGACY.intent, record.intent, IS_FIR.intent);
+    record.alarmRaised = mapLegacyField(IS_FIR_LEGACY.alarmRaised, record.alarmRaised, IS_FIR.alarmRaised);
+    record.howDetected = mapLegacyField(IS_FIR_LEGACY.fireDetected, record.howDetected, IS_FIR.fireDetected);
+    record.fireExtinguishedBy = mapLegacyField(IS_FIR_LEGACY.extinguishedBy, record.fireExtinguishedBy, IS_FIR.extinguishedBy);
+    if (!record.typeOfFireProtection) {
+      record.typeOfFireProtection = pickFromFirList(IS_FIR.fireProtection, firSeedForRecord(record) + 3);
     }
-    const picked = pickIgnitionSource(ignitionSeedForRecord(record), record.typeOfFire || '');
-    if (picked) record.ignitionSource = picked.label;
+    if (!record.mainIgnitionSource) {
+      record.mainIgnitionSource = record.ignitionSource || pickMainIgnition(firSeedForRecord(record), record.typeOfFire);
+    }
+    record.othersMinor = record.othersMinor || 0;
+    record.othersPrecautionary = record.othersPrecautionary || 0;
+    record.othersSignificant = record.othersSignificant || 0;
+    record.othersFatality = record.othersFatality || 0;
     return record;
   }
 
-  function migrateSummariesIgnition(items) {
-    return items.map(enrichSummaryIgnition);
-  }
-
-  function pickIgnitionSource(seed, fireType) {
-    if (fireType === 'False alarm — no fire') {
-      return IS_IGNITION_SOURCES.find(function (s) { return s.id === 'unknown'; });
-    }
-    let pool;
-    if (fireType.indexOf('kitchen') >= 0) {
-      pool = ['cooking', 'electrical', 'naked-flame'];
-    } else if (fireType.indexOf('industrial') >= 0) {
-      pool = ['hot-work', 'electrical', 'battery'];
-    } else if (fireType.indexOf('cell') >= 0 || fireType.indexOf('Smoking') >= 0) {
-      /* Weighted toward electrical / improvised — post anti-tamper vape trend per CPFSI field feedback. */
-      pool = ['electrical', 'electrical', 'improvised', 'improvised', 'battery', 'naked-flame', 'vape'];
-    } else {
-      pool = ['electrical', 'improvised', 'battery', 'naked-flame', 'cooking'];
-    }
-    const id = pool[Math.floor(pseudoRand(seed + 13) * pool.length)];
-    return IS_IGNITION_SOURCES.find(function (s) { return s.id === id; });
+  function migrateSummariesToFIR(items) {
+    return items.map(migrateRecordToFIR);
   }
 
   function pseudoRand(seed) {
@@ -654,7 +668,10 @@
         const r = pseudoRand(seed);
         const prem = IS_PREMISES[Math.floor(r * IS_PREMISES.length)];
         const day = 1 + Math.floor(pseudoRand(seed + 1) * daysInMonth);
-        const fireType = IS_FIRE_TYPES[Math.floor(pseudoRand(seed + 2) * IS_FIRE_TYPES.length)];
+        const fireType = pickFromFirList(
+          pseudoRand(seed + 2) < 0.72 ? IS_FIR.fireTypes.slice(0, 2) : IS_FIR.fireTypes,
+          seed + 2
+        );
         const locBase = IS_LOCATIONS[Math.floor(pseudoRand(seed + 3) * IS_LOCATIONS.length)];
         const injuryRoll = pseudoRand(seed + 4);
         const hasFatality = injuryRoll < 0.004;
@@ -670,8 +687,12 @@
         const staffPrecautionary = hasPrecautionary && !prisonerFirst ? 1 : 0;
         const prisonersFatality = hasFatality && prisonerFirst ? 1 : 0;
         const staffFatality = hasFatality && !prisonerFirst ? 1 : 0;
+        const othersMinor = 0;
+        const othersPrecautionary = 0;
+        const othersSignificant = 0;
+        const othersFatality = 0;
         const nonInjury = !hasFatality && !hasSignificant && !hasMinor && !hasPrecautionary &&
-          fireType !== 'False alarm — no fire';
+          fireType !== 'Unknown';
         const statusRoll = pseudoRand(seed + 8);
         const status = statusRoll < 0.55 ? 'reviewed' : (statusRoll < 0.78 ? 'needs_review' : 'investigating');
         const incidentDate = isoDate(batch.year, batch.month, day);
@@ -686,19 +707,27 @@
           premisesRef: prem.ref,
           specificLocation: locBase + ' ' + (1 + Math.floor(pseudoRand(seed + 9) * 24)),
           typeOfFire: fireType,
-          alarmRaised: pseudoRand(seed + 10) < 0.5 ? 'Staff' : 'Automatic fire alarm',
-          ignitionSource: pickIgnitionSource(seed, fireType).label,
-          intent: pseudoRand(seed + 11) < 0.12 ? 'Deliberate' : 'Unintentional / accidental',
-          howDetected: 'Staff observation',
-          fireExtinguishedBy: pseudoRand(seed + 12) < 0.7 ? 'Staff' : 'Fire service',
+          typeOfFireProtection: pickFromFirList(IS_FIR.fireProtection, seed + 14),
+          alarmRaised: pickFromFirList(IS_FIR.alarmRaised, seed + 10),
+          howDetected: pickFromFirList(IS_FIR.fireDetected, seed + 15),
+          fireExtinguishedBy: pickFromFirList(IS_FIR.extinguishedBy, seed + 12),
+          mainIgnitionSource: pickMainIgnition(seed, fireType),
+          intent: pickFromFirList(
+            pseudoRand(seed + 11) < 0.12 ? IS_FIR.intent.slice(0, 1) : IS_FIR.intent.slice(0, 2),
+            seed + 11
+          ),
           prisonersPrecautionary: prisonersPrecautionary,
           staffPrecautionary: staffPrecautionary,
+          othersPrecautionary: othersPrecautionary,
           prisonersMinor: prisonersMinor,
           staffMinor: staffMinor,
+          othersMinor: othersMinor,
           prisonersSignificant: prisonersSignificant,
           staffSignificant: staffSignificant,
+          othersSignificant: othersSignificant,
           prisonersFatality: prisonersFatality,
           staffFatality: staffFatality,
+          othersFatality: othersFatality,
           nonInjury: nonInjury,
           relatedCpin: null,
           suggestedCpin: null,
@@ -716,7 +745,7 @@
         records.push(rec);
       }
     });
-    return records.map(function (r, idx) { return applyAutoCpinLink(r, idx); });
+    return records.map(function (r, idx) { return migrateRecordToFIR(applyAutoCpinLink(r, idx)); });
   }
 
   let summaries = [];
@@ -769,8 +798,8 @@
       localStorage.setItem(IS_STORAGE_KEY, JSON.stringify(summaries));
       localStorage.setItem(versionKey, String(IS_SEED_VERSION));
     } else {
-      const migrated = migrateSummariesIgnition(summaries);
-      if (migrated.some(function (s, i) { return s.ignitionSource !== summaries[i].ignitionSource; })) {
+      const migrated = migrateSummariesToFIR(summaries);
+      if (JSON.stringify(migrated) !== JSON.stringify(summaries)) {
         summaries = migrated;
         localStorage.setItem(IS_STORAGE_KEY, JSON.stringify(summaries));
       }
@@ -815,33 +844,41 @@
     const staffPrecautionary = s.staffPrecautionary || 0;
     const prisonersMinor = s.prisonersMinor || 0;
     const staffMinor = s.staffMinor || 0;
-    const hasPersonImpact = prisonersPrecautionary + staffPrecautionary +
-      prisonersMinor + staffMinor +
-      prisonersSignificant + staffSignificant +
-      prisonersFatality + staffFatality > 0;
+    const othersMinor = s.othersMinor || 0;
+    const othersPrecautionary = s.othersPrecautionary || 0;
+    const othersSignificant = s.othersSignificant || 0;
+    const othersFatality = s.othersFatality || 0;
+    const hasPersonImpact = prisonersPrecautionary + staffPrecautionary + othersPrecautionary +
+      prisonersMinor + staffMinor + othersMinor +
+      prisonersSignificant + staffSignificant + othersSignificant +
+      prisonersFatality + staffFatality + othersFatality > 0;
     let nonInjury = s.nonInjury;
     if (nonInjury == null) {
-      nonInjury = !hasPersonImpact && s.typeOfFire !== 'False alarm — no fire';
+      nonInjury = !hasPersonImpact && s.typeOfFire !== 'Unknown';
     }
     return {
       nonInjury: !!nonInjury,
       prisonersPrecautionary: prisonersPrecautionary,
       staffPrecautionary: staffPrecautionary,
+      othersPrecautionary: othersPrecautionary,
       prisonersMinor: prisonersMinor,
       staffMinor: staffMinor,
+      othersMinor: othersMinor,
       prisonersSignificant: prisonersSignificant,
       staffSignificant: staffSignificant,
+      othersSignificant: othersSignificant,
       prisonersFatality: prisonersFatality,
-      staffFatality: staffFatality
+      staffFatality: staffFatality,
+      othersFatality: othersFatality
     };
   }
 
   function categoryPeopleTotal(c, categoryId) {
     if (categoryId === 'nonInjury') return c.nonInjury ? 1 : 0;
-    if (categoryId === 'precautionary') return c.prisonersPrecautionary + c.staffPrecautionary;
-    if (categoryId === 'minor') return c.prisonersMinor + c.staffMinor;
-    if (categoryId === 'significant') return c.prisonersSignificant + c.staffSignificant;
-    if (categoryId === 'fatality') return c.prisonersFatality + c.staffFatality;
+    if (categoryId === 'precautionary') return c.prisonersPrecautionary + c.staffPrecautionary + c.othersPrecautionary;
+    if (categoryId === 'minor') return c.prisonersMinor + c.staffMinor + c.othersMinor;
+    if (categoryId === 'significant') return c.prisonersSignificant + c.staffSignificant + c.othersSignificant;
+    if (categoryId === 'fatality') return c.prisonersFatality + c.staffFatality + c.othersFatality;
     return 0;
   }
 
@@ -849,24 +886,24 @@
     const c = typeof s.nonInjury === 'boolean' || s.prisonersSignificant != null ? s : getInjuryCounts(s);
     let score = 0;
     if (c.nonInjury) score += IS_SCORE_POINTS.nonInjury;
-    score += (c.prisonersPrecautionary + c.staffPrecautionary) * IS_SCORE_POINTS.precautionary;
-    score += (c.prisonersMinor + c.staffMinor) * IS_SCORE_POINTS.minor;
-    score += (c.prisonersSignificant + c.staffSignificant) * IS_SCORE_POINTS.significant;
-    score += (c.prisonersFatality + c.staffFatality) * IS_SCORE_POINTS.fatality;
+    score += (c.prisonersPrecautionary + c.staffPrecautionary + c.othersPrecautionary) * IS_SCORE_POINTS.precautionary;
+    score += (c.prisonersMinor + c.staffMinor + c.othersMinor) * IS_SCORE_POINTS.minor;
+    score += (c.prisonersSignificant + c.staffSignificant + c.othersSignificant) * IS_SCORE_POINTS.significant;
+    score += (c.prisonersFatality + c.staffFatality + c.othersFatality) * IS_SCORE_POINTS.fatality;
     return score;
   }
 
   function hasFatalityFlag(s) {
     const c = getInjuryCounts(s);
-    return c.prisonersFatality + c.staffFatality > 0;
+    return c.prisonersFatality + c.staffFatality + c.othersFatality > 0;
   }
 
   function hasInjuryFlag(s) {
     const c = getInjuryCounts(s);
     return hasFatalityFlag(s) ||
-      c.prisonersPrecautionary + c.staffPrecautionary +
-      c.prisonersMinor + c.staffMinor +
-      c.prisonersSignificant + c.staffSignificant > 0;
+      c.prisonersPrecautionary + c.staffPrecautionary + c.othersPrecautionary +
+      c.prisonersMinor + c.staffMinor + c.othersMinor +
+      c.prisonersSignificant + c.staffSignificant + c.othersSignificant > 0;
   }
 
   function rowSeverityClass(s) {
@@ -1559,14 +1596,6 @@
     return '<div><div class="k">' + esc(label) + '</div><div class="v">' + value + '</div></div>';
   }
 
-  function intakeIgnitionCell(record) {
-    const src = resolveIgnitionSource(record.ignitionSource, record);
-    if (!src) return intakeCell('Ignition source', '—');
-    const body = '<strong>' + esc(src.label) + '</strong>' +
-      (src.detail ? '<span class="is-ignition-detail">' + esc(src.detail) + '</span>' : '');
-    return '<div class="is-ignition-field"><div class="k">Ignition source</div><div class="v">' + body + '</div></div>';
-  }
-
   function renderIncidentSummaryDetail() {
     initIncidentSummaryStore();
     const s = getSummaryById(activeSummaryId);
@@ -1595,39 +1624,42 @@
       body.innerHTML =
         '<div class="setup-section">' +
         '<h3>Incident details</h3>' +
-        '<div class="help">From the monthly HMPPS incident summary spreadsheet.</div>' +
+        '<div class="help">Fields match the HMPPS FIR template monthly upload spreadsheet.</div>' +
         '<div class="cpin-intake-grid">' +
-        intakeCell('Premises', '<a onclick="showPremisesByName(' + JSON.stringify(merged.premises) + ')">' + esc(merged.premises) + '</a> <span style="color:var(--ink-3);">(' + esc(merged.premisesRef) + ')</span>') +
-        intakeCell('Incident date', esc(formatIsDate(merged.incidentDate))) +
+        intakeCell('Title of upload', esc(merged.eventId || merged.uploadBatch)) +
+        intakeCell('Date occurred', esc(formatIsDate(merged.incidentDate))) +
+        intakeCell('Location of incident', '<a onclick="showPremisesByName(' + JSON.stringify(merged.premises) + ')">' + esc(merged.premises) + '</a> <span style="color:var(--ink-3);">(' + esc(merged.premisesRef) + ')</span>') +
         intakeCell('Specific location', esc(merged.specificLocation)) +
         intakeCell('Type of fire', esc(merged.typeOfFire)) +
-        intakeCell('Alarm raised', esc(merged.alarmRaised)) +
-        intakeIgnitionCell(merged) +
-        intakeCell('Intent', esc(merged.intent)) +
-        intakeCell('How detected', esc(merged.howDetected)) +
-        intakeCell('Extinguished by', esc(merged.fireExtinguishedBy)) +
-        intakeCell('Upload batch', esc(merged.eventId || merged.uploadBatch)) +
+        intakeCell('Type of fire protection', esc(merged.typeOfFireProtection || '—')) +
+        intakeCell('How was alarm raised?', esc(merged.alarmRaised)) +
+        intakeCell('How was fire detected?', esc(merged.howDetected)) +
+        intakeCell('Who extinguished the fire?', esc(merged.fireExtinguishedBy)) +
+        intakeCell('Main ignition source', esc(merged.mainIgnitionSource || merged.ignitionSource || '—')) +
+        intakeCell('Accidental or deliberate?', esc(merged.intent)) +
         (merged.historic ? intakeCell('Historic record', 'Yes — carried from prior system') : '') +
         '</div></div>' +
         '<div class="setup-section">' +
         '<h3>Injuries &amp; scoring</h3>' +
-        '<div class="help">Counts from the HMPPS feed. Points contribute to the premises RBIP score on a rolling 12-month basis.</div>' +
-        '<table class="data is-injury-table"><thead><tr><th>Category</th><th class="is-num">Prisoners</th><th class="is-num">Staff</th><th class="is-num">Points</th></tr></thead><tbody>' +
+        '<div class="help">Counts from the HMPPS feed — prisoners, staff, and others. Points contribute to the premises RBIP score on a rolling 12-month basis.</div>' +
+        '<table class="data is-injury-table"><thead><tr><th>Category</th><th class="is-num">Prisoners</th><th class="is-num">Staff</th><th class="is-num">Others</th><th class="is-num">Points</th></tr></thead><tbody>' +
         (injuryCounts.nonInjury
-          ? '<tr><td>Non-injury</td><td class="is-num is-empty">—</td><td class="is-num is-empty">—</td><td class="is-num is-hit">' + IS_SCORE_POINTS.nonInjury + '</td></tr>'
+          ? '<tr><td>Non-injury</td><td class="is-num is-empty">—</td><td class="is-num is-empty">—</td><td class="is-num is-empty">—</td><td class="is-num is-hit">' + IS_SCORE_POINTS.nonInjury + '</td></tr>'
           : '') +
         IS_INJURY_CATEGORIES.map(function (cat) {
           const pCount = injuryCounts[cat.prisonersKey] || 0;
           const sCount = injuryCounts[cat.staffKey] || 0;
-          const pts = (pCount + sCount) * cat.points;
+          const oCount = injuryCounts[cat.othersKey] || 0;
+          const pts = (pCount + sCount + oCount) * cat.points;
           const highlight = pts > 0 ? ' is-hit' + (cat.id === 'fatality' || cat.id === 'significant' ? ' is-severe' : '') : '';
           return '<tr class="' + (pts > 0 ? 'has-value' : '') + '">' +
             '<td>' + esc(cat.label) + '</td>' +
             '<td class="is-num' + highlight + '">' + esc(String(pCount)) + '</td>' +
             '<td class="is-num' + highlight + '">' + esc(String(sCount)) + '</td>' +
+            '<td class="is-num' + highlight + '">' + esc(String(oCount)) + '</td>' +
             '<td class="is-num is-score' + highlight + '">' + esc(String(pts)) + '</td></tr>';
         }).join('') +
-        '<tr class="is-injury-total"><td><strong>Total incident score</strong></td><td class="is-num" colspan="2"></td><td class="is-num is-score"><strong>' + score + '</strong></td></tr>' +
+        '<tr class="is-injury-total"><td><strong>Total incident score</strong></td><td class="is-num" colspan="3"></td><td class="is-num is-score"><strong>' + score + '</strong></td></tr>' +
         '</tbody></table></div>' +
         '<div class="setup-section">' +
         '<h3>CPIN linkage</h3>' +
