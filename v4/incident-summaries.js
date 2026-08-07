@@ -3,7 +3,7 @@
   'use strict';
 
   const IS_STORAGE_KEY = 'cpfsi-incident-summaries-v4';
-  const IS_SEED_VERSION = 6;
+  const IS_SEED_VERSION = 8;
 
   const IS_SCORE_POINTS = {
     nonInjury: 1,
@@ -70,6 +70,63 @@
     'Cell', 'Kitchen', 'Workshop', 'Association room', 'Laundry', 'Store', 'Landing', 'Education block'
   ];
 
+  /* Common prison fire ignition types — aligned with HMPPS feed categories and CPFSI trend tracking. */
+  const IS_IGNITION_SOURCES = [
+    {
+      id: 'improvised',
+      label: 'Improvised ignition source',
+      detail: 'Makeshift device — batteries or electrical components modified to produce a spark or heat.'
+    },
+    {
+      id: 'vape',
+      label: 'Vape / e-cigarette misuse',
+      detail: 'Unauthorized modification or tampering with a vape heating element to ignite materials.'
+    },
+    {
+      id: 'electrical',
+      label: 'Electrical wiring and appliances',
+      detail: 'Tampering with in-cell circuits, overloaded sockets, or damaged kettle, TV, or appliance cords.'
+    },
+    {
+      id: 'battery',
+      label: 'Rechargeable batteries',
+      detail: 'Overheating or short-circuit from authorized or illicit personal electronic items.'
+    },
+    {
+      id: 'naked-flame',
+      label: 'Deliberate naked flame',
+      detail: 'Matches, lighters, or improvised elements used to ignite bedding, textiles, or paper.'
+    },
+    {
+      id: 'cooking',
+      label: 'Cooking appliance — unattended',
+      detail: 'Unattended cooking in kitchen or illicit kettle use in cell accommodation.'
+    },
+    {
+      id: 'hot-work',
+      label: 'Hot work — sparks to combustibles',
+      detail: 'Workshop or industrial activity generating sparks near combustible materials.'
+    },
+    {
+      id: 'unknown',
+      label: 'Unknown — under investigation',
+      detail: 'Ignition source not yet confirmed from the HMPPS feed.'
+    }
+  ];
+
+  const IS_IGNITION_LEGACY = {
+    'Smoking materials — prohibited': 'naked-flame',
+    'Battery — malfunction, mechanical failure': 'battery',
+    'Electrical distribution — faulty wiring': 'electrical',
+    'Linen — deliberate ignition': 'naked-flame',
+    'Portable heater — too close to combustibles': 'electrical'
+  };
+
+  const IS_GENERIC_IGNITION = {
+    'Various — see HMPPS feed': true,
+    '': true
+  };
+
   const IS_DEMO_CPINS = [
     { ref: 'CPIN-2026-0418', premises: 'HMP Lewes', date: '2026-06-22', routeId: 'cpin-0418' },
     { ref: 'CPIN-2026-0412', premises: 'HMP Belmarsh', date: '2026-06-21', routeId: 'cpin-0412' },
@@ -109,7 +166,7 @@
       specificLocation: 'Cell 14, E wing',
       typeOfFire: 'Fire in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Smoking materials — prohibited',
+      ignitionSource: 'Deliberate naked flame',
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Fire service',
@@ -147,7 +204,7 @@
       specificLocation: 'Cell 4, Wing B',
       typeOfFire: 'Fire in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Battery — malfunction, mechanical failure',
+      ignitionSource: 'Rechargeable batteries',
       intent: 'Unintentional / accidental',
       howDetected: 'Fire detection device — domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
@@ -215,7 +272,7 @@
       specificLocation: 'Cell 12, C wing',
       typeOfFire: 'Fire in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Smoking materials — prohibited',
+      ignitionSource: 'Vape / e-cigarette misuse',
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Staff',
@@ -245,7 +302,7 @@
       specificLocation: 'Workshop store',
       typeOfFire: 'Fire in industrial premises',
       alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Electrical distribution — faulty wiring',
+      ignitionSource: 'Electrical wiring and appliances',
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Staff',
@@ -309,7 +366,7 @@
       specificLocation: 'Cell 8',
       typeOfFire: 'Fire in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Linen — deliberate ignition',
+      ignitionSource: 'Deliberate naked flame',
       intent: 'Deliberate',
       howDetected: 'Domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
@@ -341,7 +398,7 @@
       specificLocation: 'Education block store',
       typeOfFire: 'Fire in industrial premises',
       alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Portable heater — too close to combustibles',
+      ignitionSource: 'Electrical wiring and appliances',
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Fire service',
@@ -371,7 +428,7 @@
       specificLocation: 'Cell 22',
       typeOfFire: 'Fire in cell or dormitory',
       alarmRaised: 'Staff',
-      ignitionSource: 'Smoking materials — prohibited',
+      ignitionSource: 'Deliberate naked flame',
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Staff',
@@ -403,7 +460,7 @@
       specificLocation: 'Landing, D wing',
       typeOfFire: 'Fire in other residential',
       alarmRaised: 'Automatic fire alarm',
-      ignitionSource: 'Electrical distribution — faulty wiring',
+      ignitionSource: 'Electrical wiring and appliances',
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Fire service',
@@ -462,6 +519,68 @@
       reviewedBy: 'Phil Gower'
     }
   ];
+
+  function resolveIgnitionSource(raw, record) {
+    if (!raw && !record) return null;
+    if (raw && !IS_GENERIC_IGNITION[raw]) {
+      const exact = IS_IGNITION_SOURCES.find(function (s) { return s.label === raw; });
+      if (exact) return exact;
+      const legacyId = IS_IGNITION_LEGACY[raw];
+      if (legacyId) {
+        return IS_IGNITION_SOURCES.find(function (s) { return s.id === legacyId; }) || { label: raw, detail: null };
+      }
+      if (raw) return { label: raw, detail: null };
+    }
+    if (record && record.id !== 'is-17120') {
+      return pickIgnitionSource(ignitionSeedForRecord(record), record.typeOfFire || '');
+    }
+    if (raw) {
+      return IS_IGNITION_SOURCES.find(function (s) { return s.label === raw; }) || { label: raw, detail: null };
+    }
+    return null;
+  }
+
+  function ignitionSeedForRecord(record) {
+    let seed = 0;
+    const key = (record.ref || record.id || '') + (record.incidentDate || '');
+    for (let i = 0; i < key.length; i++) seed += key.charCodeAt(i);
+    return seed;
+  }
+
+  function enrichSummaryIgnition(record) {
+    if (!record || record.id === 'is-17120') return record;
+    const raw = record.ignitionSource;
+    if (raw && !IS_GENERIC_IGNITION[raw]) {
+      const known = IS_IGNITION_SOURCES.some(function (s) { return s.label === raw; });
+      if (known || IS_IGNITION_LEGACY[raw]) return record;
+    }
+    const picked = pickIgnitionSource(ignitionSeedForRecord(record), record.typeOfFire || '');
+    if (picked) record.ignitionSource = picked.label;
+    return record;
+  }
+
+  function migrateSummariesIgnition(items) {
+    return items.map(enrichSummaryIgnition);
+  }
+
+  function pickIgnitionSource(seed, fireType) {
+    if (fireType === 'False alarm — no fire') {
+      return IS_IGNITION_SOURCES.find(function (s) { return s.id === 'unknown'; });
+    }
+    let pool;
+    if (fireType.indexOf('kitchen') >= 0) {
+      pool = ['cooking', 'electrical', 'naked-flame'];
+    } else if (fireType.indexOf('industrial') >= 0) {
+      pool = ['hot-work', 'electrical', 'battery'];
+    } else if (fireType.indexOf('cell') >= 0 || fireType.indexOf('Smoking') >= 0) {
+      /* Weighted toward electrical / improvised — post anti-tamper vape trend per CPFSI field feedback. */
+      pool = ['electrical', 'electrical', 'improvised', 'improvised', 'battery', 'naked-flame', 'vape'];
+    } else {
+      pool = ['electrical', 'improvised', 'battery', 'naked-flame', 'cooking'];
+    }
+    const id = pool[Math.floor(pseudoRand(seed + 13) * pool.length)];
+    return IS_IGNITION_SOURCES.find(function (s) { return s.id === id; });
+  }
 
   function pseudoRand(seed) {
     let x = Math.sin(seed) * 10000;
@@ -568,7 +687,7 @@
           specificLocation: locBase + ' ' + (1 + Math.floor(pseudoRand(seed + 9) * 24)),
           typeOfFire: fireType,
           alarmRaised: pseudoRand(seed + 10) < 0.5 ? 'Staff' : 'Automatic fire alarm',
-          ignitionSource: 'Various — see HMPPS feed',
+          ignitionSource: pickIgnitionSource(seed, fireType).label,
           intent: pseudoRand(seed + 11) < 0.12 ? 'Deliberate' : 'Unintentional / accidental',
           howDetected: 'Staff observation',
           fireExtinguishedBy: pseudoRand(seed + 12) < 0.7 ? 'Staff' : 'Fire service',
@@ -649,6 +768,12 @@
       summaries = generateBulkSeedSummaries();
       localStorage.setItem(IS_STORAGE_KEY, JSON.stringify(summaries));
       localStorage.setItem(versionKey, String(IS_SEED_VERSION));
+    } else {
+      const migrated = migrateSummariesIgnition(summaries);
+      if (migrated.some(function (s, i) { return s.ignitionSource !== summaries[i].ignitionSource; })) {
+        summaries = migrated;
+        localStorage.setItem(IS_STORAGE_KEY, JSON.stringify(summaries));
+      }
     }
     overrides = loadJson(IS_OVERRIDE_KEY, {});
     uploads = loadJson(IS_UPLOADS_KEY, [
@@ -1434,6 +1559,14 @@
     return '<div><div class="k">' + esc(label) + '</div><div class="v">' + value + '</div></div>';
   }
 
+  function intakeIgnitionCell(record) {
+    const src = resolveIgnitionSource(record.ignitionSource, record);
+    if (!src) return intakeCell('Ignition source', '—');
+    const body = '<strong>' + esc(src.label) + '</strong>' +
+      (src.detail ? '<span class="is-ignition-detail">' + esc(src.detail) + '</span>' : '');
+    return '<div class="is-ignition-field"><div class="k">Ignition source</div><div class="v">' + body + '</div></div>';
+  }
+
   function renderIncidentSummaryDetail() {
     initIncidentSummaryStore();
     const s = getSummaryById(activeSummaryId);
@@ -1469,7 +1602,7 @@
         intakeCell('Specific location', esc(merged.specificLocation)) +
         intakeCell('Type of fire', esc(merged.typeOfFire)) +
         intakeCell('Alarm raised', esc(merged.alarmRaised)) +
-        intakeCell('Ignition source', esc(merged.ignitionSource)) +
+        intakeIgnitionCell(merged) +
         intakeCell('Intent', esc(merged.intent)) +
         intakeCell('How detected', esc(merged.howDetected)) +
         intakeCell('Extinguished by', esc(merged.fireExtinguishedBy)) +
