@@ -2,10 +2,13 @@
 (function () {
   'use strict';
 
-  const IS_STORAGE_KEY = 'cpfsi-incident-summaries-v1';
+  const IS_STORAGE_KEY = 'cpfsi-incident-summaries-v4';
+  const IS_SEED_VERSION = 5;
   const IS_OVERRIDE_KEY = 'cpfsi-incident-summary-overrides-v1';
   const IS_UPLOADS_KEY = 'cpfsi-incident-summary-uploads-v1';
   const IS_REVIEWER = 'Phil Gower';
+  const IS_LIST_PAGE = 50;
+  const IS_DEMO_TODAY = new Date(2026, 5, 22, 12, 0, 0);
 
   const IS_STATUS_LABELS = {
     needs_review: 'Needs review',
@@ -16,13 +19,106 @@
   const IS_VIEWS = [
     { id: 'needs-review', label: 'Needs review' },
     { id: 'injury', label: 'Injury flagged' },
-    { id: 'no-cpin', label: 'No CPIN match' },
+    { id: 'fatality', label: 'Fatalities' },
     { id: 'linked', label: 'Linked to CPIN' },
+    { id: 'no-cpin', label: 'No CPIN match' },
     { id: 'reviewed', label: 'Reviewed' },
     { id: 'all', label: 'All' }
   ];
 
+  const IS_PREMISES = [
+    { name: 'HMP Bristol', ref: 'PRM-0002140' },
+    { name: 'HMP Belmarsh', ref: 'PRM-0002088' },
+    { name: 'HMP Lewes', ref: 'PRM-0002103' },
+    { name: 'HMP Maidstone', ref: 'PRM-0002118' },
+    { name: 'HMP Swaleside', ref: 'PRM-0002131' },
+    { name: 'HMP Pentonville', ref: 'PRM-0002099' },
+    { name: 'HMP Isis', ref: 'PRM-0002155' },
+    { name: 'HMP Durham', ref: 'PRM-0002122' },
+    { name: 'HMP Wandsworth', ref: 'PRM-0002095' },
+    { name: 'HMP Rochester', ref: 'PRM-0002108' },
+    { name: 'HMP Ford', ref: 'PRM-0002160' },
+    { name: 'HMP Cookham Wood', ref: 'PRM-0002171' }
+  ];
+
+  const IS_FIRE_TYPES = [
+    'Fire in cell or dormitory',
+    'Fire in kitchen',
+    'Fire in industrial premises',
+    'Fire in other residential',
+    'Fire in store or stock',
+    'Smoking materials — cell',
+    'False alarm — no fire'
+  ];
+
+  const IS_LOCATIONS = [
+    'Cell', 'Kitchen', 'Workshop', 'Association room', 'Laundry', 'Store', 'Landing', 'Education block'
+  ];
+
+  const IS_DEMO_CPINS = [
+    { ref: 'CPIN-2026-0418', premises: 'HMP Lewes', date: '2026-06-22', routeId: 'cpin-0418' },
+    { ref: 'CPIN-2026-0412', premises: 'HMP Belmarsh', date: '2026-06-21', routeId: 'cpin-0412' },
+    { ref: 'CPIN-2026-0398', premises: 'HMP Maidstone', date: '2026-06-17', routeId: 'cpin-0398' },
+    { ref: 'CPIN-2026-0440', premises: 'HMP Wandsworth', date: '2026-06-22', routeId: 'cpin-u-0440' },
+    { ref: 'CPIN-2026-0447', premises: 'HMP Wandsworth', date: '2026-06-02', routeId: 'cpin-in-0447' },
+    { ref: 'CPIN-2026-0392', premises: 'HMP Rochester', date: '2026-06-15', routeId: 'cpin-0392' },
+    { ref: 'CPIN-2026-0385', premises: 'HMP Bristol', date: '2026-06-10', routeId: 'cpin-0385' },
+    { ref: 'CPIN-2026-0401', premises: 'HMP Swaleside', date: '2026-05-28', routeId: 'cpin-0401' },
+    { ref: 'CPIN-2026-0376', premises: 'HMP Pentonville', date: '2026-05-19', routeId: 'cpin-0376' },
+    { ref: 'CPIN-2026-0368', premises: 'HMP Isis', date: '2026-04-24', routeId: 'cpin-0368' },
+    { ref: 'CPIN-2026-0359', premises: 'HMP Durham', date: '2026-04-08', routeId: 'cpin-0359' },
+    { ref: 'CPIN-2026-0344', premises: 'HMP Ford', date: '2026-03-22', routeId: 'cpin-0344' },
+    { ref: 'CPIN-2026-0331', premises: 'HMP Cookham Wood', date: '2026-02-18', routeId: 'cpin-0331' },
+    { ref: 'CPIN-2026-0425', premises: 'HMP Lewes', date: '2026-05-12', routeId: 'cpin-0425' },
+    { ref: 'CPIN-2026-0433', premises: 'HMP Belmarsh', date: '2026-04-15', routeId: 'cpin-0433' },
+    { ref: 'CPIN-2026-0415', premises: 'HMP Bristol', date: '2026-03-08', routeId: 'cpin-0415' }
+  ];
+  const IS_CPIN_LINK_RATE = 0.82;
+
+  const IS_BATCHES = [
+    { label: 'June 2026', year: 2026, month: 5, count: 142 },
+    { label: 'May 2026', year: 2026, month: 4, count: 118 },
+    { label: 'April 2026', year: 2026, month: 3, count: 96 },
+    { label: 'March 2026', year: 2026, month: 2, count: 89 },
+    { label: 'February 2026', year: 2026, month: 1, count: 74 }
+  ];
+
   const SEED_SUMMARIES = [
+    {
+      id: 'is-17205',
+      ref: 'IS202606-17205',
+      eventId: 'Upload June 2026',
+      incidentDate: '2026-06-18',
+      premises: 'HMP Wandsworth',
+      premisesRef: 'PRM-0002095',
+      specificLocation: 'Cell 14, E wing',
+      typeOfFire: 'Fire in cell or dormitory',
+      alarmRaised: 'Staff',
+      ignitionSource: 'Smoking materials — prohibited',
+      intent: 'Deliberate',
+      howDetected: 'Staff observation',
+      fireExtinguishedBy: 'Fire service',
+      prisonersInjured: 0,
+      staffInjured: 0,
+      prisonersMinor: 0,
+      staffMinor: 0,
+      seriousInjuries: 0,
+      fatalities: 1,
+      relatedCpin: 'CPIN-2026-0440',
+      suggestedCpin: null,
+      cpinAutoLinked: true,
+      cpinLinkManual: false,
+      status: 'investigating',
+      uploadBatch: 'June 2026',
+      historic: false,
+      notes: 'Fatality confirmed by prison. CPIN cross-check and escalation in progress.',
+      activityLog: {
+        notes: [{ id: 'isn-wan-fat', text: 'Fatality confirmed by prison. CPIN cross-check and escalation in progress.', at: '2 Jul 2026, 09:15', ts: 1751442900000 }],
+        times: [{ id: 'ist-wan-fat', activity: 'Review incident summary', minutes: 60, at: '2 Jul 2026, 08:30', ts: 1751440200000 }],
+        interim: [{ id: 'isi-wan-fat', title: 'Fatality escalation', text: 'Notified regional lead. Awaiting formal CPIN alignment with London Fire Brigade submission.', at: '2 Jul 2026, 09:20', ts: 1751443200000 }],
+        files: []
+      }
+    },
     {
       id: 'is-17151',
       ref: 'IS202605-17151',
@@ -68,8 +164,11 @@
       prisonersMinor: 0,
       staffMinor: 0,
       seriousInjuries: 1,
+      fatalities: 0,
       relatedCpin: 'CPIN-2026-0412',
       suggestedCpin: null,
+      cpinAutoLinked: true,
+      cpinLinkManual: false,
       status: 'investigating',
       uploadBatch: 'April 2026',
       historic: false,
@@ -307,11 +406,144 @@
     }
   ];
 
+  function pseudoRand(seed) {
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+
+  function isoDate(y, m, d) {
+    return y + '-' + pad2(m + 1) + '-' + pad2(d);
+  }
+
+  function parseIsoDate(iso) {
+    const p = (iso || '').split('-');
+    return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+  }
+
+  function daysBetween(a, b) {
+    const ms = Math.abs(parseIsoDate(a) - parseIsoDate(b));
+    return Math.round(ms / 86400000);
+  }
+
+  function autoMatchCpin(summary) {
+    if (!summary || !summary.premises || !summary.incidentDate) return null;
+    let best = null;
+    IS_DEMO_CPINS.forEach(function (c) {
+      if (c.premises !== summary.premises) return;
+      const days = daysBetween(summary.incidentDate, c.date);
+      if (days > 30) return;
+      if (!best || days < best.days) best = { ref: c.ref, routeId: c.routeId, days: days };
+    });
+    return best;
+  }
+
+  function defaultCpinForPremises(premises) {
+    return IS_DEMO_CPINS.find(function (c) { return c.premises === premises; }) || null;
+  }
+
+  function applyAutoCpinLink(record, seed) {
+    if (record.relatedCpin || record.cpinLinkManual) return record;
+    const match = autoMatchCpin(record);
+    if (match) {
+      record.relatedCpin = match.ref;
+      record.cpinAutoLinked = true;
+      record.suggestedCpin = null;
+      if (record.status === 'needs_review') record.status = 'investigating';
+      return record;
+    }
+    const linkSeed = typeof seed === 'number' ? seed : 0;
+    if (pseudoRand(linkSeed + 99) < IS_CPIN_LINK_RATE) {
+      const fallback = defaultCpinForPremises(record.premises);
+      if (fallback) {
+        record.relatedCpin = fallback.ref;
+        record.cpinAutoLinked = true;
+        record.suggestedCpin = null;
+        if (record.status === 'needs_review') record.status = 'investigating';
+      }
+    }
+    return record;
+  }
+
+  function generateBulkSeedSummaries() {
+    const records = JSON.parse(JSON.stringify(SEED_SUMMARIES));
+    let seq = 17200;
+    IS_BATCHES.forEach(function (batch, bi) {
+      const existingInBatch = records.filter(function (r) { return r.uploadBatch === batch.label; }).length;
+      const need = Math.max(0, batch.count - existingInBatch);
+      const daysInMonth = new Date(batch.year, batch.month + 1, 0).getDate();
+      for (let i = 0; i < need; i++) {
+        const seed = bi * 10000 + i;
+        const r = pseudoRand(seed);
+        const prem = IS_PREMISES[Math.floor(r * IS_PREMISES.length)];
+        const day = 1 + Math.floor(pseudoRand(seed + 1) * daysInMonth);
+        const fireType = IS_FIRE_TYPES[Math.floor(pseudoRand(seed + 2) * IS_FIRE_TYPES.length)];
+        const locBase = IS_LOCATIONS[Math.floor(pseudoRand(seed + 3) * IS_LOCATIONS.length)];
+        const injuryRoll = pseudoRand(seed + 4);
+        const hasInjury = injuryRoll < 0.14;
+        const hasFatality = injuryRoll < 0.004;
+        const prisonersInjured = hasFatality ? 0 : (hasInjury && pseudoRand(seed + 5) < 0.4 ? 1 : 0);
+        const staffInjured = hasFatality ? 0 : (hasInjury && prisonersInjured === 0 ? 1 : 0);
+        const prisonersMinor = (!hasInjury && !hasFatality && pseudoRand(seed + 6) < 0.08) ? 1 : 0;
+        const staffMinor = (!hasInjury && !hasFatality && prisonersMinor === 0 && pseudoRand(seed + 7) < 0.06) ? 1 : 0;
+        const seriousInjuries = hasInjury ? 1 : 0;
+        const fatalities = hasFatality ? 1 : 0;
+        const statusRoll = pseudoRand(seed + 8);
+        const status = statusRoll < 0.55 ? 'reviewed' : (statusRoll < 0.78 ? 'needs_review' : 'investigating');
+        const incidentDate = isoDate(batch.year, batch.month, day);
+        const ref = 'IS' + batch.year + pad2(batch.month + 1) + '-' + seq;
+        seq++;
+        const rec = applyAutoCpinLink({
+          id: 'is-' + seq,
+          ref: ref,
+          eventId: 'Upload ' + batch.label,
+          incidentDate: incidentDate,
+          premises: prem.name,
+          premisesRef: prem.ref,
+          specificLocation: locBase + ' ' + (1 + Math.floor(pseudoRand(seed + 9) * 24)),
+          typeOfFire: fireType,
+          alarmRaised: pseudoRand(seed + 10) < 0.5 ? 'Staff' : 'Automatic fire alarm',
+          ignitionSource: 'Various — see HMPPS feed',
+          intent: pseudoRand(seed + 11) < 0.12 ? 'Deliberate' : 'Unintentional / accidental',
+          howDetected: 'Staff observation',
+          fireExtinguishedBy: pseudoRand(seed + 12) < 0.7 ? 'Staff' : 'Fire service',
+          prisonersInjured: prisonersInjured,
+          staffInjured: staffInjured,
+          prisonersMinor: prisonersMinor,
+          staffMinor: staffMinor,
+          seriousInjuries: seriousInjuries,
+          fatalities: fatalities,
+          relatedCpin: null,
+          suggestedCpin: null,
+          cpinAutoLinked: false,
+          cpinLinkManual: false,
+          status: status,
+          uploadBatch: batch.label,
+          historic: false,
+          notes: ''
+        }, seed);
+        if (status === 'reviewed') {
+          rec.reviewedAt = formatIsDate(incidentDate);
+          rec.reviewedBy = IS_REVIEWER;
+        }
+        records.push(rec);
+      }
+    });
+    return records.map(function (r, idx) { return applyAutoCpinLink(r, idx); });
+  }
+
   let summaries = [];
   let overrides = {};
   let uploads = [];
   let activeView = 'needs-review';
   let activeSummaryId = null;
+  let isDateFilter = { type: 'all' };
+  let activeBatch = '';
+  let premisesSearch = '';
+  let premisesSearchOpen = false;
+  let listShown = IS_LIST_PAGE;
+  let isBatchDraft = '';
   let isActivityLog = { notes: [], times: [], interim: [], files: [] };
   let isLogType = 'note';
   let isActivityFeedFilter = 'all';
@@ -343,16 +575,21 @@
   }
 
   function initIncidentSummaryStore() {
+    const versionKey = IS_STORAGE_KEY + '-seed-version';
+    const storedVersion = parseInt(localStorage.getItem(versionKey) || '0', 10);
     summaries = loadJson(IS_STORAGE_KEY, null);
-    if (!summaries || !summaries.length) {
-      summaries = JSON.parse(JSON.stringify(SEED_SUMMARIES));
+    if (!summaries || !summaries.length || storedVersion < IS_SEED_VERSION) {
+      summaries = generateBulkSeedSummaries();
       localStorage.setItem(IS_STORAGE_KEY, JSON.stringify(summaries));
+      localStorage.setItem(versionKey, String(IS_SEED_VERSION));
     }
     overrides = loadJson(IS_OVERRIDE_KEY, {});
     uploads = loadJson(IS_UPLOADS_KEY, [
-      { id: 'u-apr-2026', label: 'April 2026', uploadedAt: '1 May 2026', uploadedBy: 'Paul Mitchell', recordCount: 412, status: 'complete' },
-      { id: 'u-mar-2026', label: 'March 2026', uploadedAt: '2 Apr 2026', uploadedBy: 'Justin Cole', recordCount: 389, status: 'complete' },
-      { id: 'u-feb-2026', label: 'February 2026', uploadedAt: '3 Mar 2026', uploadedBy: 'Paul Mitchell', recordCount: 356, status: 'complete' }
+      { id: 'u-jun-2026', label: 'June 2026', uploadedAt: '1 Jul 2026', uploadedBy: 'Paul Mitchell', recordCount: 142, status: 'complete' },
+      { id: 'u-may-2026', label: 'May 2026', uploadedAt: '2 Jun 2026', uploadedBy: 'Justin Cole', recordCount: 118, status: 'complete' },
+      { id: 'u-apr-2026', label: 'April 2026', uploadedAt: '1 May 2026', uploadedBy: 'Paul Mitchell', recordCount: 96, status: 'complete' },
+      { id: 'u-mar-2026', label: 'March 2026', uploadedAt: '2 Apr 2026', uploadedBy: 'Justin Cole', recordCount: 89, status: 'complete' },
+      { id: 'u-feb-2026', label: 'February 2026', uploadedAt: '3 Mar 2026', uploadedBy: 'Paul Mitchell', recordCount: 74, status: 'complete' }
     ]);
   }
 
@@ -377,19 +614,208 @@
     activeSummaryId = id;
   }
 
+  function hasFatalityFlag(s) {
+    return (s.fatalities || 0) > 0;
+  }
+
   function hasInjuryFlag(s) {
-    return (s.prisonersInjured || 0) + (s.staffInjured || 0) + (s.seriousInjuries || 0) > 0 ||
+    return hasFatalityFlag(s) ||
+      (s.prisonersInjured || 0) + (s.staffInjured || 0) + (s.seriousInjuries || 0) > 0 ||
       (s.prisonersMinor || 0) + (s.staffMinor || 0) > 0;
+  }
+
+  function incidentDaysAgo(iso) {
+    if (!iso) return 9999;
+    const d = parseIsoDate(iso);
+    return Math.max(0, Math.floor((IS_DEMO_TODAY - d) / (24 * 60 * 60 * 1000)));
+  }
+
+  function matchesIsDateFilter(s) {
+    if (typeof matchesDateRangeFilter !== 'function') return true;
+    return matchesDateRangeFilter(incidentDaysAgo(s.incidentDate), isDateFilter);
+  }
+
+  function matchesBatchFilter(s) {
+    if (!activeBatch) return true;
+    return s.uploadBatch === activeBatch;
+  }
+
+  function matchesPremisesSearch(s) {
+    if (!premisesSearch) return true;
+    return (s.premises || '').toLowerCase().indexOf(premisesSearch.toLowerCase()) >= 0;
   }
 
   function matchesView(s, view) {
     if (view === 'all') return true;
     if (view === 'needs-review') return s.status === 'needs_review' || s.status === 'investigating';
-    if (view === 'injury') return hasInjuryFlag(s);
+    if (view === 'injury') return hasInjuryFlag(s) && !hasFatalityFlag(s);
+    if (view === 'fatality') return hasFatalityFlag(s);
     if (view === 'no-cpin') return !s.relatedCpin;
     if (view === 'linked') return !!s.relatedCpin;
     if (view === 'reviewed') return s.status === 'reviewed';
     return true;
+  }
+
+  function filterSummaries(items) {
+    return items.filter(function (s) {
+      return matchesView(s, activeView) &&
+        matchesIsDateFilter(s) &&
+        matchesBatchFilter(s) &&
+        matchesPremisesSearch(s);
+    });
+  }
+
+  function statsBaseItems() {
+    return getAllSummaries().filter(function (s) {
+      return matchesIsDateFilter(s) && matchesBatchFilter(s) && matchesPremisesSearch(s);
+    });
+  }
+
+  function computeIsStats(items) {
+    return {
+      total: items.length,
+      injuries: items.filter(function (s) { return hasInjuryFlag(s) && !hasFatalityFlag(s); }).length,
+      fatalities: items.filter(hasFatalityFlag).length,
+      linked: items.filter(function (s) { return !!s.relatedCpin; }).length,
+      autoLinked: items.filter(function (s) { return !!s.relatedCpin && s.cpinAutoLinked; }).length,
+      needsReview: items.filter(function (s) { return s.status === 'needs_review' || s.status === 'investigating'; }).length,
+      reviewed: items.filter(function (s) { return s.status === 'reviewed'; }).length
+    };
+  }
+
+  function setIsDateFilter(filter) {
+    isDateFilter = filter && filter.type ? filter : { type: 'all' };
+    listShown = IS_LIST_PAGE;
+    renderIncidentSummariesPage();
+  }
+
+  function getIsDateFilter() {
+    return isDateFilter;
+  }
+
+  function syncIsBatchTrigger() {
+    const trigger = document.getElementById('is-batch-trigger');
+    if (!trigger) return;
+    const strong = trigger.querySelector('strong');
+    if (strong) strong.textContent = activeBatch || 'All batches';
+  }
+
+  function getIsBatchOptions() {
+    const batches = [];
+    getAllSummaries().forEach(function (s) {
+      if (s.uploadBatch && batches.indexOf(s.uploadBatch) < 0) batches.push(s.uploadBatch);
+    });
+    batches.sort(function (a, b) { return b.localeCompare(a); });
+    return batches;
+  }
+
+  function renderIsBatchModal() {
+    const el = document.getElementById('is-batch-presets');
+    if (!el) return;
+    el.innerHTML =
+      '<button type="button" class="date-range-preset' + (isBatchDraft === '' ? ' active' : '') + '" onclick="selectIsBatchDraft(\'\')">All batches</button>' +
+      getIsBatchOptions().map(function (b) {
+        return '<button type="button" class="date-range-preset' + (isBatchDraft === b ? ' active' : '') + '" onclick="selectIsBatchDraft(' + JSON.stringify(b) + ')">' + esc(b) + '</button>';
+      }).join('');
+  }
+
+  function openIsBatchModal() {
+    isBatchDraft = activeBatch;
+    renderIsBatchModal();
+    const modal = document.getElementById('is-batch-modal');
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeIsBatchModal() {
+    const modal = document.getElementById('is-batch-modal');
+    if (modal) modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function selectIsBatchDraft(batch) {
+    isBatchDraft = batch || '';
+    renderIsBatchModal();
+  }
+
+  function applyIsBatchModal() {
+    activeBatch = isBatchDraft || '';
+    listShown = IS_LIST_PAGE;
+    closeIsBatchModal();
+    renderIncidentSummariesPage();
+  }
+
+  function setIsBatchFilter(batch) {
+    activeBatch = batch || '';
+    listShown = IS_LIST_PAGE;
+    renderIncidentSummariesPage();
+  }
+
+  function setIsPremisesSearch(q) {
+    premisesSearch = q || '';
+    listShown = IS_LIST_PAGE;
+    syncIsPremisesSearchUi();
+    renderIncidentSummaryList();
+    renderIncidentSummaryStats();
+    renderIncidentSummaryViews();
+  }
+
+  function syncIsPremisesSearchUi() {
+    const wrap = document.getElementById('is-premises-search-wrap');
+    const input = document.getElementById('is-premises-search');
+    const toggle = document.getElementById('is-premises-search-toggle');
+    const open = premisesSearchOpen || !!premisesSearch;
+    if (wrap) {
+      wrap.classList.toggle('open', open);
+      wrap.classList.toggle('has-value', !!premisesSearch);
+    }
+    if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (input && input.value !== premisesSearch) input.value = premisesSearch;
+  }
+
+  function toggleIsPremisesSearch() {
+    premisesSearchOpen = !premisesSearchOpen;
+    if (!premisesSearchOpen && premisesSearch) {
+      setIsPremisesSearch('');
+      return;
+    }
+    syncIsPremisesSearchUi();
+    if (premisesSearchOpen) {
+      const input = document.getElementById('is-premises-search');
+      if (input) input.focus();
+    }
+  }
+
+  function loadMoreIsList() {
+    listShown += IS_LIST_PAGE;
+    renderIncidentSummaryList();
+  }
+
+  function renderIncidentSummaryStats() {
+    const el = document.getElementById('is-stats-hero');
+    if (!el) return;
+    const stats = computeIsStats(statsBaseItems());
+    el.innerHTML =
+      '<div class="cpin-tile green"><div class="lbl"><span class="dot"></span>Incidents</div><div class="big">' + stats.total + '</div><div class="sub">In selected range</div></div>' +
+      '<div class="cpin-tile amber"><div class="lbl"><span class="dot"></span>Injury flagged</div><div class="big">' + stats.injuries + '</div><div class="sub">Review required</div></div>' +
+      '<div class="cpin-tile red"><div class="lbl"><span class="dot"></span>Fatalities</div><div class="big">' + stats.fatalities + '</div><div class="sub">Escalate immediately</div></div>';
+  }
+
+  function renderIncidentSummaryFilterControls() {
+    syncIsBatchTrigger();
+    syncIsPremisesSearchUi();
+    if (typeof syncDateRangeTrigger === 'function') syncDateRangeTrigger('incident-summaries');
+  }
+
+  function countByView(view) {
+    return getAllSummaries().filter(function (s) {
+      return matchesView(s, view) &&
+        matchesIsDateFilter(s) &&
+        matchesBatchFilter(s) &&
+        matchesPremisesSearch(s);
+    }).length;
   }
 
   function formatIsDate(iso) {
@@ -413,20 +839,19 @@
 
   function renderIncidentSummaryCard(s) {
     const injury = hasInjuryFlag(s);
-    const cardTone = injury ? 'amber' : (s.status === 'reviewed' ? 'green' : 'amber');
-    const leftPillClass = injury ? 'red' : statusPill(s.status);
-    const leftPillLabel = injury ? 'Injury' : (IS_STATUS_LABELS[s.status] || s.status);
-    const cpinTags = [];
+    const fatality = hasFatalityFlag(s);
+    const cardTone = fatality ? 'red' : (injury ? 'amber' : (s.status === 'reviewed' ? 'green' : 'amber'));
+    const cpinTags = [
+      '<span class="pill ' + statusPill(s.status) + '">' + esc(IS_STATUS_LABELS[s.status] || s.status) + '</span>'
+    ];
     if (s.relatedCpin) {
-      cpinTags.push('<span class="pill blue">' + esc(s.relatedCpin) + '</span>');
-    } else if (s.suggestedCpin) {
-      cpinTags.push('<span class="pill grey">Suggested ' + esc(s.suggestedCpin) + '</span>');
+      cpinTags.push('<span class="pill blue">' + esc(s.relatedCpin) + (s.cpinAutoLinked ? ' · auto' : '') + '</span>');
     } else {
       cpinTags.push('<span class="pill grey">No CPIN</span>');
     }
-    if (injury) cpinTags.push('<span class="pill red">Injury flagged</span>');
-    return '<div class="cpin-card ' + cardTone + '" role="button" tabindex="0" onclick="show(\'incident-summary/' + esc(s.id) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){show(\'incident-summary/' + esc(s.id) + '\')}">' +
-      '<div class="cpin-severity"><span class="pill ' + leftPillClass + '">' + esc(leftPillLabel) + '</span></div>' +
+    if (fatality) cpinTags.push('<span class="pill red">Fatality</span>');
+    else if (injury) cpinTags.push('<span class="pill red">Injury flagged</span>');
+    return '<div class="cpin-card is-summary-card ' + cardTone + '" role="button" tabindex="0" onclick="show(\'incident-summary/' + esc(s.id) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){show(\'incident-summary/' + esc(s.id) + '\')}">' +
       '<div class="cpin-body">' +
         '<div style="font-size:12px;color:var(--ink-3);">' + esc(s.ref) + ' · ' + esc(formatIsDate(s.incidentDate)) + '</div>' +
         '<div class="premises">' + esc(s.premises) + '</div>' +
@@ -439,8 +864,25 @@
     '</div>';
   }
 
-  function countByView(view) {
-    return getAllSummaries().filter(function (s) { return matchesView(s, view); }).length;
+  function renderIncidentSummaryList() {
+    const list = document.getElementById('is-summary-list');
+    const countEl = document.getElementById('is-results-count');
+    if (!list) return;
+    const items = filterSummaries(getAllSummaries())
+      .sort(function (a, b) { return (b.incidentDate || '').localeCompare(a.incidentDate || ''); });
+    if (countEl) {
+      countEl.textContent = String(items.length) + (items.length !== getAllSummaries().length ? ' (filtered)' : '');
+    }
+    if (!items.length) {
+      list.innerHTML = '<div class="audit-feed-empty" style="margin:24px 0;">No incident summaries match this view and filter.</div>';
+      return;
+    }
+    const slice = items.slice(0, listShown);
+    list.innerHTML =
+      '<div class="cpins-card-stack">' + slice.map(renderIncidentSummaryCard).join('') + '</div>' +
+      (items.length > listShown
+        ? '<button type="button" class="btn" style="margin-top:12px;" onclick="loadMoreIsList()">Load more (' + (items.length - listShown) + ' remaining)</button>'
+        : '');
   }
 
   function renderIncidentSummaryViews() {
@@ -468,19 +910,6 @@
     });
   }
 
-  function renderIncidentSummaryList() {
-    const list = document.getElementById('is-summary-list');
-    const countEl = document.getElementById('is-results-count');
-    if (!list) return;
-    const items = getAllSummaries()
-      .filter(function (s) { return matchesView(s, activeView); })
-      .sort(function (a, b) { return (b.incidentDate || '').localeCompare(a.incidentDate || ''); });
-    if (countEl) countEl.textContent = String(items.length);
-    list.innerHTML = items.length
-      ? '<div class="cpins-card-stack">' + items.map(renderIncidentSummaryCard).join('') + '</div>'
-      : '<div class="audit-feed-empty" style="margin:24px 0;">No incident summaries in this view.</div>';
-  }
-
   function renderIncidentSummaryUploads() {
     const el = document.getElementById('is-upload-history');
     if (!el) return;
@@ -496,6 +925,8 @@
   }
 
   function renderIncidentSummariesPage() {
+    renderIncidentSummaryFilterControls();
+    renderIncidentSummaryStats();
     renderIncidentSummaryViews();
     renderIncidentSummaryList();
   }
@@ -506,10 +937,11 @@
     renderIncidentSummaryUploads();
     const intro = document.getElementById('is-queue-hint');
     if (intro) {
-      const pending = countByView('needs-review');
+      const stats = computeIsStats(statsBaseItems());
       intro.innerHTML = 'Monthly fire incident records from <strong>HMPPS</strong>. ' +
-        (pending ? '<strong>' + pending + '</strong> summaries need review this month.' : 'All current summaries are reviewed.') +
-        ' Use these to supplement CPIN knowledge, spot missing reports, and support audit evidence.';
+        '<strong>' + stats.total + '</strong> incidents in the selected range — ' +
+        '<strong>' + stats.injuries + '</strong> injury flagged, <strong>' + stats.fatalities + '</strong> fatalities. ' +
+        'CPIN links are auto-matched by premises and date where possible.';
     }
   }
 
@@ -820,11 +1252,10 @@
     }
     if (kicker) {
       const tags = ['<span class="pill ' + statusPill(merged.status) + '">' + esc(IS_STATUS_LABELS[merged.status]) + '</span>'];
-      if (hasInjuryFlag(merged)) tags.push('<span class="pill red">Injury flagged</span>');
+      if (hasFatalityFlag(merged)) tags.push('<span class="pill red">Fatality</span>');
+      else if (hasInjuryFlag(merged)) tags.push('<span class="pill red">Injury flagged</span>');
       if (merged.relatedCpin) {
-        tags.push('<span class="pill blue">' + esc(merged.relatedCpin) + '</span>');
-      } else if (merged.suggestedCpin) {
-        tags.push('<span class="pill grey">Suggested ' + esc(merged.suggestedCpin) + '</span>');
+        tags.push('<span class="pill blue">' + esc(merged.relatedCpin) + (merged.cpinAutoLinked ? ' · auto-matched' : '') + '</span>');
       }
       if (merged.reviewedAt) {
         tags.push('<span class="pill green">Reviewed ' + esc(merged.reviewedAt) + (merged.reviewedBy ? ' · ' + esc(merged.reviewedBy) : '') + '</span>');
@@ -837,7 +1268,8 @@
         ['Staff — significant injury', merged.staffInjured],
         ['Serious injuries (total)', merged.seriousInjuries],
         ['Prisoners — minor injury', merged.prisonersMinor],
-        ['Staff — minor injury', merged.staffMinor]
+        ['Staff — minor injury', merged.staffMinor],
+        ['Fatalities', merged.fatalities || 0]
       ];
       body.innerHTML =
         '<div class="setup-section">' +
@@ -865,26 +1297,31 @@
           return '<tr><td>' + esc(r[0]) + '</td><td' + highlight + '>' + esc(String(r[1])) + '</td></tr>';
         }).join('') +
         '</tbody></table>' +
-        (hasInjuryFlag(merged) ? '<div class="info-banner" style="margin-top:12px;margin-bottom:0;"><strong>Injury flagged.</strong> Review whether a CPIN exists and what action was taken.</div>' : '') +
+        (hasFatalityFlag(merged)
+          ? '<div class="info-banner info-banner--severe" style="margin-top:12px;margin-bottom:0;"><strong>Fatality recorded.</strong> Escalate per CPFSI procedure and confirm CPIN / investigation status.</div>'
+          : (hasInjuryFlag(merged) ? '<div class="info-banner" style="margin-top:12px;margin-bottom:0;"><strong>Injury flagged.</strong> Review whether a CPIN exists and what action was taken.</div>' : '')) +
         '</div>' +
         '<div class="setup-section">' +
         '<h3>CPIN linkage</h3>' +
         (merged.relatedCpin
-          ? '<div class="help">Linked to <a onclick="show(\'cpin/' + esc(getCpinRouteId(merged.relatedCpin)) + '\')">' + esc(merged.relatedCpin) + '</a>.</div>'
-          : (merged.suggestedCpin
-            ? '<div class="help">No CPIN linked yet. System suggests <strong>' + esc(merged.suggestedCpin) + '</strong> — confirm or link manually below.</div>'
-            : '<div class="help">No CPIN linked. Check whether FRS submitted a report or contact the prison if investigation is needed.</div>')) +
-        '<div class="is-link-row">' +
+          ? '<div class="help">' +
+            (merged.cpinAutoLinked
+              ? 'Auto-matched to <a onclick="show(\'cpin/' + esc(getCpinRouteId(merged.relatedCpin)) + '\')">' + esc(merged.relatedCpin) + '</a> by premises and incident date (within 14 days).'
+              : 'Manually linked to <a onclick="show(\'cpin/' + esc(getCpinRouteId(merged.relatedCpin)) + '\')">' + esc(merged.relatedCpin) + '</a>.') +
+            '</div>'
+          : '<div class="help">No CPIN auto-match found for this premises and date. Most links are created automatically on upload — override below only if needed.</div>') +
+        '<details class="is-cpin-override"><summary>Override CPIN link</summary>' +
+        '<div class="is-link-row" style="margin-top:10px;">' +
         '<div class="field">' +
         '<label for="is-link-cpin-select">Link CPIN</label>' +
         '<select id="is-link-cpin-select">' +
         '<option value="">— Select CPIN —</option>' +
-        ['CPIN-2026-0412', 'CPIN-2026-0398', 'CPIN-2026-0418'].map(function (ref) {
+        ['CPIN-2026-0412', 'CPIN-2026-0398', 'CPIN-2026-0418', 'CPIN-2026-0440'].map(function (ref) {
           return '<option value="' + esc(ref) + '"' + (merged.relatedCpin === ref ? ' selected' : '') + '>' + esc(ref) + '</option>';
         }).join('') +
         '</select></div>' +
-        '<button type="button" class="btn" onclick="linkIncidentSummaryCpin()">Save link</button>' +
-        '</div></div>';
+        '<button type="button" class="btn" onclick="linkIncidentSummaryCpin()">Save override</button>' +
+        '</div></details></div>';
     }
     if (actions) {
       actions.innerHTML =
@@ -897,10 +1334,14 @@
   }
 
   function getCpinRouteId(ref) {
+    const found = IS_DEMO_CPINS.find(function (c) { return c.ref === ref; });
+    if (found) return found.routeId;
     const map = {
       'CPIN-2026-0412': 'cpin-0412',
       'CPIN-2026-0398': 'cpin-0398',
-      'CPIN-2026-0418': 'cpin-0418-tq'
+      'CPIN-2026-0418': 'cpin-0418-tq',
+      'CPIN-2026-0440': 'cpin-u-0440',
+      'CPIN-2026-0447': 'cpin-in-0447'
     };
     return map[ref] || 'cpin-0418-tq';
   }
@@ -952,6 +1393,8 @@
     patchSummary(activeSummaryId, {
       relatedCpin: val,
       suggestedCpin: null,
+      cpinAutoLinked: false,
+      cpinLinkManual: true,
       status: 'investigating',
       activityLog: isActivityLog
     });
@@ -984,17 +1427,18 @@
       return;
     }
     const label = batch.indexOf('Upload') === 0 ? batch : batch;
+    const importCount = 120 + Math.floor(Math.random() * 40);
     uploads.unshift({
       id: 'u-' + Date.now(),
       label: label,
       uploadedAt: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
       uploadedBy: IS_REVIEWER,
-      recordCount: 400 + Math.floor(Math.random() * 80),
+      recordCount: importCount,
       status: 'processing'
     });
     saveUploads();
     closeIncidentSummaryUploadModal();
-    window.alert('Upload received. ' + uploads[0].recordCount + ' incident summaries imported from ' + label + '. Review flagged items in Needs review.');
+    window.alert('Upload received. ' + importCount + ' incident summaries imported from ' + label + '. CPIN links auto-matched where premises and dates align. Review injury and fatality flags first.');
     if (file) file.value = '';
     initIncidentSummariesPage();
   }
@@ -1045,6 +1489,16 @@
   window.setIsLogType = setIsLogType;
   window.setIsActivityFeedFilter = setIsActivityFeedFilter;
   window.submitIsLog = submitIsLog;
+  window.getIsDateFilter = getIsDateFilter;
+  window.setIsDateFilter = setIsDateFilter;
+  window.setIsBatchFilter = setIsBatchFilter;
+  window.setIsPremisesSearch = setIsPremisesSearch;
+  window.toggleIsPremisesSearch = toggleIsPremisesSearch;
+  window.openIsBatchModal = openIsBatchModal;
+  window.closeIsBatchModal = closeIsBatchModal;
+  window.selectIsBatchDraft = selectIsBatchDraft;
+  window.applyIsBatchModal = applyIsBatchModal;
+  window.loadMoreIsList = loadMoreIsList;
 
   initIncidentSummaryStore();
 })();

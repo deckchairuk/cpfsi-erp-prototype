@@ -3129,6 +3129,67 @@
     margin-top: 6px;
   }
   .cpin-card .is-card-tags .pill { font-size: 10px; }
+  #incident-summaries .cpin-hero { margin-top: 0; }
+  #incident-summaries .cpin-card.is-summary-card {
+    grid-template-columns: 1fr auto;
+  }
+  #incident-summaries .is-list-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  #incident-summaries .is-list-search-toggle {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    color: var(--ink-3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+  #incident-summaries .is-list-search-toggle:hover {
+    border-color: var(--ink-3);
+    color: var(--ink-2);
+  }
+  #incident-summaries .is-list-search-wrap.open .is-list-search-toggle,
+  #incident-summaries .is-list-search-wrap.has-value .is-list-search-toggle {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  #incident-summaries .is-list-search-input {
+    width: 0;
+    max-width: 0;
+    opacity: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: width 0.15s ease, opacity 0.15s ease, max-width 0.15s ease, padding 0.15s ease;
+  }
+  #incident-summaries .is-list-search-wrap.open .is-list-search-input,
+  #incident-summaries .is-list-search-wrap.has-value .is-list-search-input {
+    width: 200px;
+    max-width: 200px;
+    opacity: 1;
+    padding: 6px 10px;
+    border-color: var(--line);
+  }
+  #incident-summary details.is-cpin-override summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-top: 12px;
+  }
+  #incident-summary .info-banner.info-banner--severe {
+    background: var(--red-soft);
+    border-color: var(--red-soft);
+    color: var(--red-text);
+  }
   .cpin-single-workflow { margin-top: 16px; }
   #cpin .setup-section.cpin-key-section,
   #concern .setup-section.cpin-key-section,
@@ -9841,9 +9902,25 @@
       </aside>
 
       <div class="cpin-results">
+        <div class="cpin-hero" id="is-stats-hero" aria-label="Incident summary statistics"></div>
+
         <div class="list-results-bar">
           <div class="list-results-line">
             <span class="list-results-seg">Showing <strong id="is-results-count">0</strong> summaries</span>
+            <span class="list-results-seg">
+              <span class="list-results-label">Incident date</span>
+              <button type="button" class="list-control-trigger list-date-trigger" id="is-date-trigger" aria-label="Change incident date range" onclick="openListDateRangeModal('incident-summaries')"><strong>All dates</strong></button>
+            </span>
+            <span class="list-results-seg">
+              <span class="list-results-label">Upload batch</span>
+              <button type="button" class="list-control-trigger list-date-trigger" id="is-batch-trigger" aria-label="Change upload batch" onclick="openIsBatchModal()"><strong>All batches</strong></button>
+            </span>
+          </div>
+          <div class="is-list-search-wrap" id="is-premises-search-wrap">
+            <button type="button" class="is-list-search-toggle" id="is-premises-search-toggle" aria-label="Search by prison name" aria-expanded="false" aria-controls="is-premises-search" onclick="toggleIsPremisesSearch()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3-3"></path></svg>
+            </button>
+            <input type="search" id="is-premises-search" class="is-list-search-input" placeholder="Prison name…" aria-label="Filter by prison name" oninput="setIsPremisesSearch(this.value)" />
           </div>
         </div>
         <div id="is-summary-list" class="cpins-panel"></div>
@@ -11538,6 +11615,29 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
         <button type="button" class="btn" onclick="closeListDateRangeModal()">Cancel</button>
         <button type="button" class="btn primary" onclick="applyListDateRange()">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Incident summaries: upload batch picker -->
+<div id="is-batch-modal" class="modal-backdrop" onclick="if(event.target===this) closeIsBatchModal()">
+  <div class="modal" style="max-width:440px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>Upload batch</h2>
+        <div class="sub">Filter by the monthly HMPPS spreadsheet upload.</div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeIsBatchModal()" title="Close (Esc)">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-group">
+        <div class="modal-group-label">Batches</div>
+        <div class="date-range-presets" id="is-batch-presets"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" class="btn" onclick="closeIsBatchModal()">Cancel</button>
+        <button type="button" class="btn primary" onclick="applyIsBatchModal()">Apply</button>
       </div>
     </div>
   </div>
@@ -16979,6 +17079,17 @@
         { id: '90', label: 'Last 90 days' },
         { id: 'year', label: 'This year' }
       ]
+    },
+    'incident-summaries': {
+      title: 'Incident date range',
+      sub: 'Filter by when the fire incident occurred.',
+      triggerId: 'is-date-trigger',
+      presets: [
+        { id: 'all', label: 'All dates' },
+        { id: '30', label: 'Last 30 days' },
+        { id: '90', label: 'Last 90 days' },
+        { id: 'year', label: 'This year' }
+      ]
     }
   };
 
@@ -17031,6 +17142,7 @@
     if (context === 'premises') return premisesDateFilter;
     if (context === 'cpin') return cpinsDateFilter;
     if (context === 'process') return processesDateFilter;
+    if (context === 'incident-summaries' && typeof window.getIsDateFilter === 'function') return window.getIsDateFilter();
     return { type: 'all' };
   }
 
@@ -17048,6 +17160,9 @@
       processesDateFilter = filter;
       syncDateRangeTrigger('process');
       renderProcessesList();
+    } else if (context === 'incident-summaries' && typeof window.setIsDateFilter === 'function') {
+      window.setIsDateFilter(filter);
+      syncDateRangeTrigger('incident-summaries');
     }
   }
 
@@ -28098,6 +28213,8 @@
         closeScIntakeForm();
       } else if (document.getElementById('list-date-range-modal')?.classList.contains('open')) {
         closeListDateRangeModal();
+      } else if (document.getElementById('is-batch-modal')?.classList.contains('open')) {
+        closeIsBatchModal();
       } else if (document.getElementById('premises-dept-modal')?.classList.contains('open')) {
         closePremisesDeptPicker();
       } else if (document.getElementById('setup-lookup-modal')?.classList.contains('open')) {
