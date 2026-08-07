@@ -3130,6 +3130,117 @@
   }
   .cpin-card .is-card-tags .pill { font-size: 10px; }
   #incident-summaries .cpin-hero { margin-top: 0; }
+  .is-summary-table-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+  .is-summary-table {
+    margin: 0;
+    font-size: 12px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .is-summary-table th,
+  .is-summary-table td {
+    padding: 6px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--line-2);
+    white-space: nowrap;
+  }
+  .is-summary-table thead th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    font-weight: 600;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .is-summary-table tbody tr:last-child td { border-bottom: none; }
+  .is-summary-row {
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+  .is-summary-row:hover { background: var(--bg); }
+  .is-summary-row.is-injury { box-shadow: inset 3px 0 0 var(--amber); }
+  .is-summary-row.is-severe { box-shadow: inset 3px 0 0 var(--red); }
+  .is-summary-table .is-col-date {
+    color: var(--ink-3);
+    font-size: 11px;
+    width: 1%;
+  }
+  .is-summary-table .is-col-premises {
+    white-space: normal;
+    min-width: 140px;
+    max-width: 200px;
+  }
+  .is-summary-table .is-col-premises strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .is-summary-table .is-col-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .is-summary-table .is-col-fire {
+    white-space: normal;
+    min-width: 120px;
+    max-width: 180px;
+    color: var(--ink-2);
+    font-size: 11px;
+  }
+  .is-summary-table .is-num,
+  .is-injury-table .is-num {
+    text-align: center;
+    width: 1%;
+    font-variant-numeric: tabular-nums;
+  }
+  .is-summary-table .is-num.is-empty,
+  .is-injury-table .is-num.is-empty {
+    color: var(--ink-3);
+  }
+  .is-summary-table .is-num.is-hit,
+  .is-injury-table .is-num.is-hit {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .is-summary-table .is-num.is-hit.is-severe,
+  .is-injury-table .is-num.is-hit.is-severe {
+    color: var(--red);
+  }
+  .is-summary-table .is-score,
+  .is-injury-table .is-score {
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .is-injury-table { margin-top: 4px; }
+  .is-injury-table tr.has-value td:first-child { font-weight: 500; }
+  .is-injury-table tr.is-injury-total td {
+    border-top: 2px solid var(--line);
+    background: var(--bg);
+  }
+  .is-detail-score {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 2px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
   #incident-summaries .cpin-card.is-summary-card {
     grid-template-columns: 1fr auto;
   }

@@ -3,7 +3,22 @@
   'use strict';
 
   const IS_STORAGE_KEY = 'cpfsi-incident-summaries-v4';
-  const IS_SEED_VERSION = 5;
+  const IS_SEED_VERSION = 6;
+
+  const IS_SCORE_POINTS = {
+    nonInjury: 1,
+    precautionary: 2,
+    minor: 5,
+    significant: 10,
+    fatality: 25
+  };
+
+  const IS_INJURY_CATEGORIES = [
+    { id: 'precautionary', label: 'Precautionary check', prisonersKey: 'prisonersPrecautionary', staffKey: 'staffPrecautionary', points: 2 },
+    { id: 'minor', label: 'Minor injury', prisonersKey: 'prisonersMinor', staffKey: 'staffMinor', points: 5 },
+    { id: 'significant', label: 'Significant injury', prisonersKey: 'prisonersSignificant', staffKey: 'staffSignificant', points: 10 },
+    { id: 'fatality', label: 'Fatality', prisonersKey: 'prisonersFatality', staffKey: 'staffFatality', points: 25 }
+  ];
   const IS_OVERRIDE_KEY = 'cpfsi-incident-summary-overrides-v1';
   const IS_UPLOADS_KEY = 'cpfsi-incident-summary-uploads-v1';
   const IS_REVIEWER = 'Phil Gower';
@@ -98,12 +113,15 @@
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Fire service',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 0,
-      fatalities: 1,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 1,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: 'CPIN-2026-0440',
       suggestedCpin: null,
       cpinAutoLinked: true,
@@ -133,11 +151,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Fire detection device — domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 1,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: null,
       suggestedCpin: 'CPIN-2026-0398',
       status: 'needs_review',
@@ -159,12 +181,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Fire service',
-      prisonersInjured: 0,
-      staffInjured: 1,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 1,
-      fatalities: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 1,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: 'CPIN-2026-0412',
       suggestedCpin: null,
       cpinAutoLinked: true,
@@ -194,11 +219,15 @@
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 1,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 1,
+      prisonersSignificant: 1,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'needs_review',
@@ -220,11 +249,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: true,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'reviewed',
@@ -248,11 +281,15 @@
       intent: 'Unknown',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 2,
       staffMinor: 0,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: 'CPIN-2026-0398',
       suggestedCpin: null,
       status: 'reviewed',
@@ -276,11 +313,15 @@
       intent: 'Deliberate',
       howDetected: 'Domestic smoke detection (DSD)',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: true,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'reviewed',
@@ -304,11 +345,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Fire service',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 1,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'needs_review',
@@ -330,11 +375,15 @@
       intent: 'Deliberate',
       howDetected: 'Staff observation',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: true,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'reviewed',
@@ -358,11 +407,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Fire service',
-      prisonersInjured: 1,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 1,
+      prisonersSignificant: 1,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: false,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'investigating',
@@ -390,11 +443,15 @@
       intent: 'Unintentional / accidental',
       howDetected: 'Automatic fire detection system',
       fireExtinguishedBy: 'Staff',
-      prisonersInjured: 0,
-      staffInjured: 0,
+      prisonersPrecautionary: 0,
+      staffPrecautionary: 0,
       prisonersMinor: 0,
       staffMinor: 0,
-      seriousInjuries: 0,
+      prisonersSignificant: 0,
+      staffSignificant: 0,
+      prisonersFatality: 0,
+      staffFatality: 0,
+      nonInjury: true,
       relatedCpin: null,
       suggestedCpin: null,
       status: 'reviewed',
@@ -481,14 +538,21 @@
         const fireType = IS_FIRE_TYPES[Math.floor(pseudoRand(seed + 2) * IS_FIRE_TYPES.length)];
         const locBase = IS_LOCATIONS[Math.floor(pseudoRand(seed + 3) * IS_LOCATIONS.length)];
         const injuryRoll = pseudoRand(seed + 4);
-        const hasInjury = injuryRoll < 0.14;
         const hasFatality = injuryRoll < 0.004;
-        const prisonersInjured = hasFatality ? 0 : (hasInjury && pseudoRand(seed + 5) < 0.4 ? 1 : 0);
-        const staffInjured = hasFatality ? 0 : (hasInjury && prisonersInjured === 0 ? 1 : 0);
-        const prisonersMinor = (!hasInjury && !hasFatality && pseudoRand(seed + 6) < 0.08) ? 1 : 0;
-        const staffMinor = (!hasInjury && !hasFatality && prisonersMinor === 0 && pseudoRand(seed + 7) < 0.06) ? 1 : 0;
-        const seriousInjuries = hasInjury ? 1 : 0;
-        const fatalities = hasFatality ? 1 : 0;
+        const hasSignificant = !hasFatality && injuryRoll < 0.14;
+        const hasMinor = !hasFatality && !hasSignificant && pseudoRand(seed + 5) < 0.1;
+        const hasPrecautionary = !hasFatality && !hasSignificant && !hasMinor && pseudoRand(seed + 6) < 0.08;
+        const prisonerFirst = pseudoRand(seed + 7) < 0.45;
+        const prisonersSignificant = hasSignificant && prisonerFirst ? 1 : 0;
+        const staffSignificant = hasSignificant && !prisonerFirst ? 1 : 0;
+        const prisonersMinor = hasMinor && prisonerFirst ? 1 : 0;
+        const staffMinor = hasMinor && !prisonerFirst ? 1 : 0;
+        const prisonersPrecautionary = hasPrecautionary && prisonerFirst ? 1 : 0;
+        const staffPrecautionary = hasPrecautionary && !prisonerFirst ? 1 : 0;
+        const prisonersFatality = hasFatality && prisonerFirst ? 1 : 0;
+        const staffFatality = hasFatality && !prisonerFirst ? 1 : 0;
+        const nonInjury = !hasFatality && !hasSignificant && !hasMinor && !hasPrecautionary &&
+          fireType !== 'False alarm — no fire';
         const statusRoll = pseudoRand(seed + 8);
         const status = statusRoll < 0.55 ? 'reviewed' : (statusRoll < 0.78 ? 'needs_review' : 'investigating');
         const incidentDate = isoDate(batch.year, batch.month, day);
@@ -508,12 +572,15 @@
           intent: pseudoRand(seed + 11) < 0.12 ? 'Deliberate' : 'Unintentional / accidental',
           howDetected: 'Staff observation',
           fireExtinguishedBy: pseudoRand(seed + 12) < 0.7 ? 'Staff' : 'Fire service',
-          prisonersInjured: prisonersInjured,
-          staffInjured: staffInjured,
+          prisonersPrecautionary: prisonersPrecautionary,
+          staffPrecautionary: staffPrecautionary,
           prisonersMinor: prisonersMinor,
           staffMinor: staffMinor,
-          seriousInjuries: seriousInjuries,
-          fatalities: fatalities,
+          prisonersSignificant: prisonersSignificant,
+          staffSignificant: staffSignificant,
+          prisonersFatality: prisonersFatality,
+          staffFatality: staffFatality,
+          nonInjury: nonInjury,
           relatedCpin: null,
           suggestedCpin: null,
           cpinAutoLinked: false,
@@ -614,14 +681,73 @@
     activeSummaryId = id;
   }
 
+  function getInjuryCounts(s) {
+    const prisonersSignificant = s.prisonersSignificant != null ? s.prisonersSignificant : (s.prisonersInjured || 0);
+    const staffSignificant = s.staffSignificant != null ? s.staffSignificant : (s.staffInjured || 0);
+    const prisonersFatality = s.prisonersFatality != null ? s.prisonersFatality : (s.fatalities || 0);
+    const staffFatality = s.staffFatality || 0;
+    const prisonersPrecautionary = s.prisonersPrecautionary || 0;
+    const staffPrecautionary = s.staffPrecautionary || 0;
+    const prisonersMinor = s.prisonersMinor || 0;
+    const staffMinor = s.staffMinor || 0;
+    const hasPersonImpact = prisonersPrecautionary + staffPrecautionary +
+      prisonersMinor + staffMinor +
+      prisonersSignificant + staffSignificant +
+      prisonersFatality + staffFatality > 0;
+    let nonInjury = s.nonInjury;
+    if (nonInjury == null) {
+      nonInjury = !hasPersonImpact && s.typeOfFire !== 'False alarm — no fire';
+    }
+    return {
+      nonInjury: !!nonInjury,
+      prisonersPrecautionary: prisonersPrecautionary,
+      staffPrecautionary: staffPrecautionary,
+      prisonersMinor: prisonersMinor,
+      staffMinor: staffMinor,
+      prisonersSignificant: prisonersSignificant,
+      staffSignificant: staffSignificant,
+      prisonersFatality: prisonersFatality,
+      staffFatality: staffFatality
+    };
+  }
+
+  function categoryPeopleTotal(c, categoryId) {
+    if (categoryId === 'nonInjury') return c.nonInjury ? 1 : 0;
+    if (categoryId === 'precautionary') return c.prisonersPrecautionary + c.staffPrecautionary;
+    if (categoryId === 'minor') return c.prisonersMinor + c.staffMinor;
+    if (categoryId === 'significant') return c.prisonersSignificant + c.staffSignificant;
+    if (categoryId === 'fatality') return c.prisonersFatality + c.staffFatality;
+    return 0;
+  }
+
+  function computeIncidentScore(s) {
+    const c = typeof s.nonInjury === 'boolean' || s.prisonersSignificant != null ? s : getInjuryCounts(s);
+    let score = 0;
+    if (c.nonInjury) score += IS_SCORE_POINTS.nonInjury;
+    score += (c.prisonersPrecautionary + c.staffPrecautionary) * IS_SCORE_POINTS.precautionary;
+    score += (c.prisonersMinor + c.staffMinor) * IS_SCORE_POINTS.minor;
+    score += (c.prisonersSignificant + c.staffSignificant) * IS_SCORE_POINTS.significant;
+    score += (c.prisonersFatality + c.staffFatality) * IS_SCORE_POINTS.fatality;
+    return score;
+  }
+
   function hasFatalityFlag(s) {
-    return (s.fatalities || 0) > 0;
+    const c = getInjuryCounts(s);
+    return c.prisonersFatality + c.staffFatality > 0;
   }
 
   function hasInjuryFlag(s) {
+    const c = getInjuryCounts(s);
     return hasFatalityFlag(s) ||
-      (s.prisonersInjured || 0) + (s.staffInjured || 0) + (s.seriousInjuries || 0) > 0 ||
-      (s.prisonersMinor || 0) + (s.staffMinor || 0) > 0;
+      c.prisonersPrecautionary + c.staffPrecautionary +
+      c.prisonersMinor + c.staffMinor +
+      c.prisonersSignificant + c.staffSignificant > 0;
+  }
+
+  function rowSeverityClass(s) {
+    if (hasFatalityFlag(s)) return 'is-severe';
+    if (hasInjuryFlag(s)) return 'is-injury';
+    return '';
   }
 
   function incidentDaysAgo(iso) {
@@ -894,31 +1020,46 @@
     return map[status] || 'grey';
   }
 
-  function renderIncidentSummaryCard(s) {
-    const injury = hasInjuryFlag(s);
-    const fatality = hasFatalityFlag(s);
-    const cardTone = fatality ? 'red' : (injury ? 'amber' : (s.status === 'reviewed' ? 'green' : 'amber'));
-    const cpinTags = [
-      '<span class="pill ' + statusPill(s.status) + '">' + esc(IS_STATUS_LABELS[s.status] || s.status) + '</span>'
-    ];
-    if (s.relatedCpin) {
-      cpinTags.push('<span class="pill blue">' + esc(s.relatedCpin) + (s.cpinAutoLinked ? ' · auto' : '') + '</span>');
-    } else {
-      cpinTags.push('<span class="pill grey">No CPIN</span>');
-    }
-    if (fatality) cpinTags.push('<span class="pill red">Fatality</span>');
-    else if (injury) cpinTags.push('<span class="pill red">Injury flagged</span>');
-    return '<div class="cpin-card is-summary-card ' + cardTone + '" role="button" tabindex="0" onclick="show(\'incident-summary/' + esc(s.id) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){show(\'incident-summary/' + esc(s.id) + '\')}">' +
-      '<div class="cpin-body">' +
-        '<div style="font-size:12px;color:var(--ink-3);">' + esc(s.ref) + ' · ' + esc(formatIsDate(s.incidentDate)) + '</div>' +
-        '<div class="premises">' + esc(s.premises) + '</div>' +
-        '<div class="summary">' + esc(s.typeOfFire) + ' · ' + esc(s.specificLocation) + '</div>' +
-        '<div class="is-card-tags">' + cpinTags.join('') + '</div>' +
-      '</div>' +
-      '<div class="cpin-meta">' +
-        '<div class="cpin-assignee">' + esc(s.uploadBatch) + '</div>' +
-      '</div>' +
-    '</div>';
+  function renderIsCountCell(n, severe) {
+    if (!n) return '<td class="is-num is-empty">—</td>';
+    const cls = 'is-num is-hit' + (severe ? ' is-severe' : '');
+    return '<td class="' + cls + '">' + esc(String(n)) + '</td>';
+  }
+
+  function isSummaryRowNav(id) {
+    return "show('incident-summary/" + esc(id) + "')";
+  }
+
+  function renderIncidentSummaryRow(s) {
+    const c = getInjuryCounts(s);
+    const score = computeIncidentScore(c);
+    const severity = rowSeverityClass(s);
+    const nav = isSummaryRowNav(s.id);
+    return '<tr class="is-summary-row' + (severity ? ' ' + severity : '') + '" role="button" tabindex="0" onclick="' + nav + '" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){' + nav + '}">' +
+      '<td class="is-col-date">' + esc(formatIsDate(s.incidentDate)) + '</td>' +
+      '<td class="is-col-premises"><strong>' + esc(s.premises) + '</strong><span class="is-col-sub">' + esc(s.specificLocation) + '</span></td>' +
+      '<td class="is-col-fire">' + esc(s.typeOfFire) + '</td>' +
+      renderIsCountCell(categoryPeopleTotal(c, 'nonInjury'), false) +
+      renderIsCountCell(categoryPeopleTotal(c, 'precautionary'), false) +
+      renderIsCountCell(categoryPeopleTotal(c, 'minor'), false) +
+      renderIsCountCell(categoryPeopleTotal(c, 'significant'), true) +
+      renderIsCountCell(categoryPeopleTotal(c, 'fatality'), true) +
+      '<td class="is-num is-score">' + esc(String(score)) + '</td>' +
+    '</tr>';
+  }
+
+  function renderIncidentSummaryListHeader() {
+    return '<thead><tr>' +
+      '<th>Date</th>' +
+      '<th>Premises</th>' +
+      '<th>Type of fire</th>' +
+      '<th class="is-num" title="Non-injury (1 pt)">Non-injury</th>' +
+      '<th class="is-num" title="Precautionary check (2 pts per person)">Precautionary</th>' +
+      '<th class="is-num" title="Minor injury (5 pts per person)">Minor</th>' +
+      '<th class="is-num" title="Significant injury (10 pts per person)">Significant</th>' +
+      '<th class="is-num" title="Fatality (25 pts per person)">Fatality</th>' +
+      '<th class="is-num" title="Incident score">Score</th>' +
+    '</tr></thead>';
   }
 
   function renderIncidentSummaryList() {
@@ -936,7 +1077,10 @@
     }
     const slice = items.slice(0, listShown);
     list.innerHTML =
-      '<div class="cpins-card-stack">' + slice.map(renderIncidentSummaryCard).join('') + '</div>' +
+      '<div class="is-summary-table-wrap">' +
+      '<table class="data is-summary-table">' +
+      renderIncidentSummaryListHeader() +
+      '<tbody>' + slice.map(renderIncidentSummaryRow).join('') + '</tbody></table></div>' +
       (items.length > listShown
         ? '<button type="button" class="btn" style="margin-top:12px;" onclick="loadMoreIsList()">Load more (' + (items.length - listShown) + ' remaining)</button>'
         : '');
@@ -1308,26 +1452,13 @@
       meta.textContent = formatIsDate(merged.incidentDate) + ' · ' + merged.premises + ' · Batch ' + merged.uploadBatch;
     }
     if (kicker) {
-      const tags = ['<span class="pill ' + statusPill(merged.status) + '">' + esc(IS_STATUS_LABELS[merged.status]) + '</span>'];
-      if (hasFatalityFlag(merged)) tags.push('<span class="pill red">Fatality</span>');
-      else if (hasInjuryFlag(merged)) tags.push('<span class="pill red">Injury flagged</span>');
-      if (merged.relatedCpin) {
-        tags.push('<span class="pill blue">' + esc(merged.relatedCpin) + (merged.cpinAutoLinked ? ' · auto-matched' : '') + '</span>');
-      }
-      if (merged.reviewedAt) {
-        tags.push('<span class="pill green">Reviewed ' + esc(merged.reviewedAt) + (merged.reviewedBy ? ' · ' + esc(merged.reviewedBy) : '') + '</span>');
-      }
-      kicker.innerHTML = tags.join('');
+      kicker.innerHTML = merged.reviewedAt
+        ? '<span class="is-reviewed-meta">Reviewed ' + esc(merged.reviewedAt) + (merged.reviewedBy ? ' · ' + esc(merged.reviewedBy) : '') + '</span>'
+        : '';
     }
     if (body) {
-      const injuryRows = [
-        ['Prisoners — significant injury', merged.prisonersInjured],
-        ['Staff — significant injury', merged.staffInjured],
-        ['Serious injuries (total)', merged.seriousInjuries],
-        ['Prisoners — minor injury', merged.prisonersMinor],
-        ['Staff — minor injury', merged.staffMinor],
-        ['Fatalities', merged.fatalities || 0]
-      ];
+      const injuryCounts = getInjuryCounts(merged);
+      const score = computeIncidentScore(injuryCounts);
       body.innerHTML =
         '<div class="setup-section">' +
         '<h3>Incident details</h3>' +
@@ -1346,18 +1477,25 @@
         (merged.historic ? intakeCell('Historic record', 'Yes — carried from prior system') : '') +
         '</div></div>' +
         '<div class="setup-section">' +
-        '<h3>Injuries</h3>' +
-        '<div class="help">Counts from the HMPPS feed — use to decide whether a CPIN should exist.</div>' +
-        '<table class="data"><thead><tr><th>Category</th><th>Count</th></tr></thead><tbody>' +
-        injuryRows.map(function (r) {
-          const highlight = r[1] > 0 ? ' style="font-weight:600;color:var(--red);"' : '';
-          return '<tr><td>' + esc(r[0]) + '</td><td' + highlight + '>' + esc(String(r[1])) + '</td></tr>';
+        '<h3>Injuries &amp; scoring</h3>' +
+        '<div class="help">Counts from the HMPPS feed. Points contribute to the premises RBIP score on a rolling 12-month basis.</div>' +
+        '<table class="data is-injury-table"><thead><tr><th>Category</th><th class="is-num">Prisoners</th><th class="is-num">Staff</th><th class="is-num">Points</th></tr></thead><tbody>' +
+        (injuryCounts.nonInjury
+          ? '<tr><td>Non-injury</td><td class="is-num is-empty">—</td><td class="is-num is-empty">—</td><td class="is-num is-hit">' + IS_SCORE_POINTS.nonInjury + '</td></tr>'
+          : '') +
+        IS_INJURY_CATEGORIES.map(function (cat) {
+          const pCount = injuryCounts[cat.prisonersKey] || 0;
+          const sCount = injuryCounts[cat.staffKey] || 0;
+          const pts = (pCount + sCount) * cat.points;
+          const highlight = pts > 0 ? ' is-hit' + (cat.id === 'fatality' || cat.id === 'significant' ? ' is-severe' : '') : '';
+          return '<tr class="' + (pts > 0 ? 'has-value' : '') + '">' +
+            '<td>' + esc(cat.label) + '</td>' +
+            '<td class="is-num' + highlight + '">' + esc(String(pCount)) + '</td>' +
+            '<td class="is-num' + highlight + '">' + esc(String(sCount)) + '</td>' +
+            '<td class="is-num is-score' + highlight + '">' + esc(String(pts)) + '</td></tr>';
         }).join('') +
-        '</tbody></table>' +
-        (hasFatalityFlag(merged)
-          ? '<div class="info-banner info-banner--severe" style="margin-top:12px;margin-bottom:0;"><strong>Fatality recorded.</strong> Escalate per CPFSI procedure and confirm CPIN / investigation status.</div>'
-          : (hasInjuryFlag(merged) ? '<div class="info-banner" style="margin-top:12px;margin-bottom:0;"><strong>Injury flagged.</strong> Review whether a CPIN exists and what action was taken.</div>' : '')) +
-        '</div>' +
+        '<tr class="is-injury-total"><td><strong>Total incident score</strong></td><td class="is-num" colspan="2"></td><td class="is-num is-score"><strong>' + score + '</strong></td></tr>' +
+        '</tbody></table></div>' +
         '<div class="setup-section">' +
         '<h3>CPIN linkage</h3>' +
         (merged.relatedCpin
