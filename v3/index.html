@@ -22237,6 +22237,15 @@
     return html;
   }
 
+  function adminPremisesClassificationLabel(category) {
+    const map = {
+      'government-office': 'Government office',
+      'court': 'Court',
+      'prison': 'Prison'
+    };
+    return map[category] || 'Premises';
+  }
+
   function readAdminPremisesFormFields() {
     const name = document.getElementById('admin-prem-name')?.value?.trim();
     if (!name) {
@@ -22246,12 +22255,13 @@
     const score = parseInt(document.getElementById('admin-prem-score')?.value, 10);
     const parentRef = document.getElementById('admin-prem-parent')?.value || '';
     const isParentSite = !!document.getElementById('admin-prem-is-parent')?.checked;
+    const category = document.getElementById('admin-prem-category')?.value || 'government-office';
     return {
       name: name,
       address: document.getElementById('admin-prem-address')?.value?.trim() || '',
       dept: document.getElementById('admin-prem-dept')?.value || '',
-      typeLabel: document.getElementById('admin-prem-type')?.value?.trim() || 'Premises',
-      category: document.getElementById('admin-prem-category')?.value || 'government-office',
+      typeLabel: adminPremisesClassificationLabel(category),
+      category: category,
       score: isNaN(score) ? 30 : score,
       patch: !!document.getElementById('admin-prem-patch')?.checked,
       isParentSite: isParentSite,
@@ -22338,9 +22348,7 @@
         '<textarea id="admin-prem-address" rows="2">' + escHtml(prem.address || '') + '</textarea></div>' +
       '<div class="field-wrap"><label for="admin-prem-dept">Department</label>' +
         '<select id="admin-prem-dept">' + adminPremisesDeptOptions(prem.dept || 'HMCTS') + '</select></div>' +
-      '<div class="field-wrap"><label for="admin-prem-type">Premises type</label>' +
-        '<input type="text" id="admin-prem-type" value="' + escHtml(prem.typeLabel || '') + '" placeholder="e.g. Government office" /></div>' +
-      '<div class="field-wrap"><label for="admin-prem-category">Category</label>' +
+      '<div class="field-wrap"><label for="admin-prem-category">Premises classification</label>' +
         '<select id="admin-prem-category">' +
           '<option value="government-office"' + ((prem.category || 'government-office') === 'government-office' ? ' selected' : '') + '>Government office</option>' +
           '<option value="court"' + (prem.category === 'court' ? ' selected' : '') + '>Court</option>' +
