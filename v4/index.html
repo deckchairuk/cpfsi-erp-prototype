@@ -6472,6 +6472,63 @@
   }
   .report-card .foot .pill { padding: 2px 8px; }
 
+  /* ---------- Site map (prototype dev index) ---------- */
+  .sitemap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .sitemap-section {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .sitemap-section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sitemap-section .sitemap-desc {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .sitemap-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sitemap-links li {
+    margin: 0;
+    border-top: 1px solid var(--line-2);
+  }
+  .sitemap-links li:first-child { border-top: none; }
+  .sitemap-links a {
+    display: block;
+    padding: 7px 0;
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sitemap-links a:hover { text-decoration: underline; }
+  .sitemap-links .sitemap-route {
+    display: block;
+    font-size: 10px;
+    color: var(--ink-3);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    margin-top: 1px;
+  }
+  .sitemap-links li.is-external a::after {
+    content: ' ↗';
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
   /* ---------- Process list (richer) ---------- */
   .proc-row {
     display: flex;
@@ -8451,6 +8508,7 @@
         <button type="button" role="menuitem" onclick="openCpinReportFromMenu()">Submit CPIN</button>
         <button type="button" role="menuitem" onclick="openSafetyConcernReportFromMenu()">Log safety concern</button>
         <button type="button" role="menuitem" onclick="closeUserMenu();show('admin')">Admin and settings</button>
+        <button type="button" role="menuitem" onclick="closeUserMenu();show('sitemap')">Site map</button>
         <button type="button" role="menuitem" onclick="resetPrototypeData()">Reset prototype</button>
         <div class="user-menu-divider" role="separator"></div>
         <button type="button" role="menuitem" class="is-destructive" onclick="signOutPrototype()">Sign out</button>
@@ -11539,6 +11597,124 @@
 </div>
 
 <!-- =========================================================
+     SITE MAP (prototype dev index)
+========================================================= -->
+<div id="sitemap" class="screen">
+  <main>
+    <div class="screen-head">
+      <div class="screen-head-text">
+        <h1>Site map</h1>
+        <div class="meta">Quick links to every major screen in this prototype  ·  For developers and reviewers</div>
+      </div>
+    </div>
+
+    <div class="sitemap-grid">
+      <section class="sitemap-section">
+        <h2>Main navigation</h2>
+        <div class="sitemap-desc">Top-level areas from the primary nav bar.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('dashboard')">Dashboard<span class="sitemap-route">#dashboard</span></a></li>
+          <li><a onclick="show('premises')">Premises register<span class="sitemap-route">#premises</span></a></li>
+          <li><a onclick="show('processes')">Processes<span class="sitemap-route">#processes</span></a></li>
+          <li><a onclick="show('cpins')">CPINs<span class="sitemap-route">#cpins</span></a></li>
+          <li><a onclick="show('incident-summaries')">Incident summaries<span class="sitemap-route">#incident-summaries</span></a></li>
+          <li><a onclick="show('concerns')">Safety concerns<span class="sitemap-route">#concerns</span></a></li>
+          <li><a onclick="show('reports')">Reports<span class="sitemap-route">#reports</span></a></li>
+          <li><a onclick="show('search')">Global search<span class="sitemap-route">#search</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Personal &amp; team</h2>
+        <div class="sitemap-desc">From the account menu and manager tools.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('time')">Time log<span class="sitemap-route">#time</span></a></li>
+          <li><a onclick="show('team-time')">Team time (manager)<span class="sitemap-route">#team-time</span></a></li>
+          <li><a onclick="show('reminders')">Reminders<span class="sitemap-route">#reminders</span></a></li>
+          <li><a onclick="show('admin')">Admin and settings<span class="sitemap-route">#admin/users</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Premises records</h2>
+        <div class="sitemap-desc">Example premises detail screens.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('premisesdetail')">Temple Quay House<span class="sitemap-route">#premisesdetail</span></a></li>
+          <li><a onclick="show('premisesdetail-bristol')">HMP Bristol (parent site)<span class="sitemap-route">#premisesdetail-bristol</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Processes</h2>
+        <div class="sitemap-desc">Audits, consultations and business support.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('processes')">All processes<span class="sitemap-route">#processes</span></a></li>
+          <li><a onclick="show('audit/A-2026-0314/stage-2')">Audit A-2026-0314 — Stage 2<span class="sitemap-route">#audit/A-2026-0314/stage-2</span></a></li>
+          <li><a onclick="show('audit/A-2026-0314/setup')">Audit A-2026-0314 — Setup<span class="sitemap-route">#audit/A-2026-0314/setup</span></a></li>
+          <li><a onclick="show('consultation/cons-0089')">Building control consultation<span class="sitemap-route">#consultation/cons-0089</span></a></li>
+          <li><a onclick="show('bizsupport/bs-0044')">Business support B-2026-0044<span class="sitemap-route">#bizsupport/bs-0044</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>CPINs</h2>
+        <div class="sitemap-desc">Queue and example records.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('cpins')">CPIN queue<span class="sitemap-route">#cpins</span></a></li>
+          <li><a onclick="show('cpin/cpin-0418')">CPIN-2026-0418 — HMP Lewes<span class="sitemap-route">#cpin/cpin-0418</span></a></li>
+          <li><a onclick="show('cpin/cpin-0418-tq')">CPIN-2026-0417 — Temple Quay (spawned audit)<span class="sitemap-route">#cpin/cpin-0418-tq</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Incident summaries</h2>
+        <div class="sitemap-desc">HMPPS fire incident feed (v4 only).</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('incident-summaries')">Incident summaries list<span class="sitemap-route">#incident-summaries</span></a></li>
+          <li><a onclick="show('incident-summary/is-17205')">IS-17205 — Cell fire, serious injury<span class="sitemap-route">#incident-summary/is-17205</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Safety concerns</h2>
+        <div class="sitemap-desc">Internal safety concern workflow.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('concerns')">Safety concerns list<span class="sitemap-route">#concerns</span></a></li>
+          <li><a onclick="show('concern/sc-0138')">SC-2026-0138 — Hot works without permit<span class="sitemap-route">#concern/sc-0138</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>Admin tabs</h2>
+        <div class="sitemap-desc">Configuration and reference data.</div>
+        <ul class="sitemap-links">
+          <li><a onclick="show('admin', { adminTab: 'users' })">Users &amp; roles<span class="sitemap-route">#admin/users</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'premises' })">Premises register<span class="sitemap-route">#admin/premises</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'premises', adminDetailId: 'PRM-0001847' })">Premises detail — Temple Quay House<span class="sitemap-route">#admin/premises/PRM-0001847</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'duty-holders' })">Duty Holders<span class="sitemap-route">#admin/duty-holders</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'responsible-persons' })">Responsible Persons<span class="sitemap-route">#admin/responsible-persons</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'patches' })">Patches<span class="sitemap-route">#admin/patches</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'templates' })">Templates<span class="sitemap-route">#admin/templates</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'reports' })">Admin reports<span class="sitemap-route">#admin/reports</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'audit-perms' })">Audit permissions<span class="sitemap-route">#admin/audit-perms</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'cpin' })">CPIN settings<span class="sitemap-route">#admin/cpin</span></a></li>
+          <li><a onclick="show('admin', { adminTab: 'change-log' })">Change log<span class="sitemap-route">#admin/change-log</span></a></li>
+        </ul>
+      </section>
+
+      <section class="sitemap-section">
+        <h2>External forms</h2>
+        <div class="sitemap-desc">Standalone pages outside the main app shell.</div>
+        <ul class="sitemap-links">
+          <li class="is-external"><a href="cpin-report.html" target="_blank" rel="noopener">CPIN report form (FRS)<span class="sitemap-route">cpin-report.html</span></a></li>
+          <li class="is-external"><a href="safety-concern-report.html" target="_blank" rel="noopener">Safety concern report form<span class="sitemap-route">safety-concern-report.html</span></a></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- =========================================================
      AUDIT SETUP (Stage 1 of starting an audit)
 ========================================================= -->
 <div id="auditsetup" class="screen">
@@ -13396,7 +13572,8 @@
       time: 'nav-dashboard',
       'team-time': 'nav-dashboard',
       reminders: 'nav-dashboard',
-      admin: null
+      admin: null,
+      sitemap: null
     };
     const navId = navMap[id];
     if (navId) {
